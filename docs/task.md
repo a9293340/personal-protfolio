@@ -42,26 +42,26 @@
   - [x] 創建 `src/utils/` 工具函數目錄
   - [x] 創建 `src/styles/` 樣式文件目錄
 
-- [ ] 配置開發環境
-  - [ ] 配置 Vite 建構工具
-    - [ ] 設置基礎 vite.config.js
-    - [ ] 配置路徑別名 (@, @config, @components 等)
-    - [ ] 設置代碼分割策略
-    - [ ] 配置靜態資源處理
-  - [ ] 配置 ESLint 代碼檢查
-    - [ ] 安裝 ESLint 相關依賴
-    - [ ] 設置 .eslintrc.js 配置
-    - [ ] 配置代碼檢查規則
-  - [ ] 配置 Prettier 代碼格式化
-    - [ ] 安裝 Prettier 相關依賴
-    - [ ] 設置 .prettierrc 配置
-    - [ ] 整合 ESLint 和 Prettier
-  - [ ] 設置 package.json scripts
-    - [ ] dev: 開發服務器
-    - [ ] build: 生產建構
-    - [ ] preview: 預覽建構結果
-    - [ ] lint: 代碼檢查
-    - [ ] type-check: 類型檢查
+- [x] 配置開發環境
+  - [x] 配置 Vite 建構工具
+    - [x] 設置基礎 vite.config.js
+    - [x] 配置路徑別名 (@, @config, @components 等)
+    - [x] 設置代碼分割策略
+    - [x] 配置靜態資源處理
+  - [x] 配置 ESLint 代碼檢查
+    - [x] 安裝 ESLint 相關依賴
+    - [x] 設置 eslint.config.js 配置 (使用新版 flat config)
+    - [x] 配置代碼檢查規則
+  - [x] 配置 Prettier 代碼格式化
+    - [x] 安裝 Prettier 相關依賴
+    - [x] 設置 .prettierrc 配置
+    - [x] 整合 ESLint 和 Prettier
+  - [x] 設置 package.json scripts
+    - [x] dev: 開發服務器
+    - [x] build: 生產建構
+    - [x] preview: 預覽建構結果
+    - [x] lint: 代碼檢查
+    - [x] type-check: 類型檢查 (使用 TypeScript + JSDoc)
 
 - [ ] 設置 GitHub Actions 自動部署
   - [ ] 創建 `.github/workflows/deploy.yml`

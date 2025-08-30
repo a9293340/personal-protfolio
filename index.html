@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- SEO Meta Tags -->
+  <title>遊戲化個人作品集 | Gaming Portfolio</title>
+  <meta name="description" content="融合遊戲元素的個人作品集網站，展現後端工程師向系統架構師發展的專業軌跡" />
+  <meta name="keywords" content="portfolio, backend engineer, system architect, gaming, skill tree, config-driven" />
+  <meta name="author" content="Your Name" />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="遊戲化個人作品集 | Gaming Portfolio" />
+  <meta property="og:description" content="融合遊戲元素的個人作品集網站" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://your-domain.github.io" />
+  <meta property="og:image" content="/og-image.jpg" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="遊戲化個人作品集" />
+  <meta name="twitter:description" content="融合遊戲元素的個人作品集網站" />
+  
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#1a1a2e" />
+  
+  <!-- Preload Critical Resources -->
+  <link rel="preload" href="/src/main.js" as="script" />
+  <link rel="preload" href="/src/styles/main.css" as="style" />
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p class="loading-text">Loading Gaming Portfolio...</p>
+      </div>
+    </div>
+    
+    <!-- Main Application Container -->
+    <div id="main-container" class="main-container hidden">
+      <!-- Navigation will be injected here -->
+      <nav id="navigation" class="navigation"></nav>
+      
+      <!-- Page Content will be injected here -->
+      <main id="page-content" class="page-content"></main>
+      
+      <!-- Global UI Elements -->
+      <div id="modal-container" class="modal-container"></div>
+      <div id="toast-container" class="toast-container"></div>
+      <div id="particle-container" class="particle-container"></div>
+    </div>
+  </div>
+  
+  <!-- Main Application Script -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
