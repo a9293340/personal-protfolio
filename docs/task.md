@@ -63,27 +63,20 @@
     - [x] lint: 代碼檢查
     - [x] type-check: 類型檢查 (使用 TypeScript + JSDoc)
 
-- [ ] 設置 GitHub Actions 自動部署
-  - [ ] 創建 `.github/workflows/deploy.yml`
-  - [ ] 配置自動測試流程
-  - [ ] 配置自動部署到 GitHub Pages
-  - [ ] 設置環境變數和 Secrets
-  - [ ] 測試部署流程
-
-- [ ] 建立核心 Config 管理系統
-  - [ ] 實現 ConfigManager 配置管理器
-    - [ ] 配置載入功能
-    - [ ] 配置合併功能
-    - [ ] 配置監聽功能
-    - [ ] 插值處理功能 ({{變數}} 替換)
-  - [ ] 實現 ConfigValidator 配置驗證器
-    - [ ] Schema 定義功能
-    - [ ] 配置驗證功能
-    - [ ] 錯誤報告功能
-  - [ ] 實現 ConfigLoader 配置載入器
-    - [ ] 動態導入功能
-    - [ ] 批量載入功能
-    - [ ] 錯誤處理功能
+- [x] 建立核心 Config 管理系統
+  - [x] 實現 ConfigManager 配置管理器
+    - [x] 配置載入功能
+    - [x] 配置合併功能
+    - [x] 配置監聽功能
+    - [x] 插值處理功能 ({{變數}} 替換)
+  - [x] 實現 ConfigValidator 配置驗證器
+    - [x] Schema 定義功能
+    - [x] 配置驗證功能
+    - [x] 錯誤報告功能
+  - [x] 實現 ConfigLoader 配置載入器
+    - [x] 動態導入功能
+    - [x] 批量載入功能
+    - [x] 錯誤處理功能
 
 #### Step 1.2: 基礎組件系統
 - [ ] 實現 BaseComponent 基類
@@ -299,6 +292,17 @@
   - [ ] 鍵盤快捷鍵支援
   - [ ] 無障礙操作支援
   - [ ] 多點觸控處理
+
+---
+
+### **Step 2.5: 部署準備階段**
+
+- [ ] 設置 GitHub Actions 自動部署
+  - [ ] 創建 `.github/workflows/deploy.yml`
+  - [ ] 配置自動測試流程
+  - [ ] 配置自動部署到 GitHub Pages
+  - [ ] 設置環境變數和 Secrets
+  - [ ] 測試部署流程
 
 ---
 
