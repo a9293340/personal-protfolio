@@ -1,0 +1,19 @@
+{
+  "name": "poc-002-3d-card-system",
+  "version": "1.0.0",
+  "description": "## 🎯 POC 目標與驗證項目",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "flip-card-wc": "^1.3.0"
+  }
+}

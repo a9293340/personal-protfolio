@@ -1,344 +1,1383 @@
-          <div class="layout-column" data-column="3"></div>
-        `;
-      
-      case 'grid':
-        return '<div class="layout-grid"></div>';
-      
-      default:
-        return '<div class="layout-column" data-column="1"></div>';
-    }
+# 技術架構文件 - 遊戲化個人網站 Config-Driven 系統
+
+## 1. 系統概述
+
+### 1.1 架構設計理念
+
+這是一個基於 **Config-Driven 架構** 的遊戲化個人作品集網站，採用純前端技術棧，部署於 GitHub Pages。核心特色是通過配置文件驅動所有內容和行為，實現高度靈活的內容管理和功能擴展。
+
+**核心設計原則：**
+- **配置驅動一切**：頁面結構、內容、樣式、行為都通過配置文件控制
+- **組件化設計**：所有 UI 元素都封裝為可重用的組件
+- **數據與展示分離**：內容數據獨立於展示邏輯
+- **靜態部署友好**：純前端架構，無需後端服務器
+
+### 1.2 技術棧選擇
+
+#### 核心技術
+- **建構工具**：Vite 4.x - 現代化建構工具，快速開發體驗
+- **核心語言**：HTML5, CSS3, ES2022+ JavaScript - 原生技術棧，無框架依賴
+- **動畫庫**：GSAP 3.x - 專業級動畫效果
+- **包管理**：npm - 依賴管理和腳本執行
+
+#### 輔助工具
+- **代碼檢查**：ESLint + Prettier - 代碼品質控制
+- **類型檢查**：JSDoc + TypeScript (devDependency) - 類型安全
+- **測試框架**：Vitest - 輕量級測試解決方案
+- **部署平台**：GitHub Pages - 免費靜態託管
+
+### 1.3 系統特色
+
+#### Config-Driven 核心優勢
+1. **易於維護**：修改內容只需編輯配置文件，無需改動代碼
+2. **快速迭代**：新增頁面或組件只需添加配置
+3. **內容複用**：配置結構標準化，支援模組化重用
+4. **多環境支援**：不同環境可使用不同配置文件
+
+## 2. 系統架構設計
+
+### 2.1 整體架構圖
+
+```mermaid
+graph TB
+    subgraph "配置層 (Config Layer)"
+        PC[頁面配置<br/>page-configs/]
+        DC[數據配置<br/>data-configs/]
+        TC[主題配置<br/>theme-configs/]
+        SC[全站配置<br/>site.config.js]
+    end
+    
+    subgraph "核心系統層 (Core System Layer)"
+        CM[配置管理器<br/>ConfigManager]
+        RT[路由系統<br/>Router]
+        SM[狀態管理<br/>StateManager]
+        EM[事件系統<br/>EventManager]
+    end
+    
+    subgraph "組件層 (Component Layer)"
+        BC[基礎組件<br/>BaseComponent]
+        CC[通用組件<br/>Common Components]
+        GC[遊戲組件<br/>Gaming Components]
+        LC[佈局組件<br/>Layout Components]
+    end
+    
+    subgraph "業務層 (Business Layer)"
+        ST[技能樹系統<br/>SkillTree]
+        PD[專案展示<br/>ProjectDisplay]
+        YC[遊戲王卡牌<br/>YugiohCards]
+        AM[音效管理<br/>AudioManager]
+    end
+    
+    subgraph "應用層 (Application Layer)"
+        HP[首頁]
+        AP[關於頁面]
+        SP[技能頁面]
+        PP[專案頁面]
+        CP[聯絡頁面]
+    end
+    
+    PC --> CM
+    DC --> CM
+    TC --> CM
+    SC --> CM
+    
+    CM --> RT
+    CM --> SM
+    CM --> EM
+    
+    RT --> BC
+    SM --> BC
+    EM --> BC
+    
+    BC --> CC
+    BC --> GC
+    BC --> LC
+    
+    CC --> ST
+    GC --> PD
+    LC --> YC
+    SM --> AM
+    
+    ST --> HP
+    PD --> AP
+    YC --> SP
+    AM --> PP
+    BC --> CP
+```
+
+### 2.2 檔案結構設計
+
+```
+personal-portfolio/
+├── public/                          # 公共靜態資源
+│   ├── assets/
+│   │   ├── images/                  # 圖片資源
+│   │   ├── sounds/                  # 音效文件
+│   │   ├── fonts/                   # 字體文件
+│   │   └── icons/                   # 圖標資源
+│   └── index.html                   # HTML 入口文件
+├── src/
+│   ├── config/                      # 配置文件層 ⭐️ 核心
+│   │   ├── pages/                   # 頁面配置文件
+│   │   │   ├── home.config.js       # 首頁配置
+│   │   │   ├── about.config.js      # 關於頁面配置
+│   │   │   ├── skills.config.js     # 技能頁面配置
+│   │   │   ├── portfolio.config.js  # 作品集配置
+│   │   │   └── contact.config.js    # 聯絡配置
+│   │   ├── data/                    # 數據配置文件
+│   │   │   ├── personal.config.js   # 個人資料配置
+│   │   │   ├── skills.data.js       # 技能數據配置
+│   │   │   ├── projects.data.js     # 專案數據配置
+│   │   │   └── social.data.js       # 社交連結配置
+│   │   ├── theme/                   # 主題配置文件
+│   │   │   ├── colors.config.js     # 色彩配置
+│   │   │   ├── typography.config.js # 字體配置
+│   │   │   ├── spacing.config.js    # 間距配置
+│   │   │   └── animations.config.js # 動畫配置
+│   │   └── site.config.js           # 全站通用配置
+│   ├── core/                        # 核心系統層
+│   │   ├── config/
+│   │   │   ├── ConfigManager.js     # 配置管理核心
+│   │   │   ├── ConfigValidator.js   # 配置驗證器
+│   │   │   └── ConfigLoader.js      # 配置載入器
+│   │   ├── router/
+│   │   │   ├── Router.js            # SPA 路由系統
+│   │   │   └── RouteGuard.js        # 路由守衛
+│   │   ├── state/
+│   │   │   ├── StateManager.js      # 全域狀態管理
+│   │   │   └── Store.js             # 資料存儲
+│   │   ├── events/
+│   │   │   ├── EventManager.js      # 事件系統
+│   │   │   └── EventBus.js          # 事件匯流排
+│   │   └── components/
+│   │       ├── BaseComponent.js     # 基礎組件類
+│   │       ├── ComponentFactory.js  # 組件工廠
+│   │       └── ComponentRegistry.js # 組件註冊表
+│   ├── components/                  # 可重用組件層
+│   │   ├── common/                  # 通用 UI 組件
+│   │   │   ├── Button/
+│   │   │   ├── Card/
+│   │   │   ├── Modal/
+│   │   │   └── Loading/
+│   │   ├── gaming/                  # 遊戲風格組件
+│   │   │   ├── SkillTree/
+│   │   │   ├── ProjectCard/
+│   │   │   ├── YugiohCard/
+│   │   │   └── ParticleSystem/
+│   │   └── layout/                  # 佈局組件
+│   │       ├── Header/
+│   │       ├── Navigation/
+│   │       ├── Footer/
+│   │       └── Container/
+│   ├── pages/                       # 頁面組件
+│   │   ├── HomePage.js
+│   │   ├── AboutPage.js
+│   │   ├── SkillsPage.js
+│   │   ├── PortfolioPage.js
+│   │   └── ContactPage.js
+│   ├── systems/                     # 功能系統
+│   │   ├── AudioManager/            # 音效管理系統
+│   │   ├── AnimationManager/        # 動畫管理系統
+│   │   ├── PreloadManager/          # 資源預載管理
+│   │   └── ThemeManager/            # 主題管理系統
+│   ├── utils/                       # 工具函數
+│   │   ├── helpers.js               # 通用輔助函數
+│   │   ├── validators.js            # 驗證函數
+│   │   ├── formatters.js            # 格式化函數
+│   │   └── constants.js             # 常數定義
+│   ├── styles/                      # 樣式文件
+│   │   ├── global.css               # 全域樣式
+│   │   ├── variables.css            # CSS 變數
+│   │   ├── components/              # 組件樣式
+│   │   └── themes/                  # 主題樣式
+│   └── main.js                      # 應用入口文件
+├── tests/                           # 測試文件
+│   ├── unit/                        # 單元測試
+│   ├── integration/                 # 整合測試
+│   └── e2e/                         # 端對端測試
+├── docs/                            # 文檔
+│   ├── technical_architecture.md    # 技術架構文檔
+│   ├── config_guide.md             # 配置使用指南
+│   └── component_api.md            # 組件 API 文檔
+├── .github/
+│   └── workflows/
+│       ├── deploy.yml               # 自動部署工作流
+│       └── test.yml                 # 測試工作流
+├── package.json                     # 項目配置文件
+├── vite.config.js                   # Vite 配置
+├── .eslintrc.js                     # ESLint 配置
+├── .prettierrc                      # Prettier 配置
+├── CLAUDE.md                        # 開發指南
+└── README.md                        # 項目說明
+```
+
+## 3. Config-Driven 系統設計
+
+### 3.1 配置管理核心架構
+
+#### ConfigManager - 配置管理器
+
+```javascript
+/**
+ * 配置管理核心類
+ * 負責載入、驗證、合併所有配置文件
+ */
+class ConfigManager {
+  constructor() {
+    this.configs = new Map();
+    this.validators = new Map();
+    this.watchers = new Set();
+    this.isInitialized = false;
   }
 
-  async render() {
-    if (!this.pageConfig) return;
-
-    // 清空現有內容
-    this.clearSections();
-
-    // 按配置渲染各個區塊
-    await this.renderSections();
-
-    // 應用頁面動畫
-    this.applyPageAnimations();
-
-    // 觸發頁面渲染完成事件
-    eventBus.emit(EVENTS.PAGE_RENDERED, this.pageName);
-  }
-
-  async renderSections() {
-    const { sections } = this.pageConfig;
-
-    // 按順序載入區塊
-    for (const sectionConfig of sections) {
-      await this.renderSection(sectionConfig);
-    }
-  }
-
-  async renderSection(sectionConfig) {
-    const { id, type, position, config } = sectionConfig;
-
+  /**
+   * 初始化配置系統
+   * @returns {Promise<void>}
+   */
+  async initialize() {
     try {
-      // 動態載入區塊組件
-      const SectionComponent = await this.loadSectionComponent(type);
+      await this.loadSiteConfig();
+      await this.loadPageConfigs();
+      await this.loadDataConfigs();
+      await this.loadThemeConfigs();
       
-      // 找到目標容器
-      const targetColumn = this.container.querySelector(
-        `[data-column="${position.column || 1}"]`
-      );
+      this.validateAllConfigs();
+      this.mergeConfigs();
+      this.notifyWatchers();
       
-      if (!targetColumn) {
-        console.warn(`Target column not found for section ${id}`);
-        return;
+      this.isInitialized = true;
+    } catch (error) {
+      console.error('配置系統初始化失敗:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 載入站點配置
+   */
+  async loadSiteConfig() {
+    const siteConfig = await import('../config/site.config.js');
+    this.configs.set('site', siteConfig.default);
+  }
+
+  /**
+   * 載入頁面配置
+   */
+  async loadPageConfigs() {
+    const pageConfigs = {};
+    const configFiles = [
+      'home', 'about', 'skills', 'portfolio', 'contact'
+    ];
+
+    for (const page of configFiles) {
+      try {
+        const config = await import(`../config/pages/${page}.config.js`);
+        pageConfigs[page] = config.default;
+      } catch (error) {
+        console.warn(`頁面配置載入失敗: ${page}`, error);
+      }
+    }
+
+    this.configs.set('pages', pageConfigs);
+  }
+
+  /**
+   * 獲取配置
+   * @param {string} path - 配置路徑，如 'pages.home.title'
+   * @returns {any} 配置值
+   */
+  get(path) {
+    const keys = path.split('.');
+    let result = this.configs;
+
+    for (const key of keys) {
+      if (result instanceof Map) {
+        result = result.get(key);
+      } else if (result && typeof result === 'object') {
+        result = result[key];
+      } else {
+        return undefined;
       }
 
-      // 創建區塊容器
-      const sectionElement = document.createElement('div');
-      sectionElement.className = `section section--${type}`;
-      sectionElement.setAttribute('data-section-id', id);
-      sectionElement.style.order = position.order;
-
-      targetColumn.appendChild(sectionElement);
-
-      // 實例化區塊組件
-      const sectionInstance = new SectionComponent(sectionElement, config);
-      this.sections.set(id, sectionInstance);
-
-    } catch (error) {
-      console.error(`Failed to render section ${id}:`, error);
-      this.renderErrorSection(sectionConfig);
-    }
-  }
-
-  async loadSectionComponent(type) {
-    const componentMap = {
-      'character-status': () => import('../components/gaming/CharacterPanel/CharacterPanel.js'),
-      'timeline': () => import('../components/common/Timeline/Timeline.js'),
-      'radar-chart': () => import('../components/common/RadarChart/RadarChart.js'),
-      'skill-tree': () => import('../components/gaming/SkillTree/SkillTree.js'),
-      'project-grid': () => import('../components/gaming/ProjectGrid/ProjectGrid.js'),
-      'yugioh-deck': () => import('../components/gaming/YugiohDeck/YugiohDeck.js')
-    };
-
-    if (componentMap[type]) {
-      const module = await componentMap[type]();
-      return module.default;
+      if (result === undefined) {
+        return undefined;
+      }
     }
 
-    throw new Error(`Unknown section type: ${type}`);
+    return result;
   }
 
-  updatePageMeta() {
-    const { meta } = this.pageConfig;
+  /**
+   * 設置配置
+   * @param {string} path - 配置路徑
+   * @param {any} value - 配置值
+   */
+  set(path, value) {
+    // 運行時配置更新邏輯
+    // 主要用於主題切換、動態內容更新等
+  }
+
+  /**
+   * 監聽配置變化
+   * @param {Function} callback - 回調函數
+   */
+  watch(callback) {
+    this.watchers.add(callback);
+    return () => this.watchers.delete(callback);
+  }
+}
+
+// 單例導出
+export const configManager = new ConfigManager();
+```
+
+### 3.2 配置文件結構設計
+
+#### 頁面配置結構 (pages/*.config.js)
+
+```javascript
+// src/config/pages/home.config.js
+export default {
+  meta: {
+    title: "首頁 - 遊戲化作品集",
+    description: "歡迎來到我的遊戲化個人作品集網站",
+    keywords: ["前端開發", "遊戲化", "作品集"],
+    ogImage: "/assets/images/og-home.jpg"
+  },
+
+  layout: {
+    type: "fullscreen",
+    backgroundType: "particles",
+    maxWidth: "none",
+    padding: "0"
+  },
+
+  sections: [
+    {
+      id: "hero-section",
+      type: "hero",
+      order: 1,
+      visible: true,
+      config: {
+        animation: "fadeInUp",
+        delay: 0,
+        duration: 1000
+      },
+      content: {
+        avatar: {
+          src: "{{personal.avatar}}",
+          alt: "{{personal.name}}的頭像",
+          animation: "rotate"
+        },
+        title: {
+          text: "{{personal.title}}",
+          animation: "typewriter",
+          speed: 100
+        },
+        subtitle: {
+          text: "{{personal.subtitle}}",
+          animation: "fadeIn",
+          delay: 1500
+        },
+        navigation: {
+          type: "circular",
+          items: "{{site.navigation.main}}"
+        }
+      }
+    },
     
-    // 更新頁面標題
-    if (meta.title) {
-      document.title = meta.title;
+    {
+      id: "background-particles",
+      type: "particle-system",
+      order: 0,
+      config: {
+        count: 50,
+        colors: ["{{theme.colors.primary}}", "{{theme.colors.secondary}}"],
+        speed: 1,
+        size: { min: 2, max: 5 },
+        followCursor: true
+      }
     }
+  ],
 
+  interactions: {
+    mouseEffects: {
+      cursor: "glow",
+      particles: true,
+      ripple: false
+    },
+    
+    keyboardShortcuts: [
+      { key: "h", action: "goToHome" },
+      { key: "a", action: "goToAbout" },
+      { key: "s", action: "goToSkills" }
+    ],
+
+    audioTriggers: [
+      { event: "pageLoad", sound: "welcome" },
+      { event: "buttonHover", sound: "hover" },
+      { event: "buttonClick", sound: "click" }
+    ]
+  },
+
+  seo: {
+    structuredData: {
+      "@type": "Person",
+      "name": "{{personal.name}}",
+      "jobTitle": "{{personal.jobTitle}}",
+      "url": "{{site.url}}"
+    }
+  }
+};
+```
+
+#### 數據配置結構 (data/*.config.js)
+
+```javascript
+// src/config/data/skills.data.js
+export default {
+  skillTree: {
+    center: { x: 0, y: 0 },
+    hexSize: 40,
+    connectionStyle: "golden",
+    
+    nodes: [
+      {
+        id: "backend-core",
+        position: { q: 0, r: 0 },
+        type: "keystone",
+        name: "後端核心",
+        description: "後端開發基礎技能",
+        status: "mastered",
+        icon: "server",
+        children: ["java-programming", "python-programming", "database-design"],
+        
+        details: {
+          experience: "5+ 年",
+          projects: ["project-1", "project-2"],
+          certifications: [],
+          relatedSkills: ["system-design", "api-design"]
+        }
+      },
+
+      {
+        id: "java-programming",
+        position: { q: -1, r: 0 },
+        type: "notable",
+        name: "Java 程式設計",
+        description: "Java 企業級開發",
+        status: "mastered",
+        icon: "java",
+        prerequisites: ["backend-core"],
+        children: ["spring-boot", "microservices"],
+
+        skillDetails: {
+          proficiency: 90,
+          yearsOfExperience: 5,
+          frameworks: ["Spring Boot", "Spring Cloud", "Hibernate"],
+          projects: [
+            {
+              name: "微服務重構專案",
+              description: "將單體應用重構為微服務架構",
+              techStack: ["Java 11", "Spring Boot", "Docker"],
+              impact: "系統性能提升 40%"
+            }
+          ],
+          certifications: ["Oracle Certified Java Programmer"],
+          learningPath: {
+            completed: ["Java 基礎", "OOP", "集合框架", "多執行緒"],
+            inProgress: ["虛擬執行緒", "新語言特性"],
+            planned: ["GraalVM", "Project Loom"]
+          }
+        }
+      },
+
+      // ... 更多技能節點
+    ],
+
+    branches: [
+      {
+        id: "backend-track",
+        name: "後端開發軌跡",
+        description: "從初級到資深的後端開發路線",
+        color: "gold",
+        nodes: ["backend-core", "java-programming", "spring-boot", "microservices"]
+      },
+      
+      {
+        id: "architecture-track", 
+        name: "架構師軌跡",
+        description: "系統架構設計能力發展",
+        color: "blue",
+        nodes: ["system-design", "distributed-systems", "cloud-architecture"]
+      },
+
+      {
+        id: "ai-track",
+        name: "AI 工程軌跡", 
+        description: "人工智慧應用開發",
+        color: "purple",
+        nodes: ["llm-development", "prompt-engineering", "ai-integration"]
+      }
+    ]
+  },
+
+  // 技能類別定義
+  categories: {
+    "programming-languages": {
+      name: "程式語言",
+      icon: "code",
+      description: "掌握的程式語言"
+    },
+    "frameworks": {
+      name: "框架技術",
+      icon: "layer-group", 
+      description: "常用開發框架"
+    },
+    "tools": {
+      name: "開發工具",
+      icon: "tools",
+      description: "開發和部署工具"
+    }
+  },
+
+  // 熟練度等級定義
+  proficiencyLevels: {
+    beginner: { name: "初學者", min: 0, max: 30, color: "#95a5a6" },
+    intermediate: { name: "中級", min: 31, max: 60, color: "#3498db" },
+    advanced: { name: "高級", min: 61, max: 85, color: "#f39c12" },
+    expert: { name: "專家", min: 86, max: 100, color: "#d4af37" }
+  }
+};
+```
+
+#### 專案配置結構 (data/projects.data.js)
+
+```javascript
+// src/config/data/projects.data.js
+export default {
+  // 專案展示配置
+  portfolioProjects: [
+    {
+      id: "microservices-refactor",
+      title: "微服務架構重構專案",
+      category: "system-architecture",
+      rarity: "legendary",
+      type: "work-project",
+      
+      overview: {
+        description: "將單體電商應用重構為微服務架構，提升系統可擴展性和維護性",
+        duration: "6個月",
+        teamSize: 8,
+        role: "技術主導"
+      },
+
+      technical: {
+        stack: {
+          backend: ["Java 11", "Spring Boot", "Spring Cloud"],
+          database: ["MySQL", "Redis", "MongoDB"],
+          infrastructure: ["Docker", "Kubernetes", "Istio"],
+          monitoring: ["Prometheus", "Grafana", "ELK Stack"]
+        },
+        
+        architecture: {
+          pattern: "微服務架構",
+          communication: "REST API + Event-Driven",
+          dataConsistency: "Saga Pattern",
+          deployment: "CI/CD Pipeline"
+        }
+      },
+
+      achievements: [
+        {
+          metric: "系統響應時間",
+          improvement: "40%",
+          details: "平均 API 回應時間從 800ms 降至 480ms"
+        },
+        {
+          metric: "部署頻率", 
+          improvement: "10x",
+          details: "從每月部署變為每日部署"
+        },
+        {
+          metric: "系統可用性",
+          improvement: "99.9%",
+          details: "達到 SLA 要求的高可用性"
+        }
+      ],
+
+      challenges: [
+        {
+          challenge: "分散式事務處理",
+          solution: "實作 Saga Pattern 確保數據一致性",
+          learned: "深入理解分散式系統的 CAP 定理"
+        },
+        {
+          challenge: "服務治理複雜度", 
+          solution: "導入 Istio 服務網格統一管理",
+          learned: "服務網格在微服務治理中的重要性"
+        }
+      ],
+
+      display: {
+        cardPreview: {
+          image: "/assets/projects/microservices-architecture.jpg",
+          tags: ["Java", "Spring Cloud", "Kubernetes"],
+          highlights: ["系統性能提升 40%", "支援 10x 併發量"]
+        },
+        
+        detailModal: {
+          gallery: [
+            "/assets/projects/microservices-arch-diagram.jpg",
+            "/assets/projects/performance-metrics.jpg",
+            "/assets/projects/deployment-pipeline.jpg"
+          ],
+          
+          links: {
+            documentation: "/docs/microservices-project",
+            presentation: "/assets/presentations/microservices-refactor.pdf"
+          }
+        }
+      }
+    }
+  ],
+
+  // 個人專案（遊戲王卡牌風格）
+  personalProjects: [
+    {
+      id: "ai-chatbot",
+      name: "AI 聊天機器人",
+      type: "AI Application",
+      rarity: "SR",
+      level: 7,
+      
+      yugiohCard: {
+        attack: 2500,  // 專案複雜度
+        defense: 2100, // 程式碼品質 
+        attribute: "AI",
+        description: "整合 OpenAI API 的智慧對話系統，具備上下文理解與多輪對話能力",
+        effect: "召喚時：可以處理自然語言查詢，提供智慧回應",
+        artwork: "/assets/cards/ai-chatbot-art.jpg",
+        foil: true
+      },
+
+      technical: {
+        stack: ["Python", "FastAPI", "OpenAI API", "PostgreSQL", "Redis"],
+        features: [
+          "多輪對話管理",
+          "上下文記憶",
+          "意圖識別",
+          "情感分析",
+          "API 限流保護"
+        ],
+        architecture: "RESTful API + 非同步處理"
+      },
+
+      metrics: {
+        responseTime: "< 2s",
+        accuracy: "85%",
+        userSatisfaction: "4.2/5",
+        dailyUsers: "500+"
+      },
+
+      links: {
+        github: "https://github.com/username/ai-chatbot",
+        demo: "https://chatbot-demo.vercel.app",
+        documentation: "/docs/ai-chatbot"
+      }
+    }
+  ],
+
+  // 專案分類
+  categories: {
+    "system-architecture": {
+      name: "系統架構",
+      icon: "sitemap",
+      color: "#3498db",
+      description: "大型系統架構設計與重構專案"
+    },
+    "ai-ml": {
+      name: "AI/ML 應用",
+      icon: "robot",
+      color: "#9b59b6", 
+      description: "人工智慧與機器學習應用專案"
+    },
+    "fullstack": {
+      name: "全端開發",
+      icon: "layer-group",
+      color: "#e67e22",
+      description: "前後端整合的完整應用"
+    }
+  },
+
+  // 稀有度系統
+  raritySystem: {
+    "N": {
+      name: "普通",
+      color: "#95a5a6",
+      description: "學習練習專案"
+    },
+    "R": {
+      name: "稀有", 
+      color: "#3498db",
+      description: "具特色功能的專案"
+    },
+    "SR": {
+      name: "超稀有",
+      color: "#9b59b6", 
+      description: "獲獎或高影響力專案"
+    },
+    "UR": {
+      name: "傳說",
+      color: "#d4af37",
+      description: "里程碑級別的重要專案"
+    }
+  }
+};
+```
+
+#### 主題配置結構 (theme/*.config.js)
+
+```javascript
+// src/config/theme/colors.config.js
+export default {
+  // 主色調系統
+  primary: {
+    dark: "#0a0a0a",
+    secondary: "#1a1a2e", 
+    tertiary: "#16213e",
+    surface: "#2c3e50"
+  },
+
+  accent: {
+    gold: {
+      primary: "#d4af37",
+      bright: "#f4d03f", 
+      dark: "#b8941f",
+      pale: "#f8e6a0"
+    },
+    blue: {
+      primary: "#2980b9",
+      bright: "#3498db",
+      deep: "#1f3a93",
+      ice: "#ebf3fd"
+    },
+    red: {
+      primary: "#8b0000",
+      bright: "#c0392b",
+      fire: "#e74c3c",
+      pale: "#fadbd8"
+    }
+  },
+
+  // 功能色彩
+  semantic: {
+    success: "#27ae60",
+    warning: "#f39c12", 
+    error: "#e74c3c",
+    info: "#3498db"
+  },
+
+  // 遊戲化色彩系統
+  gaming: {
+    rarity: {
+      common: "#95a5a6",
+      rare: "#3498db", 
+      epic: "#9b59b6",
+      legendary: "#d4af37"
+    },
+    
+    skillStatus: {
+      mastered: "#d4af37",
+      available: "#3498db", 
+      locked: "#7f8c8d",
+      keystone: "#f4d03f"
+    }
+  },
+
+  // 無障礙支援
+  accessibility: {
+    highContrast: {
+      text: "#ffffff",
+      background: "#000000", 
+      accent: "#ffff00"
+    },
+    
+    colorBlind: {
+      safe: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
+    }
+  }
+};
+```
+
+### 3.3 配置驅動的組件系統
+
+#### 基礎組件類設計
+
+```javascript
+// src/core/components/BaseComponent.js
+import { configManager } from '../config/ConfigManager.js';
+import { eventManager } from '../events/EventManager.js';
+
+export class BaseComponent {
+  constructor(element, config = {}) {
+    this.element = element;
+    this.config = this.mergeConfig(config);
+    this.state = this.getInitialState();
+    this.isInitialized = false;
+    
+    this.init();
+  }
+
+  /**
+   * 合併預設配置與傳入配置
+   */
+  mergeConfig(userConfig) {
+    const defaultConfig = this.getDefaultConfig();
+    const themeConfig = this.getThemeConfig();
+    
+    return {
+      ...defaultConfig,
+      ...themeConfig,
+      ...userConfig
+    };
+  }
+
+  /**
+   * 獲取元件預設配置
+   * 子類別應覆寫此方法
+   */
+  getDefaultConfig() {
+    return {};
+  }
+
+  /**
+   * 獲取主題相關配置
+   */
+  getThemeConfig() {
+    const componentName = this.constructor.name.toLowerCase();
+    return configManager.get(`theme.components.${componentName}`) || {};
+  }
+
+  /**
+   * 獲取初始狀態
+   * 子類別應覆寫此方法
+   */
+  getInitialState() {
+    return {};
+  }
+
+  /**
+   * 組件初始化
+   */
+  async init() {
+    try {
+      await this.beforeInit();
+      await this.render();
+      await this.bindEvents();
+      await this.afterInit();
+      
+      this.isInitialized = true;
+      this.emit('initialized', this);
+    } catch (error) {
+      console.error(`Component ${this.constructor.name} 初始化失敗:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 初始化前鉤子
+   */
+  async beforeInit() {
+    // 子類別可覆寫
+  }
+
+  /**
+   * 渲染組件
+   */
+  async render() {
+    // 子類別必須實作
+    throw new Error('render 方法必須由子類別實作');
+  }
+
+  /**
+   * 綁定事件
+   */
+  async bindEvents() {
+    // 子類別可覆寫
+  }
+
+  /**
+   * 初始化後鉤子
+   */
+  async afterInit() {
+    // 子類別可覆寫
+  }
+
+  /**
+   * 更新狀態
+   */
+  setState(newState) {
+    const prevState = { ...this.state };
+    this.state = { ...this.state, ...newState };
+    
+    this.emit('stateChange', {
+      prevState,
+      currentState: this.state,
+      component: this
+    });
+  }
+
+  /**
+   * 發送事件
+   */
+  emit(eventName, data) {
+    eventManager.emit(`component:${this.constructor.name}:${eventName}`, data);
+  }
+
+  /**
+   * 監聽事件
+   */
+  on(eventName, callback) {
+    return eventManager.on(`component:${this.constructor.name}:${eventName}`, callback);
+  }
+
+  /**
+   * 銷毀組件
+   */
+  destroy() {
+    this.emit('beforeDestroy', this);
+    
+    // 清理事件監聽器
+    this.unbindEvents();
+    
+    // 移除 DOM 元素
+    if (this.element && this.element.parentNode) {
+      this.element.parentNode.removeChild(this.element);
+    }
+    
+    this.emit('destroyed', this);
+  }
+
+  /**
+   * 解除事件綁定
+   */
+  unbindEvents() {
+    // 子類別可覆寫
+  }
+}
+```
+
+## 4. 頁面組件系統
+
+### 4.1 頁面配置驅動渲染
+
+```javascript
+// src/core/PageRenderer.js
+import { configManager } from './config/ConfigManager.js';
+import { componentFactory } from './components/ComponentFactory.js';
+
+export class PageRenderer {
+  constructor() {
+    this.currentPage = null;
+    this.components = new Map();
+  }
+
+  /**
+   * 渲染頁面
+   * @param {string} pageName - 頁面名稱
+   * @param {HTMLElement} container - 容器元素
+   */
+  async renderPage(pageName, container) {
+    try {
+      // 獲取頁面配置
+      const pageConfig = configManager.get(`pages.${pageName}`);
+      if (!pageConfig) {
+        throw new Error(`頁面配置不存在: ${pageName}`);
+      }
+
+      // 清理前一個頁面
+      this.cleanup();
+
+      // 設置頁面 meta 資訊
+      this.setPageMeta(pageConfig.meta);
+
+      // 應用頁面佈局
+      this.applyLayout(container, pageConfig.layout);
+
+      // 按順序渲染各區塊
+      const sections = pageConfig.sections
+        .sort((a, b) => (a.order || 0) - (b.order || 0))
+        .filter(section => section.visible !== false);
+
+      for (const section of sections) {
+        await this.renderSection(section, container);
+      }
+
+      // 設置頁面互動
+      this.setupInteractions(pageConfig.interactions);
+
+      this.currentPage = pageName;
+      
+    } catch (error) {
+      console.error('頁面渲染失敗:', error);
+      this.renderErrorPage(container, error);
+    }
+  }
+
+  /**
+   * 設置頁面 Meta 資訊
+   */
+  setPageMeta(meta) {
+    if (!meta) return;
+
+    document.title = this.interpolateVariables(meta.title);
+    
     // 更新 meta 標籤
     this.updateMetaTag('description', meta.description);
     this.updateMetaTag('keywords', meta.keywords?.join(', '));
-    this.updateMetaTag('og:title', meta.title);
-    this.updateMetaTag('og:description', meta.description);
-    this.updateMetaTag('og:image', meta.ogImage);
+    
+    // 更新 Open Graph 標籤
+    this.updateMetaTag('og:title', meta.title, 'property');
+    this.updateMetaTag('og:description', meta.description, 'property');
+    this.updateMetaTag('og:image', meta.ogImage, 'property');
   }
 
-  updateMetaTag(name, content) {
+  /**
+   * 更新 Meta 標籤
+   */
+  updateMetaTag(name, content, attribute = 'name') {
     if (!content) return;
 
-    let meta = document.querySelector(`meta[name="${name}"]`) ||
-               document.querySelector(`meta[property="${name}"]`);
-    
+    let meta = document.querySelector(`meta[${attribute}="${name}"]`);
     if (!meta) {
       meta = document.createElement('meta');
-      if (name.startsWith('og:')) {
-        meta.setAttribute('property', name);
-      } else {
-        meta.setAttribute('name', name);
-      }
+      meta.setAttribute(attribute, name);
       document.head.appendChild(meta);
     }
-    
-    meta.setAttribute('content', content);
+    meta.setAttribute('content', this.interpolateVariables(content));
   }
 
-  applyPageAnimations() {
-    const { animations } = this.pageConfig;
-    
-    if (!animations) return;
+  /**
+   * 渲染區塊
+   */
+  async renderSection(sectionConfig, container) {
+    const { id, type, config, content } = sectionConfig;
 
-    if (animations.pageTransition) {
-      this.applyPageTransition(animations.pageTransition);
+    // 創建區塊元素
+    const sectionElement = document.createElement('section');
+    sectionElement.id = id;
+    sectionElement.className = `section section--${type}`;
+
+    // 應用配置樣式
+    if (config?.animation) {
+      sectionElement.setAttribute('data-animation', config.animation);
     }
 
-    if (animations.stagger) {
-      this.applyStaggerAnimation(animations.stagger);
+    // 根據類型創建組件
+    const component = await componentFactory.create(type, sectionElement, {
+      ...config,
+      content: this.interpolateContent(content)
+    });
+
+    if (component) {
+      this.components.set(id, component);
     }
+
+    container.appendChild(sectionElement);
   }
 
-  applyPageTransition(transitionConfig) {
-    const { type, duration, delay } = transitionConfig;
-    
-    this.element.style.animationName = type;
-    this.element.style.animationDuration = `${duration}ms`;
-    this.element.style.animationDelay = `${delay || 0}ms`;
-    this.element.style.animationFillMode = 'both';
-  }
+  /**
+   * 插值處理 - 將 {{變數}} 替換為實際值
+   */
+  interpolateVariables(text) {
+    if (typeof text !== 'string') return text;
 
-  applyStaggerAnimation(staggerConfig) {
-    if (!staggerConfig.enabled) return;
-
-    const sections = this.container.querySelectorAll('.section');
-    sections.forEach((section, index) => {
-      section.style.animationDelay = `${index * staggerConfig.delay}ms`;
+    return text.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
+      const value = configManager.get(path.trim());
+      return value !== undefined ? value : match;
     });
   }
 
-  clearSections() {
-    this.sections.forEach(section => {
-      if (typeof section.destroy === 'function') {
-        section.destroy();
+  /**
+   * 插值處理內容物件
+   */
+  interpolateContent(content) {
+    if (!content) return content;
+
+    const interpolated = {};
+    for (const [key, value] of Object.entries(content)) {
+      if (typeof value === 'string') {
+        interpolated[key] = this.interpolateVariables(value);
+      } else if (typeof value === 'object' && value !== null) {
+        interpolated[key] = this.interpolateContent(value);
+      } else {
+        interpolated[key] = value;
       }
-    });
-    this.sections.clear();
+    }
+    return interpolated;
   }
 
-  getPageNameFromPath(path) {
-    if (!path || path === '/') return 'landing';
-    return path.replace('/', '');
-  }
-
-  destroy() {
-    this.clearSections();
-    super.destroy();
+  /**
+   * 清理當前頁面
+   */
+  cleanup() {
+    // 銷毀所有組件
+    for (const component of this.components.values()) {
+      if (component.destroy) {
+        component.destroy();
+      }
+    }
+    this.components.clear();
   }
 }
 ```
 
-### 4.2 具體頁面實現範例
+### 4.2 組件工廠系統
+
 ```javascript
-// pages/Skills/Skills.js
-import { BasePage } from '../../core/pages/BasePage.js';
-import { eventBus, EVENTS } from '../../core/events/EventBus.js';
+// src/core/components/ComponentFactory.js
+import { SkillTree } from '../../components/gaming/SkillTree/SkillTree.js';
+import { ProjectCard } from '../../components/gaming/ProjectCard/ProjectCard.js';
+import { YugiohCard } from '../../components/gaming/YugiohCard/YugiohCard.js';
+import { ParticleSystem } from '../../components/gaming/ParticleSystem/ParticleSystem.js';
 
-export default class SkillsPage extends BasePage {
-  constructor(container, options) {
-    super(container, { ...options, pageName: 'skills' });
-    this.skillTreeInstance = null;
+class ComponentFactory {
+  constructor() {
+    this.registry = new Map();
+    this.registerDefaultComponents();
   }
 
+  /**
+   * 註冊預設組件
+   */
+  registerDefaultComponents() {
+    this.register('skill-tree', SkillTree);
+    this.register('project-card', ProjectCard);
+    this.register('yugioh-card', YugiohCard);
+    this.register('particle-system', ParticleSystem);
+    this.register('hero', HeroSection);
+    this.register('about-profile', AboutProfile);
+    this.register('project-grid', ProjectGrid);
+  }
+
+  /**
+   * 註冊組件類型
+   */
+  register(type, componentClass) {
+    this.registry.set(type, componentClass);
+  }
+
+  /**
+   * 創建組件實例
+   */
+  async create(type, element, config = {}) {
+    const ComponentClass = this.registry.get(type);
+    
+    if (!ComponentClass) {
+      console.warn(`未知的組件類型: ${type}`);
+      return null;
+    }
+
+    try {
+      const component = new ComponentClass(element, config);
+      await component.init();
+      return component;
+    } catch (error) {
+      console.error(`組件創建失敗 [${type}]:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 獲取已註冊的組件類型
+   */
+  getRegisteredTypes() {
+    return Array.from(this.registry.keys());
+  }
+}
+
+export const componentFactory = new ComponentFactory();
+```
+
+## 5. 路由系統設計
+
+### 5.1 SPA 路由系統
+
+```javascript
+// src/core/router/Router.js
+import { configManager } from '../config/ConfigManager.js';
+import { PageRenderer } from '../PageRenderer.js';
+
+export class Router {
+  constructor() {
+    this.routes = new Map();
+    this.currentRoute = null;
+    this.pageRenderer = new PageRenderer();
+    this.container = null;
+    
+    this.initializeRoutes();
+    this.bindEvents();
+  }
+
+  /**
+   * 初始化路由配置
+   */
+  initializeRoutes() {
+    const siteConfig = configManager.get('site');
+    const routes = siteConfig.routes || {
+      '/': 'home',
+      '/about': 'about',
+      '/skills': 'skills', 
+      '/portfolio': 'portfolio',
+      '/contact': 'contact'
+    };
+
+    for (const [path, pageName] of Object.entries(routes)) {
+      this.addRoute(path, pageName);
+    }
+  }
+
+  /**
+   * 添加路由
+   */
+  addRoute(path, pageName) {
+    this.routes.set(path, pageName);
+  }
+
+  /**
+   * 綁定事件
+   */
   bindEvents() {
-    super.bindEvents();
+    // 監聽瀏覽器前後退按鈕
+    window.addEventListener('popstate', (event) => {
+      this.handlePopState(event);
+    });
 
-    // 監聽技能點擊事件
-    eventBus.on(EVENTS.SKILL_CLICKED, this.handleSkillClick.bind(this));
-    
-    // 監聽鍵盤導航
-    document.addEventListener('keydown', this.handleKeyboardNavigation.bind(this));
-  }
+    // 監聽頁面載入
+    window.addEventListener('load', () => {
+      this.handleInitialRoute();
+    });
 
-  async renderSection(sectionConfig) {
-    await super.renderSection(sectionConfig);
-    
-    // 如果是技能樹區塊，儲存實例引用
-    if (sectionConfig.type === 'skill-tree') {
-      this.skillTreeInstance = this.sections.get(sectionConfig.id);
-    }
-  }
-
-  handleSkillClick(skillData) {
-    // 顯示技能詳情模態框
-    this.showSkillDetailModal(skillData);
-    
-    // 播放音效
-    eventBus.emit(EVENTS.SOUND_PLAY, 'skill-click');
-    
-    // 觸發粒子效果
-    eventBus.emit(EVENTS.PARTICLE_BURST, {
-      x: event.clientX,
-      y: event.clientY,
-      color: 'gold'
+    // 攔截連結點擊
+    document.addEventListener('click', (event) => {
+      this.handleLinkClick(event);
     });
   }
 
-  handleKeyboardNavigation(event) {
-    if (!this.skillTreeInstance) return;
+  /**
+   * 處理初始路由
+   */
+  handleInitialRoute() {
+    const currentPath = window.location.pathname;
+    this.navigate(currentPath, { replaceState: true });
+  }
 
-    const { key } = event;
+  /**
+   * 處理連結點擊
+   */
+  handleLinkClick(event) {
+    const link = event.target.closest('a[href]');
+    if (!link) return;
+
+    const href = link.getAttribute('href');
     
-    switch (key) {
-      case 'ArrowUp':
-      case 'ArrowDown':
-      case 'ArrowLeft':
-      case 'ArrowRight':
-        event.preventDefault();
-        this.skillTreeInstance.navigateWithKeyboard(key);
-        break;
-      
-      case 'Enter':
-        event.preventDefault();
-        this.skillTreeInstance.activateCurrentSkill();
-        break;
-      
-      case 'Escape':
-        this.closeSkillDetailModal();
-        break;
+    // 只處理內部連結
+    if (href.startsWith('/') || href.startsWith('#/')) {
+      event.preventDefault();
+      this.navigate(href);
     }
   }
 
-  showSkillDetailModal(skillData) {
-    // 實現技能詳情模態框
-    const modal = document.createElement('div');
-    modal.className = 'skill-detail-modal';
-    modal.innerHTML = this.generateSkillDetailHTML(skillData);
-    
-    document.body.appendChild(modal);
-    
-    // 模態框動畫
-    modal.animate([
-      { opacity: 0, transform: 'scale(0.8)' },
-      { opacity: 1, transform: 'scale(1)' }
-    ], {
-      duration: 300,
-      easing: 'ease-out'
-    });
-
-    // 綁定關閉事件
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        this.closeSkillDetailModal();
+  /**
+   * 導航到指定路由
+   */
+  async navigate(path, options = {}) {
+    try {
+      const pageName = this.routes.get(path);
+      
+      if (!pageName) {
+        console.warn(`未找到路由: ${path}`);
+        this.navigate('/404');
+        return;
       }
-    });
-  }
 
-  generateSkillDetailHTML(skillData) {
-    return `
-      <div class="modal-content">
-        <div class="skill-header">
-          <h2>${skillData.name}</h2>
-          <button class="close-btn" onclick="this.closest('.skill-detail-modal').remove()">×</button>
-        </div>
-        <div class="skill-body">
-          <p class="skill-description">${skillData.description}</p>
-          
-          <div class="skill-details">
-            <h3>相關技能</h3>
-            <div class="skill-tags">
-              ${skillData.skills.map(skill => `<span class="tag">${skill}</span>`).join('')}
-            </div>
-            
-            ${skillData.projects ? `
-              <h3>相關專案</h3>
-              <ul class="project-list">
-                ${skillData.projects.map(project => `<li>${project}</li>`).join('')}
-              </ul>
-            ` : ''}
-            
-            ${skillData.certifications ? `
-              <h3>認證</h3>
-              <ul class="certification-list">
-                ${skillData.certifications.map(cert => `<li>${cert}</li>`).join('')}
-              </ul>
-            ` : ''}
-          </div>
-        </div>
-      </div>
-    `;
-  }
+      // 更新瀏覽器歷史
+      if (options.replaceState) {
+        history.replaceState({ path, pageName }, '', path);
+      } else {
+        history.pushState({ path, pageName }, '', path);
+      }
 
-  closeSkillDetailModal() {
-    const modal = document.querySelector('.skill-detail-modal');
-    if (modal) {
-      modal.animate([
-        { opacity: 1, transform: 'scale(1)' },
-        { opacity: 0, transform: 'scale(0.8)' }
-      ], {
-        duration: 200,
-        easing: 'ease-in'
-      }).onfinish = () => {
-        modal.remove();
-      };
+      // 渲染頁面
+      await this.renderPage(pageName);
+      
+      this.currentRoute = { path, pageName };
+      
+      // 觸發路由變更事件
+      this.emit('routeChanged', { path, pageName });
+      
+    } catch (error) {
+      console.error('路由導航失敗:', error);
+      this.renderErrorPage(error);
     }
   }
 
-  destroy() {
-    // 清理事件監聽器
-    eventBus.off(EVENTS.SKILL_CLICKED, this.handleSkillClick);
-    document.removeEventListener('keydown', this.handleKeyboardNavigation);
-    
-    // 關閉模態框
-    this.closeSkillDetailModal();
-    
-    super.destroy();
+  /**
+   * 渲染頁面
+   */
+  async renderPage(pageName) {
+    if (!this.container) {
+      this.container = document.getElementById('app') || document.body;
+    }
+
+    // 添加載入狀態
+    this.showLoading();
+
+    try {
+      await this.pageRenderer.renderPage(pageName, this.container);
+      this.hideLoading();
+    } catch (error) {
+      this.hideLoading();
+      throw error;
+    }
+  }
+
+  /**
+   * 顯示載入狀態
+   */
+  showLoading() {
+    document.body.classList.add('page-loading');
+  }
+
+  /**
+   * 隱藏載入狀態
+   */
+  hideLoading() {
+    document.body.classList.remove('page-loading');
+  }
+
+  /**
+   * 獲取當前路由
+   */
+  getCurrentRoute() {
+    return this.currentRoute;
+  }
+
+  /**
+   * 發送事件
+   */
+  emit(eventName, data) {
+    const event = new CustomEvent(`router:${eventName}`, { detail: data });
+    window.dispatchEvent(event);
   }
 }
 ```
 
----
+## 6. 部署與建構系統
 
-## 5. 建構與部署系統
+### 6.1 Vite 配置
 
-### 5.1 Vite 配置
 ```javascript
 // vite.config.js
 import { defineConfig } from 'vite';
@@ -346,177 +1385,126 @@ import { resolve } from 'path';
 
 export default defineConfig({
   // 基礎配置
-  base: '/', // GitHub Pages 部署路徑
+  base: process.env.NODE_ENV === 'production' ? '/personal-portfolio/' : '/',
   
-  // 開發伺服器配置
-  server: {
-    port: 3000,
-    open: true,
-    cors: true
-  },
-
   // 建構配置
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    
-    // 資源處理
     assetsDir: 'assets',
-    assetsInlineLimit: 4096,
+    sourcemap: process.env.NODE_ENV !== 'production',
     
-    // 程式碼分割
+    // 代碼分割
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html')
+        main: resolve(__dirname, 'index.html'),
       },
+      
       output: {
-        // 分離第三方庫
-        manualChunks: {
-          vendor: ['gsap'],
-          utils: ['lodash-es']
-        },
-        
-        // 文件命名
-        entryFileNames: 'assets/[name].[hash].js',
-        chunkFileNames: 'assets/[name].[hash].js',
+        // 靜態資源命名
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split('.');
           const ext = info[info.length - 1];
           
-          if (/\.(png|jpe?g|gif|svg|webp)$/i.test(assetInfo.name)) {
-            return `assets/images/[name].[hash].${ext}`;
+          if (/\.(mp3|wav|ogg)$/.test(assetInfo.name)) {
+            return `assets/sounds/[name]-[hash].${ext}`;
           }
           
-          if (/\.(woff2?|eot|ttf|otf)$/i.test(assetInfo.name)) {
-            return `assets/fonts/[name].[hash].${ext}`;
+          if (/\.(png|jpe?g|svg|gif|webp|avif)$/.test(assetInfo.name)) {
+            return `assets/images/[name]-[hash].${ext}`;
           }
           
-          if (/\.(mp3|wav|ogg)$/i.test(assetInfo.name)) {
-            return `assets/sounds/[name].[hash].${ext}`;
+          if (/\.(woff2?|eot|ttf|otf)$/.test(assetInfo.name)) {
+            return `assets/fonts/[name]-[hash].${ext}`;
           }
           
-          return `assets/[name].[hash].${ext}`;
+          return `assets/[name]-[hash].${ext}`;
+        },
+        
+        // JavaScript 分塊
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        
+        // 手動分塊
+        manualChunks: {
+          // 第三方庫分塊
+          'vendor': ['gsap'],
+          
+          // 組件分塊
+          'components-gaming': [
+            './src/components/gaming/SkillTree/SkillTree.js',
+            './src/components/gaming/ProjectCard/ProjectCard.js',
+            './src/components/gaming/YugiohCard/YugiohCard.js'
+          ],
+          
+          // 系統分塊
+          'core-system': [
+            './src/core/config/ConfigManager.js',
+            './src/core/router/Router.js',
+            './src/core/components/BaseComponent.js'
+          ]
         }
       }
     },
     
     // 壓縮配置
-    minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,
-        drop_debugger: true
+        drop_console: process.env.NODE_ENV === 'production',
+        drop_debugger: process.env.NODE_ENV === 'production'
       }
     }
   },
-
-  // 解析配置
+  
+  // 開發服務器配置
+  server: {
+    port: 3000,
+    open: true,
+    cors: true
+  },
+  
+  // 路徑別名
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
       '@config': resolve(__dirname, 'src/config'),
       '@components': resolve(__dirname, 'src/components'),
-      '@pages': resolve(__dirname, 'src/pages'),
       '@core': resolve(__dirname, 'src/core'),
-      '@assets': resolve(__dirname, 'src/assets'),
-      '@styles': resolve(__dirname, 'src/styles')
+      '@utils': resolve(__dirname, 'src/utils'),
+      '@assets': resolve(__dirname, 'public/assets')
     }
   },
-
+  
   // CSS 配置
   css: {
+    devSourcemap: true,
     preprocessorOptions: {
       scss: {
-        additionalData: `
-          @import "@styles/globals/variables.scss";
-          @import "@styles/globals/mixins.scss";
-        `
+        additionalData: `@import "@/styles/variables.scss";`
       }
-    },
-    postcss: {
-      plugins: [
-        require('autoprefixer'),
-        require('cssnano')({
-          preset: 'default'
-        })
-      ]
     }
   },
-
+  
   // 插件配置
   plugins: [
-    // PWA 支援
-    {
-      name: 'generate-sw',
-      generateBundle() {
-        // 生成 Service Worker
-        this.emitFile({
-          type: 'asset',
-          fileName: 'sw.js',
-          source: generateServiceWorker()
-        });
-      }
-    },
-    
-    // 配置檔案複製
-    {
-      name: 'copy-configs',
-      generateBundle() {
-        // 複製配置文件到 dist 目錄
-        const configs = glob.sync('src/config/**/*.js');
-        configs.forEach(configPath => {
-          const content = fs.readFileSync(configPath, 'utf-8');
-          const fileName = path.relative('src/config', configPath);
-          
-          this.emitFile({
-            type: 'asset',
-            fileName: `config/${fileName}`,
-            source: content
-          });
-        });
-      }
-    }
+    // PWA 支援 (可選)
+    // VitePWA({
+    //   registerType: 'autoUpdate',
+    //   workbox: {
+    //     globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,gif,webp,woff,woff2}']
+    //   }
+    // })
   ],
-
+  
   // 優化配置
   optimizeDeps: {
-    include: ['gsap', 'lodash-es'],
-    exclude: ['@config/*'] // 配置文件不預打包
+    include: ['gsap'],
+    exclude: []
   }
 });
-
-// Service Worker 生成器
-function generateServiceWorker() {
-  return `
-    const CACHE_NAME = 'portfolio-v1';
-    const urlsToCache = [
-      '/',
-      '/assets/css/main.css',
-      '/assets/js/main.js',
-      '/assets/images/avatar.jpg'
-    ];
-
-    self.addEventListener('install', (event) => {
-      event.waitUntil(
-        caches.open(CACHE_NAME)
-          .then((cache) => cache.addAll(urlsToCache))
-      );
-    });
-
-    self.addEventListener('fetch', (event) => {
-      event.respondWith(
-        caches.match(event.request)
-          .then((response) => {
-            return response || fetch(event.request);
-          }
-        )
-      );
-    });
-  `;
-}
 ```
 
-### 5.2 GitHub Actions 部署配置
+### 6.2 GitHub Actions 自動部署
+
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy to GitHub Pages
@@ -544,22 +1532,19 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Lint code
-      run: npm run lint
-      
     - name: Run tests
       run: npm run test
       
-    - name: Build application
+    - name: Run linting
+      run: npm run lint
+      
+    - name: Type check
+      run: npm run type-check
+      
+    - name: Build project
       run: npm run build
       env:
         NODE_ENV: production
-        
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: dist
-        path: dist/
         
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/main'
@@ -568,2204 +1553,145 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist
         cname: your-domain.com  # 可選：自定義域名
-        
-    - name: Lighthouse CI
-      uses: treosh/lighthouse-ci-action@v9
-      with:
-        configPath: './lighthouserc.json'
-        uploadArtifacts: true
-        temporaryPublicStorage: true
 ```
 
-### 5.3 配置管理腳本
-```javascript
-// scripts/config-manager.js
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+## 7. 開發工作流程
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+### 7.1 配置文件開發流程
 
-class ConfigManager {
-  constructor() {
-    this.configDir = path.resolve(__dirname, '../src/config');
-    this.outputDir = path.resolve(__dirname, '../dist/config');
-  }
+1. **新增頁面配置**：
+   ```bash
+   # 創建新頁面配置
+   cp src/config/pages/home.config.js src/config/pages/new-page.config.js
+   # 修改配置內容
+   # 在 site.config.js 中添加路由
+   ```
 
-  // 驗證所有配置檔案
-  async validateConfigs() {
-    console.log('🔍 Validating configuration files...');
-    
-    const configFiles = this.getConfigFiles();
-    const errors = [];
+2. **修改現有內容**：
+   ```bash
+   # 直接編輯對應的配置文件
+   vim src/config/data/skills.data.js
+   # 重新載入頁面即可看到變更
+   ```
 
-    for (const file of configFiles) {
-      try {
-        await this.validateConfigFile(file);
-        console.log(`✅ ${file}`);
-      } catch (error) {
-        errors.push({ file, error: error.message });
-        console.log(`❌ ${file}: ${error.message}`);
-      }
-    }
+3. **添加新組件**：
+   ```bash
+   # 創建組件目錄和文件
+   mkdir src/components/gaming/NewComponent
+   # 在 ComponentFactory.js 中註冊
+   # 在頁面配置中使用
+   ```
 
-    if (errors.length > 0) {
-      console.log(`\n💥 Found ${errors.length} configuration errors`);
-      process.exit(1);
-    }
+### 7.2 開發環境設置
 
-    console.log('\n🎉 All configuration files are valid!');
-  }
-
-  async validateConfigFile(filePath) {
-    const fullPath = path.join(this.configDir, filePath);
-    
-    // 檢查檔案是否存在
-    if (!fs.existsSync(fullPath)) {
-      throw new Error('File not found');
-    }
-
-    // 動態載入並驗證
-    const config = await import(fullPath);
-    
-    if (filePath.includes('pages/')) {
-      this.validatePageConfig(config.default);
-    } else if (filePath.includes('data/')) {
-      this.validateDataConfig(config.default);
-    }
-  }
-
-  validatePageConfig(config) {
-    const requiredFields = ['meta', 'layout', 'sections'];
-    
-    for (const field of requiredFields) {
-      if (!config[field]) {
-        throw new Error(`Missing required field: ${field}`);
-      }
-    }
-
-    // 驗證 meta 資訊
-    if (!config.meta.title || !config.meta.description) {
-      throw new Error('Meta title and description are required');
-    }
-
-    // 驗證區塊配置
-    if (!Array.isArray(config.sections) || config.sections.length === 0) {
-      throw new Error('At least one section is required');
-    }
-
-    config.sections.forEach((section, index) => {
-      if (!section.id || !section.type) {
-        throw new Error(`Section ${index} missing id or type`);
-      }
-    });
-  }
-
-  validateDataConfig(config) {
-    // 根據不同類型進行驗證
-    if (config.branches) {
-      // 技能樹配置驗證
-      this.validateSkillTreeConfig(config);
-    } else if (config.projects) {
-      // 專案配置驗證
-      this.validateProjectsConfig(config);
-    }
-  }
-
-  validateSkillTreeConfig(config) {
-    if (!config.branches || Object.keys(config.branches).length === 0) {
-      throw new Error('At least one skill branch is required');
-    }
-
-    Object.entries(config.branches).forEach(([branchId, branch]) => {
-      if (!branch.name || !branch.nodes || !Array.isArray(branch.nodes)) {
-        throw new Error(`Invalid branch configuration: ${branchId}`);
-      }
-
-      branch.nodes.forEach((node, index) => {
-        if (!node.id || !node.name || !node.position) {
-          throw new Error(`Invalid node in branch ${branchId}, index ${index}`);
-        }
-      });
-    });
-  }
-
-  // 生成配置檔案類型定義
-  generateTypes() {
-    console.log('📝 Generating TypeScript definitions...');
-    
-    const typeDefinitions = this.generateTypeDefinitions();
-    const outputFile = path.resolve(__dirname, '../src/types/config.d.ts');
-    
-    fs.writeFileSync(outputFile, typeDefinitions);
-    console.log(`✅ Types generated: ${outputFile}`);
-  }
-
-  generateTypeDefinitions() {
-    return `
-// Auto-generated configuration types
-// Do not edit manually
-
-export interface PageConfig {
-  meta: {
-    title: string;
-    description: string;
-    keywords?: string[];
-    ogImage?: string;
-  };
-  layout: {
-    type: 'single-column' | 'two-column' | 'three-column' | 'grid';
-    sidebar?: 'left' | 'right' | 'none';
-    padding: 'none' | 'small' | 'standard' | 'large';
-    maxWidth?: string;
-  };
-  sections: SectionConfig[];
-  animations?: {
-    pageTransition?: {
-      type: string;
-      duration: number;
-      delay?: number;
-    };
-    stagger?: {
-      enabled: boolean;
-      delay: number;
-    };
-  };
-}
-
-export interface SectionConfig {
-  id: string;
-  type: string;
-  position: {
-    column?: number;
-    order: number;
-  };
-  config: Record<string, any>;
-}
-
-// ... 更多類型定義
-    `;
-  }
-
-  getConfigFiles() {
-    const files = [];
-    const walkDir = (dir, relativePath = '') => {
-      const items = fs.readdirSync(path.join(this.configDir, relativePath));
-      
-      items.forEach(item => {
-        const itemPath = path.join(relativePath, item);
-        const fullPath = path.join(this.configDir, itemPath);
-        
-        if (fs.statSync(fullPath).isDirectory()) {
-          walkDir(dir, itemPath);
-        } else if (item.endsWith('.config.js')) {
-          files.push(itemPath);
-        }
-      });
-    };
-    
-    walkDir(this.configDir);
-    return files;
-  }
-}
-
-// CLI 介面
-const manager = new ConfigManager();
-const command = process.argv[2];
-
-switch (command) {
-  case 'validate':
-    manager.validateConfigs();
-    break;
-  case 'types':
-    manager.generateTypes();
-    break;
-  default:
-    console.log('Available commands: validate, types');
-}
-```
-
----
-
-## 6. 開發工具與最佳實踐
-
-### 6.1 開發腳本
 ```json
+// package.json scripts
 {
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint src --ext .js,.ts",
-    "lint:fix": "eslint src --ext .js,.ts --fix",
+    "lint": "eslint src --ext .js,.jsx --fix",
+    "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "config:validate": "node scripts/config-manager.js validate",
-    "config:types": "node scripts/config-manager.js types",
-    "deploy": "npm run build && gh-pages -d dist",
-    "analyze": "npm run build && npx vite-bundle-analyzer dist"
+    "config:validate": "node scripts/validate-configs.js",
+    "config:generate-types": "node scripts/generate-config-types.js",
+    "deploy": "npm run build && gh-pages -d dist"
   }
 }
 ```
 
-### 6.2 代碼品質工具配置
+### 7.3 配置驗證腳本
+
 ```javascript
-// .eslintrc.js
-export default {
-  env: {
-    browser: true,
-    es2021: true,
-    node: true
-  },
-  extends: [
-    'eslint:recommended'
-  ],
-  parserOptions: {
-    ecmaVersion: 2021,
-    sourceType: 'module'
-  },
-  rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'prefer-const': 'error',
-    'no-var': 'error',
-    'object-shorthand': 'error',
-    'prefer-template': 'error'
-  },
-  globals: {
-    'CONFIG_LOADER': 'readonly',
-    'EVENT_BUS': 'readonly',
-    'STATE_MANAGER': 'readonly'
-  }
-};
-```
+// scripts/validate-configs.js
+import { configManager } from '../src/core/config/ConfigManager.js';
+import { configValidator } from '../src/core/config/ConfigValidator.js';
 
-### 6.3 效能監控
-```javascript
-// core/monitoring/Performance.js
-export class PerformanceMonitor {
-  constructor() {
-    this.metrics = {
-      pageLoadTime: 0,
-      firstContentfulPaint: 0,
-      largestContentfulPaint: 0,
-      firstInputDelay: 0,
-      cumulativeLayoutShift: 0
-    };
+async function validateAllConfigs() {
+  try {
+    console.log('🔍 開始驗證配置文件...');
     
-    this.init();
-  }
-
-  init() {
-    // 監控頁面載入時間
-    window.addEventListener('load', () => {
-      this.measurePageLoadTime();
-      this.measureCoreWebVitals();
-    });
-  }
-
-  measurePageLoadTime() {
-    const navigation = performance.getEntriesByType('navigation')[0];
-    this.metrics.pageLoadTime = navigation.loadEventEnd - navigation.fetchStart;
-  }
-
-  measureCoreWebVitals() {
-    // FCP - First Contentful Paint
-    const observer = new PerformanceObserver((list) => {
-      list.getEntries().forEach((entry) => {
-        if (entry.name === 'first-contentful-paint') {
-          this.metrics.firstContentfulPaint = entry.startTime;
-        }
-      });
-    });
-    observer.observe({ entryTypes: ['paint'] });
-
-    // LCP - Largest Contentful Paint
-    const lcpObserver = new PerformanceObserver((list) => {
-      const entries = list.getEntries();
-      const lastEntry = entries[entries.length - 1];
-      this.metrics.largestContentfulPaint = lastEntry.startTime;
-    });
-    lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
-
-    // FID - First Input Delay
-    const fidObserver = new PerformanceObserver((list) => {
-      list.getEntries().forEach((entry) => {
-        this.metrics.firstInputDelay = entry.processingStart - entry.startTime;
-      });
-    });
-    fidObserver.observe({ entryTypes: ['first-input'] });
-  }
-
-  getMetrics() {
-    return { ...this.metrics };
-  }
-
-  reportMetrics() {
-    // 發送到分析服務
-    if (window.gtag) {
-      window.gtag('event', 'performance_metrics', {
-        custom_map: this.metrics
-      });
-    }
+    await configManager.initialize();
+    const validationResult = await configValidator.validateAll();
     
-    console.log('Performance Metrics:', this.metrics);
-  }
-}
-```
-
----
-
-## 7. 總結
-
-### 7.1 架構優勢
-
-#### Config-Driven 的優勢
-✅ **內容管理簡化** - 修改內容只需編輯 JSON/JS 配置檔案  
-✅ **類型安全** - TypeScript 介面確保配置正確性  
-✅ **快速迭代** - 新增頁面或功能無需修改核心程式碼  
-✅ **易於維護** - 配置與邏輯分離，降低維護成本  
-✅ **版本控制友善** - 配置檔案變化清晰可追蹤  
-
-#### 技術架構優勢
-✅ **模組化設計** - 組件可重用，系統可擴展  
-✅ **事件驅動** - 鬆耦合的組件通訊  
-✅ **狀態管理** - 統一的應用狀態管理  
-✅ **效能優化** - 懶載入、程式碼分割、快取策略  
-✅ **開發體驗** - 熱重載、型別檢查、自動化測試  
-
-### 7.2 使用建議
-
-#### 日常內容更新流程
-1. **修改配置檔案** - 編輯對應的 `.config.js` 檔案
-2. **驗證配置** - 運行 `npm run config:validate`
-3. **本地預覽** - `npm run dev` 檢查效果
-4. **部署更新** - 推送到 GitHub，自動部署
-
-#### 新增頁面流程
-1. **創建頁面配置** - `src/config/pages/new-page.config.js`
-2. **註冊路由** - 在 `setupRoutes()` 中添加路由
-3. **創建頁面組件** - 繼承 `BasePage` 類別
-4. **測試與部署** - 驗證功能後部署
-
-### 7.3 擴展可能性
-
-#### 未來功能擴展
-🚀 **多語言支援** - 在配置中添加語言選項  
-🚀 **主題切換** - 支援多種視覺主題  
-🚀 **內容管理系統** - 可視化配置編輯器  
-🚀 **A/B 測試** - 配置驅動的實驗功能  
-🚀 **動態載入** - 運行時從 API 載入配置  
-
-這個技術架構export interface SectionConfig {
-  id: string;
-  type: string;
-  position: {
-    column?: number;
-    order: number;
-  };
-  config: Record<string, any>;
-  visibility?: {
-    desktop?: boolean;
-    tablet?: boolean;
-    mobile?: boolean;
-  };
-}
-
-export interface SkillTreeConfig {
-  settings: {
-    centerPoint: { x: number; y: number };
-    hexSize: number;
-    spacing: number;
-    maxZoom: number;
-    minZoom: number;
-    defaultZoom: number;
-  };
-  theme: SkillTreeTheme;
-  branches: Record<string, SkillBranch>;
-  learningPaths: LearningPath[];
-}
-
-export interface SkillNode {
-  id: string;
-  name: string;
-  position: { q: number; r: number };
-  type: 'normal' | 'notable' | 'keystone';
-  status: 'locked' | 'available' | 'learning' | 'mastered';
-  description: string;
-  skills: string[];
-  prerequisites: string[];
-  unlocks: string[];
-  learnedDate?: string;
-  targetDate?: string;
-  progress?: number;
-  projects?: string[];
-  certifications?: string[];
-}
-
-export interface ProjectConfig {
-  id: string;
-  title: string;
-  subtitle?: string;
-  category: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-  description: string;
-  technologies: string[];
-  achievements: string[];
-  media: ProjectMedia;
-  links: ProjectLinks;
-  dates: ProjectDates;
-  gamification: ProjectGamification;
-}
-```
-
-### 3.2 組件系統架構
-
-#### 3.2.1 基礎組件類別
-```javascript
-// core/components/BaseComponent.js
-export class BaseComponent {
-  constructor(element, config = {}) {
-    this.element = element;
-    this.config = this.mergeConfig(this.getDefaultConfig(), config);
-    this.state = this.getInitialState();
-    this.eventListeners = new Map();
-    
-    this.init();
-  }
-
-  // 配置合併
-  mergeConfig(defaultConfig, userConfig) {
-    return {
-      ...defaultConfig,
-      ...userConfig,
-      // 深層合併嵌套物件
-      ...Object.keys(defaultConfig).reduce((acc, key) => {
-        if (typeof defaultConfig[key] === 'object' && 
-            typeof userConfig[key] === 'object') {
-          acc[key] = { ...defaultConfig[key], ...userConfig[key] };
-        }
-        return acc;
-      }, {})
-    };
-  }
-
-  // 預設配置 (由子類覆寫)
-  getDefaultConfig() {
-    return {};
-  }
-
-  // 初始狀態 (由子類覆寫)
-  getInitialState() {
-    return {};
-  }
-
-  // 初始化方法
-  init() {
-    this.createElement();
-    this.bindEvents();
-    this.render();
-  }
-
-  // 創建元素結構 (由子類實現)
-  createElement() {
-    throw new Error('createElement must be implemented by subclass');
-  }
-
-  // 綁定事件 (由子類實現)
-  bindEvents() {
-    // 基礎事件綁定
-  }
-
-  // 渲染方法 (由子類實現)
-  render() {
-    throw new Error('render must be implemented by subclass');
-  }
-
-  // 狀態更新
-  setState(newState) {
-    const prevState = { ...this.state };
-    this.state = { ...this.state, ...newState };
-    this.onStateChange(prevState, this.state);
-    this.render();
-  }
-
-  // 狀態變化回調
-  onStateChange(prevState, currentState) {
-    // 由子類覆寫
-  }
-
-  // 事件綁定輔助方法
-  addEventListener(element, event, handler) {
-    element.addEventListener(event, handler);
-    
-    const key = `${element.constructor.name}-${event}`;
-    if (!this.eventListeners.has(key)) {
-      this.eventListeners.set(key, []);
-    }
-    this.eventListeners.get(key).push({ element, event, handler });
-  }
-
-  // 銷毀組件
-  destroy() {
-    // 清理事件監聽器
-    this.eventListeners.forEach(listeners => {
-      listeners.forEach(({ element, event, handler }) => {
-        element.removeEventListener(event, handler);
-      });
-    });
-    
-    // 清理 DOM
-    if (this.element && this.element.parentNode) {
-      this.element.parentNode.removeChild(this.element);
-    }
-    
-    // 清理狀態
-    this.state = null;
-    this.config = null;
-  }
-}
-```
-
-#### 3.2.2 技能樹組件實現
-```javascript
-// components/gaming/SkillTree/SkillTree.js
-import { BaseComponent } from '../../../core/components/BaseComponent.js';
-import { configLoader } from '../../../core/config/ConfigLoader.js';
-
-export class SkillTree extends BaseComponent {
-  getDefaultConfig() {
-    return {
-      container: null,
-      interactive: true,
-      enableZoom: true,
-      enableDrag: true,
-      animationDuration: 300,
-      onSkillClick: null,
-      onSkillHover: null
-    };
-  }
-
-  getInitialState() {
-    return {
-      skillTreeData: null,
-      viewport: {
-        x: 0,
-        y: 0,
-        scale: 1
-      },
-      selectedSkill: null,
-      hoveredSkill: null,
-      loading: true
-    };
-  }
-
-  async init() {
-    // 載入技能樹配置
-    const skillTreeConfig = await configLoader.loadDataConfig('skills');
-    this.setState({ skillTreeData: skillTreeConfig, loading: false });
-    
-    super.init();
-  }
-
-  createElement() {
-    this.element.innerHTML = `
-      <div class="skill-tree-container">
-        <div class="skill-tree-controls">
-          <button class="zoom-in">+</button>
-          <button class="zoom-out">-</button>
-          <button class="reset-view">⌂</button>
-        </div>
-        <div class="skill-tree-viewport">
-          <svg class="skill-tree-svg">
-            <g class="connections-layer"></g>
-            <g class="nodes-layer"></g>
-          </svg>
-        </div>
-        <div class="skill-tree-minimap"></div>
-      </div>
-    `;
-
-    // 設定 SVG 尺寸
-    this.svg = this.element.querySelector('.skill-tree-svg');
-    this.connectionsLayer = this.element.querySelector('.connections-layer');
-    this.nodesLayer = this.element.querySelector('.nodes-layer');
-    
-    this.resizeSVG();
-  }
-
-  bindEvents() {
-    const viewport = this.element.querySelector('.skill-tree-viewport');
-    
-    // 拖曳功能
-    if (this.config.enableDrag) {
-      this.initDragBehavior(viewport);
-    }
-    
-    // 縮放功能
-    if (this.config.enableZoom) {
-      this.initZoomBehavior(viewport);
-    }
-    
-    // 控制按鈕
-    this.bindControlButtons();
-    
-    // 視窗大小變化
-    window.addEventListener('resize', () => this.resizeSVG());
-  }
-
-  render() {
-    if (this.state.loading) {
-      this.renderLoadingState();
-      return;
-    }
-
-    this.renderSkillTree();
-  }
-
-  renderSkillTree() {
-    const { skillTreeData } = this.state;
-    
-    // 清空現有內容
-    this.connectionsLayer.innerHTML = '';
-    this.nodesLayer.innerHTML = '';
-    
-    // 渲染連線
-    this.renderConnections(skillTreeData);
-    
-    // 渲染技能節點
-    this.renderSkillNodes(skillTreeData);
-    
-    // 更新視窗位置
-    this.updateViewport();
-  }
-
-  renderSkillNodes(skillTreeData) {
-    Object.values(skillTreeData.branches).forEach(branch => {
-      branch.nodes.forEach(node => {
-        const nodeElement = this.createSkillNode(node);
-        this.nodesLayer.appendChild(nodeElement);
-      });
-    });
-  }
-
-  createSkillNode(nodeData) {
-    const { x, y } = this.hexToPixel(nodeData.position.q, nodeData.position.r);
-    
-    const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    nodeGroup.setAttribute('class', `skill-node skill-node--${nodeData.status}`);
-    nodeGroup.setAttribute('transform', `translate(${x}, ${y})`);
-    nodeGroup.setAttribute('data-skill-id', nodeData.id);
-    
-    // 技能節點圓圈
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    const radius = nodeData.type === 'keystone' ? 30 : 
-                   nodeData.type === 'notable' ? 22 : 18;
-    
-    circle.setAttribute('r', radius);
-    circle.setAttribute('class', `skill-circle skill-circle--${nodeData.type}`);
-    
-    // 技能圖示
-    if (nodeData.icon) {
-      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-      icon.setAttribute('href', `/assets/icons/skills/${nodeData.icon}.svg`);
-      icon.setAttribute('x', -12);
-      icon.setAttribute('y', -12);
-      icon.setAttribute('width', 24);
-      icon.setAttribute('height', 24);
-      nodeGroup.appendChild(icon);
-    }
-    
-    nodeGroup.appendChild(circle);
-    
-    // 綁定互動事件
-    this.bindNodeEvents(nodeGroup, nodeData);
-    
-    return nodeGroup;
-  }
-
-  bindNodeEvents(nodeElement, nodeData) {
-    nodeElement.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.handleSkillClick(nodeData);
-    });
-    
-    nodeElement.addEventListener('mouseenter', () => {
-      this.handleSkillHover(nodeData, true);
-    });
-    
-    nodeElement.addEventListener('mouseleave', () => {
-      this.handleSkillHover(nodeData, false);
-    });
-  }
-
-  handleSkillClick(skillData) {
-    this.setState({ selectedSkill: skillData });
-    
-    if (this.config.onSkillClick) {
-      this.config.onSkillClick(skillData);
-    }
-    
-    // 觸發自定義事件
-    this.element.dispatchEvent(new CustomEvent('skillClick', {
-      detail: { skill: skillData }
-    }));
-  }
-
-  // 六角形座標轉換為像素座標
-  hexToPixel(q, r) {
-    const { hexSize } = this.state.skillTreeData.settings;
-    const x = hexSize * (3/2 * q);
-    const y = hexSize * (Math.sqrt(3)/2 * q + Math.sqrt(3) * r);
-    return { x, y };
-  }
-
-  // 縮放與平移控制
-  updateViewport() {
-    const { x, y, scale } = this.state.viewport;
-    const transform = `translate(${x}, ${y}) scale(${scale})`;
-    
-    this.connectionsLayer.setAttribute('transform', transform);
-    this.nodesLayer.setAttribute('transform', transform);
-  }
-
-  zoomTo(scale, centerX = 0, centerY = 0) {
-    const { skillTreeData } = this.state;
-    const { maxZoom, minZoom } = skillTreeData.settings;
-    
-    const newScale = Math.max(minZoom, Math.min(maxZoom, scale));
-    const { viewport } = this.state;
-    
-    // 以指定點為中心進行縮放
-    const newX = centerX - (centerX - viewport.x) * (newScale / viewport.scale);
-    const newY = centerY - (centerY - viewport.y) * (newScale / viewport.scale);
-    
-    this.setState({
-      viewport: {
-        x: newX,
-        y: newY,
-        scale: newScale
-      }
-    });
-  }
-
-  // 重置視圖到中心
-  resetView() {
-    const { skillTreeData } = this.state;
-    this.setState({
-      viewport: {
-        x: 0,
-        y: 0,
-        scale: skillTreeData.settings.defaultZoom
-      }
-    });
-  }
-}
-```
-
-### 3.3 狀態管理系統
-
-#### 3.3.1 簡易狀態管理器
-```javascript
-// core/state/StateManager.js
-class StateManager {
-  constructor() {
-    this.state = {};
-    this.listeners = new Map();
-    this.middleware = [];
-  }
-
-  // 設定初始狀態
-  setInitialState(initialState) {
-    this.state = { ...initialState };
-  }
-
-  // 獲取狀態
-  getState(path = null) {
-    if (!path) return this.state;
-    
-    return path.split('.').reduce((obj, key) => obj?.[key], this.state);
-  }
-
-  // 更新狀態
-  setState(updates, options = {}) {
-    const prevState = { ...this.state };
-    
-    // 應用中介軟體
-    const processedUpdates = this.applyMiddleware(updates, prevState);
-    
-    // 更新狀態
-    if (typeof processedUpdates === 'function') {
-      this.state = processedUpdates(prevState);
+    if (validationResult.isValid) {
+      console.log('✅ 所有配置文件驗證通過');
     } else {
-      this.state = { ...prevState, ...processedUpdates };
+      console.error('❌ 配置文件驗證失敗:');
+      validationResult.errors.forEach(error => {
+        console.error(`  - ${error.path}: ${error.message}`);
+      });
+      process.exit(1);
     }
-    
-    // 通知監聽器
-    if (!options.silent) {
-      this.notifyListeners(prevState, this.state, updates);
-    }
-  }
-
-  // 訂閱狀態變化
-  subscribe(path, callback) {
-    if (!this.listeners.has(path)) {
-      this.listeners.set(path, new Set());
-    }
-    
-    this.listeners.get(path).add(callback);
-    
-    // 返回取消訂閱函數
-    return () => {
-      const pathListeners = this.listeners.get(path);
-      if (pathListeners) {
-        pathListeners.delete(callback);
-        if (pathListeners.size === 0) {
-          this.listeners.delete(path);
-        }
-      }
-    };
-  }
-
-  // 通知監聽器
-  notifyListeners(prevState, currentState, updates) {
-    this.listeners.forEach((callbacks, path) => {
-      const prevValue = this.getValueFromPath(prevState, path);
-      const currentValue = this.getValueFromPath(currentState, path);
-      
-      if (prevValue !== currentValue || this.pathAffectedByUpdates(path, updates)) {
-        callbacks.forEach(callback => {
-          callback(currentValue, prevValue, currentState);
-        });
-      }
-    });
-  }
-
-  // 添加中介軟體
-  addMiddleware(middleware) {
-    this.middleware.push(middleware);
-  }
-
-  // 應用中介軟體
-  applyMiddleware(updates, prevState) {
-    return this.middleware.reduce(
-      (processedUpdates, middleware) => 
-        middleware(processedUpdates, prevState),
-      updates
-    );
-  }
-
-  getValueFromPath(obj, path) {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
-  }
-
-  pathAffectedByUpdates(path, updates) {
-    const pathParts = path.split('.');
-    let currentUpdates = updates;
-    
-    for (const part of pathParts) {
-      if (typeof currentUpdates !== 'object' || currentUpdates === null) {
-        return false;
-      }
-      if (!(part in currentUpdates)) {
-        return false;
-      }
-      currentUpdates = currentUpdates[part];
-    }
-    
-    return true;
+  } catch (error) {
+    console.error('💥 配置驗證過程出錯:', error);
+    process.exit(1);
   }
 }
 
-// 創建全域狀態管理器
-export const stateManager = new StateManager();
-
-// 設定初始狀態
-stateManager.setInitialState({
-  app: {
-    currentPage: 'landing',
-    loading: false,
-    theme: 'dark',
-    language: 'zh-TW'
-  },
-  user: {
-    preferences: {
-      enableSounds: true,
-      enableAnimations: true,
-      enableParticles: true
-    }
-  },
-  skillTree: {
-    selectedSkill: null,
-    unlockedSkills: [],
-    viewport: {
-      x: 0,
-      y: 0,
-      scale: 1
-    }
-  },
-  projects: {
-    selectedProject: null,
-    currentCategory: 'all',
-    sortBy: 'date'
-  }
-});
-
-// 添加日誌中介軟體 (開發環境)
-if (process.env.NODE_ENV === 'development') {
-  stateManager.addMiddleware((updates, prevState) => {
-    console.log('State Update:', {
-      prevState,
-      updates,
-      nextState: { ...prevState, ...updates }
-    });
-    return updates;
-  });
-}
+validateAllConfigs();
 ```
 
-### 3.4 事件系統
+## 8. 性能優化策略
 
-#### 3.4.1 事件巴士
+### 8.1 配置文件優化
+
+1. **配置文件分割**：將大型配置文件拆分為多個小文件
+2. **懶載入**：非首屏需要的配置採用動態 import
+3. **配置快取**：利用瀏覽器快取機制快取配置文件
+4. **配置壓縮**：生產環境下壓縮配置文件
+
+### 8.2 組件載入優化
+
 ```javascript
-// core/events/EventBus.js
-class EventBus {
-  constructor() {
-    this.events = new Map();
-    this.onceEvents = new Map();
+// 動態組件載入
+const loadComponent = async (componentType) => {
+  const componentMap = {
+    'skill-tree': () => import('@/components/gaming/SkillTree/SkillTree.js'),
+    'project-card': () => import('@/components/gaming/ProjectCard/ProjectCard.js'),
+    'yugioh-card': () => import('@/components/gaming/YugiohCard/YugiohCard.js')
+  };
+
+  const loader = componentMap[componentType];
+  if (loader) {
+    const module = await loader();
+    return module.default;
   }
-
-  // 監聽事件
-  on(event, callback, context = null) {
-    if (!this.events.has(event)) {
-      this.events.set(event, []);
-    }
-    
-    this.events.get(event).push({ callback, context });
-  }
-
-  // 監聽一次性事件
-  once(event, callback, context = null) {
-    if (!this.onceEvents.has(event)) {
-      this.onceEvents.set(event, []);
-    }
-    
-    this.onceEvents.get(event).push({ callback, context });
-  }
-
-  // 觸發事件
-  emit(event, ...args) {
-    // 處理持續監聽器
-    if (this.events.has(event)) {
-      const listeners = this.events.get(event);
-      listeners.forEach(({ callback, context }) => {
-        try {
-          callback.apply(context, args);
-        } catch (error) {
-          console.error(`Error in event listener for ${event}:`, error);
-        }
-      });
-    }
-
-    // 處理一次性監聽器
-    if (this.onceEvents.has(event)) {
-      const onceListeners = this.onceEvents.get(event);
-      onceListeners.forEach(({ callback, context }) => {
-        try {
-          callback.apply(context, args);
-        } catch (error) {
-          console.error(`Error in once event listener for ${event}:`, error);
-        }
-      });
-      
-      // 清除一次性監聽器
-      this.onceEvents.delete(event);
-    }
-  }
-
-  // 移除事件監聽器
-  off(event, callback = null, context = null) {
-    if (callback === null) {
-      // 移除該事件的所有監聽器
-      this.events.delete(event);
-      this.onceEvents.delete(event);
-      return;
-    }
-
-    // 移除特定的監聽器
-    if (this.events.has(event)) {
-      const listeners = this.events.get(event);
-      const index = listeners.findIndex(
-        listener => listener.callback === callback && 
-                   (context === null || listener.context === context)
-      );
-      
-      if (index > -1) {
-        listeners.splice(index, 1);
-        if (listeners.length === 0) {
-          this.events.delete(event);
-        }
-      }
-    }
-  }
-
-  // 獲取事件監聽器數量
-  listenerCount(event) {
-    const persistentCount = this.events.has(event) ? 
-      this.events.get(event).length : 0;
-    const onceCount = this.onceEvents.has(event) ? 
-      this.onceEvents.get(event).length : 0;
-    
-    return persistentCount + onceCount;
-  }
-
-  // 清除所有事件監聽器
-  clear() {
-    this.events.clear();
-    this.onceEvents.clear();
-  }
-}
-
-export const eventBus = new EventBus();
-
-// 定義常用事件常數
-export const EVENTS = {
-  // 應用程式事件
-  APP_INITIALIZED: 'app:initialized',
-  PAGE_CHANGED: 'app:pageChanged',
-  THEME_CHANGED: 'app:themeChanged',
   
-  // 技能樹事件
-  SKILL_CLICKED: 'skillTree:skillClicked',
-  SKILL_UNLOCKED: 'skillTree:skillUnlocked',
-  VIEWPORT_CHANGED: 'skillTree:viewportChanged',
-  
-  // 專案事件
-  PROJECT_SELECTED: 'projects:projectSelected',
-  PROJECT_CARD_FLIPPED: 'projects:cardFlipped',
-  CATEGORY_CHANGED: 'projects:categoryChanged',
-  
-  // 音效事件
-  SOUND_PLAY: 'audio:play',
-  SOUND_STOP: 'audio:stop',
-  VOLUME_CHANGED: 'audio:volumeChanged',
-  
-  // 動畫事件
-  ANIMATION_START: 'animation:start',
-  ANIMATION_END: 'animation:end',
-  PARTICLE_BURST: 'animation:particleBurst'
+  return null;
 };
 ```
 
-### 3.5 路由系統
+## 9. 維護與擴展
 
-#### 3.5.1 簡易 SPA 路由器
-```javascript
-// core/router/Router.js
-import { eventBus, EVENTS } from '../events/EventBus.js';
-import { stateManager } from '../state/StateManager.js';
+### 9.1 配置文件維護
 
-class Router {
-  constructor() {
-    this.routes = new Map();
-    this.currentRoute = null;
-    this.basePath = '';
-    this.hooks = {
-      before: [],
-      after: []
-    };
-  }
+- **版本控制**：所有配置文件納入 Git 版本控制
+- **備份策略**：重要配置變更前進行備份
+- **文檔同步**：配置變更時更新相關文檔
+- **測試覆蓋**：為配置驗證編寫測試
 
-  // 註冊路由
-  register(path, component, options = {}) {
-    this.routes.set(path, {
-      component,
-      meta: options.meta || {},
-      beforeEnter: options.beforeEnter,
-      afterEnter: options.afterEnter
-    });
-  }
+### 9.2 系統擴展指南
 
-  // 初始化路由器
-  init() {
-    window.addEventListener('popstate', this.handlePopState.bind(this));
-    this.navigate(this.getCurrentPath(), false);
-  }
+1. **新增頁面**：
+   - 在 `src/config/pages/` 創建配置文件
+   - 在路由配置中添加對應路由
+   - 測試頁面渲染和功能
 
-  // 導航到指定路徑
-  async navigate(path, addToHistory = true) {
-    const route = this.routes.get(path);
-    
-    if (!route) {
-      console.warn(`Route not found: ${path}`);
-      return false;
-    }
+2. **新增組件**：
+   - 繼承 `BaseComponent` 創建組件類
+   - 在 `ComponentFactory` 中註冊組件
+   - 編寫組件配置 schema
 
-    // 執行前置鉤子
-    const shouldContinue = await this.runBeforeHooks(path, route);
-    if (!shouldContinue) return false;
+3. **新增數據類型**：
+   - 在 `src/config/data/` 添加數據配置
+   - 更新 `ConfigValidator` 添加驗證規則
+   - 更新相關組件以支援新數據
 
-    // 執行路由前置守衛
-    if (route.beforeEnter) {
-      const result = await route.beforeEnter(path);
-      if (result === false) return false;
-    }
+這個 Config-Driven 架構確保了系統的高度靈活性和可維護性，讓您能夠輕鬆地通過修改配置文件來更新網站內容，而無需深入修改核心代碼。
 
-    // 更新瀏覽器歷史
-    if (addToHistory) {
-      window.history.pushState({ path }, '', this.basePath + path);
-    }
-
-    // 載入並渲染組件
-    await this.renderRoute(route, path);
-
-    // 更新狀態
-    stateManager.setState({
-      app: { currentPage: this.getPageNameFromPath(path) }
-    });
-
-    // 執行後置鉤子
-    await this.runAfterHooks(path, route);
-
-    // 執行路由後置守衛
-    if (route.afterEnter) {
-      await route.afterEnter(path);
-    }
-
-    this.currentRoute = { path, route };
-    eventBus.emit(EVENTS.PAGE_CHANGED, path);
-
-    return true;
-  }
-
-  // 渲染路由
-  async renderRoute(route, path) {
-    const appContainer = document.getElementById('app');
-    
-    if (!appContainer) {
-      throw new Error('App container not found');
-    }
-
-    // 顯示載入狀態
-    stateManager.setState({ app: { loading: true } });
-
-    try {
-      // 動態載入組件
-      let ComponentClass;
-      
-      if (typeof route.component === 'string') {
-        // 字符串路徑，動態導入
-        const module = await import(route.component);
-        ComponentClass = module.default;
-      } else {
-        // 已經是組件類別
-        ComponentClass = route.component;
-      }
-
-      // 清理舊組件
-      if (this.currentComponent && typeof this.currentComponent.destroy === 'function') {
-        this.currentComponent.destroy();
-      }
-
-      // 創建新組件實例
-      this.currentComponent = new ComponentClass(appContainer, {
-        path,
-        meta: route.meta
-      });
-
-    } catch (error) {
-      console.error(`Failed to load route component: ${path}`, error);
-      this.showErrorPage(error);
-    } finally {
-      stateManager.setState({ app: { loading: false } });
-    }
-  }
-
-  // 前置鉤子
-  beforeEach(hook) {
-    this.hooks.before.push(hook);
-  }
-
-  // 後置鉤子
-  afterEach(hook) {
-    this.hooks.after.push(hook);
-  }
-
-  async runBeforeHooks(path, route) {
-    for (const hook of this.hooks.before) {
-      const result = await hook(path, route);
-      if (result === false) return false;
-    }
-    return true;
-  }
-
-  async runAfterHooks(path, route) {
-    for (const hook of this.hooks.after) {
-      await hook(path, route);
-    }
-  }
-
-  // 處理瀏覽器返回/前進
-  handlePopState(event) {
-    const path = event.state?.path || this.getCurrentPath();
-    this.navigate(path, false);
-  }
-
-  // 獲取當前路徑
-  getCurrentPath() {
-    return window.location.pathname.replace(this.basePath, '') || '/';
-  }
-
-  // 從路徑獲取頁面名稱
-  getPageNameFromPath(path) {
-    if (path === '/') return 'landing';
-    return path.replace('/', '');
-  }
-
-  // 錯誤頁面
-  showErrorPage(error) {
-    const appContainer = document.getElementById('app');
-    appContainer.innerHTML = `
-      <div class="error-page">
-        <h1>頁面載入失敗</h1>
-        <p>抱歉，頁面載入時發生錯誤。</p>
-        <button onclick="location.reload()">重新載入</button>
-      </div>
-    `;
-  }
-}
-
-export const router = new Router();
-
-// 路由配置
-export function setupRoutes() {
-  router.register('/', 'pages/Landing/Landing.js', {
-    meta: { title: 'Home - Portfolio' }
-  });
-
-  router.register('/about', 'pages/About/About.js', {
-    meta: { title: 'About - Backend Engineer' }
-  });
-
-  router.register('/skills', 'pages/Skills/Skills.js', {
-    meta: { title: 'Skills - Interactive Skill Tree' }
-  });
-
-  router.register('/portfolio', 'pages/Portfolio/Portfolio.js', {
-    meta: { title: 'Portfolio - My Projects' }
-  });
-
-  router.register('/projects', 'pages/Projects/Projects.js', {
-    meta: { title: 'Projects - Card Collection' }
-  });
-
-  router.register('/contact', 'pages/Contact/Contact.js', {
-    meta: { title: 'Contact - Get In Touch' }
-  });
-
-  // 全域前置守衛 - 更新頁面標題
-  router.beforeEach((path, route) => {
-    if (route.meta.title) {
-      document.title = route.meta.title;
-    }
-    return true;
-  });
-
-  // 全域後置鉤子 - Google Analytics
-  router.afterEach((path) => {
-    if (window.gtag) {
-      window.gtag('config', 'GA_TRACKING_ID', {
-        page_path: path
-      });
-    }
-  });
-}
-```
-
----
-
-## 4. 配置驅動的頁面系統
-
-### 4.1 頁面基礎類別
-```javascript
-// core/pages/BasePage.js
-import { BaseComponent } from '../components/BaseComponent.js';
-import { configLoader } from '../config/ConfigLoader.js';
-import { eventBus, EVENTS } from '../events/EventBus.js';
-
-export class BasePage extends BaseComponent {
-  constructor(container, options = {}) {
-    super(container, options);
-    this.pageName = options.pageName || this.getPageNameFromPath(options.path);
-    this.pageConfig = null;
-    this.sections = new Map();
-  }
-
-  async init() {
-    // 載入頁面配置
-    this.pageConfig = await configLoader.loadPageConfig(this.pageName);
-    
-    // 設定頁面 meta 信息
-    this.updatePageMeta();
-    
-    // 初始化父類
-    super.init();
-  }
-
-  createElement() {
-    const { layout } = this.pageConfig;
-    
-    this.element.innerHTML = `
-      <div class="page page--${this.pageName}">
-        <div class="page-container" 
-             data-layout="${layout.type}"
-             data-padding="${layout.padding}"
-             style="max-width: ${layout.maxWidth || 'none'}">
-          ${this.generateLayoutHTML(layout)}
-        </div>
-      </div>
-    `;
-
-    this.container = this.element.querySelector('.page-container');
-  }
-
-  generateLayoutHTML(layout) {
-    switch (layout.type) {
-      case 'single-column':
-        return '<div class="layout-column" data-column="1"></div>';
-      
-      case 'two-column':
-        return `
-          <div class="layout-column" data-column="1"></div>
-          <div class="layout-column" data-column="2"></div>
-        `;
-      
-      case 'three-column':
-        return `
-          <div class="layout-column" data-column="1"></div>
-          <div class="layout-column" data-column="2"></div>
-          <div class# 技術架構文件 - 遊戲化個人網站
-
-## 1. 架構總覽
-
-### 1.1 系統架構圖
-```
-┌─────────────────────────────────────────────────────────┐
-│                     用戶界面層                            │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
-│  │ Landing │ │  About  │ │ Skills  │ │Portfolio│  ...  │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
-└─────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────┐
-│                     組件層                               │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
-│  │SkillTree│ │ CardGrid│ │Particles│ │AudioMgr │  ...  │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
-└─────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────┐
-│                 Config驅動層                            │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
-│  │PageConfig│ │SkillData│ │Projects │ │ Profile │  ...  │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
-└─────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────┐
-│                     核心層                               │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
-│  │ Router  │ │EventBus │ │StateManager│ Utils │       │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
-│                                                         │
-│              ┌─────────────────────┐                    │
-│              │   Build System      │                    │
-│              │      (Vite)         │                    │
-│              └─────────────────────┘                    │
-└─────────────────────────────────────────────────────────┘
-```
-
-### 1.2 核心設計原則
-
-#### Config-Driven 架構
-**理念：** 所有頁面內容、組件配置、樣式設定都透過 JSON 配置檔案控制，實現內容與程式碼分離。
-
-**優勢：**
-- 🔄 **內容更新簡單** - 只需修改配置檔案，無需改程式碼
-- 🎯 **類型安全** - TypeScript 介面確保配置正確性
-- 🚀 **快速擴展** - 新增頁面只需添加配置
-- 🔧 **易於維護** - 配置集中管理，版本控制友善
-- 🎨 **設計彈性** - 支援不同主題和佈局變化
-
----
-
-## 2. 專案結構設計
-
-### 2.1 目錄結構
-```
-src/
-├── config/                     # 配置文件目錄
-│   ├── pages/                  # 頁面配置
-│   │   ├── landing.config.js
-│   │   ├── about.config.js
-│   │   ├── skills.config.js
-│   │   ├── portfolio.config.js
-│   │   └── projects.config.js
-│   ├── data/                   # 數據配置
-│   │   ├── profile.config.js
-│   │   ├── skills.config.js
-│   │   ├── projects.config.js
-│   │   └── experience.config.js
-│   ├── theme/                  # 主題配置
-│   │   ├── colors.config.js
-│   │   ├── typography.config.js
-│   │   └── animations.config.js
-│   └── site.config.js          # 全站配置
-│
-├── components/                 # 可重用組件
-│   ├── common/                 # 通用組件
-│   │   ├── Button/
-│   │   ├── Modal/
-│   │   ├── Card/
-│   │   └── Loader/
-│   ├── gaming/                 # 遊戲風格組件
-│   │   ├── SkillTree/
-│   │   ├── ProjectCard/
-│   │   ├── YugiohCard/
-│   │   └── ParticleSystem/
-│   └── layout/                 # 佈局組件
-│       ├── Header/
-│       ├── Navigation/
-│       └── Footer/
-│
-├── pages/                      # 頁面組件
-│   ├── Landing/
-│   │   ├── index.js
-│   │   ├── Landing.css
-│   │   └── components/
-│   ├── About/
-│   ├── Skills/
-│   ├── Portfolio/
-│   └── Projects/
-│
-├── core/                       # 核心系統
-│   ├── router/
-│   ├── state/
-│   ├── events/
-│   ├── config/
-│   └── utils/
-│
-├── systems/                    # 功能系統
-│   ├── AudioManager/
-│   ├── AnimationManager/
-│   ├── PreloadManager/
-│   └── ErrorBoundary/
-│
-├── assets/                     # 靜態資源
-│   ├── images/
-│   ├── sounds/
-│   ├── fonts/
-│   └── data/
-│
-└── styles/                     # 樣式文件
-    ├── globals/
-    ├── components/
-    └── themes/
-```
-
-### 2.2 配置文件設計
-
-#### 2.2.1 頁面配置範例 - About 頁面
-```javascript
-// config/pages/about.config.js
-export const aboutPageConfig = {
-  // 頁面基本信息
-  meta: {
-    title: "About - Backend Engineer",
-    description: "了解我的技術背景與職涯發展",
-    keywords: ["後端工程師", "系統架構", "技術領導"],
-    ogImage: "/assets/images/about-og.jpg"
-  },
-
-  // 頁面佈局配置
-  layout: {
-    type: "three-column",          // 佈局類型
-    sidebar: "left",               // 側邊欄位置
-    padding: "standard",           // 內邊距大小
-    maxWidth: "1200px"            // 最大寬度
-  },
-
-  // 動畫配置
-  animations: {
-    pageTransition: {
-      type: "fadeInUp",
-      duration: 800,
-      delay: 0
-    },
-    stagger: {
-      enabled: true,
-      delay: 150
-    }
-  },
-
-  // 頁面區塊配置
-  sections: [
-    {
-      id: "character-panel",
-      type: "character-status",
-      position: { column: 1, order: 1 },
-      config: {
-        avatar: {
-          src: "/assets/images/avatar.jpg",
-          alt: "個人頭像",
-          effects: ["glow", "rotate-hover"]
-        },
-        stats: {
-          level: {
-            current: 7,              // 工作年資
-            label: "Backend Engineer",
-            experience: 75           // 當前階段進度 %
-          },
-          attributes: [
-            { name: "Technical Skills", value: 85, color: "gold" },
-            { name: "Architecture Thinking", value: 78, color: "blue" },
-            { name: "Team Collaboration", value: 82, color: "green" },
-            { name: "Problem Solving", value: 88, color: "red" },
-            { name: "AI Integration", value: 75, color: "purple" }
-          ]
-        },
-        badges: [
-          { name: "AWS Certified", icon: "aws", earned: true },
-          { name: "Kubernetes Expert", icon: "k8s", earned: true },
-          { name: "AI Specialist", icon: "ai", earned: false }
-        ]
-      }
-    },
-    {
-      id: "career-timeline",
-      type: "timeline",
-      position: { column: 2, order: 1 },
-      config: {
-        title: "職涯發展歷程",
-        items: [
-          {
-            id: "current-role",
-            date: "2022 - Present",
-            title: "Senior Backend Engineer",
-            company: "Tech Company",
-            description: "負責微服務架構設計與團隊技術指導",
-            skills: ["Java", "Spring Boot", "Kubernetes", "AWS"],
-            achievements: [
-              "系統性能提升 40%",
-              "導入 AI 輔助開發工具",
-              "建立技術分享文化"
-            ],
-            type: "work",
-            status: "current"
-          }
-          // ... 更多時間軸項目
-        ]
-      }
-    },
-    {
-      id: "skills-radar",
-      type: "radar-chart",
-      position: { column: 3, order: 1 },
-      config: {
-        title: "技能雷達圖",
-        data: [
-          { skill: "Backend Development", value: 90 },
-          { skill: "System Architecture", value: 80 },
-          { skill: "Cloud Technologies", value: 75 },
-          { skill: "AI/ML Integration", value: 70 },
-          { skill: "DevOps", value: 65 },
-          { skill: "Team Leadership", value: 75 }
-        ],
-        colors: {
-          fill: "rgba(212, 175, 55, 0.2)",
-          stroke: "#d4af37",
-          point: "#f4d03f"
-        }
-      }
-    }
-  ],
-
-  // 互動元素配置
-  interactions: {
-    enableParticles: true,
-    enableSoundEffects: true,
-    hoverEffects: ["glow", "lift", "particle-burst"],
-    clickEffects: ["ripple", "sound-feedback"]
-  },
-
-  // 響應式配置
-  responsive: {
-    mobile: {
-      layout: { type: "single-column" },
-      sections: [
-        { id: "character-panel", order: 1 },
-        { id: "career-timeline", order: 2 },
-        { id: "skills-radar", order: 3 }
-      ]
-    },
-    tablet: {
-      layout: { type: "two-column" },
-      sections: [
-        { id: "character-panel", position: { column: 1, order: 1 } },
-        { id: "career-timeline", position: { column: 1, order: 2 } },
-        { id: "skills-radar", position: { column: 2, order: 1 } }
-      ]
-    }
-  }
-};
-```
-
-#### 2.2.2 技能樹配置範例
-```javascript
-// config/data/skills.config.js
-export const skillTreeConfig = {
-  // 技能樹全域設定
-  settings: {
-    centerPoint: { x: 0, y: 0 },
-    hexSize: 40,
-    spacing: 50,
-    maxZoom: 2.0,
-    minZoom: 0.3,
-    defaultZoom: 1.0
-  },
-
-  // 技能樹主題樣式
-  theme: {
-    connections: {
-      active: { color: "#d4af37", width: 3, glow: true },
-      inactive: { color: "#6c757d", width: 1, glow: false }
-    },
-    nodes: {
-      mastered: {
-        background: "radial-gradient(circle, #f4d03f 0%, #d4af37 70%)",
-        border: "#f4d03f",
-        glow: "0 0 15px rgba(244, 208, 63, 0.8)"
-      },
-      available: {
-        background: "radial-gradient(circle, #3498db 0%, #2980b9 70%)",
-        border: "#5dade2", 
-        glow: "0 0 10px rgba(93, 173, 226, 0.5)"
-      },
-      locked: {
-        background: "#2c3e50",
-        border: "#34495e",
-        glow: "none"
-      }
-    }
-  },
-
-  // 技能樹分支定義
-  branches: {
-    "backend-core": {
-      name: "後端核心",
-      color: "#d4af37",
-      startPosition: { q: 0, r: 0 },
-      icon: "server",
-      description: "後端開發基礎技能",
-      
-      nodes: [
-        {
-          id: "programming-fundamentals",
-          name: "程式設計基礎",
-          position: { q: 0, r: 0 },
-          type: "keystone",
-          status: "mastered",
-          description: "紮實的程式設計基礎與邏輯思維",
-          skills: ["演算法", "資料結構", "設計模式"],
-          learnedDate: "2018-09",
-          experience: "5+ years",
-          projects: ["personal-blog", "task-manager"],
-          prerequisites: [],
-          unlocks: ["java-mastery", "python-proficiency"]
-        },
-        {
-          id: "java-mastery", 
-          name: "Java 精通",
-          position: { q: 0, r: -1 },
-          type: "notable",
-          status: "mastered",
-          description: "深度掌握 Java 語言特性與生態系統",
-          skills: ["Java 8+", "JVM 調優", "並發程式設計", "記憶體管理"],
-          learnedDate: "2019-03",
-          experience: "4+ years",
-          certifications: ["Oracle Java Certified"],
-          projects: ["microservices-project", "payment-gateway"],
-          prerequisites: ["programming-fundamentals"],
-          unlocks: ["spring-ecosystem", "jvm-optimization"]
-        }
-        // ... 更多技能節點
-      ]
-    },
-
-    "ai-ml-engineering": {
-      name: "AI/ML 工程",
-      color: "#9b59b6",
-      startPosition: { q: -2, r: -2 },
-      icon: "robot",
-      description: "人工智慧與機器學習應用開發",
-      
-      nodes: [
-        {
-          id: "llm-integration",
-          name: "LLM 整合應用",
-          position: { q: -2, r: -1 },
-          type: "notable", 
-          status: "learning",
-          description: "大型語言模型的企業級整合與應用",
-          skills: ["OpenAI API", "LangChain", "Vector DB", "RAG"],
-          startedDate: "2024-01",
-          targetDate: "2024-06",
-          progress: 60,
-          prerequisites: ["python-proficiency", "api-design"],
-          unlocks: ["ai-agent-development", "prompt-optimization"]
-        },
-        {
-          id: "prompt-engineering",
-          name: "Prompt Engineering",
-          position: { q: -3, r: -1 },
-          type: "normal",
-          status: "planning",
-          description: "專業的 Prompt 設計與優化技能",
-          skills: ["Few-shot Learning", "Chain of Thought", "Prompt 優化"],
-          plannedDate: "2024-07",
-          estimatedDuration: "2 months",
-          prerequisites: ["llm-integration"],
-          unlocks: ["ai-workflow-automation"]
-        }
-        // ... 更多 AI 相關技能
-      ]
-    }
-    // ... 其他分支
-  },
-
-  // 學習路徑建議
-  learningPaths: [
-    {
-      name: "後端工程師成長路線",
-      description: "從初級到資深後端工程師的學習建議",
-      steps: [
-        "programming-fundamentals",
-        "java-mastery", 
-        "database-design",
-        "api-development",
-        "microservices-architecture",
-        "cloud-technologies"
-      ],
-      estimatedDuration: "24 months"
-    },
-    {
-      name: "AI 整合專家路線",
-      description: "結合後端開發與 AI 技術的專業路線",
-      steps: [
-        "python-proficiency",
-        "machine-learning-basics", 
-        "llm-integration",
-        "prompt-engineering",
-        "ai-agent-development"
-      ],
-      estimatedDuration: "18 months"
-    }
-  ]
-};
-```
-
-#### 2.2.3 專案配置範例
-```javascript
-// config/data/projects.config.js
-export const projectsConfig = {
-  // 專案展示設定
-  displaySettings: {
-    cardsPerPage: 9,
-    defaultSort: "date",
-    enableFiltering: true,
-    enableSearch: true,
-    animationDelay: 150
-  },
-
-  // 分類定義
-  categories: [
-    { 
-      id: "backend", 
-      name: "後端開發", 
-      icon: "server",
-      color: "#d4af37",
-      description: "後端系統與API開發專案"
-    },
-    { 
-      id: "ai-ml", 
-      name: "AI/ML", 
-      icon: "robot",
-      color: "#9b59b6",
-      description: "人工智慧與機器學習應用"
-    },
-    {
-      id: "system-architecture",
-      name: "系統架構", 
-      icon: "sitemap",
-      color: "#3498db",
-      description: "大型系統架構設計與優化"
-    }
-  ],
-
-  // 技術標籤定義
-  technologies: {
-    "Java": { color: "#f89820", category: "backend" },
-    "Spring Boot": { color: "#6db33f", category: "backend" },
-    "Python": { color: "#3776ab", category: "backend" },
-    "Docker": { color: "#2496ed", category: "devops" },
-    "Kubernetes": { color: "#326ce5", category: "devops" },
-    "OpenAI": { color: "#00a67e", category: "ai" },
-    "LangChain": { color: "#1c3c3c", category: "ai" }
-  },
-
-  // 專案列表
-  projects: [
-    {
-      id: "microservices-ecommerce",
-      title: "微服務電商平台",
-      subtitle: "Enterprise E-commerce Platform",
-      category: "system-architecture",
-      rarity: "legendary",          // common, rare, epic, legendary
-      
-      // 基本資訊
-      description: "基於微服務架構的大型電商平台，支援高併發與彈性擴展",
-      shortDescription: "高併發微服務電商平台",
-      
-      // 技術資訊
-      technologies: [
-        "Java", "Spring Boot", "Spring Cloud", 
-        "Docker", "Kubernetes", "Redis", "PostgreSQL", "Kafka"
-      ],
-      architecture: "Microservices",
-      
-      // 專案詳情
-      details: {
-        duration: "8 months",
-        teamSize: 6,
-        role: "Lead Backend Developer",
-        status: "Production",
-        scale: {
-          users: "50K+ daily active users",
-          requests: "1M+ requests/day", 
-          uptime: "99.9%"
-        }
-      },
-
-      // 成就與亮點
-      achievements: [
-        "系統響應時間提升 60%",
-        "支援 10x 併發量提升", 
-        "實現零停機部署",
-        "建立完整的監控與告警體系"
-      ],
-
-      // 技術挑戰與解決方案
-      challenges: [
-        {
-          problem: "高併發下的資料一致性問題",
-          solution: "實作分散式鎖與事件溯源模式",
-          impact: "確保資料強一致性，支援高併發交易"
-        },
-        {
-          problem: "服務間通訊的效能瓶頸",
-          solution: "導入 gRPC 與非同步訊息佇列",
-          impact: "服務間通訊延遲降低 40%"
-        }
-      ],
-
-      // 多媒體資源
-      media: {
-        coverImage: "/assets/projects/microservices-ecommerce/cover.jpg",
-        screenshots: [
-          "/assets/projects/microservices-ecommerce/dashboard.jpg",
-          "/assets/projects/microservices-ecommerce/architecture.png"
-        ],
-        demoVideo: "/assets/projects/microservices-ecommerce/demo.mp4",
-        architectureDiagram: "/assets/projects/microservices-ecommerce/arch.svg"
-      },
-
-      // 連結
-      links: {
-        demo: "https://ecommerce-demo.example.com",
-        github: "https://github.com/username/microservices-ecommerce",
-        documentation: "https://docs.ecommerce.example.com",
-        caseStudy: "/case-studies/microservices-ecommerce"
-      },
-
-      // 時間資訊  
-      dates: {
-        started: "2023-06-01",
-        completed: "2024-02-01",
-        lastUpdated: "2024-03-15"
-      },
-
-      // SEO 與元數據
-      meta: {
-        keywords: ["微服務", "電商平台", "高併發", "系統架構"],
-        ogImage: "/assets/projects/microservices-ecommerce/og-image.jpg"
-      },
-
-      // 遊戲化元素
-      gamification: {
-        cardStats: {
-          complexity: 9,      // 專案複雜度 (1-10)
-          innovation: 8,      // 創新程度 (1-10) 
-          impact: 9           // 影響力 (1-10)
-        },
-        unlockConditions: [
-          "完成 Java 精通技能",
-          "掌握微服務架構設計",
-          "具備雲端部署經驗"
-        ]
-      }
-    },
-
-    {
-      id: "ai-code-assistant",
-      title: "AI 程式碼助手",
-      subtitle: "Intelligent Coding Assistant",
-      category: "ai-ml", 
-      rarity: "epic",
-      
-      description: "基於 GPT-4 的智能程式碼助手，提供程式碼生成、優化建議與錯誤檢測",
-      shortDescription: "GPT-4 驅動的程式碼助手",
-      
-      technologies: [
-        "Python", "FastAPI", "OpenAI GPT-4", 
-        "LangChain", "ChromaDB", "Docker"
-      ],
-      architecture: "RAG + LLM",
-
-      details: {
-        duration: "4 months",
-        teamSize: 3,
-        role: "AI Integration Lead",
-        status: "Beta",
-        scale: {
-          users: "500+ developers",
-          codeGenerated: "10K+ lines/month",
-          accuracy: "92%"
-        }
-      },
-
-      achievements: [
-        "程式碼生成準確率達 92%",
-        "開發效率提升 35%",
-        "支援 15+ 程式語言",
-        "整合主流 IDE 插件"
-      ],
-
-      challenges: [
-        {
-          problem: "程式碼上下文理解不準確",
-          solution: "建立專案級程式碼索引與 RAG 檢索",
-          impact: "上下文理解準確率提升至 88%"
-        }
-      ],
-
-      media: {
-        coverImage: "/assets/projects/ai-code-assistant/cover.jpg",
-        screenshots: [
-          "/assets/projects/ai-code-assistant/vscode-demo.jpg",
-          "/assets/projects/ai-code-assistant/chat-interface.jpg"
-        ],
-        demoVideo: "/assets/projects/ai-code-assistant/demo.mp4"
-      },
-
-      links: {
-        demo: "https://ai-assistant-demo.example.com",
-        github: "https://github.com/username/ai-code-assistant",
-        marketplace: "https://marketplace.visualstudio.com/items?itemName=ai-assistant"
-      },
-
-      dates: {
-        started: "2024-01-01", 
-        completed: null,
-        lastUpdated: "2024-03-20"
-      },
-
-      gamification: {
-        cardStats: {
-          complexity: 7,
-          innovation: 9,
-          impact: 8
-        },
-        unlockConditions: [
-          "完成 LLM 整合應用技能",
-          "掌握 Prompt Engineering", 
-          "具備 RAG 系統開發經驗"
-        ]
-      }
-    }
-    // ... 更多專案
-  ],
-
-  // 專案統計
-  statistics: {
-    totalProjects: 12,
-    categoriesCount: {
-      "backend": 5,
-      "ai-ml": 3,
-      "system-architecture": 2,
-      "fullstack": 2
-    },
-    rarityDistribution: {
-      "legendary": 2,
-      "epic": 3, 
-      "rare": 4,
-      "common": 3
-    }
-  }
-};
-```
-
----
-
-## 3. 核心系統架構
-
-### 3.1 配置管理系統
-
-#### 3.1.1 配置載入器 (ConfigLoader)
-```javascript
-// core/config/ConfigLoader.js
-class ConfigLoader {
-  constructor() {
-    this.configs = new Map();
-    this.watchers = new Map();
-    this.cache = new Map();
-  }
-
-  // 載入頁面配置
-  async loadPageConfig(pageName) {
-    const cacheKey = `page:${pageName}`;
-    
-    if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey);
-    }
-
-    try {
-      const configModule = await import(`../config/pages/${pageName}.config.js`);
-      const config = this.validatePageConfig(configModule.default);
-      
-      this.cache.set(cacheKey, config);
-      return config;
-    } catch (error) {
-      console.error(`Failed to load page config: ${pageName}`, error);
-      return this.getDefaultPageConfig(pageName);
-    }
-  }
-
-  // 載入數據配置
-  async loadDataConfig(dataName) {
-    const cacheKey = `data:${dataName}`;
-    
-    if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey);
-    }
-
-    try {
-      const configModule = await import(`../config/data/${dataName}.config.js`);
-      const config = this.validateDataConfig(configModule.default);
-      
-      this.cache.set(cacheKey, config);
-      return config;
-    } catch (error) {
-      console.error(`Failed to load data config: ${dataName}`, error);
-      return this.getDefaultDataConfig(dataName);
-    }
-  }
-
-  // 配置驗證
-  validatePageConfig(config) {
-    const requiredFields = ['meta', 'layout', 'sections'];
-    
-    for (const field of requiredFields) {
-      if (!config[field]) {
-        throw new Error(`Missing required field: ${field}`);
-      }
-    }
-
-    return config;
-  }
-
-  validateDataConfig(config) {
-    // 根據不同數據類型進行驗證
-    if (config.type === 'skillTree') {
-      return this.validateSkillTreeConfig(config);
-    } else if (config.type === 'projects') {
-      return this.validateProjectsConfig(config);
-    }
-    
-    return config;
-  }
-
-  // 熱重載支援 (開發環境)
-  enableHotReload(configPath, callback) {
-    if (process.env.NODE_ENV !== 'development') return;
-    
-    if (this.watchers.has(configPath)) {
-      this.watchers.get(configPath).close();
-    }
-
-    const watcher = new FileWatcher(configPath);
-    watcher.on('change', () => {
-      this.cache.delete(configPath);
-      callback();
-    });
-    
-    this.watchers.set(configPath, watcher);
-  }
-
-  // 預設配置
-  getDefaultPageConfig(pageName) {
-    return {
-      meta: {
-        title: `${pageName} - Portfolio`,
-        description: `${pageName} page description`
-      },
-      layout: {
-        type: "single-column",
-        padding: "standard"
-      },
-      sections: [],
-      animations: {
-        pageTransition: {
-          type: "fadeIn",
-          duration: 500
-        }
-      }
-    };
-  }
-}
-
-export const configLoader = new ConfigLoader();
-```
-
-#### 3.1.2 配置型別定義 (TypeScript)
-```typescript
-// core/config/types.ts
-export interface PageConfig {
-  meta: PageMeta;
-  layout: LayoutConfig;
-  sections: SectionConfig[];
-  animations?: AnimationConfig;
-  interactions?: InteractionConfig;
-  responsive?: ResponsiveConfig;
-}
-
-export interface PageMeta {
-  title: string;
-  description: string;
-  keywords?: string[];
-  ogImage?: string;
-}
-
-export interface LayoutConfig {
-  type: 'single-column' | 'two-column' | 'three-column' | 'grid';
-  sidebar?: 'left' | 'right' | 'none';
-  padding: 'none' | 'small' | 'standard' | 'large';
-  maxWidth?: string;
-}
-
-export interface Section
+<function_calls>
+<invoke name="TodoWrite">
+<parameter name="todos">[{"content": "\u5206\u6790\u73fe\u6709\u5c08\u6848\u7d50\u69cb\u548c\u914d\u7f6e", "status": "completed", "activeForm": "\u5206\u6790\u73fe\u6709\u5c08\u6848\u7d50\u69cb\u548c\u914d\u7f6e"}, {"content": "\u8a2d\u8a08 Config-Driven \u7cfb\u7d71\u67b6\u69cb", "status": "completed", "activeForm": "\u8a2d\u8a08 Config-Driven \u7cfb\u7d71\u67b6\u69cb"}, {"content": "\u751f\u6210\u6280\u8853\u67b6\u69cb\u6587\u4ef6", "status": "completed", "activeForm": "\u751f\u6210\u6280\u8853\u67b6\u69cb\u6587\u4ef6"}, {"content": "\u8a2d\u8a08\u9801\u9762\u914d\u7f6e\u7cfb\u7d71\u7bc4\u4f8b", "status": "in_progress", "activeForm": "\u8a2d\u8a08\u9801\u9762\u914d\u7f6e\u7cfb\u7d71\u7bc4\u4f8b"}]

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POC-001: 簡化技能樹系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0a 70%);
+        }
+
+        .hex-node {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .hex-node:hover {
+            transform: scale(1.1);
+        }
+
+        .hex-center {
+            fill: #d4af37;
+            stroke: #f4d03f;
+            stroke-width: 2;
+        }
+
+        .hex-branch {
+            fill: #2980b9;
+            stroke: #3498db;
+            stroke-width: 1.5;
+        }
+
+        .hex-connection {
+            stroke: #555;
+            stroke-width: 1;
+            stroke-dasharray: 2,2;
+        }
+
+        .info-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .info-title {
+            color: #d4af37;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .info-item {
+            color: #ccc;
+            font-size: 12px;
+            margin: 3px 0;
+        }
+
+        .skill-type-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.9);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 2px solid #d4af37;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .skill-type-display.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 移動端適配 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .info-panel {
+                top: 10px;
+                left: 10px;
+                padding: 10px;
+                font-size: 10px;
+                max-width: 200px;
+            }
+            
+            .info-title {
+                font-size: 14px;
+            }
+            
+            .info-item {
+                font-size: 10px;
+            }
+            
+            .skill-type-display {
+                top: 10px;
+                right: 10px;
+                padding: 10px 15px;
+                font-size: 16px;
+            }
+        }
+
+        /* 功能欄樣式 */
+        .function-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .function-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #d4af37;
+            color: #d4af37;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .function-btn:hover {
+            background: rgba(212,175,55,0.2);
+            transform: scale(1.1);
+        }
+
+        .function-btn.active {
+            background: #d4af37;
+            color: #000;
+        }
+
+        /* 技能總攬彈窗 */
+        .skill-overview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal-header {
+            background: #d4af37;
+            color: #000;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #000;
+            font-size: 24px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-tabs {
+            display: flex;
+            background: #2a2a3e;
+            border-bottom: 1px solid #333;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .tab-btn.active {
+            color: #d4af37;
+            border-bottom-color: #d4af37;
+        }
+
+        .tab-content {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .proficiency-section {
+            margin-bottom: 20px;
+        }
+
+        .proficiency-title {
+            color: #d4af37;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skill-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+            margin-left: 20px;
+        }
+
+        .skill-item {
+            background: rgba(255,255,255,0.05);
+            padding: 8px 12px;
+            border-radius: 5px;
+            border-left: 3px solid;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .skill-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+
+        /* 拖曳功能樣式 */
+        .dragging {
+            cursor: grabbing;
+        }
+
+        .dragging svg {
+            cursor: grabbing;
+        }
+
+        @media (max-width: 768px) {
+            .function-panel {
+                bottom: 15px;
+                right: 15px;
+                gap: 8px;
+            }
+            
+            .function-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                max-height: 85vh;
+            }
+            
+            .modal-header {
+                padding: 12px 15px;
+                font-size: 16px;
+            }
+            
+            .tab-content {
+                padding: 15px;
+                max-height: 300px;
+            }
+            
+            .skill-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg id="skillTreeSvg" viewBox="0 0 1200 800">
+            <!-- 這裡會動態生成六角形網格和技能樹 -->
+        </svg>
+    </div>
+
+    <div class="info-panel">
+        <div class="info-title">個人天賦技能樹</div>
+        <div class="info-item">• 中心點：金色起始點</div>
+        <div class="info-item">• 6大技能領域：前端、後端、資料庫、雲端/DevOps、AI、架構</div>
+        <div class="info-item">• 大技能：按基礎→進階排序連接</div>
+        <div class="info-item">• 小技能：顯示實際熟練度</div>
+        <div class="info-item">• 熟練度：O(熟練/發光) *(略懂/半透明) X(待學習/虛線)</div>
+        <div class="info-item">• 滑鼠懸停：詳細技能卡片</div>
+    </div>
+
+    <div id="skillTypeDisplay" class="skill-type-display"></div>
+
+    <!-- 功能欄 -->
+    <div class="function-panel">
+        <div class="function-btn" id="dragBtn" title="拖曳模式">
+            ✋
+        </div>
+        <div class="function-btn" id="overviewBtn" title="技能總攬">
+            📊
+        </div>
+    </div>
+
+    <!-- 技能總攬彈窗 -->
+    <div id="skillOverviewModal" class="skill-overview-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>技能總攬</span>
+                <button class="close-btn" id="closeModal">×</button>
+            </div>
+            <div class="modal-tabs" id="modalTabs">
+                <!-- 動態生成頁籤 -->
+            </div>
+            <div id="modalTabContent">
+                <!-- 動態生成內容 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="src/scripts/HexCoordSystem.js"></script>
+    <script src="src/scripts/skill-tree-config.js"></script>
+    <script src="src/scripts/simple-skill-tree.js"></script>
+</body>
+</html>
