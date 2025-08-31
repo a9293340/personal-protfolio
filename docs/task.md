@@ -79,37 +79,37 @@
     - [x] 錯誤處理功能
 
 #### Step 1.2: 基礎組件系統
-- [ ] 實現 BaseComponent 基類
-  - [ ] 基礎生命週期方法
-    - [ ] beforeInit() 前置鉤子
-    - [ ] render() 渲染方法
-    - [ ] bindEvents() 事件綁定
-    - [ ] afterInit() 後置鉤子
-    - [ ] destroy() 銷毀方法
-  - [ ] 狀態管理系統
-    - [ ] getInitialState() 初始狀態
-    - [ ] setState() 狀態更新
-    - [ ] 狀態變化通知
-  - [ ] 事件系統整合
-    - [ ] emit() 事件發送
-    - [ ] on() 事件監聽  
-    - [ ] 事件命名規範
-  - [ ] 配置合併機制
-    - [ ] getDefaultConfig() 默認配置
-    - [ ] getThemeConfig() 主題配置
-    - [ ] mergeConfig() 配置合併
+- [x] 實現 BaseComponent 基類
+  - [x] 基礎生命週期方法
+    - [x] beforeInit() 前置鉤子
+    - [x] render() 渲染方法
+    - [x] bindEvents() 事件綁定
+    - [x] afterInit() 後置鉤子
+    - [x] destroy() 銷毀方法
+  - [x] 狀態管理系統
+    - [x] getInitialState() 初始狀態
+    - [x] setState() 狀態更新
+    - [x] 狀態變化通知
+  - [x] 事件系統整合
+    - [x] emit() 事件發送
+    - [x] on() 事件監聽  
+    - [x] 事件命名規範
+  - [x] 配置合併機制
+    - [x] getDefaultConfig() 默認配置
+    - [x] getThemeConfig() 主題配置
+    - [x] mergeConfig() 配置合併
 
-- [ ] 建立 ComponentFactory 組件工廠
-  - [ ] 組件註冊系統
-    - [ ] register() 註冊組件
-    - [ ] getRegisteredTypes() 獲取已註冊類型
-  - [ ] 組件創建系統
-    - [ ] create() 創建組件實例
-    - [ ] 異步初始化處理
-    - [ ] 錯誤處理和回退
-  - [ ] 預設組件註冊
-    - [ ] 註冊所有核心組件類型
-    - [ ] 組件類型映射表
+- [x] 建立 ComponentFactory 組件工廠
+  - [x] 組件註冊系統
+    - [x] register() 註冊組件
+    - [x] getRegisteredTypes() 獲取已註冊類型
+  - [x] 組件創建系統
+    - [x] create() 創建組件實例
+    - [x] 異步初始化處理
+    - [x] 錯誤處理和回退
+  - [x] 預設組件註冊
+    - [x] 註冊所有核心組件類型
+    - [x] 組件類型映射表
 
 - [ ] 實現核心系統
   - [ ] Router 路由系統
