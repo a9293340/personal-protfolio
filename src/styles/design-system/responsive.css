@@ -1,0 +1,537 @@
+/**
+ * 響應式設計系統
+ * 
+ * 基於移動優先的響應式設計斷點和媒體查詢
+ */
+
+/* ===== 斷點定義 ===== */
+/*
+  斷點系統：
+  - xs: 0px+     (超小手機)
+  - sm: 640px+   (手機橫向)
+  - md: 768px+   (平板直向)
+  - lg: 1024px+  (平板橫向/小筆電)
+  - xl: 1280px+  (桌面)
+  - 2xl: 1536px+ (大桌面)
+*/
+
+/* ===== 容器響應式 ===== */
+
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+}
+
+/* ===== 網格響應式 ===== */
+
+/* 移動優先網格 */
+.grid-responsive {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+}
+
+/* 小屏幕 (手機橫向) */
+@media (min-width: 640px) {
+  .grid-responsive {
+    gap: var(--space-6);
+  }
+  
+  .sm\:grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+  .sm\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .sm\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .sm\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* 中等屏幕 (平板) */
+@media (min-width: 768px) {
+  .grid-responsive {
+    gap: var(--space-6);
+  }
+  
+  .md\:grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .md\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .md\:grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* 大屏幕 (桌面) */
+@media (min-width: 1024px) {
+  .grid-responsive {
+    gap: var(--space-8);
+  }
+  
+  .lg\:grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+  .lg\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .lg\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .lg\:grid-cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .lg\:grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
+  .lg\:grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+}
+
+/* 超大屏幕 */
+@media (min-width: 1280px) {
+  .xl\:grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+  .xl\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .xl\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .xl\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .xl\:grid-cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .xl\:grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
+  .xl\:grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+}
+
+/* ===== 響應式工具類別 ===== */
+
+/* 隱藏/顯示 */
+@media (max-width: 639px) {
+  .xs\:hidden { display: none !important; }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+  .sm\:only { display: block !important; }
+  .sm\:hidden { display: none !important; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .md\:only { display: block !important; }
+  .md\:hidden { display: none !important; }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .lg\:only { display: block !important; }
+  .lg\:hidden { display: none !important; }
+}
+
+@media (min-width: 1280px) {
+  .xl\:only { display: block !important; }
+  .xl\:hidden { display: none !important; }
+}
+
+/* 響應式文字大小 */
+@media (min-width: 640px) {
+  .sm\:text-xs { font-size: var(--font-size-xs); }
+  .sm\:text-sm { font-size: var(--font-size-sm); }
+  .sm\:text-base { font-size: var(--font-size-base); }
+  .sm\:text-lg { font-size: var(--font-size-lg); }
+  .sm\:text-xl { font-size: var(--font-size-xl); }
+  .sm\:text-2xl { font-size: var(--font-size-2xl); }
+}
+
+@media (min-width: 768px) {
+  .md\:text-xs { font-size: var(--font-size-xs); }
+  .md\:text-sm { font-size: var(--font-size-sm); }
+  .md\:text-base { font-size: var(--font-size-base); }
+  .md\:text-lg { font-size: var(--font-size-lg); }
+  .md\:text-xl { font-size: var(--font-size-xl); }
+  .md\:text-2xl { font-size: var(--font-size-2xl); }
+  .md\:text-3xl { font-size: var(--font-size-3xl); }
+  .md\:text-4xl { font-size: var(--font-size-4xl); }
+}
+
+@media (min-width: 1024px) {
+  .lg\:text-xs { font-size: var(--font-size-xs); }
+  .lg\:text-sm { font-size: var(--font-size-sm); }
+  .lg\:text-base { font-size: var(--font-size-base); }
+  .lg\:text-lg { font-size: var(--font-size-lg); }
+  .lg\:text-xl { font-size: var(--font-size-xl); }
+  .lg\:text-2xl { font-size: var(--font-size-2xl); }
+  .lg\:text-3xl { font-size: var(--font-size-3xl); }
+  .lg\:text-4xl { font-size: var(--font-size-4xl); }
+  .lg\:text-5xl { font-size: var(--font-size-5xl); }
+  .lg\:text-hero { font-size: var(--font-size-hero); }
+}
+
+/* 響應式間距 */
+@media (min-width: 640px) {
+  .sm\:p-0 { padding: 0; }
+  .sm\:p-1 { padding: var(--space-1); }
+  .sm\:p-2 { padding: var(--space-2); }
+  .sm\:p-4 { padding: var(--space-4); }
+  .sm\:p-6 { padding: var(--space-6); }
+  .sm\:p-8 { padding: var(--space-8); }
+  
+  .sm\:m-0 { margin: 0; }
+  .sm\:m-1 { margin: var(--space-1); }
+  .sm\:m-2 { margin: var(--space-2); }
+  .sm\:m-4 { margin: var(--space-4); }
+  .sm\:m-6 { margin: var(--space-6); }
+  .sm\:m-8 { margin: var(--space-8); }
+}
+
+@media (min-width: 768px) {
+  .md\:p-0 { padding: 0; }
+  .md\:p-2 { padding: var(--space-2); }
+  .md\:p-4 { padding: var(--space-4); }
+  .md\:p-6 { padding: var(--space-6); }
+  .md\:p-8 { padding: var(--space-8); }
+  .md\:p-12 { padding: var(--space-12); }
+  
+  .md\:m-0 { margin: 0; }
+  .md\:m-2 { margin: var(--space-2); }
+  .md\:m-4 { margin: var(--space-4); }
+  .md\:m-6 { margin: var(--space-6); }
+  .md\:m-8 { margin: var(--space-8); }
+  .md\:m-12 { margin: var(--space-12); }
+}
+
+@media (min-width: 1024px) {
+  .lg\:p-0 { padding: 0; }
+  .lg\:p-4 { padding: var(--space-4); }
+  .lg\:p-6 { padding: var(--space-6); }
+  .lg\:p-8 { padding: var(--space-8); }
+  .lg\:p-12 { padding: var(--space-12); }
+  .lg\:p-16 { padding: var(--space-16); }
+  
+  .lg\:m-0 { margin: 0; }
+  .lg\:m-4 { margin: var(--space-4); }
+  .lg\:m-6 { margin: var(--space-6); }
+  .lg\:m-8 { margin: var(--space-8); }
+  .lg\:m-12 { margin: var(--space-12); }
+  .lg\:m-16 { margin: var(--space-16); }
+}
+
+/* ===== 遊戲化響應式 ===== */
+
+/* 技能樹響應式配置 */
+.skill-tree-container {
+  width: 100%;
+  height: 60vh; /* 移動端較小 */
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .skill-tree-container {
+    height: 70vh; /* 平板稍大 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .skill-tree-container {
+    height: 80vh; /* 桌面較大 */
+  }
+}
+
+/* 技能節點響應式大小 */
+.skill-node {
+  width: var(--skill-node-size-mobile);
+  height: var(--skill-node-size-mobile);
+}
+
+@media (min-width: 768px) {
+  .skill-node {
+    width: var(--skill-node-size-tablet);
+    height: var(--skill-node-size-tablet);
+  }
+}
+
+@media (min-width: 1024px) {
+  .skill-node {
+    width: var(--skill-node-size-desktop);
+    height: var(--skill-node-size-desktop);
+  }
+}
+
+/* 專案卡片響應式佈局 */
+.projects-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr; /* 移動端單欄 */
+}
+
+@media (min-width: 640px) {
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr); /* 小屏雙欄 */
+    gap: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .projects-grid {
+    grid-template-columns: repeat(3, 1fr); /* 大屏三欄 */
+    gap: var(--space-8);
+  }
+}
+
+@media (min-width: 1280px) {
+  .projects-grid {
+    grid-template-columns: repeat(4, 1fr); /* 超大屏四欄 */
+  }
+}
+
+/* 遊戲王卡牌響應式 */
+.yugioh-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .yugioh-cards-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .yugioh-cards-container {
+    gap: var(--space-8);
+  }
+}
+
+/* 角色面板響應式 */
+.character-panel {
+  width: 100%;
+  max-width: 400px; /* 移動端限制寬度 */
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .character-panel {
+    max-width: 500px; /* 平板稍大 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .character-panel {
+    max-width: 600px; /* 桌面最大 */
+  }
+}
+
+/* ===== 導航響應式 ===== */
+
+/* 移動端導航 */
+.nav-mobile {
+  display: block;
+}
+
+.nav-desktop {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .nav-mobile {
+    display: none;
+  }
+  
+  .nav-desktop {
+    display: block;
+  }
+}
+
+/* 漢堡選單響應式 */
+.hamburger-menu {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .hamburger-menu {
+    display: none;
+  }
+}
+
+/* ===== 字體響應式優化 ===== */
+
+/* 確保文字在小屏幕上可讀性 */
+@media (max-width: 639px) {
+  .gaming-title {
+    font-size: var(--font-size-2xl);
+    line-height: var(--line-height-tight);
+  }
+  
+  h1 {
+    font-size: var(--font-size-3xl);
+  }
+  
+  h2 {
+    font-size: var(--font-size-2xl);
+  }
+  
+  h3 {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* 平板優化 */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .gaming-title {
+    font-size: var(--font-size-3xl);
+  }
+}
+
+/* ===== 觸控優化 ===== */
+
+/* 確保觸控目標足夠大 (最小 44px) */
+@media (max-width: 1023px) {
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .skill-node,
+  .project-card,
+  .yugioh-card,
+  button,
+  .nav-link {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* ===== 效能優化響應式 ===== */
+
+/* 在小屏幕上減少動畫複雜度 */
+@media (max-width: 767px) {
+  .reduce-motion-mobile {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  /* 在移動端隱藏背景粒子以提升性能 */
+  .particles-container {
+    display: none;
+  }
+  
+  /* 簡化發光效果 */
+  .glow-legendary,
+  .glow-super-rare {
+    box-shadow: 0 0 5px var(--color-primary-gold);
+    animation: none;
+  }
+}
+
+/* 低性能設備優化 */
+@media (max-width: 480px) {
+  .performance-optimized {
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+  
+  .magical-glow::before,
+  .magical-aura::before {
+    display: none;
+  }
+}
+
+/* ===== 列印樣式響應式 ===== */
+
+@media print {
+  .container {
+    max-width: none;
+    padding: 0;
+  }
+  
+  .grid-responsive {
+    display: block;
+  }
+  
+  .grid-responsive > * {
+    margin-bottom: var(--space-4);
+    page-break-inside: avoid;
+  }
+  
+  /* 隱藏不必要的互動元素 */
+  .skill-tree-container,
+  .yugioh-cards-container,
+  .particles-container,
+  .nav-mobile,
+  .nav-desktop {
+    display: none !important;
+  }
+}
+
+/* ===== 高對比度模式響應式 ===== */
+
+@media (prefers-contrast: high) {
+  .container {
+    border: 1px solid currentColor;
+  }
+  
+  .skill-node,
+  .project-card,
+  .yugioh-card {
+    border: 2px solid currentColor !important;
+    background: transparent !important;
+  }
+  
+  /* 移除複雜的視覺效果 */
+  .glow-normal,
+  .glow-rare,
+  .glow-super-rare,
+  .glow-legendary,
+  .magical-glow,
+  .magical-aura,
+  .holographic {
+    box-shadow: none !important;
+    background: transparent !important;
+    animation: none !important;
+  }
+}
+
+/* ===== 減少動畫偏好響應式 ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  .skill-tree-container,
+  .yugioh-cards-container,
+  .projects-grid,
+  .character-panel {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .floating,
+  .magical-glow,
+  .magical-aura,
+  .holographic {
+    animation: none !important;
+  }
+  
+  .skill-node:hover,
+  .project-card:hover,
+  .yugioh-card:hover {
+    transform: none !important;
+  }
+}

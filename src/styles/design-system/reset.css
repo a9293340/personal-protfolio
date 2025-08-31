@@ -1,0 +1,346 @@
+/**
+ * 現代 CSS Reset
+ * 
+ * 基於 Josh Comeau 的現代 CSS Reset，針對遊戲化設計優化
+ */
+
+/* ===== 全域重置 ===== */
+
+/*
+  1. 使用更直觀的 box-sizing 模型
+*/
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/*
+  2. 移除默認邊距和內距
+*/
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/*
+  3. 防止 iOS 字體大小調整
+*/
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/*
+  4. 改善媒體元素的默認行為
+*/
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/*
+  5. 移除內建表單樣式
+*/
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+/*
+  6. 避免文字溢出
+*/
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/*
+  7. 改善行高設定在大文字
+*/
+h1, h2, h3, h4, h5, h6 {
+  line-height: var(--line-height-heading);
+}
+
+/*
+  8. 平滑滾動 (尊重使用者偏好)
+*/
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/*
+  9. 改善表格邊框處理
+*/
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/*
+  10. 列表樣式重置
+*/
+ol, ul {
+  list-style: none;
+}
+
+/*
+  11. 按鈕重置
+*/
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/*
+  12. 連結重置
+*/
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/*
+  13. 表單元素重置
+*/
+input, textarea, select {
+  background: transparent;
+  border: none;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+input:focus, textarea:focus, select:focus, button:focus {
+  outline: 2px solid var(--theme-accent);
+  outline-offset: 2px;
+}
+
+/* 在高對比度模式下隱藏自定義焦點樣式 */
+@media (prefers-contrast: high) {
+  input:focus, textarea:focus, select:focus, button:focus {
+    outline: 2px solid;
+  }
+}
+
+/*
+  14. 移除 iOS 按鈕樣式
+*/
+input[type="submit"], input[type="button"], button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+/*
+  15. 修復 Safari 中的滾動條樣式
+*/
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gray-800);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray-600);
+  border-radius: 4px;
+  transition: background-color var(--animation-fast) var(--easing-smooth);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-gold);
+}
+
+/* Firefox 滾動條樣式 */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-600) var(--color-gray-800);
+}
+
+/*
+  16. 選擇文字顏色
+*/
+::selection {
+  background-color: var(--color-primary-gold);
+  color: var(--color-primary-dark);
+}
+
+::-moz-selection {
+  background-color: var(--color-primary-gold);
+  color: var(--color-primary-dark);
+}
+
+/* ===== 遊戲化特殊重置 ===== */
+
+/*
+  遊戲王卡牌專用重置
+*/
+.yugioh-card, .yugioh-card * {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/*
+  技能樹專用重置
+*/
+.skill-tree, .skill-tree * {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/*
+  粒子系統專用重置
+*/
+.particles-container, .particles-container * {
+  pointer-events: none;
+  position: absolute;
+}
+
+/*
+  動畫專用重置
+*/
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== 輔助功能改善 ===== */
+
+/*
+  隱藏元素但保持螢幕閱讀器可訪問
+*/
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+  跳過連結 (無障礙導航)
+*/
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--theme-background);
+  color: var(--theme-foreground);
+  padding: 8px;
+  text-decoration: none;
+  z-index: 10000;
+  border-radius: 4px;
+  transition: top var(--animation-fast) var(--easing-smooth);
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/*
+  高對比度模式支援
+*/
+@media (prefers-contrast: high) {
+  * {
+    border-color: currentColor !important;
+  }
+  
+  button, input, textarea, select {
+    border: 1px solid !important;
+  }
+}
+
+/*
+  減少動畫偏好設定
+*/
+@media (prefers-reduced-motion: reduce) {
+  .skill-tree {
+    transform: none !important;
+  }
+  
+  .yugioh-card {
+    transform: none !important;
+  }
+  
+  .particles-container {
+    display: none !important;
+  }
+}
+
+/*
+  深色模式系統偏好設定
+*/
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --theme-background: var(--color-primary-dark);
+    --theme-foreground: #ffffff;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --theme-background: #f5f5f5;
+    --theme-foreground: #1a1a1a;
+  }
+}
+
+/* ===== 打印樣式 ===== */
+
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .skill-tree, .yugioh-card, .particles-container {
+    display: none !important;
+  }
+  
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+  
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
+    content: "";
+  }
+}

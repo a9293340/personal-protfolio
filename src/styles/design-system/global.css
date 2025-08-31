@@ -1,0 +1,523 @@
+/**
+ * 全域樣式定義
+ * 
+ * 基礎元素樣式和全域設定
+ */
+
+/* ===== 根元素設定 ===== */
+
+html {
+  font-size: 16px; /* 1rem = 16px */
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-body);
+  color: var(--theme-text-primary);
+  background-color: var(--theme-background);
+  min-height: 100vh;
+  overflow-x: hidden;
+  
+  /* 優化文字渲染 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  
+  /* 硬體加速 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* 設定根容器 */
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== 標題樣式 ===== */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--theme-text-primary);
+  margin-bottom: var(--space-4);
+}
+
+h1 {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-6);
+}
+
+h2 {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-semi-bold);
+  margin-bottom: var(--space-5);
+}
+
+h3 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semi-bold);
+  margin-bottom: var(--space-4);
+}
+
+h4 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semi-bold);
+  margin-bottom: var(--space-3);
+}
+
+h5 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-3);
+}
+
+h6 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-2);
+}
+
+/* 遊戲化標題樣式 */
+.gaming-title {
+  font-family: var(--font-gaming);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-gaming);
+  text-transform: uppercase;
+  background: var(--gradient-gold);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px var(--color-primary-gold);
+}
+
+/* ===== 段落和文字樣式 ===== */
+
+p {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-body);
+  color: var(--theme-text-primary);
+  margin-bottom: var(--space-4);
+}
+
+.lead {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  color: var(--theme-text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+.small {
+  font-size: var(--font-size-sm);
+  color: var(--theme-text-muted);
+}
+
+.caption {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--theme-text-secondary);
+  opacity: 0.8;
+}
+
+/* ===== 連結樣式 ===== */
+
+a {
+  color: var(--theme-accent);
+  text-decoration: none;
+  transition: all var(--animation-fast) var(--easing-smooth);
+  position: relative;
+}
+
+a:hover {
+  color: var(--color-gold-bright);
+}
+
+a:focus {
+  outline: 2px solid var(--theme-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* 下劃線動畫效果 */
+.link-animated {
+  position: relative;
+}
+
+.link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-gold);
+  transition: width var(--animation-normal) var(--easing-smooth);
+}
+
+.link-animated:hover::after {
+  width: 100%;
+}
+
+/* ===== 列表樣式 ===== */
+
+ul, ol {
+  margin-bottom: var(--space-4);
+  padding-left: var(--space-6);
+}
+
+ul {
+  list-style-type: none;
+}
+
+ul li {
+  position: relative;
+  margin-bottom: var(--space-2);
+}
+
+ul li::before {
+  content: '▶';
+  position: absolute;
+  left: -var(--space-5);
+  color: var(--theme-accent);
+  font-size: var(--font-size-sm);
+  top: 2px;
+}
+
+ol {
+  list-style-type: decimal;
+}
+
+ol li {
+  margin-bottom: var(--space-2);
+  color: var(--theme-text-primary);
+}
+
+/* 遊戲化列表樣式 */
+.gaming-list li::before {
+  content: '⚡';
+  color: var(--color-primary-gold);
+  font-size: var(--font-size-base);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ===== 代碼樣式 ===== */
+
+code, pre {
+  font-family: var(--font-code);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-code);
+}
+
+code {
+  background: var(--opacity-bg-medium);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 4px;
+  color: var(--color-blue-light);
+  border: 1px solid var(--theme-border);
+}
+
+pre {
+  background: var(--color-gray-900);
+  padding: var(--space-4);
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--theme-border);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  color: var(--color-gray-200);
+}
+
+/* ===== 表格樣式 ===== */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-4);
+  background: var(--opacity-bg-light);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border-bottom: 1px solid var(--theme-border);
+}
+
+th {
+  background: var(--opacity-bg-medium);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--theme-text-primary);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+tr:hover {
+  background: var(--opacity-bg-light);
+}
+
+/* ===== 分隔線樣式 ===== */
+
+hr {
+  border: none;
+  height: 1px;
+  background: var(--gradient-gold);
+  margin: var(--space-8) 0;
+  position: relative;
+}
+
+hr::after {
+  content: '⚔️';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--theme-background);
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+/* ===== 引用樣式 ===== */
+
+blockquote {
+  position: relative;
+  margin: var(--space-6) 0;
+  padding: var(--space-4) var(--space-6);
+  background: var(--opacity-bg-light);
+  border-left: 4px solid var(--theme-accent);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: var(--theme-text-secondary);
+}
+
+blockquote::before {
+  content: '"';
+  position: absolute;
+  top: -10px;
+  left: var(--space-4);
+  font-size: 3rem;
+  color: var(--theme-accent);
+  opacity: 0.3;
+}
+
+blockquote p {
+  margin-bottom: var(--space-2);
+}
+
+blockquote cite {
+  display: block;
+  text-align: right;
+  font-size: var(--font-size-sm);
+  color: var(--theme-text-muted);
+  margin-top: var(--space-2);
+}
+
+blockquote cite::before {
+  content: '— ';
+}
+
+/* ===== 容器樣式 ===== */
+
+.container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding-mobile);
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 0 var(--container-padding-desktop);
+  }
+}
+
+/* 響應式容器變體 */
+.container-sm {
+  max-width: 640px;
+}
+
+.container-md {
+  max-width: 768px;
+}
+
+.container-lg {
+  max-width: 1024px;
+}
+
+.container-xl {
+  max-width: 1280px;
+}
+
+.container-2xl {
+  max-width: 1536px;
+}
+
+/* ===== 網格系統 ===== */
+
+.grid {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
+.grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+
+/* 響應式網格 */
+@media (max-width: 768px) {
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4,
+  .grid-cols-6,
+  .grid-cols-12 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .grid-cols-3,
+  .grid-cols-4,
+  .grid-cols-6,
+  .grid-cols-12 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Flexbox 系統 */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+
+.flex-1 { flex: 1; }
+.flex-auto { flex: auto; }
+.flex-none { flex: none; }
+
+/* ===== 遊戲化全域樣式 ===== */
+
+/* 頁面載入動畫背景 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-primary);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 魔法光暈效果 */
+.magical-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.magical-glow::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent,
+    var(--color-primary-gold),
+    transparent
+  );
+  animation: rotate 3s linear infinite;
+  opacity: 0.1;
+  z-index: -1;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 遊戲風格滾動指示器 */
+.scroll-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--gradient-gold);
+  transform-origin: left;
+  transform: scaleX(0);
+  z-index: var(--z-navbar);
+  transition: transform var(--animation-fast) var(--easing-smooth);
+}
+
+/* ===== 響應式設計 ===== */
+
+/* 隱藏/顯示類別 */
+.hidden { display: none !important; }
+.visible { display: block !important; }
+
+/* 響應式隱藏/顯示 */
+@media (max-width: 640px) {
+  .sm-hidden { display: none !important; }
+}
+
+@media (min-width: 641px) {
+  .sm-only { display: none !important; }
+}
+
+@media (max-width: 768px) {
+  .md-hidden { display: none !important; }
+}
+
+@media (min-width: 769px) {
+  .md-only { display: none !important; }
+}
+
+@media (max-width: 1024px) {
+  .lg-hidden { display: none !important; }
+}
+
+@media (min-width: 1025px) {
+  .lg-only { display: none !important; }
+}

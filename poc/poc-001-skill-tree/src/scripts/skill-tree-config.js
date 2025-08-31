@@ -6,48 +6,48 @@
 const SKILL_TREE_CONFIG = {
   // 6個技能領域 (按照 MD 文件結構)
   types: {
-    'frontend': { 
-      color: '#e74c3c', 
-      direction: 0,    // 0度 - 右
-      name: '前端領域'
+    frontend: {
+      color: '#e74c3c',
+      direction: 0, // 0度 - 右
+      name: '前端開發領域',
     },
-    'backend': { 
-      color: '#3498db', 
-      direction: 300,  // 300度 - 右下
-      name: '後端領域'
+    backend: {
+      color: '#3498db',
+      direction: 300, // 300度 - 右下
+      name: '後端工程領域',
     },
-    'database': { 
-      color: '#2ecc71', 
-      direction: 240,  // 240度 - 左下
-      name: '資料庫領域'
+    database: {
+      color: '#2ecc71',
+      direction: 240, // 240度 - 左下
+      name: '資料庫工程領域',
     },
-    'cloud-devops': { 
-      color: '#9b59b6', 
-      direction: 180,  // 180度 - 左
-      name: '雲端服務與 DevOps'
+    'cloud-devops': {
+      color: '#9b59b6',
+      direction: 180, // 180度 - 左
+      name: '雲端服務與 DevOps',
     },
-    'ai': { 
-      color: '#f39c12', 
-      direction: 120,  // 120度 - 左上
-      name: 'AI 使用領域'
+    ai: {
+      color: '#f39c12',
+      direction: 120, // 120度 - 左上
+      name: 'AI 工程應用領域',
     },
-    'architecture': { 
-      color: '#1abc9c', 
-      direction: 60,   // 60度 - 右上
-      name: '架構規劃領域'
-    }
+    architecture: {
+      color: '#1abc9c',
+      direction: 60, // 60度 - 右上
+      name: '系統架構設計領域',
+    },
   },
 
   // 技能熟練度定義
   proficiencyLevels: {
-    'O': { level: 'expert', name: '熟練', opacity: 1.0 },
+    O: { level: 'expert', name: '熟練', opacity: 1.0 },
     '*': { level: 'intermediate', name: '略懂', opacity: 0.7 },
-    'X': { level: 'learning', name: '待學習', opacity: 0.4 }
+    X: { level: 'learning', name: '待學習', opacity: 0.4 },
   },
 
   skills: [
     // ===== 1. 前端領域 (右方 0度) =====
-    
+
     // 大技能 - HTML/CSS (基本)
     {
       id: 'html-css',
@@ -55,7 +55,7 @@ const SKILL_TREE_CONFIG = {
       type: 'frontend',
       skillLevel: 'major',
       hexCoord: { q: 2, r: 0 },
-      difficulty: 1 // 基本技能，離中心最近
+      difficulty: 1, // 基本技能，離中心最近
     },
     // HTML/CSS 小技能
     {
@@ -65,7 +65,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 3, r: -1 },
       proficiency: 'O',
-      relatedTo: ['html-css']
+      relatedTo: ['html-css'],
     },
     {
       id: 'css3-selectors',
@@ -74,7 +74,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 3, r: 0 },
       proficiency: 'O',
-      relatedTo: ['html-css']
+      relatedTo: ['html-css'],
     },
     {
       id: 'flexbox-grid',
@@ -83,7 +83,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 3, r: 1 },
       proficiency: 'O',
-      relatedTo: ['html-css']
+      relatedTo: ['html-css'],
     },
     {
       id: 'rwd',
@@ -92,7 +92,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 2, r: -1 },
       proficiency: 'O',
-      relatedTo: ['html-css']
+      relatedTo: ['html-css'],
     },
     {
       id: 'css-preprocessor',
@@ -101,7 +101,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 2, r: 1 },
       proficiency: 'O',
-      relatedTo: ['html-css']
+      relatedTo: ['html-css'],
     },
     {
       id: 'tailwind',
@@ -110,7 +110,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 1, r: 0 },
       proficiency: 'O',
-      relatedTo: ['html-css']
+      relatedTo: ['html-css'],
     },
 
     // 大技能 - JavaScript (基本)
@@ -120,7 +120,7 @@ const SKILL_TREE_CONFIG = {
       type: 'frontend',
       skillLevel: 'major',
       hexCoord: { q: 4, r: 0 },
-      difficulty: 2
+      difficulty: 2,
     },
     // JavaScript 小技能
     {
@@ -130,7 +130,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 5, r: -1 },
       proficiency: 'O',
-      relatedTo: ['javascript']
+      relatedTo: ['javascript'],
     },
     {
       id: 'async-programming',
@@ -140,7 +140,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 5, r: 0 },
       proficiency: 'O',
-      relatedTo: ['javascript']
+      relatedTo: ['javascript'],
     },
     {
       id: 'modular-development',
@@ -149,7 +149,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 5, r: 1 },
       proficiency: 'O',
-      relatedTo: ['javascript']
+      relatedTo: ['javascript'],
     },
     {
       id: 'dom-manipulation',
@@ -158,7 +158,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 4, r: -1 },
       proficiency: 'O',
-      relatedTo: ['javascript']
+      relatedTo: ['javascript'],
     },
     {
       id: 'browser-api',
@@ -167,7 +167,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 4, r: 1 },
       proficiency: 'O',
-      relatedTo: ['javascript']
+      relatedTo: ['javascript'],
     },
 
     // 大技能 - 前端框架 (進階)
@@ -177,7 +177,7 @@ const SKILL_TREE_CONFIG = {
       type: 'frontend',
       skillLevel: 'major',
       hexCoord: { q: 6, r: 0 },
-      difficulty: 3
+      difficulty: 3,
     },
     {
       id: 'react',
@@ -187,7 +187,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 7, r: -1 },
       proficiency: '*',
-      relatedTo: ['frontend-frameworks']
+      relatedTo: ['frontend-frameworks'],
     },
     {
       id: 'vuejs',
@@ -197,7 +197,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 7, r: 0 },
       proficiency: 'O',
-      relatedTo: ['frontend-frameworks']
+      relatedTo: ['frontend-frameworks'],
     },
     {
       id: 'angular',
@@ -207,7 +207,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 7, r: 1 },
       proficiency: 'X',
-      relatedTo: ['frontend-frameworks']
+      relatedTo: ['frontend-frameworks'],
     },
 
     // 大技能 - 前端工具鏈 (高階)
@@ -217,7 +217,7 @@ const SKILL_TREE_CONFIG = {
       type: 'frontend',
       skillLevel: 'major',
       hexCoord: { q: 8, r: 0 },
-      difficulty: 4
+      difficulty: 4,
     },
     {
       id: 'webpack',
@@ -227,7 +227,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 9, r: -1 },
       proficiency: '*',
-      relatedTo: ['frontend-tools']
+      relatedTo: ['frontend-tools'],
     },
     {
       id: 'vite',
@@ -237,7 +237,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 9, r: 0 },
       proficiency: 'O',
-      relatedTo: ['frontend-tools']
+      relatedTo: ['frontend-tools'],
     },
     {
       id: 'babel',
@@ -247,7 +247,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 9, r: 1 },
       proficiency: '*',
-      relatedTo: ['frontend-tools']
+      relatedTo: ['frontend-tools'],
     },
     {
       id: 'typescript',
@@ -257,11 +257,11 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 8, r: 1 },
       proficiency: 'O',
-      relatedTo: ['frontend-tools']
+      relatedTo: ['frontend-tools'],
     },
 
     // ===== 2. 後端領域 (右上 60度) =====
-    
+
     // 大技能 - 程式語言 (基本)
     {
       id: 'backend-languages',
@@ -269,7 +269,7 @@ const SKILL_TREE_CONFIG = {
       type: 'backend',
       skillLevel: 'major',
       hexCoord: { q: 1, r: -2 },
-      difficulty: 1
+      difficulty: 1,
     },
     {
       id: 'nodejs',
@@ -279,7 +279,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 2, r: -3 },
       proficiency: 'O',
-      relatedTo: ['backend-languages']
+      relatedTo: ['backend-languages'],
     },
     {
       id: 'python',
@@ -289,7 +289,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 1, r: -3 },
       proficiency: '*',
-      relatedTo: ['backend-languages']
+      relatedTo: ['backend-languages'],
     },
     {
       id: 'java',
@@ -299,7 +299,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 0, r: -2 },
       proficiency: 'X',
-      relatedTo: ['backend-languages']
+      relatedTo: ['backend-languages'],
     },
     {
       id: 'csharp',
@@ -309,7 +309,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 0, r: -3 },
       proficiency: '*',
-      relatedTo: ['backend-languages']
+      relatedTo: ['backend-languages'],
     },
     {
       id: 'golang',
@@ -319,7 +319,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 2, r: -2 },
       proficiency: '*',
-      relatedTo: ['backend-languages']
+      relatedTo: ['backend-languages'],
     },
 
     // 大技能 - API 開發 (中階)
@@ -329,7 +329,7 @@ const SKILL_TREE_CONFIG = {
       type: 'backend',
       skillLevel: 'major',
       hexCoord: { q: 2, r: -4 },
-      difficulty: 2
+      difficulty: 2,
     },
     {
       id: 'restful-api',
@@ -338,7 +338,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 3, r: -5 },
       proficiency: 'O',
-      relatedTo: ['api-development']
+      relatedTo: ['api-development'],
     },
     {
       id: 'graphql',
@@ -347,7 +347,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 2, r: -5 },
       proficiency: '*',
-      relatedTo: ['api-development']
+      relatedTo: ['api-development'],
     },
     {
       id: 'websocket',
@@ -356,7 +356,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 1, r: -4 },
       proficiency: 'O',
-      relatedTo: ['api-development']
+      relatedTo: ['api-development'],
     },
     {
       id: 'api-versioning',
@@ -365,7 +365,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 1, r: -5 },
       proficiency: 'O',
-      relatedTo: ['api-development']
+      relatedTo: ['api-development'],
     },
     {
       id: 'swagger',
@@ -374,7 +374,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 3, r: -4 },
       proficiency: 'O',
-      relatedTo: ['api-development']
+      relatedTo: ['api-development'],
     },
 
     // 大技能 - 後端架構模式 (高階)
@@ -384,7 +384,7 @@ const SKILL_TREE_CONFIG = {
       type: 'backend',
       skillLevel: 'major',
       hexCoord: { q: 3, r: -6 },
-      difficulty: 3
+      difficulty: 3,
     },
     {
       id: 'mvc-pattern',
@@ -393,7 +393,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 4, r: -7 },
       proficiency: 'O',
-      relatedTo: ['backend-architecture']
+      relatedTo: ['backend-architecture'],
     },
     {
       id: 'dependency-injection',
@@ -402,7 +402,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 3, r: -7 },
       proficiency: 'O',
-      relatedTo: ['backend-architecture']
+      relatedTo: ['backend-architecture'],
     },
     {
       id: 'middleware-pattern',
@@ -411,7 +411,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 2, r: -6 },
       proficiency: 'O',
-      relatedTo: ['backend-architecture']
+      relatedTo: ['backend-architecture'],
     },
     {
       id: 'microservices',
@@ -420,7 +420,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 4, r: -6 },
       proficiency: '*',
-      relatedTo: ['backend-architecture']
+      relatedTo: ['backend-architecture'],
     },
     {
       id: 'event-driven',
@@ -429,11 +429,11 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 2, r: -7 },
       proficiency: '*',
-      relatedTo: ['backend-architecture']
+      relatedTo: ['backend-architecture'],
     },
 
     // ===== 3. 資料庫領域 (左上 120度) =====
-    
+
     // 大技能 - 關聯式資料庫 (基本)
     {
       id: 'relational-db',
@@ -441,7 +441,7 @@ const SKILL_TREE_CONFIG = {
       type: 'database',
       skillLevel: 'major',
       hexCoord: { q: -1, r: -2 },
-      difficulty: 1
+      difficulty: 1,
     },
     {
       id: 'mysql',
@@ -451,7 +451,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -2, r: -2 },
       proficiency: 'O',
-      relatedTo: ['relational-db']
+      relatedTo: ['relational-db'],
     },
     {
       id: 'postgresql',
@@ -461,7 +461,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -1, r: -3 },
       proficiency: '*',
-      relatedTo: ['relational-db']
+      relatedTo: ['relational-db'],
     },
     {
       id: 'sqlserver',
@@ -471,7 +471,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -2, r: -3 },
       proficiency: 'X',
-      relatedTo: ['relational-db']
+      relatedTo: ['relational-db'],
     },
     {
       id: 'normalization',
@@ -480,7 +480,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -1, r: -1 },
       proficiency: '*',
-      relatedTo: ['relational-db']
+      relatedTo: ['relational-db'],
     },
     {
       id: 'acid-transactions',
@@ -489,7 +489,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -2, r: -1 },
       proficiency: '*',
-      relatedTo: ['relational-db']
+      relatedTo: ['relational-db'],
     },
 
     // 大技能 - NoSQL 資料庫 (中階)
@@ -499,7 +499,7 @@ const SKILL_TREE_CONFIG = {
       type: 'database',
       skillLevel: 'major',
       hexCoord: { q: -2, r: -4 },
-      difficulty: 2
+      difficulty: 2,
     },
     {
       id: 'mongodb',
@@ -509,7 +509,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -3, r: -4 },
       proficiency: 'O',
-      relatedTo: ['nosql-db']
+      relatedTo: ['nosql-db'],
     },
     {
       id: 'redis',
@@ -519,7 +519,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -2, r: -5 },
       proficiency: 'O',
-      relatedTo: ['nosql-db']
+      relatedTo: ['nosql-db'],
     },
     {
       id: 'elasticsearch',
@@ -529,7 +529,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -3, r: -5 },
       proficiency: '*',
-      relatedTo: ['nosql-db']
+      relatedTo: ['nosql-db'],
     },
     {
       id: 'cassandra',
@@ -539,7 +539,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -1, r: -4 },
       proficiency: 'X',
-      relatedTo: ['nosql-db']
+      relatedTo: ['nosql-db'],
     },
 
     // 大技能 - 資料庫設計與優化 (高階)
@@ -549,7 +549,7 @@ const SKILL_TREE_CONFIG = {
       type: 'database',
       skillLevel: 'major',
       hexCoord: { q: -3, r: -6 },
-      difficulty: 3
+      difficulty: 3,
     },
     {
       id: 'er-modeling',
@@ -558,7 +558,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -4, r: -6 },
       proficiency: 'O',
-      relatedTo: ['db-optimization']
+      relatedTo: ['db-optimization'],
     },
     {
       id: 'indexing-strategy',
@@ -567,7 +567,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -3, r: -7 },
       proficiency: 'O',
-      relatedTo: ['db-optimization']
+      relatedTo: ['db-optimization'],
     },
     {
       id: 'query-optimization',
@@ -576,7 +576,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -2, r: -6 },
       proficiency: 'O',
-      relatedTo: ['db-optimization']
+      relatedTo: ['db-optimization'],
     },
     {
       id: 'sharding',
@@ -585,7 +585,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -4, r: -7 },
       proficiency: '*',
-      relatedTo: ['db-optimization']
+      relatedTo: ['db-optimization'],
     },
     {
       id: 'read-write-split',
@@ -594,11 +594,11 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -2, r: -7 },
       proficiency: 'O',
-      relatedTo: ['db-optimization']
+      relatedTo: ['db-optimization'],
     },
 
     // ===== 4. 雲端服務與 DevOps (左方 180度) =====
-    
+
     // 大技能 - 雲端平台 (基本)
     {
       id: 'cloud-platforms',
@@ -606,7 +606,7 @@ const SKILL_TREE_CONFIG = {
       type: 'cloud-devops',
       skillLevel: 'major',
       hexCoord: { q: -3, r: 0 },
-      difficulty: 1
+      difficulty: 1,
     },
     {
       id: 'aws',
@@ -616,7 +616,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -4, r: 0 },
       proficiency: '*',
-      relatedTo: ['cloud-platforms']
+      relatedTo: ['cloud-platforms'],
     },
     {
       id: 'azure',
@@ -626,7 +626,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -3, r: 1 },
       proficiency: 'X',
-      relatedTo: ['cloud-platforms']
+      relatedTo: ['cloud-platforms'],
     },
     {
       id: 'gcp',
@@ -636,7 +636,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -3, r: -1 },
       proficiency: 'O',
-      relatedTo: ['cloud-platforms']
+      relatedTo: ['cloud-platforms'],
     },
 
     // 大技能 - 容器化技術 (中階)
@@ -646,7 +646,7 @@ const SKILL_TREE_CONFIG = {
       type: 'cloud-devops',
       skillLevel: 'major',
       hexCoord: { q: -5, r: 0 },
-      difficulty: 2
+      difficulty: 2,
     },
     {
       id: 'docker',
@@ -656,7 +656,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -6, r: 0 },
       proficiency: 'O',
-      relatedTo: ['containerization']
+      relatedTo: ['containerization'],
     },
     {
       id: 'kubernetes',
@@ -666,7 +666,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -5, r: 1 },
       proficiency: '*',
-      relatedTo: ['containerization']
+      relatedTo: ['containerization'],
     },
     {
       id: 'container-orchestration',
@@ -675,7 +675,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -5, r: -1 },
       proficiency: '*',
-      relatedTo: ['containerization']
+      relatedTo: ['containerization'],
     },
     {
       id: 'microservices-deployment',
@@ -684,7 +684,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -6, r: 1 },
       proficiency: '*',
-      relatedTo: ['containerization']
+      relatedTo: ['containerization'],
     },
 
     // 大技能 - CI/CD 工具 (中高階)
@@ -694,7 +694,7 @@ const SKILL_TREE_CONFIG = {
       type: 'cloud-devops',
       skillLevel: 'major',
       hexCoord: { q: -7, r: 0 },
-      difficulty: 3
+      difficulty: 3,
     },
     {
       id: 'jenkins',
@@ -704,7 +704,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -8, r: 0 },
       proficiency: '*',
-      relatedTo: ['cicd-tools']
+      relatedTo: ['cicd-tools'],
     },
     {
       id: 'gitlab-ci',
@@ -714,7 +714,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -7, r: 1 },
       proficiency: 'O',
-      relatedTo: ['cicd-tools']
+      relatedTo: ['cicd-tools'],
     },
     {
       id: 'github-actions',
@@ -724,7 +724,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -7, r: -1 },
       proficiency: 'O',
-      relatedTo: ['cicd-tools']
+      relatedTo: ['cicd-tools'],
     },
     {
       id: 'automated-testing',
@@ -733,7 +733,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -8, r: 1 },
       proficiency: 'O',
-      relatedTo: ['cicd-tools']
+      relatedTo: ['cicd-tools'],
     },
     {
       id: 'deployment-strategies',
@@ -743,7 +743,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -8, r: -1 },
       proficiency: 'O',
-      relatedTo: ['cicd-tools']
+      relatedTo: ['cicd-tools'],
     },
 
     // 大技能 - 基礎設施管理 (高階)
@@ -753,7 +753,7 @@ const SKILL_TREE_CONFIG = {
       type: 'cloud-devops',
       skillLevel: 'major',
       hexCoord: { q: -9, r: 0 },
-      difficulty: 4
+      difficulty: 4,
     },
     {
       id: 'terraform',
@@ -763,7 +763,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -10, r: 0 },
       proficiency: 'X',
-      relatedTo: ['infrastructure']
+      relatedTo: ['infrastructure'],
     },
     {
       id: 'ansible',
@@ -773,7 +773,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -9, r: 1 },
       proficiency: '*',
-      relatedTo: ['infrastructure']
+      relatedTo: ['infrastructure'],
     },
     {
       id: 'monitoring',
@@ -783,7 +783,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -9, r: -1 },
       proficiency: 'O',
-      relatedTo: ['infrastructure']
+      relatedTo: ['infrastructure'],
     },
     {
       id: 'security-scanning',
@@ -792,11 +792,11 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -10, r: 1 },
       proficiency: 'X',
-      relatedTo: ['infrastructure']
+      relatedTo: ['infrastructure'],
     },
 
     // ===== 5. AI 使用領域 (左下 240度) =====
-    
+
     // 大技能 - Prompt Engineering (基本)
     {
       id: 'prompt-engineering',
@@ -804,7 +804,7 @@ const SKILL_TREE_CONFIG = {
       type: 'ai',
       skillLevel: 'major',
       hexCoord: { q: -1, r: 2 },
-      difficulty: 1
+      difficulty: 1,
     },
     {
       id: 'effective-prompts',
@@ -813,7 +813,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -2, r: 2 },
       proficiency: 'O',
-      relatedTo: ['prompt-engineering']
+      relatedTo: ['prompt-engineering'],
     },
     {
       id: 'prompt-optimization',
@@ -822,7 +822,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -1, r: 3 },
       proficiency: 'O',
-      relatedTo: ['prompt-engineering']
+      relatedTo: ['prompt-engineering'],
     },
     {
       id: 'context-enhancement',
@@ -831,7 +831,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -2, r: 3 },
       proficiency: 'O',
-      relatedTo: ['prompt-engineering']
+      relatedTo: ['prompt-engineering'],
     },
 
     // 大技能 - Contextual Understanding (中階)
@@ -841,7 +841,7 @@ const SKILL_TREE_CONFIG = {
       type: 'ai',
       skillLevel: 'major',
       hexCoord: { q: -2, r: 4 },
-      difficulty: 2
+      difficulty: 2,
     },
     {
       id: 'context-limits',
@@ -850,7 +850,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -3, r: 4 },
       proficiency: '*',
-      relatedTo: ['contextual-understanding']
+      relatedTo: ['contextual-understanding'],
     },
     {
       id: 'background-info',
@@ -859,7 +859,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -2, r: 5 },
       proficiency: '*',
-      relatedTo: ['contextual-understanding']
+      relatedTo: ['contextual-understanding'],
     },
     {
       id: 'context-continuity',
@@ -868,7 +868,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -3, r: 5 },
       proficiency: '*',
-      relatedTo: ['contextual-understanding']
+      relatedTo: ['contextual-understanding'],
     },
 
     // 大技能 - Model Interaction (中高階)
@@ -878,7 +878,7 @@ const SKILL_TREE_CONFIG = {
       type: 'ai',
       skillLevel: 'major',
       hexCoord: { q: -3, r: 6 },
-      difficulty: 3
+      difficulty: 3,
     },
     {
       id: 'model-selection',
@@ -887,7 +887,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -4, r: 6 },
       proficiency: '*',
-      relatedTo: ['model-interaction']
+      relatedTo: ['model-interaction'],
     },
     {
       id: 'model-matching',
@@ -896,7 +896,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -3, r: 7 },
       proficiency: '*',
-      relatedTo: ['model-interaction']
+      relatedTo: ['model-interaction'],
     },
     {
       id: 'response-evaluation',
@@ -905,7 +905,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -4, r: 7 },
       proficiency: '*',
-      relatedTo: ['model-interaction']
+      relatedTo: ['model-interaction'],
     },
 
     // 大技能 - Ethical AI Use (高階)
@@ -915,7 +915,7 @@ const SKILL_TREE_CONFIG = {
       type: 'ai',
       skillLevel: 'major',
       hexCoord: { q: -4, r: 8 },
-      difficulty: 4
+      difficulty: 4,
     },
     {
       id: 'ai-ethics',
@@ -924,7 +924,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -5, r: 8 },
       proficiency: '*',
-      relatedTo: ['ethical-ai']
+      relatedTo: ['ethical-ai'],
     },
     {
       id: 'privacy-security',
@@ -933,7 +933,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -4, r: 9 },
       proficiency: 'O',
-      relatedTo: ['ethical-ai']
+      relatedTo: ['ethical-ai'],
     },
     {
       id: 'bias-fairness',
@@ -942,7 +942,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -5, r: 9 },
       proficiency: '*',
-      relatedTo: ['ethical-ai']
+      relatedTo: ['ethical-ai'],
     },
 
     // 大技能 - AI Tools and Platforms (應用)
@@ -952,7 +952,7 @@ const SKILL_TREE_CONFIG = {
       type: 'ai',
       skillLevel: 'major',
       hexCoord: { q: -1, r: 4 },
-      difficulty: 2
+      difficulty: 2,
     },
     {
       id: 'ai-platforms',
@@ -962,7 +962,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: -1, r: 5 },
       proficiency: '*',
-      relatedTo: ['ai-tools']
+      relatedTo: ['ai-tools'],
     },
     {
       id: 'ai-integration',
@@ -971,7 +971,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 0, r: 4 },
       proficiency: 'O',
-      relatedTo: ['ai-tools']
+      relatedTo: ['ai-tools'],
     },
     {
       id: 'platform-evaluation',
@@ -980,11 +980,11 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 0, r: 5 },
       proficiency: 'O',
-      relatedTo: ['ai-tools']
+      relatedTo: ['ai-tools'],
     },
 
     // ===== 6. 架構規劃領域 (右下 300度) =====
-    
+
     // 大技能 - 設計模式 (基本)
     {
       id: 'design-patterns',
@@ -992,7 +992,7 @@ const SKILL_TREE_CONFIG = {
       type: 'architecture',
       skillLevel: 'major',
       hexCoord: { q: 1, r: 2 },
-      difficulty: 1
+      difficulty: 1,
     },
     {
       id: 'creational-patterns',
@@ -1002,7 +1002,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 2, r: 2 },
       proficiency: 'O',
-      relatedTo: ['design-patterns']
+      relatedTo: ['design-patterns'],
     },
     {
       id: 'structural-patterns',
@@ -1012,7 +1012,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 1, r: 3 },
       proficiency: 'O',
-      relatedTo: ['design-patterns']
+      relatedTo: ['design-patterns'],
     },
     {
       id: 'behavioral-patterns',
@@ -1022,7 +1022,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 2, r: 3 },
       proficiency: '*',
-      relatedTo: ['design-patterns']
+      relatedTo: ['design-patterns'],
     },
     {
       id: 'architectural-patterns',
@@ -1032,7 +1032,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 0, r: 2 },
       proficiency: 'O',
-      relatedTo: ['design-patterns']
+      relatedTo: ['design-patterns'],
     },
 
     // 大技能 - 系統架構設計 (中高階)
@@ -1042,7 +1042,7 @@ const SKILL_TREE_CONFIG = {
       type: 'architecture',
       skillLevel: 'major',
       hexCoord: { q: 2, r: 4 },
-      difficulty: 3
+      difficulty: 3,
     },
     {
       id: 'ddd',
@@ -1051,7 +1051,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 3, r: 4 },
       proficiency: '*',
-      relatedTo: ['system-architecture']
+      relatedTo: ['system-architecture'],
     },
     {
       id: 'cqrs-event-sourcing',
@@ -1060,7 +1060,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 2, r: 5 },
       proficiency: '*',
-      relatedTo: ['system-architecture']
+      relatedTo: ['system-architecture'],
     },
     {
       id: 'distributed-systems',
@@ -1069,7 +1069,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 3, r: 5 },
       proficiency: '*',
-      relatedTo: ['system-architecture']
+      relatedTo: ['system-architecture'],
     },
 
     // 大技能 - 效能與擴展性 (中階)
@@ -1079,7 +1079,7 @@ const SKILL_TREE_CONFIG = {
       type: 'architecture',
       skillLevel: 'major',
       hexCoord: { q: 3, r: 2 },
-      difficulty: 2
+      difficulty: 2,
     },
     {
       id: 'load-balancing',
@@ -1088,7 +1088,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 4, r: 2 },
       proficiency: 'O',
-      relatedTo: ['performance-scalability']
+      relatedTo: ['performance-scalability'],
     },
     {
       id: 'cache-architecture',
@@ -1097,7 +1097,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 3, r: 3 },
       proficiency: 'O',
-      relatedTo: ['performance-scalability']
+      relatedTo: ['performance-scalability'],
     },
     {
       id: 'cdn-optimization',
@@ -1106,7 +1106,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 4, r: 3 },
       proficiency: 'O',
-      relatedTo: ['performance-scalability']
+      relatedTo: ['performance-scalability'],
     },
     {
       id: 'database-scaling',
@@ -1115,7 +1115,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 4, r: 1 },
       proficiency: 'O',
-      relatedTo: ['performance-scalability']
+      relatedTo: ['performance-scalability'],
     },
     {
       id: 'horizontal-vertical-scaling',
@@ -1124,7 +1124,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 3, r: 1 },
       proficiency: 'O',
-      relatedTo: ['performance-scalability']
+      relatedTo: ['performance-scalability'],
     },
 
     // 大技能 - 安全性架構 (中高階)
@@ -1134,7 +1134,7 @@ const SKILL_TREE_CONFIG = {
       type: 'architecture',
       skillLevel: 'major',
       hexCoord: { q: 4, r: 4 },
-      difficulty: 3
+      difficulty: 3,
     },
     {
       id: 'auth-authorization',
@@ -1144,7 +1144,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 5, r: 4 },
       proficiency: 'O',
-      relatedTo: ['security-architecture']
+      relatedTo: ['security-architecture'],
     },
     {
       id: 'api-security',
@@ -1153,7 +1153,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 4, r: 5 },
       proficiency: 'O',
-      relatedTo: ['security-architecture']
+      relatedTo: ['security-architecture'],
     },
     {
       id: 'data-encryption',
@@ -1162,7 +1162,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 5, r: 5 },
       proficiency: 'O',
-      relatedTo: ['security-architecture']
+      relatedTo: ['security-architecture'],
     },
     {
       id: 'secure-coding',
@@ -1171,7 +1171,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 5, r: 3 },
       proficiency: '*',
-      relatedTo: ['security-architecture']
+      relatedTo: ['security-architecture'],
     },
     {
       id: 'threat-modeling',
@@ -1180,7 +1180,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 4, r: 6 },
       proficiency: '*',
-      relatedTo: ['security-architecture']
+      relatedTo: ['security-architecture'],
     },
 
     // 大技能 - 架構治理 (高階)
@@ -1190,7 +1190,7 @@ const SKILL_TREE_CONFIG = {
       type: 'architecture',
       skillLevel: 'major',
       hexCoord: { q: 5, r: 6 },
-      difficulty: 4
+      difficulty: 4,
     },
     {
       id: 'technical-debt',
@@ -1199,7 +1199,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 6, r: 6 },
       proficiency: '*',
-      relatedTo: ['architecture-governance']
+      relatedTo: ['architecture-governance'],
     },
     {
       id: 'architecture-decisions',
@@ -1208,7 +1208,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 5, r: 7 },
       proficiency: 'X',
-      relatedTo: ['architecture-governance']
+      relatedTo: ['architecture-governance'],
     },
     {
       id: 'code-quality',
@@ -1217,7 +1217,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 6, r: 7 },
       proficiency: '*',
-      relatedTo: ['architecture-governance']
+      relatedTo: ['architecture-governance'],
     },
     {
       id: 'performance-monitoring',
@@ -1226,7 +1226,7 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 6, r: 5 },
       proficiency: '*',
-      relatedTo: ['architecture-governance']
+      relatedTo: ['architecture-governance'],
     },
     {
       id: 'disaster-recovery',
@@ -1235,9 +1235,9 @@ const SKILL_TREE_CONFIG = {
       skillLevel: 'minor',
       hexCoord: { q: 5, r: 8 },
       proficiency: '*',
-      relatedTo: ['architecture-governance']
-    }
-  ]
+      relatedTo: ['architecture-governance'],
+    },
+  ],
 };
 
 // 導出配置

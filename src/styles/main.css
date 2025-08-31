@@ -1,80 +1,86 @@
 /**
- * 主樣式文件 - Gaming Portfolio
- * Config-Driven Architecture
+ * 主樣式入口文件
+ * 
+ * 整合所有設計系統組件，提供統一的樣式載入
  */
 
-/* CSS 變數定義 */
-:root {
-  /* 主色調 */
-  --primary-dark: #0a0a0a;
-  --secondary-dark: #1a1a2e;
-  --primary-gold: #d4af37;
-  --bright-gold: #f4d03f;
-  --primary-blue: #2980b9;
-  --primary-red: #8b0000;
-  
-  /* 字體系統 */
-  --font-heading: 'Cinzel', 'Noto Serif TC', serif;
-  --font-body: 'Inter', 'Noto Sans TC', sans-serif;
-  --font-code: 'Fira Code', 'JetBrains Mono', monospace;
-  
-  /* 間距系統 */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  
-  /* 斷點系統 */
-  --breakpoint-sm: 640px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
-  
-  /* 動畫變數 */
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.3s ease;
-  --transition-slow: 0.5s ease;
-}
+/* ===== 設計系統核心 ===== */
 
-/* Reset & Normalize */
+/* 1. CSS 變數系統 - 必須最先載入 */
+@import './design-system/variables.css';
+
+/* 2. CSS Reset - 重置瀏覽器默認樣式 */
+@import './design-system/reset.css';
+
+/* 3. 全域樣式 - 基礎元素樣式 */
+@import './design-system/global.css';
+
+/* 4. 工具類別 - 原子化工具類別 */
+@import './design-system/utilities.css';
+
+/* 5. 響應式系統 - 斷點和媒體查詢 */
+@import './design-system/responsive.css';
+
+/* ===== 字體載入 ===== */
+
+/* Google Fonts - 遊戲化字體 */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@300;400;500;600&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+/* 中文字體支援 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;500;600;700&display=swap');
+
+/* ===== 全域初始化 ===== */
+
+/* 確保所有元素使用正確的字體 */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
   font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--bright-gold);
-  background: var(--primary-dark);
-  overflow-x: hidden;
 }
 
-/* 工具類別 */
-.hidden {
-  display: none !important;
+h1, h2, h3, h4, h5, h6,
+.font-heading {
+  font-family: var(--font-heading);
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+code, pre,
+.font-code {
+  font-family: var(--font-code);
 }
+
+.font-gaming {
+  font-family: var(--font-gaming);
+}
+
+/* ===== 主題初始化 ===== */
+
+/* 初始化主題模式 */
+:root {
+  color-scheme: dark; /* 告訴瀏覽器我們使用暗色主題 */
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+[data-theme="neon"] {
+  color-scheme: dark;
+}
+
+/* 主題切換動畫 */
+* {
+  transition: 
+    background-color var(--animation-normal) var(--easing-smooth),
+    color var(--animation-normal) var(--easing-smooth),
+    border-color var(--animation-normal) var(--easing-smooth);
+}
+
+/* 在減少動畫模式下禁用主題切換動畫 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none;
+  }
+}
+
+/* ===== 應用專用樣式 ===== */
 
 /* 載入畫面樣式 */
 .loading-screen {
@@ -83,11 +89,11 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+  background: var(--gradient-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 10000;
 }
 
 .loading-spinner {
@@ -97,8 +103,8 @@ body {
 .spinner {
   width: 60px;
   height: 60px;
-  border: 3px solid rgba(212, 175, 55, 0.1);
-  border-top: 3px solid var(--primary-gold);
+  border: 3px solid var(--opacity-gold-20);
+  border-top: 3px solid var(--color-primary-gold);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto var(--space-4);
@@ -106,9 +112,9 @@ body {
 
 .loading-text {
   font-family: var(--font-heading);
-  font-size: 1.2rem;
-  color: var(--primary-gold);
-  letter-spacing: 0.1em;
+  font-size: var(--font-size-xl);
+  color: var(--color-primary-gold);
+  letter-spacing: var(--letter-spacing-gaming);
 }
 
 @keyframes spin {
@@ -128,10 +134,10 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
-  background: rgba(26, 26, 46, 0.9);
+  z-index: var(--z-navbar);
+  background: var(--opacity-bg-medium);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--primary-gold);
+  border-bottom: 1px solid var(--theme-accent);
 }
 
 /* 頁面內容樣式 */
@@ -150,22 +156,22 @@ body {
 
 .welcome-title {
   font-family: var(--font-heading);
-  font-size: 3rem;
-  color: var(--primary-gold);
+  font-size: var(--font-size-5xl);
+  color: var(--theme-accent);
   margin-bottom: var(--space-4);
-  text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+  text-shadow: var(--shadow-glow-gold);
 }
 
 .welcome-subtitle {
-  font-size: 1.5rem;
-  color: var(--bright-gold);
+  font-size: var(--font-size-xl);
+  color: var(--theme-text-secondary);
   margin-bottom: var(--space-8);
-  font-weight: 300;
+  font-weight: var(--font-weight-light);
 }
 
 .status-info {
-  background: rgba(26, 26, 46, 0.8);
-  border: 1px solid var(--primary-gold);
+  background: var(--opacity-bg-light);
+  border: 1px solid var(--theme-accent);
   border-radius: 8px;
   padding: var(--space-6);
   margin-bottom: var(--space-8);
@@ -177,27 +183,27 @@ body {
 }
 
 .status-info strong {
-  color: var(--primary-gold);
+  color: var(--theme-accent);
 }
 
 .directory-structure {
   text-align: left;
-  background: rgba(10, 10, 10, 0.8);
-  border: 1px solid var(--primary-blue);
+  background: var(--color-gray-900);
+  border: 1px solid var(--color-primary-blue);
   border-radius: 8px;
   padding: var(--space-6);
 }
 
 .directory-structure h3 {
-  color: var(--primary-blue);
+  color: var(--color-primary-blue);
   margin-bottom: var(--space-4);
 }
 
 .directory-structure pre {
   font-family: var(--font-code);
-  font-size: 0.9rem;
-  line-height: 1.4;
-  color: var(--bright-gold);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-code);
+  color: var(--theme-text-primary);
   overflow-x: auto;
 }
 
@@ -208,48 +214,94 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.9);
+  background: var(--opacity-overlay-strong);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  z-index: var(--z-modal);
 }
 
 .error-content {
-  background: var(--secondary-dark);
-  border: 2px solid var(--primary-red);
+  background: var(--theme-secondary);
+  border: 2px solid var(--color-status-error);
   border-radius: 8px;
   padding: var(--space-8);
   text-align: center;
   max-width: 500px;
+  box-shadow: var(--shadow-large);
 }
 
 .error-content h2 {
-  color: var(--primary-red);
+  color: var(--color-status-error);
   margin-bottom: var(--space-4);
 }
 
 .retry-button {
-  background: var(--primary-gold);
-  color: var(--primary-dark);
+  background: var(--theme-accent);
+  color: var(--theme-background);
   border: none;
-  padding: var(--space-2) var(--space-6);
+  padding: var(--space-2-5) var(--space-6);
   border-radius: 4px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semi-bold);
   cursor: pointer;
   margin-top: var(--space-4);
-  transition: var(--transition-fast);
+  transition: all var(--animation-fast) var(--easing-smooth);
+  font-family: inherit;
 }
 
 .retry-button:hover {
-  background: var(--bright-gold);
-  transform: translateY(-1px);
+  background: var(--color-gold-bright);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+/* 滾動進度指示器 */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--gradient-gold);
+  transform-origin: left;
+  transform: scaleX(0);
+  z-index: var(--z-navbar);
+  transition: transform var(--animation-fast) var(--easing-smooth);
+}
+
+/* 全頁面魔法光暈背景 */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, var(--opacity-gold-10) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, var(--opacity-blue-10) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+  animation: magical-background 20s ease-in-out infinite;
+}
+
+@keyframes magical-background {
+  0%, 100% {
+    background: 
+      radial-gradient(circle at 20% 80%, var(--opacity-gold-10) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, var(--opacity-blue-10) 0%, transparent 50%);
+  }
+  50% {
+    background: 
+      radial-gradient(circle at 80% 20%, var(--opacity-gold-10) 0%, transparent 50%),
+      radial-gradient(circle at 20% 80%, var(--opacity-blue-10) 0%, transparent 50%);
+  }
 }
 
 /* 響應式設計 */
 @media (max-width: 768px) {
   .welcome-title {
-    font-size: 2rem;
+    font-size: var(--font-size-3xl);
   }
   
   .welcome-container {
@@ -257,15 +309,27 @@ body {
   }
   
   .directory-structure pre {
-    font-size: 0.8rem;
+    font-size: var(--font-size-xs);
+  }
+  
+  /* 在移動端簡化背景動畫 */
+  body::after {
+    animation: none;
+    background: 
+      radial-gradient(circle at 50% 50%, var(--opacity-gold-10) 0%, transparent 70%);
   }
 }
 
-/* 可及性增強 */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+/* 設計系統載入完成標記 */
+html {
+  --design-system-loaded: true;
+}
+
+html[data-design-system="loaded"] {
+  opacity: 1;
+  transition: opacity var(--animation-slow) var(--easing-smooth);
+}
+
+html:not([data-design-system="loaded"]) {
+  opacity: 0;
 }
