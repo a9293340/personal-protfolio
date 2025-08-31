@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>簡化核心系統測試</title>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+      color: #ffffff;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 2rem;
+      background: rgba(212, 175, 55, 0.1);
+      border-radius: 12px;
+      border: 2px solid #d4af37;
+    }
+
+    .header h1 {
+      color: #d4af37;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    }
+
+    .test-section {
+      background: rgba(26, 26, 46, 0.8);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid #333;
+    }
+
+    .test-button {
+      background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .test-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    }
+
+    .console-output {
+      background: #000;
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      max-height: 400px;
+      overflow-y: auto;
+      margin: 1rem 0;
+      white-space: pre-wrap;
+      color: #00ff00;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .status-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .status-indicator {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+
+    .status-pending { background: #95a5a6; }
+    .status-success { background: #27ae60; }
+    .status-error { background: #e74c3c; }
+    .status-running { background: #f39c12; animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎮 簡化核心系統測試</h1>
+      <p>直接測試核心系統功能</p>
+    </div>
+
+    <div class="test-section">
+      <h2>系統狀態</h2>
+      <div class="status-grid">
+        <div class="status-card">
+          <span class="status-indicator status-pending" id="router-status"></span>
+          <span>Router: <span id="router-info">未初始化</span></span>
+        </div>
+        <div class="status-card">
+          <span class="status-indicator status-pending" id="state-status"></span>
+          <span>State: <span id="state-info">未初始化</span></span>
+        </div>
+        <div class="status-card">
+          <span class="status-indicator status-pending" id="core-status"></span>
+          <span>Core: <span id="core-info">未初始化</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>測試操作</h2>
+      <button class="test-button" onclick="initializeSystem()">初始化系統</button>
+      <button class="test-button" onclick="testRouter()">測試路由</button>
+      <button class="test-button" onclick="testState()">測試狀態管理</button>
+      <button class="test-button" onclick="clearLog()">清除日誌</button>
+    </div>
+
+    <div class="test-section">
+      <h2>測試輸出</h2>
+      <div class="console-output" id="console-output">等待測試開始...</div>
+    </div>
+  </div>
+
+  <!-- 隱藏的路由測試容器 -->
+  <div id="test-container" style="display: none;"></div>
+
+  <script type="module">
+    let systems = {
+      router: null,
+      state: null,
+      core: null
+    };
+
+    // 日誌功能
+    function log(message, type = 'info') {
+      const output = document.getElementById('console-output');
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = `[${timestamp}] ${message}\n`;
+      
+      output.textContent += logEntry;
+      output.scrollTop = output.scrollHeight;
+      
+      console.log(message);
+    }
+
+    // 更新狀態指示器
+    function updateStatus(system, status, info) {
+      const statusEl = document.getElementById(`${system}-status`);
+      const infoEl = document.getElementById(`${system}-info`);
+      
+      statusEl.className = `status-indicator status-${status}`;
+      infoEl.textContent = info;
+    }
+
+    // 初始化系統
+    window.initializeSystem = async function() {
+      try {
+        log('🚀 開始初始化系統...', 'info');
+        
+        updateStatus('router', 'running', '初始化中');
+        updateStatus('state', 'running', '初始化中');
+        updateStatus('core', 'running', '初始化中');
+
+        // 導入 Router
+        const { createRouter } = await import('/src/core/router/Router.ts');
+        systems.router = createRouter({ 
+          mode: 'hash',
+          container: '#test-container' // 提供一個測試容器
+        });
+        updateStatus('router', 'success', '已就緒');
+        log('✅ Router 系統初始化完成');
+
+        // 導入 StateManager
+        const { createStateManager } = await import('/src/core/state/StateManager.ts');
+        systems.state = createStateManager({
+          strict: false,
+          persistent: false,
+          devtools: true
+        });
+        updateStatus('state', 'success', '已就緒');
+        log('✅ StateManager 系統初始化完成');
+
+        // 導入 CoreSystem
+        const { initializeCoreSystem } = await import('/src/core/index.ts');
+        systems.core = await initializeCoreSystem();
+        updateStatus('core', 'success', '已就緒');
+        log('✅ CoreSystem 系統初始化完成');
+
+        log('🎉 所有系統初始化完成！');
+
+      } catch (error) {
+        log(`❌ 初始化失敗: ${error.message}`, 'error');
+        updateStatus('router', 'error', '失敗');
+        updateStatus('state', 'error', '失敗');
+        updateStatus('core', 'error', '失敗');
+      }
+    };
+
+    // 測試路由系統
+    window.testRouter = async function() {
+      if (!systems.router) {
+        log('❌ 請先初始化系統');
+        return;
+      }
+
+      try {
+        log('🛣️ 測試路由系統...');
+
+        // 添加測試路由
+        const testRoutes = [
+          {
+            path: '/',
+            name: 'home',
+            redirect: '/dashboard'
+          },
+          {
+            path: '/dashboard',
+            name: 'dashboard',
+            meta: { title: '儀表板' }
+          },
+          {
+            path: '/profile/:id',
+            name: 'profile', 
+            meta: { title: '個人資料' }
+          }
+        ];
+
+        systems.router.addRoutes(testRoutes);
+        log(`✅ 添加了 ${testRoutes.length} 個測試路由`);
+
+        // 測試路由匹配
+        const matchResult = systems.router.matchRoute('/profile/123');
+        if (matchResult) {
+          log(`✅ 路由匹配成功: ${matchResult.route.path}`);
+          log(`   參數: ${JSON.stringify(matchResult.params)}`);
+        }
+
+        // 測試導航事件監聽
+        systems.router.on('router:navigated', (data) => {
+          log(`🔄 導航完成: ${data.to.path}`);
+        });
+
+        // 不進行實際導航，只測試路由匹配
+        log('✅ 路由匹配測試完成');
+        log('📄 跳過實際導航測試（無需頁面容器）');
+        log('✅ 路由測試完成');
+
+      } catch (error) {
+        log(`❌ 路由測試失敗: ${error.message}`);
+      }
+    };
+
+    // 測試狀態管理
+    window.testState = async function() {
+      if (!systems.state) {
+        log('❌ 請先初始化系統');
+        return;
+      }
+
+      try {
+        log('📦 測試狀態管理系統...');
+
+        // 註冊用戶模組
+        const userModule = {
+          namespace: 'user',
+          initialState: {
+            id: null,
+            name: '',
+            isAuthenticated: false
+          },
+          mutations: {
+            setUser(state, payload) {
+              state.id = payload.id;
+              state.name = payload.name;
+              state.isAuthenticated = true;
+            },
+            logout(state) {
+              state.id = null;
+              state.name = '';
+              state.isAuthenticated = false;
+            }
+          },
+          actions: {
+            async login(context, { username }) {
+              context.commit('setUser', {
+                id: Math.floor(Math.random() * 1000),
+                name: username
+              });
+              return { success: true };
+            }
+          },
+          getters: {
+            isLoggedIn: (state) => state.isAuthenticated,
+            displayName: (state) => state.name || '訪客'
+          }
+        };
+
+        systems.state.registerModule(userModule);
+        log('✅ 用戶模組註冊完成');
+
+        // 設置訂閱
+        systems.state.subscribe((mutation, state) => {
+          log(`🔄 狀態變更: ${mutation.type}`);
+        });
+
+        // 測試登入
+        await systems.state.dispatch('user/login', { username: 'testuser' });
+        
+        const isLoggedIn = systems.state.getGetter('user', 'isLoggedIn');
+        const displayName = systems.state.getGetter('user', 'displayName');
+        
+        log(`✅ 登入狀態: ${isLoggedIn}`);
+        log(`✅ 用戶名稱: ${displayName}`);
+
+        // 創建快照
+        const snapshot = systems.state.createSnapshot('test-snapshot');
+        log(`✅ 狀態快照已創建: ${snapshot.id}`);
+        
+        log('✅ 狀態管理測試完成');
+
+      } catch (error) {
+        log(`❌ 狀態管理測試失敗: ${error.message}`);
+      }
+    };
+
+    // 清除日誌
+    window.clearLog = function() {
+      document.getElementById('console-output').textContent = '';
+    };
+
+    // 頁面載入完成
+    log('🎮 測試頁面載入完成');
+    log('請點擊"初始化系統"開始測試');
+  </script>
+</body>
+</html>
