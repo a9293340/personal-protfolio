@@ -17,7 +17,13 @@
 import { BaseComponent } from '../../../core/components/BaseComponent.js';
 import type { ComponentConfig, ComponentState } from '../../../core/components/BaseComponent.js';
 import { HexCoordSystem } from './HexCoordSystem.js';
-import type { SkillTreeConfig, SkillNode, HexCoord } from './types.js';
+import type { HexCoord } from './HexCoordSystem.js';
+import type { 
+  SkillTreeConfig, 
+  SkillNode, 
+  SkillsDataConfig,
+  RenderedSkillNode 
+} from './types.js';
 
 // SkillTree 特定的配置接口
 export interface SkillTreeComponentConfig extends ComponentConfig {
@@ -257,27 +263,129 @@ export class SkillTree extends BaseComponent {
    * 載入技能樹數據
    */
   private async loadSkillTreeData(): Promise<void> {
-    // 這裡將會整合配置系統載入技能數據
-    // 暫時使用空數據作為佔位符
     console.log('[SkillTree] 載入技能樹數據...');
     
-    // TODO: 實際數據載入將在後續子階段實現
-    // const skillData = await ConfigManager.loadSkillTreeConfig();
+    try {
+      // 動態載入技能數據配置
+      const skillDataModule = await import('../../../config/data/skills.data.js');
+      const skillsData = skillDataModule.skillsDataConfig || skillDataModule.default;
+      
+      if (!skillsData) {
+        throw new Error('技能數據配置未找到');
+      }
+      
+      // 將配置數據轉換為組件可用的節點數據
+      const allNodes = [
+        skillsData.tree.center,
+        ...skillsData.tree.ring1,
+        ...skillsData.tree.ring2,
+        ...skillsData.tree.ring3
+      ] as SkillNode[];
+      
+      // 驗證數據完整性
+      this.validateSkillData(allNodes);
+      
+      // 更新組件狀態
+      this.setState({ 
+        nodes: allNodes,
+        isLoaded: true 
+      });
+      
+      console.log(`[SkillTree] 成功載入 ${allNodes.length} 個技能節點`);
+      
+      // 觸發數據載入完成事件
+      this.emit('data:loaded', { config: skillsData });
+      
+    } catch (error) {
+      console.error('[SkillTree] 技能數據載入失敗:', error);
+      throw new Error(`技能數據載入失敗: ${error.message}`);
+    }
+  }
+
+  /**
+   * 驗證技能數據完整性
+   */
+  private validateSkillData(nodes: SkillNode[]): void {
+    console.log('[SkillTree] 驗證技能數據...');
     
-    console.log('[SkillTree] 技能樹數據載入完成');
+    const errors: string[] = [];
+    
+    nodes.forEach((node, index) => {
+      // 驗證必要欄位
+      if (!node.id) errors.push(`節點 ${index}: 缺少 id`);
+      if (!node.name) errors.push(`節點 ${index}: 缺少 name`);
+      if (!node.category) errors.push(`節點 ${index}: 缺少 category`);
+      if (!node.status) errors.push(`節點 ${index}: 缺少 status`);
+      if (!node.coordinates) errors.push(`節點 ${index}: 缺少 coordinates`);
+      
+      // 驗證座標格式
+      if (node.coordinates) {
+        if (typeof node.coordinates.q !== 'number') {
+          errors.push(`節點 ${node.id}: coordinates.q 必須是數字`);
+        }
+        if (typeof node.coordinates.r !== 'number') {
+          errors.push(`節點 ${node.id}: coordinates.r 必須是數字`);
+        }
+      }
+      
+      // 驗證技能陣列
+      if (!Array.isArray(node.skills)) {
+        errors.push(`節點 ${node.id}: skills 必須是陣列`);
+      }
+    });
+    
+    if (errors.length > 0) {
+      console.error('[SkillTree] 數據驗證失敗:', errors);
+      throw new Error(`數據驗證失敗: ${errors.join('; ')}`);
+    }
+    
+    console.log(`[SkillTree] 數據驗證通過，共 ${nodes.length} 個節點`);
   }
 
   /**
    * 生成技能樹結構
    */
   private generateSkillTree(): void {
-    // 從配置生成技能節點和連接
-    // 這裡將會處理從 POC-001 遷移來的邏輯
     console.log('[SkillTree] 生成技能樹結構...');
     
-    // TODO: 具體實現將在後續子階段完成
+    const { nodes } = this.state;
     
-    console.log('[SkillTree] 技能樹結構生成完成');
+    if (!nodes || nodes.length === 0) {
+      console.warn('[SkillTree] 沒有技能節點數據，跳過結構生成');
+      return;
+    }
+    
+    // 生成連接關係
+    const connections = this.generateConnections(nodes);
+    this.setState({ connections });
+    
+    console.log(`[SkillTree] 技能樹結構生成完成: ${nodes.length} 節點, ${connections.length} 連接`);
+  }
+
+  /**
+   * 生成技能節點之間的連接關係
+   */
+  private generateConnections(nodes: SkillNode[]): Array<{ from: string; to: string }> {
+    const connections: Array<{ from: string; to: string }> = [];
+    
+    nodes.forEach(node => {
+      if (node.prerequisites && node.prerequisites.length > 0) {
+        node.prerequisites.forEach(prereqId => {
+          // 檢查前置技能是否存在
+          const prereqNode = nodes.find(n => n.id === prereqId);
+          if (prereqNode) {
+            connections.push({
+              from: prereqId,
+              to: node.id
+            });
+          } else {
+            console.warn(`[SkillTree] 前置技能不存在: ${prereqId} -> ${node.id}`);
+          }
+        });
+      }
+    });
+    
+    return connections;
   }
 
   /**

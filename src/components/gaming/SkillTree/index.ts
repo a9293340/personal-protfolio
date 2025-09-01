@@ -2,10 +2,10 @@
  * SkillTree 組件模組入口
  * 
  * 統一匯出技能樹相關的所有類別和類型
- * 基於 POC-001 遷移到新架構的技能樹系統
+ * 基於新的 Config-Driven 架構設計
  * 
  * @author Claude
- * @version 2.0.0
+ * @version 2.1.0 - 適配新配置系統
  */
 
 // 主要組件類別
@@ -25,17 +25,17 @@ export type {
 // 類型定義
 export type {
   // 基本類型
-  ProficiencyLevel,
-  SkillLevel,
-  SkillType,
+  SkillStatus,
+  SkillCategory,
   
   // 數據結構
   SkillNode,
   SkillTreeConfig,
-  SkillConnection,
+  SkillsDataConfig,
   RenderedSkillNode,
-  ProficiencyDefinition,
-  SkillTypeDefinition,
+  SkillCategoryDefinition,
+  ProficiencyLevelDefinition,
+  LearningPath,
   
   // 配置和狀態
   ViewportConfig,
@@ -52,35 +52,14 @@ export type {
   RenderedNode,
 } from './types.js';
 
-// 預設配置常數
-export const DEFAULT_SKILL_TREE_CONFIG = {
-  nodeSize: 30,
-  viewWidth: 1200,
-  viewHeight: 800,
-  enableDrag: true,
-  enableZoom: true,
-  enableNodeClick: true,
-  showGrid: true,
-  showConnections: true,
-  animationDuration: 300,
-} as const;
+// 預設配置常數（從 types.js 導入）
+export { DEFAULT_SKILL_TREE_CONFIG } from './types.js';
 
-// 技能類型顏色主題
-export const SKILL_TYPE_COLORS = {
-  frontend: '#e74c3c',    // 紅色
-  backend: '#3498db',     // 藍色
-  database: '#2ecc71',    // 綠色
-  'cloud-devops': '#9b59b6',  // 紫色
-  ai: '#f39c12',          // 橙色
-  architecture: '#1abc9c', // 青色
-} as const;
-
-// 熟練度等級配置
-export const PROFICIENCY_CONFIGS = {
-  'O': { level: 'expert', name: '熟練', opacity: 1.0 },
-  '*': { level: 'intermediate', name: '略懂', opacity: 0.7 },
-  'X': { level: 'learning', name: '待學習', opacity: 0.4 },
-} as const;
+// 技能狀態樣式和類別色彩
+export { 
+  SKILL_STATUS_STYLES, 
+  SKILL_CATEGORY_COLORS 
+} from './types.js';
 
 // 工具函數
 export const SkillTreeUtils = {
@@ -91,11 +70,11 @@ export const SkillTreeUtils = {
     return !!(
       node.id &&
       node.name &&
-      node.type &&
-      node.skillLevel &&
-      node.hexCoord &&
-      typeof node.hexCoord.q === 'number' &&
-      typeof node.hexCoord.r === 'number'
+      node.category &&
+      node.status &&
+      node.coordinates &&
+      typeof node.coordinates.q === 'number' &&
+      typeof node.coordinates.r === 'number'
     );
   },
 
@@ -103,42 +82,71 @@ export const SkillTreeUtils = {
    * 計算技能樹統計信息
    */
   getSkillTreeStats(config: any) {
+    const allNodes = [
+      config.tree.center,
+      ...config.tree.ring1,
+      ...config.tree.ring2,
+      ...config.tree.ring3
+    ];
+
     const stats = {
-      totalSkills: config.skills.length,
-      skillsByType: {} as Record<string, number>,
+      totalSkills: allNodes.length,
+      skillsByCategory: {} as Record<string, number>,
+      skillsByStatus: {} as Record<string, number>,
       skillsByLevel: {} as Record<string, number>,
-      skillsByProficiency: {} as Record<string, number>,
     };
 
-    config.skills.forEach(skill => {
-      // 按類型統計
-      stats.skillsByType[skill.type] = (stats.skillsByType[skill.type] || 0) + 1;
+    allNodes.forEach(skill => {
+      // 按類別統計
+      stats.skillsByCategory[skill.category] = (stats.skillsByCategory[skill.category] || 0) + 1;
+      
+      // 按狀態統計
+      stats.skillsByStatus[skill.status] = (stats.skillsByStatus[skill.status] || 0) + 1;
       
       // 按等級統計
-      stats.skillsByLevel[skill.skillLevel] = (stats.skillsByLevel[skill.skillLevel] || 0) + 1;
-      
-      // 按熟練度統計
-      if (skill.proficiency) {
-        stats.skillsByProficiency[skill.proficiency] = (stats.skillsByProficiency[skill.proficiency] || 0) + 1;
-      }
+      stats.skillsByLevel[skill.level] = (stats.skillsByLevel[skill.level] || 0) + 1;
     });
 
     return stats;
   },
 
   /**
-   * 根據類型過濾技能
+   * 根據類別過濾技能
    */
-  filterSkillsByType(skills: any[], types: string[]): any[] {
-    return skills.filter(skill => types.includes(skill.type));
+  filterSkillsByCategory(skills: any[], categories: string[]): any[] {
+    return skills.filter(skill => categories.includes(skill.category));
   },
 
   /**
-   * 根據熟練度過濾技能
+   * 根據狀態過濾技能
    */
-  filterSkillsByProficiency(skills: any[], proficiencies: string[]): any[] {
-    return skills.filter(skill => 
-      skill.proficiency && proficiencies.includes(skill.proficiency)
-    );
+  filterSkillsByStatus(skills: any[], statuses: string[]): any[] {
+    return skills.filter(skill => statuses.includes(skill.status));
+  },
+
+  /**
+   * 獲取技能節點的依賴鏈
+   */
+  getDependencyChain(skillId: string, allSkills: any[]): string[] {
+    const skill = allSkills.find(s => s.id === skillId);
+    if (!skill || !skill.prerequisites) return [skillId];
+    
+    const dependencies: string[] = [];
+    for (const prereq of skill.prerequisites) {
+      dependencies.push(...this.getDependencyChain(prereq, allSkills));
+    }
+    dependencies.push(skillId);
+    
+    return [...new Set(dependencies)]; // 去重
+  },
+
+  /**
+   * 檢查技能是否可以解鎖
+   */
+  canUnlockSkill(skillId: string, allSkills: any[], unlockedSkills: Set<string>): boolean {
+    const skill = allSkills.find(s => s.id === skillId);
+    if (!skill || !skill.prerequisites) return true;
+    
+    return skill.prerequisites.every((prereqId: string) => unlockedSkills.has(prereqId));
   },
 } as const;

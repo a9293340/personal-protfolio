@@ -2,217 +2,245 @@
  * SkillTree 類型定義文件
  * 
  * 定義技能樹系統中使用的所有數據結構和類型
- * 基於 POC-001 的配置結構遷移而來
+ * 基於配置文件 skills.data.js 的結構設計
  * 
  * @author Claude
- * @version 2.0.0
+ * @version 2.1.0 - 適配新配置系統
  */
 
 import type { HexCoord } from './HexCoordSystem.js';
 
-// 技能熟練度等級
-export type ProficiencyLevel = 'O' | '*' | 'X';
+// 技能狀態類型
+export type SkillStatus = 'mastered' | 'available' | 'learning' | 'locked';
 
-// 技能等級類型
-export type SkillLevel = 'major' | 'minor';
-
-// 技能類型/領域
-export type SkillType = 
-  | 'frontend' 
+// 技能類別類型
+export type SkillCategory = 
   | 'backend' 
+  | 'architecture' 
   | 'database' 
-  | 'cloud-devops' 
-  | 'ai' 
-  | 'architecture';
+  | 'devops' 
+  | 'frontend' 
+  | 'soft';
 
-// 熟練度定義
-export interface ProficiencyDefinition {
-  level: 'expert' | 'intermediate' | 'learning';
+// 單一技能定義（技能節點內的子技能）
+export interface Skill {
   name: string;
-  opacity: number;
+  proficiency: number; // 0-100
 }
 
-// 技能領域類型定義
-export interface SkillTypeDefinition {
+// 學習資源定義
+export interface LearningResource {
+  type: 'book' | 'course' | 'tutorial' | 'documentation';
+  title: string;
+  url?: string;
+}
+
+// 技能類別定義
+export interface SkillCategoryDefinition {
+  name: string;
   color: string;
-  direction: number; // 角度（0-360）
-  name: string;
+  icon: string;
+  description: string;
 }
 
-// 技能節點數據結構
+// 技能節點數據結構（基於配置文件）
 export interface SkillNode {
   // 基本信息
   id: string;
   name: string;
-  type: SkillType;
-  skillLevel: SkillLevel;
+  category: SkillCategory;
+  level: number; // 1-5
+  status: SkillStatus;
   
   // 座標信息
-  hexCoord: HexCoord;
-  pixelCoord?: { x: number; y: number }; // 渲染時計算
+  coordinates: HexCoord;
   
-  // 技能屬性
-  difficulty?: number; // 難度等級，影響離中心的距離
-  proficiency?: ProficiencyLevel; // 熟練度等級
-  
-  // 關聯關係
-  relatedTo?: string[]; // 相關的技能 ID
-  prerequisites?: string[]; // 前置技能 ID
-  unlocks?: string[]; // 解鎖的技能 ID
-  
-  // 顯示狀態
-  isVisible?: boolean;
-  isUnlocked?: boolean;
-  isSelected?: boolean;
-  isHovered?: boolean;
+  // 學習依賴
+  prerequisites?: string[]; // 前置技能 ID 數組
   
   // 描述信息
-  description?: string;
-  tags?: string[];
-  experience?: string; // 經驗描述
-  projects?: string[]; // 相關專案
+  description: string;
+  
+  // 子技能列表
+  skills: Skill[];
+  
+  // 相關專案
+  projects?: string[];
+  
+  // 學習資源
+  learningResources?: LearningResource[];
 }
 
-// 技能樹配置結構
-export interface SkillTreeConfig {
-  // 技能領域定義
-  types: Record<SkillType, SkillTypeDefinition>;
-  
-  // 熟練度等級定義
-  proficiencyLevels: Record<ProficiencyLevel, ProficiencyDefinition>;
-  
-  // 所有技能節點
-  skills: SkillNode[];
-  
-  // 版本信息
-  version?: string;
-  lastUpdated?: string;
-  
-  // 元數據
-  metadata?: {
-    totalSkills: number;
-    skillTypes: SkillType[];
-    maxDifficulty: number;
-  };
+// 學習路徑定義
+export interface LearningPath {
+  name: string;
+  description: string;
+  steps: string[]; // 技能節點 ID 的順序
+  estimatedTimeMonths: number;
 }
 
-// 技能連接定義
-export interface SkillConnection {
-  from: string; // 起始技能 ID
-  to: string;   // 目標技能 ID
-  type: 'prerequisite' | 'related' | 'progression';
-  strength?: number; // 連接強度（影響視覺表現）
+// 熟練度等級定義
+export interface ProficiencyLevelDefinition {
+  name: string;
+  description: string;
 }
 
-// 渲染用的技能節點
-export interface RenderedSkillNode extends SkillNode {
-  // 渲染屬性
-  pixelCoord: { x: number; y: number };
-  color: string;
-  size: number;
-  opacity: number;
-  
-  // 動畫屬性
-  animationDelay?: number;
-  isAnimating?: boolean;
-  
-  // SVG 元素引用
-  element?: SVGElement;
-  labelElement?: SVGElement;
+// 技能樹元數據
+export interface SkillTreeMetadata {
+  version: string;
+  lastUpdated: string;
+  totalSkills: number;
+  maxLevel: number;
+  coordinateSystem: string;
 }
 
-// 技能樹視窗配置
-export interface ViewportConfig {
-  width: number;
-  height: number;
-  centerX: number;
-  centerY: number;
-  minZoom: number;
-  maxZoom: number;
-  currentZoom: number;
+// 技能樹結構
+export interface SkillTreeStructure {
+  center: SkillNode;
+  ring1: SkillNode[];
+  ring2: SkillNode[];
+  ring3: SkillNode[];
 }
 
-// 技能樹互動狀態
-export interface InteractionState {
-  // 拖曳狀態
-  isDragging: boolean;
-  dragStartPos: { x: number; y: number };
-  dragCurrentPos: { x: number; y: number };
-  
-  // 縮放狀態
-  zoomLevel: number;
-  zoomCenter: { x: number; y: number };
-  
-  // 選擇狀態
-  selectedNodes: string[];
-  hoveredNode: string | null;
-  
-  // 過濾狀態
-  visibleTypes: SkillType[];
-  difficultyFilter: [number, number]; // [min, max]
-  proficiencyFilter: ProficiencyLevel[];
-}
-
-// 技能樹事件類型
-export interface SkillTreeEvents {
-  'node:click': { nodeId: string; node: SkillNode };
-  'node:hover': { nodeId: string; node: SkillNode };
-  'node:leave': { nodeId: string; node: SkillNode };
-  'node:select': { nodeId: string; node: SkillNode };
-  'node:deselect': { nodeId: string; node: SkillNode };
-  'viewport:change': { viewport: ViewportConfig };
-  'filter:change': { filters: Partial<InteractionState> };
-  'tree:load': { config: SkillTreeConfig };
-  'tree:error': { error: Error; context: string };
+// 完整的技能數據配置
+export interface SkillsDataConfig {
+  metadata: SkillTreeMetadata;
+  categories: Record<SkillCategory, SkillCategoryDefinition>;
+  tree: SkillTreeStructure;
+  learningPaths: Record<string, LearningPath>;
+  proficiencyLevels: Record<number, ProficiencyLevelDefinition>;
 }
 
 // 技能樹配置選項
-export interface SkillTreeOptions {
+export interface SkillTreeConfig {
   // 基本設置
-  container: string | HTMLElement;
-  width?: number;
-  height?: number;
+  nodeSize?: number;
+  gridSize?: number;
+  
+  // 視窗設置
+  viewWidth?: number;
+  viewHeight?: number;
+  centerX?: number;
+  centerY?: number;
+  
+  // 交互功能
+  enableDrag?: boolean;
+  enableZoom?: boolean;
+  enableNodeClick?: boolean;
   
   // 視覺設置
-  nodeSize?: number;
   showGrid?: boolean;
   showConnections?: boolean;
   animationDuration?: number;
   
-  // 互動設置
-  enableDrag?: boolean;
-  enableZoom?: boolean;
-  enableNodeClick?: boolean;
-  enableKeyboardNav?: boolean;
+  // 數據源
+  skillsData?: SkillsDataConfig;
   
-  // 主題設置
-  theme?: 'dark' | 'light' | 'neon';
-  customColors?: Partial<Record<SkillType, string>>;
-  
-  // 無障礙設置
-  ariaLabel?: string;
-  tabIndex?: number;
-  announceChanges?: boolean;
-  
-  // 性能設置
-  enableVirtualization?: boolean;
-  renderBatchSize?: number;
-  maxVisibleNodes?: number;
+  // 調試模式
+  debug?: boolean;
 }
 
-// 技能樹狀態快照（用於狀態管理）
+// 渲染用的技能節點（包含計算後的視覺屬性）
+export interface RenderedSkillNode extends SkillNode {
+  // 像素座標
+  x: number;
+  y: number;
+  
+  // 視覺屬性
+  isVisible: boolean;
+  isClickable: boolean;
+  opacity: number;
+  
+  // 連線信息
+  connections: Array<{
+    to: string;
+    isActive: boolean;
+  }>;
+}
+
+// 視窗配置
+export interface ViewportConfig {
+  x: number;
+  y: number;
+  scale: number;
+  width: number;
+  height: number;
+}
+
+// 交互狀態
+export interface InteractionState {
+  selectedNode: string | null;
+  hoveredNode: string | null;
+  isDragging: boolean;
+  dragMode: boolean;
+  lastPanPoint: { x: number; y: number };
+  currentPan: { x: number; y: number };
+}
+
+// 技能樹選項（擴展配置）
+export interface SkillTreeOptions extends SkillTreeConfig {
+  container?: HTMLElement | string;
+  theme?: 'dark' | 'light' | 'auto';
+  language?: 'zh-TW' | 'en-US';
+}
+
+// 技能樹快照（用於保存/載入狀態）
 export interface SkillTreeSnapshot {
-  timestamp: number;
   viewport: ViewportConfig;
-  interaction: InteractionState;
-  visibleNodes: string[];
-  selectedNodes: string[];
+  selectedNode: string | null;
+  userProgress?: Record<string, SkillStatus>;
+  timestamp: number;
 }
 
-// 匯出所有類型
-export type {
-  HexCoord,
-  SkillNode as Skill,
-  SkillTreeConfig as Config,
-  RenderedSkillNode as RenderedNode,
+// 技能樹事件類型
+export interface SkillTreeEvents {
+  'node:click': { node: SkillNode; event: MouseEvent };
+  'node:hover': { node: SkillNode | null; event: MouseEvent };
+  'viewport:change': { viewport: ViewportConfig };
+  'data:loaded': { config: SkillsDataConfig };
+  'render:complete': { nodesCount: number };
+}
+
+// 類型別名
+export type Config = SkillTreeConfig;
+export type RenderedNode = RenderedSkillNode;
+
+// 默認配置值
+export const DEFAULT_SKILL_TREE_CONFIG: Required<SkillTreeConfig> = {
+  nodeSize: 30,
+  gridSize: 20,
+  viewWidth: 1200,
+  viewHeight: 800,
+  centerX: 600,
+  centerY: 400,
+  enableDrag: true,
+  enableZoom: true,
+  enableNodeClick: true,
+  showGrid: false,
+  showConnections: true,
+  animationDuration: 300,
+  skillsData: {} as SkillsDataConfig,
+  debug: false,
+};
+
+// 技能狀態樣式映射
+export const SKILL_STATUS_STYLES: Record<SkillStatus, { 
+  color: string; 
+  opacity: number; 
+  glow: boolean; 
+}> = {
+  mastered: { color: 'var(--color-primary-gold)', opacity: 1.0, glow: true },
+  available: { color: 'var(--color-primary-blue)', opacity: 0.8, glow: false },
+  learning: { color: 'var(--color-primary-green)', opacity: 0.7, glow: false },
+  locked: { color: 'var(--color-gray-600)', opacity: 0.4, glow: false },
+};
+
+// 技能類別顏色映射
+export const SKILL_CATEGORY_COLORS: Record<SkillCategory, string> = {
+  backend: 'var(--color-skill-backend)',
+  architecture: 'var(--color-skill-architecture)', 
+  database: 'var(--color-skill-database)',
+  devops: 'var(--color-skill-devops)',
+  frontend: 'var(--color-skill-frontend)',
+  soft: 'var(--color-skill-soft)',
 };

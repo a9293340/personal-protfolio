@@ -64,7 +64,7 @@ export const skillsDataConfig = {
       category: "backend",
       level: 5,
       status: "mastered",
-      coordinates: { x: 0, y: 0 },
+      coordinates: { q: 0, r: 0 },
       description: "紮實的後端開發基礎，包含程式語言、框架和基本概念",
       
       skills: [
@@ -89,7 +89,7 @@ export const skillsDataConfig = {
         category: "backend", 
         level: 4,
         status: "mastered",
-        coordinates: { x: 1, y: 0 },
+        coordinates: { q: 1, r: 0 },
         prerequisites: ["backend-foundation"],
         
         description: "主流Web框架的深度應用",
@@ -107,7 +107,7 @@ export const skillsDataConfig = {
         category: "database",
         level: 4, 
         status: "mastered",
-        coordinates: { x: 0, y: 1 },
+        coordinates: { q: 0, r: 1 },
         prerequisites: ["backend-foundation"],
         
         description: "關聯式與非關聯式資料庫技術",
@@ -125,7 +125,7 @@ export const skillsDataConfig = {
         category: "backend",
         level: 4,
         status: "mastered", 
-        coordinates: { x: -1, y: 1 },
+        coordinates: { q: -1, r: 1 },
         prerequisites: ["backend-foundation"],
         
         description: "RESTful API 和 GraphQL 設計最佳實務",
@@ -143,7 +143,7 @@ export const skillsDataConfig = {
         category: "backend",
         level: 3,
         status: "available",
-        coordinates: { x: -1, y: 0 },
+        coordinates: { q: -1, r: 0 },
         prerequisites: ["backend-foundation"],
         
         description: "單元測試、整合測試與測試驅動開發",
@@ -161,7 +161,7 @@ export const skillsDataConfig = {
         category: "devops", 
         level: 5,
         status: "mastered",
-        coordinates: { x: -1, y: -1 },
+        coordinates: { q: -1, r: -1 },
         prerequisites: ["backend-foundation"],
         
         description: "Git 工作流程與協作開發",
@@ -179,7 +179,7 @@ export const skillsDataConfig = {
         category: "devops",
         level: 4,
         status: "mastered",
-        coordinates: { x: 0, y: -1 },
+        coordinates: { q: 0, r: -1 },
         prerequisites: ["backend-foundation"],
         
         description: "Linux 系統管理與命令列操作",
@@ -200,7 +200,7 @@ export const skillsDataConfig = {
         category: "architecture",
         level: 3,
         status: "available", 
-        coordinates: { x: 2, y: 0 },
+        coordinates: { q: 2, r: 0 },
         prerequisites: ["web-frameworks", "api-design"],
         
         description: "微服務設計模式與實作",
@@ -218,7 +218,7 @@ export const skillsDataConfig = {
         category: "database",
         level: 3,
         status: "available",
-        coordinates: { x: 1, y: 2 },
+        coordinates: { q: 1, r: 1 },
         prerequisites: ["database-fundamentals"],
         
         description: "數據庫效能調優與索引設計",
@@ -236,7 +236,7 @@ export const skillsDataConfig = {
         category: "architecture",
         level: 3,
         status: "learning",
-        coordinates: { x: -1, y: 2 },
+        coordinates: { q: -1, r: 2 },
         prerequisites: ["database-fundamentals"],
         
         description: "快取設計模式與實作策略", 
@@ -254,7 +254,7 @@ export const skillsDataConfig = {
         category: "backend",
         level: 2,
         status: "locked",
-        coordinates: { x: -2, y: 1 },
+        coordinates: { q: -2, r: 1 },
         prerequisites: ["api-design", "testing-fundamentals"],
         
         description: "Web 應用程式安全與防護",
@@ -272,7 +272,7 @@ export const skillsDataConfig = {
         category: "devops",
         level: 3,
         status: "available",
-        coordinates: { x: -2, y: 0 },
+        coordinates: { q: -2, r: 0 },
         prerequisites: ["version-control", "testing-fundamentals"],
         
         description: "持續整合與持續部署",
@@ -290,7 +290,7 @@ export const skillsDataConfig = {
         category: "devops", 
         level: 3,
         status: "learning",
-        coordinates: { x: -2, y: -1 },
+        coordinates: { q: -2, r: -1 },
         prerequisites: ["linux-basics"],
         
         description: "Docker 與容器編排技術",
@@ -308,7 +308,7 @@ export const skillsDataConfig = {
         category: "devops",
         level: 2, 
         status: "locked",
-        coordinates: { x: -1, y: -2 },
+        coordinates: { q: -1, r: -2 },
         prerequisites: ["linux-basics"],
         
         description: "系統監控、日誌管理與警報",
@@ -326,7 +326,7 @@ export const skillsDataConfig = {
         category: "devops",
         level: 3,
         status: "available",
-        coordinates: { x: 0, y: -2 },
+        coordinates: { q: 0, r: -2 },
         prerequisites: ["linux-basics", "containerization"],
         
         description: "AWS、GCP、Azure 雲端服務",
@@ -347,7 +347,7 @@ export const skillsDataConfig = {
         category: "architecture",
         level: 2,
         status: "locked", 
-        coordinates: { x: 3, y: 0 },
+        coordinates: { q: 3, r: 0 },
         prerequisites: ["microservices", "caching-strategies"],
         
         description: "大型分散式系統設計",
@@ -365,7 +365,7 @@ export const skillsDataConfig = {
         category: "architecture",
         level: 1,
         status: "locked",
-        coordinates: { x: 2, y: 2 },
+        coordinates: { q: 2, r: 1 },
         prerequisites: ["microservices"],
         
         description: "事件流處理與訊息佇列",
@@ -383,7 +383,7 @@ export const skillsDataConfig = {
         category: "database", 
         level: 1,
         status: "locked",
-        coordinates: { x: 1, y: 3 },
+        coordinates: { q: 1, r: 2 },
         prerequisites: ["database-optimization"],
         
         description: "分散式資料庫與NewSQL",
