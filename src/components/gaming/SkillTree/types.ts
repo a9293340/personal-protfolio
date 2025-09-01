@@ -102,6 +102,34 @@ export interface SkillTreeStructure {
   ring3: SkillNode[];
 }
 
+// 視覺配置接口
+export interface VisualConfig {
+  nodeSize: number;
+  gridSize: number;
+  viewport: {
+    width: number;
+    height: number;
+    centerX: number;
+    centerY: number;
+  };
+  interaction: {
+    enableDrag: boolean;
+    enableZoom: boolean;
+    enableNodeClick: boolean;
+  };
+  effects: {
+    showGrid: boolean;
+    showConnections: boolean;
+    animationDuration: number;
+  };
+  accessibility: {
+    responsive: boolean;
+    animation: boolean;
+    className: string;
+  };
+  debug: boolean;
+}
+
 // 完整的技能數據配置
 export interface SkillsDataConfig {
   metadata: SkillTreeMetadata;
@@ -109,6 +137,7 @@ export interface SkillsDataConfig {
   tree: SkillTreeStructure;
   learningPaths: Record<string, LearningPath>;
   proficiencyLevels: Record<number, ProficiencyLevelDefinition>;
+  visual: VisualConfig;
 }
 
 // 技能樹配置選項

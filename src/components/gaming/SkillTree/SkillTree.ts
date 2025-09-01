@@ -22,33 +22,26 @@ import type {
   SkillTreeConfig, 
   SkillNode, 
   SkillsDataConfig,
-  RenderedSkillNode 
+  RenderedSkillNode,
+  VisualConfig 
 } from './types.js';
 
 // SkillTree 特定的配置接口
 export interface SkillTreeComponentConfig extends ComponentConfig {
-  // 技能樹基本設置
-  nodeSize?: number;
-  gridSize?: number;
+  // 配置數據來源路徑
+  configPath?: string;
   
-  // 視窗設置
-  viewWidth?: number;
-  viewHeight?: number;
-  centerX?: number;
-  centerY?: number;
-  
-  // 交互功能
-  enableDrag?: boolean;
-  enableZoom?: boolean;
-  enableNodeClick?: boolean;
-  
-  // 視覺設置
-  showGrid?: boolean;
-  showConnections?: boolean;
-  animationDuration?: number;
-  
-  // 數據源（保持與 ConfigValue 兼容）
-  skillData?: any;
+  // 運行時配置覆寫
+  overrides?: {
+    nodeSize?: number;
+    gridSize?: number;
+    viewWidth?: number;
+    viewHeight?: number;
+    enableDrag?: boolean;
+    enableZoom?: boolean;
+    showGrid?: boolean;
+    debug?: boolean;
+  };
 }
 
 // SkillTree 組件狀態
@@ -83,6 +76,7 @@ export interface SkillTreeState extends ComponentState {
 export class SkillTree extends BaseComponent {
   protected hexSystem!: HexCoordSystem;
   protected svg!: SVGElement;
+  protected skillsConfig!: SkillsDataConfig;
   declare protected config: SkillTreeComponentConfig;
   declare protected state: SkillTreeState;
   
@@ -91,34 +85,57 @@ export class SkillTree extends BaseComponent {
    */
   protected getDefaultConfig(): SkillTreeComponentConfig {
     return {
-      // 基本設置
-      nodeSize: 30,
-      gridSize: 20,
-      
-      // 視窗設置
-      viewWidth: 1200,
-      viewHeight: 800,
-      centerX: 600,
-      centerY: 400,
-      
-      // 交互功能
-      enableDrag: true,
-      enableZoom: true,
-      enableNodeClick: true,
-      
-      // 視覺設置
-      showGrid: true,
-      showConnections: true,
-      animationDuration: 300,
-      
-      // 響應式和無障礙
-      responsive: true,
-      animation: true,
+      // 配置文件路徑
+      configPath: '../../../config/data/skills.data.js',
       
       // 基礎配置
       className: 'skill-tree-container',
-      debug: false,
+      responsive: true,
+      animation: true,
+      
+      // 運行時覆寫（可選）
+      overrides: {}
     };
+  }
+
+  /**
+   * 從配置中獲取視覺設定
+   */
+  private getVisualConfig<K extends keyof VisualConfig>(key: K): any {
+    if (!this.skillsConfig?.visual) return null;
+    
+    // 檢查是否有運行時覆寫
+    const override = this.config.overrides?.[key as string];
+    if (override !== undefined) {
+      return override;
+    }
+    
+    // 返回配置值或默認值
+    return this.skillsConfig.visual[key];
+  }
+
+  /**
+   * 初始化基於配置的系統設定
+   */
+  private initializeFromConfig(): void {
+    if (!this.skillsConfig?.visual) {
+      throw new Error('技能樹視覺配置未載入');
+    }
+
+    // 初始化六角形座標系統
+    const nodeSize = Number(this.getVisualConfig('nodeSize') || 30);
+    this.hexSystem = new HexCoordSystem(nodeSize);
+
+    // 更新視窗狀態
+    const viewport = this.skillsConfig.visual.viewport;
+    this.setState({
+      viewBox: {
+        x: 0,
+        y: 0,
+        width: Number(viewport.width),
+        height: Number(viewport.height)
+      }
+    });
   }
 
   /**
@@ -130,8 +147,8 @@ export class SkillTree extends BaseComponent {
       viewBox: {
         x: 0,
         y: 0,
-        width: this.config.viewWidth || 1200,
-        height: this.config.viewHeight || 800,
+        width: 1200,
+        height: 800,
       },
       
       // 拖曳狀態
@@ -161,14 +178,14 @@ export class SkillTree extends BaseComponent {
     console.log('[SkillTree] 組件初始化開始...');
     
     try {
-      // 初始化六角形座標系統
-      this.hexSystem = new HexCoordSystem(this.config.nodeSize || 30);
+      // 載入配置數據
+      await this.loadSkillTreeData();
+      
+      // 基於配置初始化系統
+      this.initializeFromConfig();
       
       // 創建 SVG 元素
       this.createSVGElement();
-      
-      // 載入技能樹數據
-      await this.loadSkillTreeData();
       
       // 生成技能樹結構
       this.generateSkillTree();
@@ -216,13 +233,14 @@ export class SkillTree extends BaseComponent {
       this.container.innerHTML = '';
       
       // 添加 CSS 類名
-      this.container.className = this.config.className || 'skill-tree-container';
+      const className = this.skillsConfig.visual.accessibility.className;
+      this.container.className = className;
       
       // 添加 SVG 到容器
       this.container.appendChild(this.svg);
       
       // 渲染背景網格（如果啟用）
-      if (this.config.showGrid) {
+      if (this.skillsConfig.visual.effects.showGrid) {
         this.renderHexGrid();
       }
       
@@ -230,12 +248,15 @@ export class SkillTree extends BaseComponent {
       this.renderSkillNodes();
       
       // 渲染連接線（如果啟用）
-      if (this.config.showConnections) {
+      if (this.skillsConfig.visual.effects.showConnections) {
         this.renderConnections();
       }
       
       this.setState({ isRendering: false });
-      console.log('[SkillTree] 組件渲染完成');
+      
+      if (this.getVisualConfig('debug')) {
+        console.log('[SkillTree] 組件渲染完成');
+      }
       
     } catch (error) {
       this.setState({ isRendering: false });
@@ -248,10 +269,12 @@ export class SkillTree extends BaseComponent {
    * 創建 SVG 元素
    */
   private createSVGElement(): void {
+    const viewport = this.skillsConfig.visual.viewport;
+    
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    this.svg.setAttribute('width', String(this.config.viewWidth));
-    this.svg.setAttribute('height', String(this.config.viewHeight));
-    this.svg.setAttribute('viewBox', `0 0 ${this.config.viewWidth} ${this.config.viewHeight}`);
+    this.svg.setAttribute('width', String(viewport.width));
+    this.svg.setAttribute('height', String(viewport.height));
+    this.svg.setAttribute('viewBox', `0 0 ${viewport.width} ${viewport.height}`);
     this.svg.setAttribute('class', 'skill-tree-svg');
     
     // 添加無障礙標籤
@@ -273,6 +296,9 @@ export class SkillTree extends BaseComponent {
       if (!skillsData) {
         throw new Error('技能數據配置未找到');
       }
+      
+      // 保存配置數據
+      this.skillsConfig = skillsData as SkillsDataConfig;
       
       // 將配置數據轉換為組件可用的節點數據
       const allNodes = [
@@ -306,8 +332,6 @@ export class SkillTree extends BaseComponent {
    * 驗證技能數據完整性
    */
   private validateSkillData(nodes: SkillNode[]): void {
-    console.log('[SkillTree] 驗證技能數據...');
-    
     const errors: string[] = [];
     
     nodes.forEach((node, index) => {
@@ -339,19 +363,21 @@ export class SkillTree extends BaseComponent {
       throw new Error(`數據驗證失敗: ${errors.join('; ')}`);
     }
     
-    console.log(`[SkillTree] 數據驗證通過，共 ${nodes.length} 個節點`);
+    if (this.getVisualConfig('debug')) {
+      console.log(`[SkillTree] 數據驗證通過，共 ${nodes.length} 個節點`);
+    }
   }
 
   /**
    * 生成技能樹結構
    */
   private generateSkillTree(): void {
-    console.log('[SkillTree] 生成技能樹結構...');
-    
     const { nodes } = this.state;
     
     if (!nodes || nodes.length === 0) {
-      console.warn('[SkillTree] 沒有技能節點數據，跳過結構生成');
+      if (this.getVisualConfig('debug')) {
+        console.warn('[SkillTree] 沒有技能節點數據，跳過結構生成');
+      }
       return;
     }
     
@@ -359,7 +385,9 @@ export class SkillTree extends BaseComponent {
     const connections = this.generateConnections(nodes);
     this.setState({ connections });
     
-    console.log(`[SkillTree] 技能樹結構生成完成: ${nodes.length} 節點, ${connections.length} 連接`);
+    if (this.getVisualConfig('debug')) {
+      console.log(`[SkillTree] 技能樹結構生成完成: ${nodes.length} 節點, ${connections.length} 連接`);
+    }
   }
 
   /**
@@ -392,24 +420,30 @@ export class SkillTree extends BaseComponent {
    * 渲染六角形背景網格
    */
   private renderHexGrid(): void {
-    // TODO: 實現背景網格渲染
-    console.log('[SkillTree] 渲染背景網格...');
+    // 實際渲染將在 Step 2.1.2 中實現
+    if (this.getVisualConfig('debug')) {
+      console.log('[SkillTree] 背景網格渲染準備就緒');
+    }
   }
 
   /**
    * 渲染技能節點
    */
   private renderSkillNodes(): void {
-    // TODO: 實現技能節點渲染
-    console.log('[SkillTree] 渲染技能節點...');
+    // 實際渲染將在 Step 2.1.2 中實現
+    if (this.getVisualConfig('debug')) {
+      console.log('[SkillTree] 技能節點渲染準備就緒');
+    }
   }
 
   /**
    * 渲染連接線
    */
   private renderConnections(): void {
-    // TODO: 實現連接線渲染
-    console.log('[SkillTree] 渲染連接線...');
+    // 實際渲染將在 Step 2.1.2 中實現
+    if (this.getVisualConfig('debug')) {
+      console.log('[SkillTree] 連接線渲染準備就緒');
+    }
   }
 
   /**
@@ -434,7 +468,9 @@ export class SkillTree extends BaseComponent {
     // 清理 SVG 元素
     // 重置狀態
     
-    console.log('[SkillTree] 組件清理完成');
+    if (this.getVisualConfig && this.getVisualConfig('debug')) {
+      console.log('[SkillTree] 組件清理完成');
+    }
   }
 
   // 公開方法用於外部控制

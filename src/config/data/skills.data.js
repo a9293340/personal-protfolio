@@ -438,6 +438,45 @@ export const skillsDataConfig = {
     60: { name: "熟練", description: "能處理複雜問題" },
     80: { name: "專家", description: "能指導他人" },
     95: { name: "大師", description: "業界認可的專家" }
+  },
+  
+  // 視覺配置
+  visual: {
+    // 基本設置
+    nodeSize: 30,
+    gridSize: 20,
+    
+    // 視窗設置
+    viewport: {
+      width: 1200,
+      height: 800,
+      centerX: 600,
+      centerY: 400
+    },
+    
+    // 交互功能
+    interaction: {
+      enableDrag: true,
+      enableZoom: true,
+      enableNodeClick: true
+    },
+    
+    // 視覺效果
+    effects: {
+      showGrid: true,
+      showConnections: true,
+      animationDuration: 300
+    },
+    
+    // 響應式和無障礙
+    accessibility: {
+      responsive: true,
+      animation: true,
+      className: 'skill-tree-container'
+    },
+    
+    // 調試模式
+    debug: false
   }
 };
 
