@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillTree Component Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #0a0a0a;
+      color: white;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    #skill-tree-container {
+      width: 100%;
+      height: 600px;
+      border: 2px solid #d4af37;
+      border-radius: 8px;
+      background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .info {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(26, 26, 46, 0.8);
+      border-radius: 8px;
+      border-left: 4px solid #d4af37;
+    }
+    
+    .debug {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(26, 26, 46, 0.6);
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="info">
+    <h1>🎮 SkillTree Component Test Page</h1>
+    <p>Testing the visual rendering system for Step 2.1.2</p>
+    <p><strong>Expected:</strong> Hexagonal grid background, skill nodes with different colors based on status, and connection lines between nodes.</p>
+  </div>
+
+  <div id="skill-tree-container"></div>
+  
+  <div class="debug" id="debug-info">
+    <h3>Debug Information:</h3>
+    <div id="debug-content">Loading...</div>
+  </div>
+
+  <script type="module">
+    import { SkillTree } from './src/components/gaming/SkillTree/SkillTree.ts';
+    
+    // Debug function
+    function updateDebugInfo(message) {
+      const debugContent = document.getElementById('debug-content');
+      debugContent.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+    }
+    
+    // Test the SkillTree component
+    async function testSkillTree() {
+      try {
+        updateDebugInfo('🚀 Starting SkillTree component test...');
+        
+        const container = document.getElementById('skill-tree-container');
+        if (!container) {
+          throw new Error('Container not found');
+        }
+        
+        updateDebugInfo('📦 Creating SkillTree instance...');
+        
+        // Create SkillTree component with test config
+        const skillTree = new SkillTree(container, {
+          debug: true,
+          responsive: true,
+          className: 'skill-tree-test'
+        });
+        
+        updateDebugInfo('🔧 Initializing component...');
+        
+        // Initialize the component
+        await skillTree.init();
+        
+        updateDebugInfo('✅ SkillTree component initialized successfully');
+        updateDebugInfo('🎯 Check the container above for visual elements');
+        
+        // Log component state for debugging
+        console.log('SkillTree state:', skillTree.state);
+        updateDebugInfo('📊 Component state logged to browser console');
+        
+      } catch (error) {
+        console.error('SkillTree test failed:', error);
+        updateDebugInfo(`❌ Error: ${error.message}`);
+        updateDebugInfo(`📋 Stack trace: ${error.stack}`);
+      }
+    }
+    
+    // Start test when page loads
+    document.addEventListener('DOMContentLoaded', testSkillTree);
+    
+    // Also start immediately in case DOM is already loaded
+    if (document.readyState !== 'loading') {
+      testSkillTree();
+    }
+  </script>
+</body>
+</html>

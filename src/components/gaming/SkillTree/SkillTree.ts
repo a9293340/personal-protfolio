@@ -172,29 +172,32 @@ export class SkillTree extends BaseComponent {
   }
 
   /**
-   * 初始化組件（重寫父類的 init 方法）
+   * 覆寫父類的 beforeInit 方法以載入技能數據
    */
-  async init(): Promise<void> {
-    console.log('[SkillTree] 組件初始化開始...');
+  protected async beforeInit(): Promise<void> {
+    // 先執行父類的 beforeInit
+    await super.beforeInit();
     
     try {
-      // 載入配置數據
+      if (this.config.debug) {
+        console.log('[SkillTree] 開始初始化組件...');
+      }
+      
+      // 載入技能數據
       await this.loadSkillTreeData();
       
       // 基於配置初始化系統
       this.initializeFromConfig();
       
-      // 創建 SVG 元素
-      this.createSVGElement();
-      
       // 生成技能樹結構
       this.generateSkillTree();
       
-      // 設置事件監聽
-      this.setupEventListeners();
-      
+      // 標記為已載入
       this.setState({ isLoaded: true });
-      console.log('[SkillTree] 組件初始化完成');
+      
+      if (this.skillsConfig?.visual?.debug) {
+        console.log('[SkillTree] 組件初始化完成，數據已載入');
+      }
       
     } catch (error) {
       console.error('[SkillTree] 組件初始化失敗:', error);
@@ -208,7 +211,40 @@ export class SkillTree extends BaseComponent {
   protected doRender(context: any): HTMLElement {
     // 創建 SVG 元素作為主要渲染元素
     this.createSVGElement();
-    return this.svg as any;
+    
+    // 渲染所有視覺內容 (數據在 beforeInit 已載入)
+    this.renderAllContent();
+    
+    // 將 SVG 添加到容器
+    if (this.container && this.svg) {
+      this.container.appendChild(this.svg);
+    }
+    
+    return this.svg as unknown as HTMLElement;
+  }
+
+  /**
+   * 渲染所有視覺內容
+   */
+  private renderAllContent(): void {
+    if (!this.svg || !this.state.isLoaded) return;
+
+    // 渲染背景網格（如果啟用）
+    if (this.skillsConfig.visual.effects.showGrid) {
+      this.renderHexGrid();
+    }
+    
+    // 渲染技能節點
+    this.renderSkillNodes();
+    
+    // 渲染連接線（如果啟用）
+    if (this.skillsConfig.visual.effects.showConnections) {
+      this.renderConnections();
+    }
+    
+    if (this.skillsConfig.visual.debug) {
+      console.log('[SkillTree] 所有視覺內容渲染完成');
+    }
   }
 
   /**
@@ -218,52 +254,6 @@ export class SkillTree extends BaseComponent {
     this.setupEventListeners();
   }
 
-  /**
-   * 渲染組件
-   */
-  protected async render(): Promise<void> {
-    if (!this.container) {
-      throw new Error('SkillTree: 容器元素不存在');
-    }
-
-    this.setState({ isRendering: true });
-    
-    try {
-      // 清空容器
-      this.container.innerHTML = '';
-      
-      // 添加 CSS 類名
-      const className = this.skillsConfig.visual.accessibility.className;
-      this.container.className = className;
-      
-      // 添加 SVG 到容器
-      this.container.appendChild(this.svg);
-      
-      // 渲染背景網格（如果啟用）
-      if (this.skillsConfig.visual.effects.showGrid) {
-        this.renderHexGrid();
-      }
-      
-      // 渲染技能節點
-      this.renderSkillNodes();
-      
-      // 渲染連接線（如果啟用）
-      if (this.skillsConfig.visual.effects.showConnections) {
-        this.renderConnections();
-      }
-      
-      this.setState({ isRendering: false });
-      
-      if (this.getVisualConfig('debug')) {
-        console.log('[SkillTree] 組件渲染完成');
-      }
-      
-    } catch (error) {
-      this.setState({ isRendering: false });
-      console.error('[SkillTree] 組件渲染失敗:', error);
-      throw error;
-    }
-  }
 
   /**
    * 創建 SVG 元素
@@ -420,30 +410,363 @@ export class SkillTree extends BaseComponent {
    * 渲染六角形背景網格
    */
   private renderHexGrid(): void {
-    // 實際渲染將在 Step 2.1.2 中實現
-    if (this.getVisualConfig('debug')) {
-      console.log('[SkillTree] 背景網格渲染準備就緒');
+    if (!this.svg || !this.hexSystem) return;
+    
+    const viewport = this.skillsConfig.visual.viewport;
+    const gridSize = this.skillsConfig.visual.gridSize;
+    
+    // 創建網格組
+    let gridGroup = this.svg.querySelector('.hex-grid') as SVGGElement;
+    if (!gridGroup) {
+      gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      gridGroup.setAttribute('class', 'hex-grid');
+      gridGroup.setAttribute('opacity', '0.1');
+      this.svg.appendChild(gridGroup);
     }
+    
+    // 清空現有網格
+    gridGroup.innerHTML = '';
+    
+    // 計算需要渲染的網格範圍
+    const centerX = viewport.centerX;
+    const centerY = viewport.centerY;
+    const maxRadius = Math.max(viewport.width, viewport.height) / this.hexSystem.getSize() + 2;
+    
+    // 渲染網格線
+    this.renderGridLines(gridGroup, centerX, centerY, maxRadius);
+    
+    if (this.skillsConfig.visual.debug) {
+      console.log(`[SkillTree] 背景網格渲染完成，半徑: ${maxRadius}`);
+    }
+  }
+
+  /**
+   * 渲染網格線
+   */
+  private renderGridLines(gridGroup: SVGGElement, centerX: number, centerY: number, maxRadius: number): void {
+    const hexSize = this.hexSystem.getSize();
+    
+    // 獲取所有需要渲染的六角形座標
+    const gridHexes = this.hexSystem.getHexesInRange({ q: 0, r: 0 }, Math.ceil(maxRadius));
+    
+    gridHexes.forEach(hex => {
+      const pixelCoord = this.hexSystem.hexToPixel(hex);
+      
+      // 調整到視窗中心
+      const x = centerX + pixelCoord.x;
+      const y = centerY + pixelCoord.y;
+      
+      // 只渲染在視窗範圍內的網格
+      if (this.isInViewport(x, y)) {
+        this.createHexagonOutline(gridGroup, x, y, hexSize);
+      }
+    });
+  }
+
+  /**
+   * 檢查座標是否在視窗範圍內
+   */
+  private isInViewport(x: number, y: number): boolean {
+    const viewport = this.skillsConfig.visual.viewport;
+    const margin = this.hexSystem.getSize() * 2; // 添加邊距
+    
+    return x >= -margin && 
+           x <= viewport.width + margin && 
+           y >= -margin && 
+           y <= viewport.height + margin;
+  }
+
+  /**
+   * 創建六角形輪廓
+   */
+  private createHexagonOutline(parent: SVGElement, x: number, y: number, size: number): void {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    
+    // 計算六角形的六個頂點 (flat-top orientation)
+    const points: string[] = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i; // 60度間隔
+      const px = x + size * Math.cos(angle);
+      const py = y + size * Math.sin(angle);
+      points.push(i === 0 ? `M ${px} ${py}` : `L ${px} ${py}`);
+    }
+    points.push('Z'); // 閉合路徑
+    
+    path.setAttribute('d', points.join(' '));
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#333333');
+    path.setAttribute('stroke-width', '0.5');
+    path.setAttribute('opacity', '0.3');
+    
+    parent.appendChild(path);
   }
 
   /**
    * 渲染技能節點
    */
   private renderSkillNodes(): void {
-    // 實際渲染將在 Step 2.1.2 中實現
-    if (this.getVisualConfig('debug')) {
-      console.log('[SkillTree] 技能節點渲染準備就緒');
+    if (!this.svg || !this.hexSystem || !this.state.nodes?.length) return;
+
+    const viewport = this.skillsConfig.visual.viewport;
+    
+    // 創建節點組
+    let nodesGroup = this.svg.querySelector('.skill-nodes') as SVGGElement;
+    if (!nodesGroup) {
+      nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      nodesGroup.setAttribute('class', 'skill-nodes');
+      this.svg.appendChild(nodesGroup);
     }
+    
+    // 清空現有節點
+    nodesGroup.innerHTML = '';
+    
+    // 渲染每個技能節點
+    this.state.nodes.forEach(node => {
+      const pixelCoord = this.hexSystem.hexToPixel(node.coordinates);
+      const x = viewport.centerX + pixelCoord.x;
+      const y = viewport.centerY + pixelCoord.y;
+      
+      this.renderSkillNode(nodesGroup, node, x, y);
+    });
+    
+    if (this.skillsConfig.visual.debug) {
+      console.log(`[SkillTree] 技能節點渲染完成，共 ${this.state.nodes.length} 個節點`);
+    }
+  }
+
+  /**
+   * 渲染單個技能節點
+   */
+  private renderSkillNode(parent: SVGElement, node: SkillNode, x: number, y: number): void {
+    const nodeSize = this.hexSystem.getSize();
+    
+    // 創建節點組
+    const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    nodeGroup.setAttribute('class', `skill-node skill-node-${node.status}`);
+    nodeGroup.setAttribute('data-node-id', node.id);
+    nodeGroup.setAttribute('transform', `translate(${x}, ${y})`);
+    
+    // 根據狀態獲取樣式
+    const statusStyle = this.getNodeStatusStyle(node.status);
+    const categoryColor = this.getCategoryColor(node.category);
+    
+    // 渲染節點背景（六角形）
+    this.renderNodeBackground(nodeGroup, nodeSize, statusStyle, categoryColor);
+    
+    // 渲染節點內容
+    this.renderNodeContent(nodeGroup, node, nodeSize);
+    
+    // 添加互動事件
+    this.addNodeInteraction(nodeGroup, node);
+    
+    parent.appendChild(nodeGroup);
+  }
+
+  /**
+   * 獲取節點狀態樣式
+   */
+  private getNodeStatusStyle(status: string): { color: string; opacity: number; glow: boolean } {
+    const statusMap = {
+      mastered: { color: '#d4af37', opacity: 1.0, glow: true },
+      available: { color: '#2980b9', opacity: 0.8, glow: false },
+      learning: { color: '#27ae60', opacity: 0.7, glow: false },
+      locked: { color: '#666666', opacity: 0.4, glow: false }
+    };
+    
+    return statusMap[status as keyof typeof statusMap] || statusMap.locked;
+  }
+
+  /**
+   * 獲取類別顏色
+   */
+  private getCategoryColor(category: string): string {
+    return this.skillsConfig.categories[category as keyof typeof this.skillsConfig.categories]?.color || '#666666';
+  }
+
+  /**
+   * 渲染節點背景
+   */
+  private renderNodeBackground(parent: SVGElement, size: number, statusStyle: any, categoryColor: string): void {
+    // 外圈（類別色彩）
+    const outerHex = this.createHexagon(size * 1.1, 'none', categoryColor, 2);
+    outerHex.setAttribute('opacity', String(statusStyle.opacity * 0.6));
+    parent.appendChild(outerHex);
+    
+    // 內圈（狀態色彩）
+    const innerHex = this.createHexagon(size * 0.9, statusStyle.color, 'none', 0);
+    innerHex.setAttribute('opacity', String(statusStyle.opacity));
+    parent.appendChild(innerHex);
+    
+    // 發光效果（僅對 mastered 狀態）
+    if (statusStyle.glow) {
+      const glowHex = this.createHexagon(size * 1.2, 'none', statusStyle.color, 3);
+      glowHex.setAttribute('opacity', '0.3');
+      glowHex.setAttribute('filter', 'blur(3px)');
+      parent.insertBefore(glowHex, parent.firstChild);
+    }
+  }
+
+  /**
+   * 創建六角形 SVG 元素
+   */
+  private createHexagon(size: number, fill: string, stroke: string, strokeWidth: number): SVGPathElement {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    
+    const points: string[] = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i;
+      const px = size * Math.cos(angle);
+      const py = size * Math.sin(angle);
+      points.push(i === 0 ? `M ${px} ${py}` : `L ${px} ${py}`);
+    }
+    points.push('Z');
+    
+    path.setAttribute('d', points.join(' '));
+    path.setAttribute('fill', fill);
+    path.setAttribute('stroke', stroke);
+    path.setAttribute('stroke-width', String(strokeWidth));
+    
+    return path;
+  }
+
+  /**
+   * 渲染節點內容
+   */
+  private renderNodeContent(parent: SVGElement, node: SkillNode, size: number): void {
+    // 節點名稱
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'central');
+    text.setAttribute('font-family', 'Arial, sans-serif');
+    text.setAttribute('font-size', '10');
+    text.setAttribute('font-weight', 'bold');
+    text.setAttribute('fill', '#ffffff');
+    text.textContent = node.name.length > 8 ? node.name.substring(0, 6) + '...' : node.name;
+    
+    parent.appendChild(text);
+  }
+
+  /**
+   * 添加節點互動事件
+   */
+  private addNodeInteraction(nodeGroup: SVGElement, node: SkillNode): void {
+    if (!this.skillsConfig.visual.interaction.enableNodeClick) return;
+    
+    nodeGroup.style.cursor = 'pointer';
+    
+    nodeGroup.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.handleNodeClick(node, event as MouseEvent);
+    });
+    
+    nodeGroup.addEventListener('mouseenter', (event) => {
+      this.handleNodeHover(node, event as MouseEvent);
+    });
+    
+    nodeGroup.addEventListener('mouseleave', () => {
+      this.handleNodeLeave(node);
+    });
+  }
+
+  /**
+   * 處理節點點擊
+   */
+  private handleNodeClick(node: SkillNode, event: MouseEvent): void {
+    this.setState({ selectedNode: node.id });
+    this.emit('node:click', { node, event });
+    
+    if (this.skillsConfig.visual.debug) {
+      console.log(`[SkillTree] 節點點擊: ${node.name}`);
+    }
+  }
+
+  /**
+   * 處理節點懸停
+   */
+  private handleNodeHover(node: SkillNode, event: MouseEvent): void {
+    this.setState({ hoveredNode: node.id });
+    this.emit('node:hover', { node, event });
+  }
+
+  /**
+   * 處理節點離開
+   */
+  private handleNodeLeave(node: SkillNode): void {
+    this.setState({ hoveredNode: null });
+    this.emit('node:hover', { node: null, event: null });
   }
 
   /**
    * 渲染連接線
    */
   private renderConnections(): void {
-    // 實際渲染將在 Step 2.1.2 中實現
-    if (this.getVisualConfig('debug')) {
-      console.log('[SkillTree] 連接線渲染準備就緒');
+    if (!this.svg || !this.hexSystem || !this.state.connections?.length) return;
+
+    const viewport = this.skillsConfig.visual.viewport;
+    
+    // 創建連接線組
+    let connectionsGroup = this.svg.querySelector('.skill-connections') as SVGGElement;
+    if (!connectionsGroup) {
+      connectionsGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      connectionsGroup.setAttribute('class', 'skill-connections');
+      // 確保連接線在節點之下
+      this.svg.insertBefore(connectionsGroup, this.svg.querySelector('.skill-nodes'));
     }
+    
+    // 清空現有連接線
+    connectionsGroup.innerHTML = '';
+    
+    // 渲染每條連接線
+    this.state.connections.forEach(connection => {
+      const fromNode = this.state.nodes.find(n => n.id === connection.from);
+      const toNode = this.state.nodes.find(n => n.id === connection.to);
+      
+      if (fromNode && toNode) {
+        this.renderConnection(connectionsGroup, fromNode, toNode, viewport);
+      }
+    });
+    
+    if (this.skillsConfig.visual.debug) {
+      console.log(`[SkillTree] 連接線渲染完成，共 ${this.state.connections.length} 條連線`);
+    }
+  }
+
+  /**
+   * 渲染單條連接線
+   */
+  private renderConnection(parent: SVGElement, fromNode: SkillNode, toNode: SkillNode, viewport: any): void {
+    const fromPixel = this.hexSystem.hexToPixel(fromNode.coordinates);
+    const toPixel = this.hexSystem.hexToPixel(toNode.coordinates);
+    
+    const x1 = viewport.centerX + fromPixel.x;
+    const y1 = viewport.centerY + fromPixel.y;
+    const x2 = viewport.centerX + toPixel.x;
+    const y2 = viewport.centerY + toPixel.y;
+    
+    // 創建連接線
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', String(x1));
+    line.setAttribute('y1', String(y1));
+    line.setAttribute('x2', String(x2));
+    line.setAttribute('y2', String(y2));
+    line.setAttribute('stroke', '#4a5568');
+    line.setAttribute('stroke-width', '2');
+    line.setAttribute('opacity', '0.6');
+    line.setAttribute('class', `connection-${fromNode.id}-${toNode.id}`);
+    
+    // 根據目標節點狀態調整連接線樣式
+    if (toNode.status === 'available') {
+      line.setAttribute('stroke', '#2980b9');
+      line.setAttribute('opacity', '0.8');
+    } else if (toNode.status === 'mastered') {
+      line.setAttribute('stroke', '#d4af37');
+      line.setAttribute('opacity', '1.0');
+    } else if (toNode.status === 'learning') {
+      line.setAttribute('stroke', '#27ae60');
+      line.setAttribute('opacity', '0.7');
+    }
+    
+    parent.appendChild(line);
   }
 
   /**
