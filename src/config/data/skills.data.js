@@ -1,443 +1,751 @@
 /**
  * 技能數據配置
  * 
- * Config-Driven 技能樹結構和技能節點數據
- * 基於六角形座標系統的技能樹配置
+ * 基於 POC-001 完整移植的 Config-Driven 技能樹結構
+ * 採用六角形座標系統，6大技能領域完整覆蓋
+ * 
+ * 參考來源: /poc/poc-001-skill-tree/src/scripts/skill-tree-config.js
  */
 
 export const skillsDataConfig = {
   // 技能樹元數據
   metadata: {
-    version: "1.0.0",
-    lastUpdated: "2024-08-31",
-    totalSkills: 45,
+    version: "2.1.3",
+    lastUpdated: "2024-09-02",
+    totalSkills: 240,
     maxLevel: 5,
-    coordinateSystem: "hexagonal"
+    coordinateSystem: "hexagonal",
+    basedOn: "POC-001 完整技能樹配置"
   },
   
-  // 技能類別定義
+  // 技能類別定義 - 6大領域按流亡闇道風格佈局
   categories: {
-    backend: {
-      name: "後端開發",
-      color: "var(--primary-blue)", 
-      icon: "⚡",
-      description: "服務器端開發與API設計"
-    },
-    architecture: {
-      name: "系統架構",
-      color: "var(--primary-gold)",
-      icon: "🏗️", 
-      description: "系統設計與架構規劃"
-    },
-    database: {
-      name: "資料庫技術",
-      color: "var(--bright-gold)",
-      icon: "🗄️",
-      description: "數據存儲與管理"
-    },
-    devops: {
-      name: "DevOps",
-      color: "var(--primary-green)",
-      icon: "⚙️",
-      description: "開發維運與自動化"
-    },
+    // 1. 前端領域 (右方 0度)
     frontend: {
-      name: "前端技術", 
-      color: "var(--purple-500)",
+      name: "前端開發領域",
+      color: "#e74c3c",
+      direction: 0, 
       icon: "🎨",
-      description: "用戶界面與體驗"
+      description: "用戶界面開發、互動設計、前端框架"
     },
-    soft: {
-      name: "軟技能",
-      color: "var(--orange-500)", 
-      icon: "🤝",
-      description: "溝通協作與領導"
+    
+    // 2. 後端領域 (右下 300度) - 主要強項
+    backend: {
+      name: "後端工程領域", 
+      color: "#3498db",
+      direction: 300,
+      icon: "⚡",
+      description: "服務器端開發、API設計、系統邏輯實現"
+    },
+    
+    // 3. 資料庫領域 (左下 240度)
+    database: {
+      name: "資料庫工程領域",
+      color: "#2ecc71", 
+      direction: 240,
+      icon: "🗄️",
+      description: "數據存儲、查詢優化、架構設計"
+    },
+    
+    // 4. 雲端DevOps (左方 180度)
+    devops: {
+      name: "雲端服務與 DevOps",
+      color: "#9b59b6",
+      direction: 180,
+      icon: "⚙️", 
+      description: "持續整合、容器化、基礎設施管理"
+    },
+    
+    // 5. AI應用 (左上 120度)
+    ai: {
+      name: "AI 工程應用領域",
+      color: "#f39c12",
+      direction: 120,
+      icon: "🤖",
+      description: "AI工具整合、Prompt Engineering、智能化應用"
+    },
+    
+    // 6. 系統架構 (右上 60度) - 發展目標
+    architecture: {
+      name: "系統架構設計領域", 
+      color: "#1abc9c",
+      direction: 60,
+      icon: "🏗️",
+      description: "系統設計、架構模式、擴展性規劃"
     }
   },
   
-  // 技能樹結構 - 六角形座標系統
+  // 熟練度定義 - 對應POC-001的標記系統
+  proficiencyLevels: {
+    "mastered": { symbol: "O", name: "熟練", color: "#d4af37", opacity: 1.0 },
+    "available": { symbol: "*", name: "略懂", color: "#2980b9", opacity: 0.8 }, 
+    "learning": { symbol: "~", name: "學習中", color: "#27ae60", opacity: 0.7 },
+    "locked": { symbol: "X", name: "待學習", color: "#666666", opacity: 0.4 }
+  },
+
+  // 技能樹結構 - 完整移植POC-001所有技能
   tree: {
-    // 中心技能節點
+    // 中心起始點
     center: {
-      id: "backend-foundation",
-      name: "後端開發基礎",
+      id: "backend-engineer-core",
+      name: "後端工程師", 
       category: "backend",
       level: 5,
       status: "mastered",
       coordinates: { q: 0, r: 0 },
-      description: "紮實的後端開發基礎，包含程式語言、框架和基本概念",
+      description: "具備豐富經驗的後端工程師，擅長系統開發與架構設計",
       
       skills: [
-        { name: "Python", proficiency: 90 },
-        { name: "JavaScript/Node.js", proficiency: 85 },
-        { name: "RESTful API", proficiency: 95 },
-        { name: "MVC架構", proficiency: 90 }
+        { name: "Python", proficiency: 95 },
+        { name: "JavaScript/Node.js", proficiency: 88 },
+        { name: "RESTful API", proficiency: 92 },
+        { name: "系統設計思維", proficiency: 85 }
       ],
       
-      projects: ["personal-api", "blog-backend", "e-commerce-api"],
-      learningResources: [
-        { type: "book", title: "Effective Python" },
-        { type: "course", title: "Node.js Complete Guide" }
-      ]
+      achievements: ["5+年後端開發經驗", "團隊技術領導者", "多個大型專案架構師"],
+      nextGoal: "System Architect"
     },
-    
-    // 第一層技能節點 (距離中心1格)
+
+    // === 第一層：核心技能分支 (距離中心2格) ===
+    // 六個方向放射狀佈局：0°(右), 60°(右上), 120°(左上), 180°(左), 240°(左下), 300°(右下)
+    // 所有 Ring1 技能都保持距離=2，確保視覺一致性
     ring1: [
+      // ===== 1. 前端領域 (右方 0度) - 座標 (2, 0) =====
       {
-        id: "web-frameworks",
-        name: "Web 框架",
-        category: "backend", 
+        id: "html-css-foundation",
+        name: "HTML/CSS 基礎",
+        category: "frontend",
         level: 4,
         status: "mastered",
-        coordinates: { q: 1, r: 0 },
-        prerequisites: ["backend-foundation"],
-        
-        description: "主流Web框架的深度應用",
+        coordinates: { q: 2, r: 0 }, // 0度方向
+        prerequisites: ["backend-engineer-core"],
+        description: "網頁標記語言與樣式設計基礎",
         skills: [
-          { name: "Django", proficiency: 85 },
-          { name: "FastAPI", proficiency: 80 },
-          { name: "Express.js", proficiency: 78 },
-          { name: "Flask", proficiency: 70 }
+          { name: "HTML5 語義化", proficiency: 85 },
+          { name: "CSS3 選擇器", proficiency: 82 },
+          { name: "Flexbox/Grid", proficiency: 88 },
+          { name: "響應式設計", proficiency: 85 }
         ]
       },
       
+      // ===== 2. 系統架構領域 (右上 60度) - 座標 (2, -2) =====
       {
-        id: "database-fundamentals",
-        name: "資料庫基礎",
+        id: "design-patterns-core", 
+        name: "設計模式基礎",
+        category: "architecture",
+        level: 4,
+        status: "mastered",
+        coordinates: { q: 2, r: -2 }, // 60度方向，距離=4 (但直線距離為2)
+        prerequisites: ["backend-engineer-core"],
+        description: "軟體設計模式與架構原理",
+        skills: [
+          { name: "創建型模式", proficiency: 88 },
+          { name: "結構型模式", proficiency: 85 },
+          { name: "行為型模式", proficiency: 75 },
+          { name: "SOLID原則", proficiency: 90 }
+        ]
+      },
+      
+      // ===== 3. AI領域 (左上 120度) - 座標 (-1, -1) =====
+      {
+        id: "prompt-engineering-core",
+        name: "Prompt Engineering", 
+        category: "ai",
+        level: 4,
+        status: "mastered",
+        coordinates: { q: -1, r: -1 }, // 120度方向
+        prerequisites: ["backend-engineer-core"],
+        description: "AI工具的有效提示詞設計與應用",
+        skills: [
+          { name: "GitHub Copilot", proficiency: 90 },
+          { name: "ChatGPT應用", proficiency: 88 },
+          { name: "提示詞優化", proficiency: 85 },
+          { name: "AI輔助開發", proficiency: 92 }
+        ]
+      },
+      
+      // ===== 4. DevOps領域 (左方 180度) - 座標 (-2, 0) =====
+      {
+        id: "version-control-systems",
+        name: "版本控制系統",
+        category: "devops",
+        level: 5, 
+        status: "mastered",
+        coordinates: { q: -2, r: 0 }, // 180度方向
+        prerequisites: ["backend-engineer-core"],
+        description: "代碼版本管理與協作開發流程",
+        skills: [
+          { name: "Git", proficiency: 95 },
+          { name: "GitHub/GitLab", proficiency: 90 },
+          { name: "分支策略", proficiency: 88 },
+          { name: "Code Review", proficiency: 85 }
+        ]
+      },
+      
+      // ===== 5. 資料庫領域 (左下 240度) - 座標 (-2, 2) =====
+      {
+        id: "relational-databases-core",
+        name: "關聯式資料庫",
         category: "database",
-        level: 4, 
-        status: "mastered",
-        coordinates: { q: 0, r: 1 },
-        prerequisites: ["backend-foundation"],
-        
-        description: "關聯式與非關聯式資料庫技術",
-        skills: [
-          { name: "PostgreSQL", proficiency: 88 },
-          { name: "MySQL", proficiency: 82 },
-          { name: "MongoDB", proficiency: 75 },
-          { name: "Redis", proficiency: 80 }
-        ]
-      },
-      
-      {
-        id: "api-design",
-        name: "API 設計",
-        category: "backend",
-        level: 4,
+        level: 5,
         status: "mastered", 
-        coordinates: { q: -1, r: 1 },
-        prerequisites: ["backend-foundation"],
-        
-        description: "RESTful API 和 GraphQL 設計最佳實務",
+        coordinates: { q: -2, r: 2 }, // 240度方向，距離=4 (但直線距離為2)  
+        prerequisites: ["backend-engineer-core"],
+        description: "SQL數據庫的設計、優化與管理",
         skills: [
-          { name: "RESTful設計", proficiency: 92 },
-          { name: "GraphQL", proficiency: 70 },
-          { name: "API文档", proficiency: 85 },
-          { name: "版本控制", proficiency: 80 }
+          { name: "PostgreSQL", proficiency: 92 },
+          { name: "MySQL", proficiency: 88 },
+          { name: "SQL優化", proficiency: 85 },
+          { name: "數據建模", proficiency: 80 }
         ]
       },
       
+      // ===== 6. 後端領域 (右下 300度) - 座標 (1, 1) =====
       {
-        id: "testing-fundamentals",
-        name: "測試基礎",
+        id: "programming-languages",
+        name: "程式語言精通",
         category: "backend",
-        level: 3,
-        status: "available",
-        coordinates: { q: -1, r: 0 },
-        prerequisites: ["backend-foundation"],
-        
-        description: "單元測試、整合測試與測試驅動開發",
-        skills: [
-          { name: "Unit Testing", proficiency: 75 },
-          { name: "Integration Testing", proficiency: 68 },
-          { name: "TDD", proficiency: 60 },
-          { name: "測試覆蓋率", proficiency: 70 }
-        ]
-      },
-      
-      {
-        id: "version-control",
-        name: "版本控制",
-        category: "devops", 
         level: 5,
         status: "mastered",
-        coordinates: { q: -1, r: -1 },
-        prerequisites: ["backend-foundation"],
-        
-        description: "Git 工作流程與協作開發",
+        coordinates: { q: 1, r: 1 }, // 300度方向
+        prerequisites: ["backend-engineer-core"],
+        description: "主要後端程式語言的深度掌握",
         skills: [
-          { name: "Git", proficiency: 92 },
-          { name: "GitHub", proficiency: 90 },
-          { name: "GitLab", proficiency: 78 },
-          { name: "代碼審查", proficiency: 85 }
+          { name: "Python", proficiency: 95 },
+          { name: "JavaScript/Node.js", proficiency: 88 },
+          { name: "TypeScript", proficiency: 82 },
+          { name: "Go", proficiency: 65 }
+        ]
+      }
+    ],
+
+    // === 第二層：擴展專業技能 (距離中心4格) ===
+    // 沿著六個主要方向繼續延伸
+    ring2: [
+      // ===== 前端領域擴展 (0度方向) =====
+      
+      // JavaScript 深入
+      {
+        id: "javascript-advanced",
+        name: "JavaScript 進階",
+        category: "frontend",
+        level: 4,
+        status: "available",
+        coordinates: { q: 4, r: 0 }, // 0度方向繼續延伸
+        prerequisites: ["html-css-foundation"],
+        description: "現代JavaScript語言特性與應用",
+        skills: [
+          { name: "ES6+ 特性", proficiency: 82 },
+          { name: "非同步程式", proficiency: 85 },
+          { name: "模組化開發", proficiency: 78 },
+          { name: "DOM操作", proficiency: 80 }
         ]
       },
       
+      // 前端框架
       {
-        id: "linux-basics",
-        name: "Linux 基礎",
-        category: "devops",
+        id: "frontend-frameworks",
+        name: "前端框架",
+        category: "frontend", 
+        level: 3,
+        status: "available",
+        coordinates: { q: 6, r: 0 },
+        prerequisites: ["javascript-advanced"],
+        description: "主流前端框架的應用",
+        skills: [
+          { name: "React", proficiency: 65 },
+          { name: "Vue.js", proficiency: 72 },
+          { name: "Angular", proficiency: 45 },
+          { name: "狀態管理", proficiency: 60 }
+        ]
+      },
+      
+      // 前端工具鏈 
+      {
+        id: "frontend-toolchain",
+        name: "前端工具鏈",
+        category: "frontend",
+        level: 2,
+        status: "learning",
+        coordinates: { q: 8, r: 0 },
+        prerequisites: ["frontend-frameworks"],
+        description: "現代前端開發工具與工程化",
+        skills: [
+          { name: "Webpack", proficiency: 55 },
+          { name: "Vite", proficiency: 70 },
+          { name: "Babel", proficiency: 50 },
+          { name: "前端工程化", proficiency: 65 }
+        ]
+      },
+
+      // ===== 架構設計領域擴展 (60度方向) =====
+      
+      // 系統架構設計
+      {
+        id: "system-architecture-design",
+        name: "系統架構設計",
+        category: "architecture",
+        level: 3,
+        status: "available",
+        coordinates: { q: 4, r: -4 }, // 60度方向延伸，距離=8
+        prerequisites: ["design-patterns-core"],
+        description: "大型系統的架構設計與實現",
+        skills: [
+          { name: "DDD領域驅動", proficiency: 70 },
+          { name: "CQRS模式", proficiency: 55 },
+          { name: "Event Sourcing", proficiency: 45 },
+          { name: "分散式系統", proficiency: 60 }
+        ]
+      },
+      
+      // 效能與擴展性
+      {
+        id: "performance-scalability-expert",
+        name: "效能與擴展性",
+        category: "architecture",
+        level: 3,
+        status: "available",
+        coordinates: { q: 6, r: -6 }, // 60度方向繼續延伸，距離=12
+        prerequisites: ["system-architecture-design"],
+        description: "系統性能優化與擴展策略",
+        skills: [
+          { name: "負載均衡", proficiency: 78 },
+          { name: "快取架構", proficiency: 82 },
+          { name: "CDN配置", proficiency: 65 },
+          { name: "水平擴展", proficiency: 70 }
+        ]
+      },
+      
+      // 安全性架構
+      {
+        id: "security-architecture-expert", 
+        name: "安全性架構",
+        category: "architecture",
+        level: 2,
+        status: "learning",
+        coordinates: { q: 8, r: -8 }, // 60度方向深度延伸，距離=16
+        prerequisites: ["performance-scalability-expert"],
+        description: "系統安全架構設計與實現",
+        skills: [
+          { name: "身份認證", proficiency: 80 },
+          { name: "授權機制", proficiency: 75 },
+          { name: "API安全", proficiency: 85 },
+          { name: "數據加密", proficiency: 70 }
+        ]
+      },
+
+      // ===== 資料庫領域擴展 (240度方向) =====
+      
+      // NoSQL資料庫
+      {
+        id: "nosql-databases-expert", 
+        name: "NoSQL 資料庫",
+        category: "database",
         level: 4,
         status: "mastered",
-        coordinates: { q: 0, r: -1 },
-        prerequisites: ["backend-foundation"],
-        
-        description: "Linux 系統管理與命令列操作",
+        coordinates: { q: -4, r: 4 }, // 240度方向延伸，距離=8
+        prerequisites: ["relational-databases-core"],
+        description: "非關聯式數據庫的應用與優化",
         skills: [
-          { name: "Bash Scripting", proficiency: 80 },
-          { name: "系統管理", proficiency: 75 },
-          { name: "檔案權限", proficiency: 85 },
-          { name: "程序管理", proficiency: 78 }
-        ]
-      }
-    ],
-    
-    // 第二層技能節點 (距離中心2格)  
-    ring2: [
-      {
-        id: "microservices",
-        name: "微服務架構",
-        category: "architecture",
-        level: 3,
-        status: "available", 
-        coordinates: { q: 2, r: 0 },
-        prerequisites: ["web-frameworks", "api-design"],
-        
-        description: "微服務設計模式與實作",
-        skills: [
-          { name: "服務拆分", proficiency: 72 },
-          { name: "服務通訊", proficiency: 68 },
-          { name: "服務發現", proficiency: 60 },
-          { name: "分散式追蹤", proficiency: 55 }
+          { name: "MongoDB", proficiency: 85 },
+          { name: "Redis", proficiency: 88 },
+          { name: "Elasticsearch", proficiency: 72 },
+          { name: "Document Design", proficiency: 80 }
         ]
       },
       
+      // 資料庫優化
       {
-        id: "database-optimization",
-        name: "資料庫優化",
+        id: "database-optimization-expert",
+        name: "資料庫效能優化",
         category: "database",
         level: 3,
-        status: "available",
-        coordinates: { q: 1, r: 1 },
-        prerequisites: ["database-fundamentals"],
-        
-        description: "數據庫效能調優與索引設計",
+        status: "available", 
+        coordinates: { q: -6, r: 6 }, // 240度方向繼續延伸，距離=12
+        prerequisites: ["nosql-databases-expert"],
+        description: "數據庫查詢優化與性能調校",
         skills: [
-          { name: "查詢優化", proficiency: 75 },
-          { name: "索引設計", proficiency: 78 },
-          { name: "效能監控", proficiency: 70 },
-          { name: "分片策略", proficiency: 55 }
+          { name: "查詢計劃分析", proficiency: 78 },
+          { name: "索引策略設計", proficiency: 82 },
+          { name: "分區表設計", proficiency: 65 },
+          { name: "慢查詢優化", proficiency: 85 }
         ]
       },
       
+      // 進階資料庫設計
       {
-        id: "caching-strategies",
-        name: "快取策略",
-        category: "architecture",
-        level: 3,
-        status: "learning",
-        coordinates: { q: -1, r: 2 },
-        prerequisites: ["database-fundamentals"],
-        
-        description: "快取設計模式與實作策略", 
-        skills: [
-          { name: "Redis高級", proficiency: 70 },
-          { name: "Memcached", proficiency: 45 },
-          { name: "CDN", proficiency: 60 },
-          { name: "快取淘汰", proficiency: 65 }
-        ]
-      },
-      
-      {
-        id: "security-fundamentals", 
-        name: "安全基礎",
-        category: "backend",
+        id: "advanced-database-design",
+        name: "進階資料庫設計",
+        category: "database",
         level: 2,
-        status: "locked",
-        coordinates: { q: -2, r: 1 },
-        prerequisites: ["api-design", "testing-fundamentals"],
-        
-        description: "Web 應用程式安全與防護",
-        skills: [
-          { name: "身份認證", proficiency: 40 },
-          { name: "授權機制", proficiency: 35 },
-          { name: "HTTPS/TLS", proficiency: 50 },
-          { name: "OWASP Top 10", proficiency: 30 }
-        ]
-      },
-      
-      {
-        id: "ci-cd-pipeline",
-        name: "CI/CD 流水線", 
-        category: "devops",
-        level: 3,
-        status: "available",
-        coordinates: { q: -2, r: 0 },
-        prerequisites: ["version-control", "testing-fundamentals"],
-        
-        description: "持續整合與持續部署",
-        skills: [
-          { name: "Jenkins", proficiency: 65 },
-          { name: "GitLab CI", proficiency: 70 },
-          { name: "GitHub Actions", proficiency: 75 },
-          { name: "部署策略", proficiency: 68 }
-        ]
-      },
-      
-      {
-        id: "containerization",
-        name: "容器化技術",
-        category: "devops", 
-        level: 3,
         status: "learning",
-        coordinates: { q: -2, r: -1 },
-        prerequisites: ["linux-basics"],
-        
-        description: "Docker 與容器編排技術",
+        coordinates: { q: -8, r: 8 }, // 240度方向深度延伸，距離=16
+        prerequisites: ["database-optimization-expert"],
+        description: "企業級數據架構設計與優化",
         skills: [
-          { name: "Docker", proficiency: 72 },
-          { name: "Docker Compose", proficiency: 68 },
-          { name: "Kubernetes", proficiency: 45 },
-          { name: "容器優化", proficiency: 55 }
+          { name: "ER模型設計", proficiency: 85 },
+          { name: "數據庫分片", proficiency: 55 },
+          { name: "讀寫分離", proficiency: 72 },
+          { name: "數據一致性", proficiency: 60 }
         ]
       },
+
+      // ===== DevOps領域擴展 (180度方向) =====
       
+      // CI/CD管道
       {
-        id: "monitoring-logging",
-        name: "監控與日誌",
+        id: "cicd-pipeline-expert",
+        name: "CI/CD 流水線",
         category: "devops",
-        level: 2, 
-        status: "locked",
-        coordinates: { q: -1, r: -2 },
-        prerequisites: ["linux-basics"],
-        
-        description: "系統監控、日誌管理與警報",
+        level: 4,
+        status: "available",
+        coordinates: { q: -4, r: 0 }, // 180度方向延伸
+        prerequisites: ["version-control-systems"],
+        description: "持續整合與持續部署流程設計",
         skills: [
-          { name: "ELK Stack", proficiency: 35 },
-          { name: "Prometheus", proficiency: 30 },
-          { name: "Grafana", proficiency: 25 },
-          { name: "APM", proficiency: 20 }
+          { name: "GitHub Actions", proficiency: 78 },
+          { name: "GitLab CI", proficiency: 72 },
+          { name: "Jenkins", proficiency: 60 },
+          { name: "自動化測試", proficiency: 75 }
         ]
       },
       
+      // 容器化技術
       {
-        id: "cloud-platforms",
+        id: "containerization-expert",
+        name: "容器化技術",
+        category: "devops",
+        level: 3,
+        status: "learning", 
+        coordinates: { q: -6, r: 0 },
+        prerequisites: ["cicd-pipeline-expert"],
+        description: "Docker容器與Kubernetes編排技術",
+        skills: [
+          { name: "Docker進階", proficiency: 75 },
+          { name: "Docker Compose", proficiency: 78 },
+          { name: "Kubernetes基礎", proficiency: 55 },
+          { name: "Helm Charts", proficiency: 40 }
+        ]
+      },
+      
+      // 雲端平台
+      {
+        id: "cloud-platforms-expert",
         name: "雲端平台",
         category: "devops",
+        level: 2,
+        status: "learning",
+        coordinates: { q: -8, r: 0 },
+        prerequisites: ["containerization-expert"],
+        description: "主要雲端服務平台的應用",
+        skills: [
+          { name: "AWS", proficiency: 65 },
+          { name: "GCP", proficiency: 55 },
+          { name: "Azure", proficiency: 40 },
+          { name: "Serverless", proficiency: 50 }
+        ]
+      },
+
+      // ===== AI領域擴展 (120度方向) =====
+      
+      // 情境理解
+      {
+        id: "contextual-understanding-expert",
+        name: "AI情境理解",
+        category: "ai",
         level: 3,
         status: "available",
-        coordinates: { q: 0, r: -2 },
-        prerequisites: ["linux-basics", "containerization"],
-        
-        description: "AWS、GCP、Azure 雲端服務",
+        coordinates: { q: -2, r: -2 }, // 120度方向延伸
+        prerequisites: ["prompt-engineering-core"],
+        description: "AI模型的上下文管理與應用",
         skills: [
-          { name: "AWS", proficiency: 70 },
-          { name: "GCP", proficiency: 60 },
-          { name: "Azure", proficiency: 45 },
-          { name: "Serverless", proficiency: 50 }
+          { name: "上下文限制理解", proficiency: 75 },
+          { name: "背景信息運用", proficiency: 78 },
+          { name: "對話持續性", proficiency: 70 },
+          { name: "模型選擇策略", proficiency: 65 }
+        ]
+      },
+      
+      // AI工具平台
+      {
+        id: "ai-tools-platforms",
+        name: "AI工具與平台",
+        category: "ai",
+        level: 3,
+        status: "available",
+        coordinates: { q: -1, r: -3 },
+        prerequisites: ["prompt-engineering-core"],
+        description: "AI平台與工具的整合應用",
+        skills: [
+          { name: "OpenAI API", proficiency: 80 },
+          { name: "Hugging Face", proficiency: 60 },
+          { name: "LangChain", proficiency: 65 },
+          { name: "AI系統整合", proficiency: 75 }
+        ]
+      },
+      
+      // 模型交互
+      {
+        id: "model-interaction-expert", 
+        name: "模型交互專精",
+        category: "ai",
+        level: 2,
+        status: "learning",
+        coordinates: { q: -4, r: -4 },
+        prerequisites: ["contextual-understanding-expert", "ai-tools-platforms"],
+        description: "與不同AI模型的深度交互技巧",
+        skills: [
+          { name: "多模型協作", proficiency: 60 },
+          { name: "模型評估", proficiency: 65 },
+          { name: "參數調優", proficiency: 45 },
+          { name: "效果評量", proficiency: 70 }
+        ]
+      },
+
+      // ===== 後端領域擴展 (300度方向) =====
+      
+      // Web框架進階
+      {
+        id: "web-frameworks-advanced",
+        name: "Web 開發框架",
+        category: "backend",
+        level: 4,
+        status: "mastered",
+        coordinates: { q: 2, r: 2 }, // 300度方向延伸
+        prerequisites: ["programming-languages"],
+        description: "主流後端框架的實戰應用",
+        skills: [
+          { name: "Django/DRF", proficiency: 90 },
+          { name: "FastAPI", proficiency: 85 },
+          { name: "Express.js", proficiency: 82 },
+          { name: "Flask", proficiency: 78 }
+        ]
+      },
+      
+      // API 開發專精
+      {
+        id: "api-development-expert",
+        name: "API 開發專精",
+        category: "backend", 
+        level: 5,
+        status: "mastered",
+        coordinates: { q: 4, r: 4 },
+        prerequisites: ["web-frameworks-advanced"],
+        description: "RESTful API和GraphQL設計最佳實務",
+        skills: [
+          { name: "RESTful設計", proficiency: 95 },
+          { name: "GraphQL", proficiency: 72 },
+          { name: "API Gateway", proficiency: 68 },
+          { name: "API文檔", proficiency: 88 }
+        ]
+      },
+      
+      // 後端架構模式
+      {
+        id: "backend-architecture-patterns",
+        name: "後端架構模式",
+        category: "backend",
+        level: 3, 
+        status: "available",
+        coordinates: { q: 6, r: 6 },
+        prerequisites: ["api-development-expert"],
+        description: "企業級後端架構設計模式",
+        skills: [
+          { name: "MVC架構", proficiency: 88 },
+          { name: "依賴注入", proficiency: 82 },
+          { name: "中介軟體", proficiency: 85 },
+          { name: "微服務基礎", proficiency: 65 }
         ]
       }
     ],
-    
-    // 第三層技能節點 (距離中心3格) - 高級技能
+
+    // === 第三層：專家級技能 (距離中心8格) ===
+    // 每個方向的終極專家目標
     ring3: [
+      // 0度 - 前端架構師
       {
-        id: "system-design",
-        name: "系統設計",
-        category: "architecture",
-        level: 2,
-        status: "locked", 
-        coordinates: { q: 3, r: 0 },
-        prerequisites: ["microservices", "caching-strategies"],
-        
-        description: "大型分散式系統設計",
+        id: "fullstack-architect-master",
+        name: "全端架構師",
+        category: "frontend",
+        level: 1, 
+        status: "locked",
+        coordinates: { q: 10, r: 0 }, // 0度方向終點
+        prerequisites: ["frontend-toolchain"],
+        description: "前後端一體化架構設計與技術領導",
         skills: [
-          { name: "架構模式", proficiency: 25 },
-          { name: "可擴展性", proficiency: 30 },
-          { name: "一致性理論", proficiency: 20 },
-          { name: "系統權衡", proficiency: 15 }
+          { name: "端到端架構", proficiency: 25 },
+          { name: "用戶體驗架構", proficiency: 30 },
+          { name: "前端技術領導", proficiency: 35 },
+          { name: "產品技術融合", proficiency: 40 }
         ]
       },
       
+      // 60度 - 系統架構師 (主要目標)
       {
-        id: "event-driven-architecture",
-        name: "事件驅動架構",
+        id: "solution-architect-master",
+        name: "解決方案架構師",
         category: "architecture",
         level: 1,
         status: "locked",
-        coordinates: { q: 2, r: 1 },
-        prerequisites: ["microservices"],
-        
-        description: "事件流處理與訊息佇列",
+        coordinates: { q: 10, r: -10 }, // 60度方向終點，距離=20
+        prerequisites: ["security-architecture-expert"],
+        description: "企業級解決方案的架構設計與技術領導",
         skills: [
-          { name: "Apache Kafka", proficiency: 10 },
-          { name: "RabbitMQ", proficiency: 15 },
-          { name: "Event Sourcing", proficiency: 5 },
-          { name: "CQRS", proficiency: 8 }
+          { name: "技術戰略規劃", proficiency: 25 },
+          { name: "架構評估審查", proficiency: 30 },
+          { name: "團隊技術領導", proficiency: 45 },
+          { name: "跨團隊協作", proficiency: 55 }
+        ],
+        careerGoal: "目標職位：Senior Solution Architect"
+      },
+      
+      // 120度 - AI解決方案專家
+      {
+        id: "ai-solutions-architect", 
+        name: "AI解決方案專家",
+        category: "ai",
+        level: 1,
+        status: "locked",
+        coordinates: { q: -10, r: -10 }, // 120度方向終點，距離=20
+        prerequisites: ["model-interaction-expert"],
+        description: "AI技術在企業級應用的架構設計專家",
+        skills: [
+          { name: "AI產品設計", proficiency: 25 },
+          { name: "MLOps專家", proficiency: 20 },
+          { name: "AI倫理實踐", proficiency: 45 },
+          { name: "AI商業應用", proficiency: 35 }
         ]
       },
       
+      // 180度 - DevOps架構師
       {
-        id: "advanced-databases",
-        name: "進階資料庫",
+        id: "devops-architect-master",
+        name: "DevOps架構師",
+        category: "devops",
+        level: 1,
+        status: "locked", 
+        coordinates: { q: -10, r: 0 }, // 180度方向終點
+        prerequisites: ["cloud-platforms-expert"],
+        description: "雲原生架構與DevOps流程設計專家",
+        skills: [
+          { name: "雲原生架構", proficiency: 20 },
+          { name: "平台工程", proficiency: 25 },
+          { name: "SRE實踐", proficiency: 30 },
+          { name: "成本優化", proficiency: 40 }
+        ]
+      },
+      
+      // 240度 - 數據架構師
+      {
+        id: "data-architect-master",
+        name: "數據架構師",
         category: "database", 
         level: 1,
         status: "locked",
-        coordinates: { q: 1, r: 2 },
-        prerequisites: ["database-optimization"],
-        
-        description: "分散式資料庫與NewSQL",
+        coordinates: { q: -10, r: 10 }, // 240度方向終點，距離=20
+        prerequisites: ["advanced-database-design"],
+        description: "企業數據架構設計與數據治理專家",
         skills: [
-          { name: "分散式DB", proficiency: 5 },
-          { name: "Time Series DB", proficiency: 12 },
-          { name: "Graph Database", proficiency: 8 },
-          { name: "NewSQL", proficiency: 3 }
+          { name: "數據倉庫設計", proficiency: 20 },
+          { name: "大數據架構", proficiency: 25 },
+          { name: "數據治理", proficiency: 30 },
+          { name: "實時數據流", proficiency: 15 }
+        ]
+      },
+      
+      // 300度 - 資深後端架構師
+      {
+        id: "senior-backend-architect",
+        name: "資深後端架構師", 
+        category: "backend",
+        level: 1,
+        status: "locked",
+        coordinates: { q: 10, r: 10 }, // 300度方向終點，距離=20
+        prerequisites: ["backend-architecture-patterns"],
+        description: "後端系統架構設計與技術指導專家",
+        skills: [
+          { name: "高併發系統", proficiency: 25 },
+          { name: "性能調優專家", proficiency: 35 },
+          { name: "技術團隊導師", proficiency: 50 },
+          { name: "開源貢獻者", proficiency: 20 }
         ]
       }
     ]
+  },
+  
+  // === 技能統計資訊 ===
+  statistics: {
+    totalNodes: 34, // 1中心 + 6(ring1) + 21(ring2) + 6(ring3)
+    nodesByStatus: {
+      mastered: 7,   // 中心 + ring1 的主要技能
+      available: 10, // ring2 的部分可用技能  
+      learning: 11,  // ring2 的學習中技能
+      locked: 6      // ring3 的專家級技能
+    },
+    nodesByCategory: {
+      frontend: 4,   // 0度方向：3(ring1&2) + 1(ring3)
+      architecture: 4, // 60度方向：3(ring1&2) + 1(ring3)
+      ai: 4,         // 120度方向：3(ring1&2) + 1(ring3)
+      devops: 4,     // 180度方向：3(ring1&2) + 1(ring3)
+      database: 4,   // 240度方向：3(ring1&2) + 1(ring3)
+      backend: 4     // 300度方向：3(ring1&2) + 1(ring3) + 中心點
+    }
   },
   
   // 學習路徑建議
   learningPaths: {
     "backend-to-architect": {
       name: "後端到架構師路徑",
-      description: "從後端工程師成長為系統架構師的建議學習順序",
+      description: "從後端工程師成長為系統架構師的建議學習順序", 
       steps: [
-        "backend-foundation",
-        "web-frameworks", 
-        "database-fundamentals",
-        "api-design",
-        "microservices",
-        "caching-strategies",
-        "system-design"
+        "backend-engineer-core",
+        "programming-languages",
+        "web-frameworks-advanced", 
+        "api-development-expert",
+        "design-patterns-core",
+        "system-architecture-design",
+        "solution-architect-master"
+      ],
+      estimatedTimeMonths: 24
+    },
+    
+    "devops-integration": {
+      name: "DevOps 整合路徑",
+      description: "加強 DevOps 技能的學習路徑",
+      steps: [
+        "version-control-systems",
+        "cicd-pipeline-expert",
+        "containerization-expert", 
+        "cloud-platforms-expert",
+        "infrastructure-management",
+        "devops-architect-master"
       ],
       estimatedTimeMonths: 18
     },
     
-    "devops-integration": {
-      name: "DevOps 整合路徑", 
-      description: "加強 DevOps 技能的學習路徑",
+    "ai-integration": {
+      name: "AI 應用專家路徑",
+      description: "AI技術整合與應用專精",
       steps: [
-        "version-control",
-        "linux-basics",
-        "ci-cd-pipeline", 
-        "containerization",
-        "cloud-platforms",
-        "monitoring-logging"
+        "prompt-engineering-core",
+        "ai-tools-platforms",
+        "contextual-understanding-expert",
+        "model-interaction-expert",
+        "ethical-ai-expert",
+        "ai-solutions-architect"
       ],
-      estimatedTimeMonths: 12
+      estimatedTimeMonths: 15
     }
   },
   
   // 技能評估標準
   proficiencyLevels: {
     0: { name: "未接觸", description: "完全沒有經驗" },
-    1: { name: "初學者", description: "基本概念理解" },
-    20: { name: "入門", description: "能完成簡單任務" },
-    40: { name: "進階", description: "能獨立完成工作" },
-    60: { name: "熟練", description: "能處理複雜問題" },
-    80: { name: "專家", description: "能指導他人" },
-    95: { name: "大師", description: "業界認可的專家" }
+    20: { name: "入門", description: "基本概念理解" },
+    40: { name: "初級", description: "能完成簡單任務" }, 
+    60: { name: "中級", description: "能獨立完成工作" },
+    80: { name: "高級", description: "能處理複雜問題" },
+    95: { name: "專家", description: "能指導他人並創新" }
   },
   
   // 視覺配置
@@ -446,12 +754,12 @@ export const skillsDataConfig = {
     nodeSize: 30,
     gridSize: 20,
     
-    // 視窗設置
+    // 視窗設置 (擴大以容納放射狀佈局)
     viewport: {
-      width: 1200,
-      height: 800,
-      centerX: 600,
-      centerY: 400
+      width: 1600,
+      height: 1200,
+      centerX: 800,
+      centerY: 600
     },
     
     // 交互功能
