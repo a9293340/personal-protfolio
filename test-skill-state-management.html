@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技能狀態管理系統測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-header h1 {
+            color: #d4af37;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 12px;
+        }
+        
+        .control-button {
+            padding: 10px 15px;
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .control-button:hover {
+            background: #3498db;
+            transform: translateY(-1px);
+        }
+        
+        .control-button.danger {
+            background: #e74c3c;
+        }
+        
+        .control-button.danger:hover {
+            background: #c0392b;
+        }
+        
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid #d4af37;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d4af37;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #cccccc;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .skill-category {
+            background: rgba(26, 26, 46, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #d4af37;
+        }
+        
+        .category-icon {
+            font-size: 1.3rem;
+            margin-right: 10px;
+        }
+        
+        .skill-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .skill-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(2px);
+        }
+        
+        .skill-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .skill-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .skill-status.mastered {
+            background: #d4af37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+        }
+        
+        .skill-status.available {
+            background: #2980b9;
+            box-shadow: 0 0 8px rgba(41, 128, 185, 0.4);
+        }
+        
+        .skill-status.learning {
+            background: #27ae60;
+            box-shadow: 0 0 8px rgba(39, 174, 96, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        .skill-status.locked {
+            background: #666666;
+        }
+        
+        .skill-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .skill-action-btn {
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .skill-action-btn.learn {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .skill-action-btn.master {
+            background: #d4af37;
+            color: black;
+        }
+        
+        .skill-action-btn.reset {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .skill-action-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .skill-action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .log-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            margin: 2px 0;
+            padding: 2px 5px;
+            border-left: 3px solid transparent;
+        }
+        
+        .log-entry.info {
+            color: #3498db;
+            border-left-color: #3498db;
+        }
+        
+        .log-entry.success {
+            color: #27ae60;
+            border-left-color: #27ae60;
+        }
+        
+        .log-entry.warning {
+            color: #f39c12;
+            border-left-color: #f39c12;
+        }
+        
+        .log-entry.error {
+            color: #e74c3c;
+            border-left-color: #e74c3c;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        @keyframes skill-unlock {
+            0% {
+                transform: scale(1);
+                opacity: 0.4;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+        
+        @keyframes skill-master {
+            0% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% {
+                transform: scale(1.3);
+                filter: brightness(1.5);
+            }
+            100% {
+                transform: scale(1);
+                filter: brightness(1.2);
+            }
+        }
+        
+        .skill-item.status-change-unlock {
+            animation: skill-unlock 0.8s ease-out;
+        }
+        
+        .skill-item.status-change-master {
+            animation: skill-master 1.2s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎮 技能狀態管理系統測試</h1>
+            <p>Step 2.1.4 - 測試技能狀態邏輯、動畫效果和持久化</p>
+        </div>
+        
+        <div class="control-panel">
+            <button class="control-button" onclick="initializeSystem()">初始化系統</button>
+            <button class="control-button" onclick="recalculateStates()">重新計算狀態</button>
+            <button class="control-button" onclick="simulateProgressPath()">模擬學習路徑</button>
+            <button class="control-button" onclick="testAnimations()">測試動畫</button>
+            <button class="control-button danger" onclick="resetAllStates()">重置所有狀態</button>
+            <button class="control-button danger" onclick="clearStorage()">清除儲存</button>
+        </div>
+        
+        <div class="stats-panel" id="statsPanel">
+            <!-- 統計資料將由 JavaScript 填充 -->
+        </div>
+        
+        <div class="skills-grid" id="skillsGrid">
+            <!-- 技能網格將由 JavaScript 填充 -->
+        </div>
+        
+        <div class="log-panel">
+            <h3 style="color: #d4af37; margin-bottom: 10px;">🔍 系統日誌</h3>
+            <div id="logContainer">
+                <!-- 日誌條目將由 JavaScript 填充 -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 模擬導入 (在實際環境中會從模組導入)
+        
+        // 模擬技能數據配置
+        const mockSkillsData = {
+            metadata: {
+                version: "2.1.4",
+                totalSkills: 16
+            },
+            categories: {
+                frontend: { name: "前端開發領域", color: "#e74c3c", icon: "🎨" },
+                backend: { name: "後端工程領域", color: "#3498db", icon: "⚡" },
+                database: { name: "資料庫工程領域", color: "#2ecc71", icon: "🗄️" },
+                devops: { name: "雲端服務與 DevOps", color: "#9b59b6", icon: "⚙️" },
+                ai: { name: "AI 工程應用領域", color: "#f39c12", icon: "🤖" },
+                architecture: { name: "系統架構設計領域", color: "#1abc9c", icon: "🏗️" }
+            },
+            tree: {
+                center: {
+                    id: "backend-engineer-core",
+                    name: "後端工程師",
+                    category: "backend",
+                    status: "mastered",
+                    coordinates: { q: 0, r: 0 }
+                },
+                ring1: [
+                    { id: "html-css-foundation", name: "HTML/CSS 基礎", category: "frontend", status: "mastered", prerequisites: ["backend-engineer-core"] },
+                    { id: "design-patterns-core", name: "設計模式基礎", category: "architecture", status: "available", prerequisites: ["backend-engineer-core"] },
+                    { id: "prompt-engineering-core", name: "Prompt Engineering", category: "ai", status: "available", prerequisites: ["backend-engineer-core"] },
+                    { id: "version-control-systems", name: "版本控制系統", category: "devops", status: "mastered", prerequisites: ["backend-engineer-core"] },
+                    { id: "relational-databases-core", name: "關聯式資料庫", category: "database", status: "mastered", prerequisites: ["backend-engineer-core"] },
+                    { id: "programming-languages", name: "程式語言精通", category: "backend", status: "mastered", prerequisites: ["backend-engineer-core"] }
+                ],
+                ring2: [
+                    { id: "javascript-advanced", name: "JavaScript 進階", category: "frontend", status: "locked", prerequisites: ["html-css-foundation"] },
+                    { id: "system-architecture-design", name: "系統架構設計", category: "architecture", status: "locked", prerequisites: ["design-patterns-core"] },
+                    { id: "contextual-understanding", name: "AI情境理解", category: "ai", status: "locked", prerequisites: ["prompt-engineering-core"] },
+                    { id: "cicd-pipeline", name: "CI/CD 流水線", category: "devops", status: "available", prerequisites: ["version-control-systems"] },
+                    { id: "nosql-databases", name: "NoSQL 資料庫", category: "database", status: "available", prerequisites: ["relational-databases-core"] },
+                    { id: "web-frameworks", name: "Web 開發框架", category: "backend", status: "available", prerequisites: ["programming-languages"] }
+                ],
+                ring3: [
+                    { id: "fullstack-architect", name: "全端架構師", category: "frontend", status: "locked", prerequisites: ["javascript-advanced"] },
+                    { id: "solution-architect", name: "解決方案架構師", category: "architecture", status: "locked", prerequisites: ["system-architecture-design"] },
+                    { id: "ai-solutions-expert", name: "AI解決方案專家", category: "ai", status: "locked", prerequisites: ["contextual-understanding"] },
+                    { id: "devops-architect", name: "DevOps架構師", category: "devops", status: "locked", prerequisites: ["cicd-pipeline"] }
+                ]
+            }
+        };
+
+        // 模擬狀態管理器 (簡化版本)
+        class MockSkillStateManager {
+            constructor() {
+                this.skillStates = new Map();
+                this.listeners = {};
+                this.storageKey = 'skillTree_userProgress_test';
+            }
+
+            setSkillTreeData(data) {
+                this.skillTreeData = data;
+                this.initializeSkillStates();
+                this.calculateAllStates();
+                this.emit('skill-states-initialized', { totalSkills: this.skillStates.size });
+            }
+
+            initializeSkillStates() {
+                const allNodes = this.collectAllSkillNodes();
+                allNodes.forEach(node => {
+                    if (!this.skillStates.has(node.id)) {
+                        this.skillStates.set(node.id, {
+                            id: node.id,
+                            status: node.status || 'locked',
+                            level: node.level || 1,
+                            progress: 0,
+                            unlockedAt: node.status === 'mastered' ? Date.now() : null,
+                            lastUpdated: Date.now()
+                        });
+                    }
+                });
+            }
+
+            collectAllSkillNodes() {
+                const nodes = [];
+                const tree = this.skillTreeData.tree;
+                if (tree.center) nodes.push(tree.center);
+                ['ring1', 'ring2', 'ring3'].forEach(ring => {
+                    if (tree[ring]) nodes.push(...tree[ring]);
+                });
+                return nodes;
+            }
+
+            calculateAllStates() {
+                const allNodes = this.collectAllSkillNodes();
+                let hasChanges = true;
+                let rounds = 0;
+
+                while (hasChanges && rounds < 5) {
+                    hasChanges = false;
+                    rounds++;
+
+                    allNodes.forEach(node => {
+                        const newStatus = this.calculateSkillStatus(node);
+                        const currentState = this.skillStates.get(node.id);
+                        if (currentState && currentState.status !== newStatus) {
+                            this.updateSkillStatus(node.id, newStatus, false);
+                            hasChanges = true;
+                        }
+                    });
+                }
+
+                this.emit('skill-states-recalculated', { rounds });
+            }
+
+            calculateSkillStatus(node) {
+                const currentState = this.skillStates.get(node.id);
+                if (!currentState) return 'locked';
+
+                if (currentState.status === 'mastered') return 'mastered';
+
+                const prerequisites = node.prerequisites || [];
+                if (prerequisites.length === 0) return currentState.status;
+
+                const prerequisitesMet = prerequisites.every(prereqId => {
+                    const prereqState = this.skillStates.get(prereqId);
+                    return prereqState && prereqState.status === 'mastered';
+                });
+
+                if (prerequisitesMet) {
+                    if (currentState.status === 'locked') return 'available';
+                    return currentState.status;
+                } else {
+                    if (currentState.status === 'available' || currentState.status === 'learning') {
+                        return 'locked';
+                    }
+                    return currentState.status;
+                }
+            }
+
+            updateSkillStatus(skillId, newStatus, emitEvent = true) {
+                const currentState = this.skillStates.get(skillId);
+                if (!currentState || currentState.status === newStatus) return false;
+
+                const oldStatus = currentState.status;
+                currentState.status = newStatus;
+                currentState.lastUpdated = Date.now();
+
+                if (newStatus === 'mastered' && oldStatus !== 'mastered') {
+                    currentState.unlockedAt = Date.now();
+                }
+
+                if (emitEvent) {
+                    this.emit('skill-status-changed', {
+                        skillId,
+                        oldStatus,
+                        newStatus,
+                        state: currentState
+                    });
+                }
+
+                this.persistState();
+                return true;
+            }
+
+            getSkillState(skillId) {
+                return this.skillStates.get(skillId);
+            }
+
+            getStatesCount() {
+                const counts = { mastered: 0, available: 0, learning: 0, locked: 0 };
+                for (const state of this.skillStates.values()) {
+                    counts[state.status]++;
+                }
+                return counts;
+            }
+
+            getProgressStats() {
+                const states = this.getStatesCount();
+                const total = this.skillStates.size;
+                return {
+                    total,
+                    mastered: states.mastered,
+                    available: states.available,
+                    learning: states.learning,
+                    locked: states.locked,
+                    masteredPercentage: total > 0 ? Math.round((states.mastered / total) * 100) : 0,
+                    unlockedPercentage: total > 0 ? Math.round(((states.mastered + states.available + states.learning) / total) * 100) : 0
+                };
+            }
+
+            persistState() {
+                try {
+                    const stateData = {
+                        version: '2.1.4',
+                        timestamp: Date.now(),
+                        states: Array.from(this.skillStates.entries()).map(([id, state]) => ({ id, ...state }))
+                    };
+                    localStorage.setItem(this.storageKey, JSON.stringify(stateData));
+                    log('狀態已保存到本地存儲', 'success');
+                } catch (error) {
+                    log('保存狀態失敗: ' + error.message, 'error');
+                }
+            }
+
+            loadPersistedState() {
+                try {
+                    const savedData = localStorage.getItem(this.storageKey);
+                    if (savedData) {
+                        const stateData = JSON.parse(savedData);
+                        if (stateData.states) {
+                            stateData.states.forEach(state => {
+                                this.skillStates.set(state.id, state);
+                            });
+                            log(`從本地存儲載入 ${stateData.states.length} 個技能狀態`, 'info');
+                        }
+                    }
+                } catch (error) {
+                    log('載入狀態失敗: ' + error.message, 'error');
+                }
+            }
+
+            clearPersistedState() {
+                localStorage.removeItem(this.storageKey);
+                log('清除本地存儲的狀態數據', 'warning');
+            }
+
+            resetAllSkillStates() {
+                const allNodes = this.collectAllSkillNodes();
+                allNodes.forEach(node => {
+                    const initialStatus = node.status || 'locked';
+                    this.skillStates.set(node.id, {
+                        id: node.id,
+                        status: initialStatus,
+                        level: node.level || 1,
+                        progress: 0,
+                        unlockedAt: initialStatus === 'mastered' ? Date.now() : null,
+                        lastUpdated: Date.now()
+                    });
+                });
+                this.persistState();
+                this.calculateAllStates();
+                this.emit('skill-states-reset');
+                log('所有技能狀態已重置', 'warning');
+            }
+
+            on(event, callback) {
+                if (!this.listeners[event]) this.listeners[event] = [];
+                this.listeners[event].push(callback);
+            }
+
+            emit(event, data) {
+                if (this.listeners[event]) {
+                    this.listeners[event].forEach(callback => callback(data));
+                }
+            }
+        }
+
+        // 全局變量
+        let stateManager;
+
+        // 日誌函數
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 初始化系統
+        function initializeSystem() {
+            log('開始初始化技能狀態管理系統', 'info');
+            
+            stateManager = new MockSkillStateManager();
+            
+            // 載入持久化狀態
+            stateManager.loadPersistedState();
+            
+            // 設置技能數據
+            stateManager.setSkillTreeData(mockSkillsData);
+            
+            // 綁定事件
+            stateManager.on('skill-status-changed', (event) => {
+                log(`技能狀態變化: ${event.skillId} (${event.oldStatus} -> ${event.newStatus})`, 'success');
+                animateSkillStatusChange(event.skillId, event.oldStatus, event.newStatus);
+                updateSkillsDisplay();
+                updateStatsDisplay();
+            });
+            
+            stateManager.on('skill-states-recalculated', (event) => {
+                log(`狀態重新計算完成 (${event.rounds} 輪)`, 'info');
+                updateSkillsDisplay();
+                updateStatsDisplay();
+            });
+            
+            stateManager.on('skill-states-reset', () => {
+                log('所有技能狀態已重置', 'warning');
+                updateSkillsDisplay();
+                updateStatsDisplay();
+            });
+            
+            // 初始化顯示
+            updateSkillsDisplay();
+            updateStatsDisplay();
+            
+            log('技能狀態管理系統初始化完成', 'success');
+        }
+
+        // 更新統計顯示
+        function updateStatsDisplay() {
+            const stats = stateManager.getProgressStats();
+            const statsPanel = document.getElementById('statsPanel');
+            
+            statsPanel.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.total}</div>
+                    <div class="stat-label">總技能</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.mastered}</div>
+                    <div class="stat-label">已掌握</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.available}</div>
+                    <div class="stat-label">可學習</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.learning}</div>
+                    <div class="stat-label">學習中</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.locked}</div>
+                    <div class="stat-label">未解鎖</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.masteredPercentage}%</div>
+                    <div class="stat-label">掌握率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.unlockedPercentage}%</div>
+                    <div class="stat-label">解鎖率</div>
+                </div>
+            `;
+        }
+
+        // 更新技能顯示
+        function updateSkillsDisplay() {
+            const skillsGrid = document.getElementById('skillsGrid');
+            const categories = {};
+            
+            // 收集所有技能並按類別分組
+            const allNodes = [];
+            const tree = mockSkillsData.tree;
+            if (tree.center) allNodes.push(tree.center);
+            ['ring1', 'ring2', 'ring3'].forEach(ring => {
+                if (tree[ring]) allNodes.push(...tree[ring]);
+            });
+            
+            allNodes.forEach(node => {
+                if (!categories[node.category]) {
+                    categories[node.category] = [];
+                }
+                categories[node.category].push(node);
+            });
+            
+            // 生成 HTML
+            skillsGrid.innerHTML = Object.entries(categories).map(([category, nodes]) => {
+                const categoryInfo = mockSkillsData.categories[category];
+                
+                return `
+                    <div class="skill-category">
+                        <div class="category-header">
+                            <span class="category-icon">${categoryInfo.icon}</span>
+                            <span>${categoryInfo.name}</span>
+                        </div>
+                        ${nodes.map(node => {
+                            const state = stateManager.getSkillState(node.id);
+                            const status = state ? state.status : 'locked';
+                            
+                            return `
+                                <div class="skill-item" data-skill-id="${node.id}">
+                                    <div class="skill-info">
+                                        <div class="skill-status ${status}"></div>
+                                        <span class="skill-name">${node.name}</span>
+                                    </div>
+                                    <div class="skill-actions">
+                                        <button class="skill-action-btn learn" 
+                                                onclick="learnSkill('${node.id}')"
+                                                ${status === 'locked' || status === 'mastered' ? 'disabled' : ''}>
+                                            學習
+                                        </button>
+                                        <button class="skill-action-btn master" 
+                                                onclick="masterSkill('${node.id}')"
+                                                ${status === 'locked' || status === 'mastered' ? 'disabled' : ''}>
+                                            掌握
+                                        </button>
+                                        <button class="skill-action-btn reset" 
+                                                onclick="resetSkill('${node.id}')">
+                                            重置
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 動畫技能狀態變化
+        function animateSkillStatusChange(skillId, oldStatus, newStatus) {
+            const skillElement = document.querySelector(`[data-skill-id="${skillId}"]`);
+            if (!skillElement) return;
+            
+            // 清除舊的動畫類
+            skillElement.classList.remove('status-change-unlock', 'status-change-master');
+            
+            // 添加適當的動畫類
+            if (newStatus === 'mastered' && oldStatus !== 'mastered') {
+                skillElement.classList.add('status-change-master');
+            } else if (newStatus === 'available' && oldStatus === 'locked') {
+                skillElement.classList.add('status-change-unlock');
+            }
+            
+            // 清除動畫類
+            setTimeout(() => {
+                skillElement.classList.remove('status-change-unlock', 'status-change-master');
+            }, 1200);
+        }
+
+        // 技能交互函數
+        function learnSkill(skillId) {
+            const currentState = stateManager.getSkillState(skillId);
+            if (currentState && currentState.status === 'available') {
+                stateManager.updateSkillStatus(skillId, 'learning');
+            }
+        }
+
+        function masterSkill(skillId) {
+            const currentState = stateManager.getSkillState(skillId);
+            if (currentState && (currentState.status === 'available' || currentState.status === 'learning')) {
+                stateManager.updateSkillStatus(skillId, 'mastered');
+                stateManager.calculateAllStates();
+            }
+        }
+
+        function resetSkill(skillId) {
+            const allNodes = stateManager.collectAllSkillNodes();
+            const node = allNodes.find(n => n.id === skillId);
+            if (node) {
+                const initialStatus = node.status || 'locked';
+                stateManager.updateSkillStatus(skillId, initialStatus);
+                stateManager.calculateAllStates();
+            }
+        }
+
+        // 控制面板函數
+        function recalculateStates() {
+            if (!stateManager) {
+                log('請先初始化系統', 'warning');
+                return;
+            }
+            stateManager.calculateAllStates();
+            log('狀態重新計算完成', 'info');
+        }
+
+        function simulateProgressPath() {
+            if (!stateManager) {
+                log('請先初始化系統', 'warning');
+                return;
+            }
+            
+            log('開始模擬學習路徑', 'info');
+            
+            // 模擬學習序列
+            const learningPath = [
+                'design-patterns-core',
+                'system-architecture-design',
+                'prompt-engineering-core',
+                'contextual-understanding'
+            ];
+            
+            let delay = 1000;
+            learningPath.forEach((skillId, index) => {
+                setTimeout(() => {
+                    masterSkill(skillId);
+                    log(`自動掌握技能: ${skillId}`, 'info');
+                }, delay * (index + 1));
+            });
+        }
+
+        function testAnimations() {
+            log('測試動畫效果', 'info');
+            
+            const testSkills = ['html-css-foundation', 'version-control-systems'];
+            testSkills.forEach(skillId => {
+                animateSkillStatusChange(skillId, 'available', 'mastered');
+            });
+        }
+
+        function resetAllStates() {
+            if (!stateManager) {
+                log('請先初始化系統', 'warning');
+                return;
+            }
+            stateManager.resetAllSkillStates();
+        }
+
+        function clearStorage() {
+            if (!stateManager) {
+                log('請先初始化系統', 'warning');
+                return;
+            }
+            stateManager.clearPersistedState();
+        }
+
+        // 頁面載入時初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            log('頁面載入完成，準備初始化系統', 'info');
+            initializeSystem();
+        });
+
+        // 導出函數供按鈕使用
+        window.initializeSystem = initializeSystem;
+        window.recalculateStates = recalculateStates;
+        window.simulateProgressPath = simulateProgressPath;
+        window.testAnimations = testAnimations;
+        window.resetAllStates = resetAllStates;
+        window.clearStorage = clearStorage;
+        window.learnSkill = learnSkill;
+        window.masterSkill = masterSkill;
+        window.resetSkill = resetSkill;
+    </script>
+</body>
+</html>
