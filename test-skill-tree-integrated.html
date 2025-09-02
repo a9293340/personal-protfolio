@@ -595,9 +595,12 @@
         
         <div class="control-group">
             <label>🔧 系統工具</label>
-            <div class="button-grid">
+            <div class="button-grid" style="grid-template-columns: 1fr 1fr 1fr;">
                 <button class="control-button" id="animation-toggle">動畫開關</button>
+                <button class="control-button" id="grid-toggle">顯示網格</button>
                 <button class="control-button" id="debug-info">調試信息</button>
+            </div>
+            <div class="button-grid" style="margin-top: 8px;">
                 <button class="control-button" id="performance-test">效能測試</button>
                 <button class="control-button" id="export-state">導出狀態</button>
             </div>
@@ -655,6 +658,7 @@
                 this.skillTree = null;
                 this.isLoading = true;
                 this.animationsEnabled = true;
+                this.gridVisible = false;
                 this.currentMode = 'auto';
                 
                 // 統計數據
@@ -833,6 +837,10 @@
                     this.toggleAnimations();
                 });
                 
+                document.getElementById('grid-toggle').addEventListener('click', () => {
+                    this.toggleGrid();
+                });
+                
                 document.getElementById('debug-info').addEventListener('click', () => {
                     this.showDebugInfo();
                 });
@@ -911,6 +919,28 @@
                 const button = document.getElementById('animation-toggle');
                 button.textContent = this.animationsEnabled ? '動畫開啟' : '動畫關閉';
                 button.classList.toggle('active', !this.animationsEnabled);
+            }
+            
+            toggleGrid() {
+                console.log('toggleGrid called, current gridVisible:', this.gridVisible);
+                
+                this.gridVisible = !this.gridVisible;
+                
+                console.log('New gridVisible:', this.gridVisible);
+                console.log('SkillTree available:', !!this.skillTree);
+                
+                if (this.skillTree) {
+                    console.log('Calling skillTree.toggleGrid with:', this.gridVisible);
+                    this.skillTree.toggleGrid(this.gridVisible);
+                } else {
+                    console.error('SkillTree not available');
+                }
+                
+                const button = document.getElementById('grid-toggle');
+                button.textContent = this.gridVisible ? '隱藏網格' : '顯示網格';
+                button.classList.toggle('active', this.gridVisible);
+                
+                console.log('Button text updated to:', button.textContent);
             }
             
             showDebugInfo() {

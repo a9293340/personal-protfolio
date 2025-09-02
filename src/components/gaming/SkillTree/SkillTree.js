@@ -14,7 +14,7 @@
  */
 
 import { EventManager } from '../../../core/events/EventManager.js';
-import SkillTreeStateManager from './SkillStateManager.js';
+import SkillTreeStateManager from './SkillTreeStateManager.js';
 import SkillTreeAnimationController from './SkillAnimationController.js';
 import SkillTreeViewportController from './SkillTreeViewportController.js';
 import SkillTreeResponsiveAdapter from './SkillTreeResponsiveAdapter.js';
@@ -28,8 +28,8 @@ export const SkillTreeConfig = {
     skillSize: 60,
     skillSpacing: 120,
     connectionWidth: 2,
-    gridSize: 1000,
-    centerOffset: { x: 500, y: 500 }
+    gridSize: 2000,
+    centerOffset: { x: 1000, y: 1000 }
   },
   
   // 六角形網格配置
@@ -143,6 +143,8 @@ export class SkillTree extends EventManager {
     this.contentContainer.style.position = 'absolute';
     this.contentContainer.style.top = '0';
     this.contentContainer.style.left = '0';
+    this.contentContainer.style.width = `${this.config.rendering.gridSize}px`;
+    this.contentContainer.style.height = `${this.config.rendering.gridSize}px`;
     this.contentContainer.style.transformOrigin = '0 0';
     this.contentContainer.style.willChange = 'transform';
     
@@ -182,13 +184,42 @@ export class SkillTree extends EventManager {
       
       // 動態導入技能數據配置
       const skillsDataModule = await import('../../../config/data/skills.data.js');
-      this.skillData = skillsDataModule.skillsConfig?.skills || skillsDataModule.default?.skills;
+      const skillsConfig = skillsDataModule.skillsDataConfig || skillsDataModule.default;
       
-      if (!this.skillData || !Array.isArray(this.skillData)) {
+      if (!skillsConfig || !skillsConfig.tree) {
         throw new Error('技能數據格式無效或為空');
       }
       
+      // 將分層技能數據合併為平面陣列
+      this.skillData = [];
+      const treeData = skillsConfig.tree;
+      
+      // 合併所有層級的技能
+      if (treeData.center) this.skillData.push(treeData.center);
+      if (treeData.ring1 && Array.isArray(treeData.ring1)) {
+        this.skillData.push(...treeData.ring1);
+      }
+      if (treeData.ring2 && Array.isArray(treeData.ring2)) {
+        this.skillData.push(...treeData.ring2);
+      }
+      if (treeData.ring3 && Array.isArray(treeData.ring3)) {
+        this.skillData.push(...treeData.ring3);
+      }
+      
+      if (this.skillData.length === 0) {
+        throw new Error('沒有找到有效的技能數據');
+      }
+      
       console.log(`SkillTree: 成功載入 ${this.skillData.length} 個技能配置`);
+      
+      // 調試：顯示載入的技能資訊
+      console.log('載入的技能清單:', this.skillData.map(skill => ({
+        id: skill.id,
+        name: skill.name,
+        category: skill.category,
+        coordinates: skill.coordinates,
+        hasCoordinates: !!skill.coordinates
+      })));
       
     } catch (error) {
       console.warn('SkillTree: 無法載入配置文件，使用測試數據', error);
@@ -370,7 +401,7 @@ export class SkillTree extends EventManager {
     console.log('SkillTree: 初始化子系統');
     
     // 1. 狀態管理器
-    this.stateManager = new SkillTreeStateManager(this.skillData);
+    this.stateManager = new SkillTreeStateManager();
     
     // 2. 動畫控制器
     this.animationController = new SkillTreeAnimationController(
@@ -453,9 +484,22 @@ export class SkillTree extends EventManager {
     this.skillData.forEach(skill => {
       const skillElement = this.createSkillElement(skill);
       
-      // 設置位置
-      const x = centerX + skill.position.x;
-      const y = centerY + skill.position.y;
+      // 計算位置 - 支援六角形座標和笛卡爾座標
+      let x, y;
+      if (skill.coordinates) {
+        // 六角形座標轉換為笛卡爾座標
+        const { q, r } = skill.coordinates;
+        x = centerX + (q * this.config.hexGrid.spacing * 0.866); // sqrt(3)/2 ≈ 0.866
+        y = centerY + (r * this.config.hexGrid.spacing + q * this.config.hexGrid.spacing * 0.5);
+      } else if (skill.position) {
+        // 直接使用笛卡爾座標
+        x = centerX + skill.position.x;
+        y = centerY + skill.position.y;
+      } else {
+        // 默認位置
+        x = centerX;
+        y = centerY;
+      }
       
       skillElement.style.left = `${x - this.config.rendering.skillSize / 2}px`;
       skillElement.style.top = `${y - this.config.rendering.skillSize / 2}px`;
@@ -474,8 +518,18 @@ export class SkillTree extends EventManager {
     element.className = 'skill-node';
     element.id = skill.id;
     element.dataset.skillId = skill.id;
-    element.dataset.branch = skill.branch;
-    element.dataset.ring = skill.position.ring;
+    element.dataset.category = skill.category || 'unknown';
+    
+    // 根據座標判斷是哪個ring
+    let ring = 'center';
+    if (skill.coordinates) {
+      const distance = Math.abs(skill.coordinates.q) + Math.abs(skill.coordinates.r);
+      if (distance === 0) ring = 'center';
+      else if (distance <= 4) ring = 'ring1';
+      else if (distance <= 8) ring = 'ring2';
+      else ring = 'ring3';
+    }
+    element.dataset.ring = ring;
     
     // 設置基礎樣式
     element.style.position = 'absolute';
@@ -554,8 +608,11 @@ export class SkillTree extends EventManager {
    */
   renderConnections() {
     this.skillData.forEach(skill => {
-      if (skill.prerequisites && skill.prerequisites.length > 0) {
-        skill.prerequisites.forEach(prereqId => {
+      // 支援不同的前置技能屬性名
+      const prerequisites = skill.prerequisites || skill.dependencies || [];
+      
+      if (prerequisites.length > 0) {
+        prerequisites.forEach(prereqId => {
           this.createConnection(prereqId, skill.id);
         });
       }
@@ -574,10 +631,33 @@ export class SkillTree extends EventManager {
     const centerX = this.config.rendering.centerOffset.x;
     const centerY = this.config.rendering.centerOffset.y;
     
-    const x1 = centerX + fromSkill.position.x;
-    const y1 = centerY + fromSkill.position.y;
-    const x2 = centerX + toSkill.position.x;
-    const y2 = centerY + toSkill.position.y;
+    // 計算起點座標
+    let x1, y1;
+    if (fromSkill.coordinates) {
+      const { q, r } = fromSkill.coordinates;
+      x1 = centerX + (q * this.config.hexGrid.spacing * 0.866);
+      y1 = centerY + (r * this.config.hexGrid.spacing + q * this.config.hexGrid.spacing * 0.5);
+    } else if (fromSkill.position) {
+      x1 = centerX + fromSkill.position.x;
+      y1 = centerY + fromSkill.position.y;
+    } else {
+      x1 = centerX;
+      y1 = centerY;
+    }
+    
+    // 計算終點座標
+    let x2, y2;
+    if (toSkill.coordinates) {
+      const { q, r } = toSkill.coordinates;
+      x2 = centerX + (q * this.config.hexGrid.spacing * 0.866);
+      y2 = centerY + (r * this.config.hexGrid.spacing + q * this.config.hexGrid.spacing * 0.5);
+    } else if (toSkill.position) {
+      x2 = centerX + toSkill.position.x;
+      y2 = centerY + toSkill.position.y;
+    } else {
+      x2 = centerX;
+      y2 = centerY;
+    }
     
     const connection = document.createElement('div');
     connection.className = 'skill-connection';
@@ -842,6 +922,219 @@ export class SkillTree extends EventManager {
   }
   
   /**
+   * 切換網格顯示
+   */
+  toggleGrid(visible) {
+    if (!this.isInitialized) return;
+    
+    this.isGridVisible = visible;
+    
+    if (visible) {
+      this.showGrid();
+    } else {
+      this.hideGrid();
+    }
+    
+    console.log(`SkillTree: 網格顯示 ${visible ? '開啟' : '關閉'}`);
+  }
+  
+  /**
+   * 顯示六角形網格
+   */
+  showGrid() {
+    console.log('SkillTree.showGrid called');
+    console.log('contentContainer available:', !!this.contentContainer);
+    console.log('connectionLayer available:', !!this.connectionLayer);
+    
+    if (!this.gridLayer) {
+      console.log('Creating new grid layer');
+      this.gridLayer = document.createElement('div');
+      this.gridLayer.className = 'hexagonal-grid-layer';
+      this.gridLayer.style.position = 'absolute';
+      this.gridLayer.style.top = '0';
+      this.gridLayer.style.left = '0';
+      this.gridLayer.style.width = '100%';
+      this.gridLayer.style.height = '100%';
+      this.gridLayer.style.pointerEvents = 'none';
+      this.gridLayer.style.zIndex = '1';
+      this.gridLayer.style.opacity = '0.3';
+      
+      if (this.contentContainer && this.connectionLayer) {
+        this.contentContainer.insertBefore(this.gridLayer, this.connectionLayer);
+        console.log('Grid layer inserted into DOM');
+      } else {
+        console.error('Cannot insert grid layer - missing containers');
+      }
+    } else {
+      console.log('Using existing grid layer');
+    }
+    
+    this.renderGrid();
+  }
+  
+  /**
+   * 隱藏網格
+   */
+  hideGrid() {
+    if (this.gridLayer) {
+      this.gridLayer.remove();
+      this.gridLayer = null;
+    }
+  }
+  
+  /**
+   * 渲染六角形網格
+   */
+  renderGrid() {
+    console.log('SkillTree.renderGrid called');
+    console.log('gridLayer available:', !!this.gridLayer);
+    
+    if (!this.gridLayer) {
+      console.error('No grid layer available for rendering');
+      return;
+    }
+    
+    this.gridLayer.innerHTML = '';
+    
+    const centerX = this.config.rendering.centerOffset.x;
+    const centerY = this.config.rendering.centerOffset.y;
+    const spacing = this.config.hexGrid.spacing;
+    
+    console.log('Grid rendering params:', { centerX, centerY, spacing });
+    
+    // 繪製真正的六角形網格
+    this.renderHexagonalGridLines(centerX, centerY, spacing);
+    
+    // 只添加中心標記用於參考
+    const centerMarker = document.createElement('div');
+    centerMarker.style.position = 'absolute';
+    centerMarker.style.left = `${centerX - 2}px`;
+    centerMarker.style.top = `${centerY - 2}px`;
+    centerMarker.style.width = '4px';
+    centerMarker.style.height = '4px';
+    centerMarker.style.backgroundColor = 'red';
+    centerMarker.style.borderRadius = '50%';
+    centerMarker.style.opacity = '0.6';
+    this.gridLayer.appendChild(centerMarker);
+    
+    console.log('Hexagonal grid rendered');
+    console.log('Grid layer element count:', this.gridLayer.children.length);
+  }
+  
+  /**
+   * 渲染六角形網格線
+   */
+  renderHexagonalGridLines(centerX, centerY, spacing) {
+    // 根據容器大小動態計算網格範圍，確保覆蓋整個可視區域
+    const containerWidth = this.container.offsetWidth;
+    const containerHeight = this.container.offsetHeight;
+    
+    // 標準蜂巢六角形網格的數學常數
+    const hexRadius = spacing * 0.5;  // 六角形外接圓半徑
+    const hexWidth = hexRadius * Math.sqrt(3);  // 六角形寬度
+    const hexHeight = hexRadius * 2;  // 六角形高度
+    
+    // 正確的蜂巢排列偏移量
+    const horizontalSpacing = hexWidth;
+    const verticalSpacing = hexHeight * 0.75;
+    
+    // 動態計算需要的網格範圍，確保覆蓋整個可拖曳區域
+    const maxDistance = Math.max(containerWidth, containerHeight);
+    const gridRange = Math.ceil(maxDistance / (spacing * 2)) + 10;  // 充足的緩衝區
+    
+    console.log('Grid rendering params:', {
+      containerWidth,
+      containerHeight, 
+      spacing,
+      maxDistance,
+      gridRange,
+      centerX,
+      centerY
+    });
+    
+    // 使用標準的六角形網格座標系統
+    for (let q = -gridRange; q <= gridRange; q++) {
+      for (let r = -gridRange; r <= gridRange; r++) {
+        // 六角形座標系統的範圍限制
+        if (Math.abs(q + r) > gridRange) continue;
+        
+        // 標準六角形座標轉換為笛卡爾座標的公式
+        const hexX = centerX + horizontalSpacing * (q + r * 0.5);
+        const hexY = centerY + verticalSpacing * r;
+        
+        // 繪製六角形輪廓，使用正確的外接圓半徑
+        this.drawHexagonOutline(hexX, hexY, hexRadius);
+      }
+    }
+  }
+  
+  /**
+   * 繪製六角形輪廓
+   */
+  drawHexagonOutline(centerX, centerY, radius) {
+    const points = [];
+    
+    // 計算六角形的6個頂點（頂點在上方，平邊在左右）
+    for (let i = 0; i < 6; i++) {
+      const angle = ((i * 60) - 90) * Math.PI / 180; // -90度讓頂點在上方
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+      points.push({ x, y });
+    }
+    
+    // 繪製6條邊，使用更高的透明度讓網格更清楚
+    for (let i = 0; i < 6; i++) {
+      const start = points[i];
+      const end = points[(i + 1) % 6];
+      
+      this.createGridLine(start.x, start.y, end.x, end.y, 0.25);
+    }
+  }
+  
+  /**
+   * 創建網格線
+   */
+  createGridLine(x1, y1, x2, y2, opacity) {
+    const line = document.createElement('div');
+    line.style.position = 'absolute';
+    line.style.left = `${x1}px`;
+    line.style.top = `${y1}px`;
+    
+    const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+    
+    line.style.width = `${length}px`;
+    line.style.height = '1px';
+    line.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+    line.style.opacity = opacity.toString();
+    line.style.transformOrigin = '0 0.5px';
+    line.style.transform = `rotate(${angle}deg)`;
+    line.style.pointerEvents = 'none';
+    line.style.boxShadow = '0 0 1px rgba(255, 255, 255, 0.3)';
+    
+    this.gridLayer.appendChild(line);
+  }
+  
+  
+  /**
+   * 在指定位置繪製六角形
+   */
+  drawHexagonAt(centerX, centerY, radius) {
+    const hexagon = document.createElement('div');
+    hexagon.style.position = 'absolute';
+    hexagon.style.left = `${centerX - radius}px`;
+    hexagon.style.top = `${centerY - radius}px`;
+    hexagon.style.width = `${radius * 2}px`;
+    hexagon.style.height = `${radius * 2}px`;
+    hexagon.style.border = '1px solid white';
+    hexagon.style.borderRadius = '50%';
+    hexagon.style.opacity = '0.4';
+    hexagon.style.pointerEvents = 'none';
+    
+    this.gridLayer.appendChild(hexagon);
+  }
+
+  /**
    * 銷毀技能樹
    */
   destroy() {
@@ -869,6 +1162,12 @@ export class SkillTree extends EventManager {
     
     // 清除 DOM
     this.clearSkillTree();
+    
+    // 清除網格層
+    if (this.gridLayer) {
+      this.gridLayer.remove();
+      this.gridLayer = null;
+    }
     
     // 移除事件監聽器
     this.removeAllListeners();

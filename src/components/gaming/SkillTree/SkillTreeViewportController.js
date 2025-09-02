@@ -155,14 +155,19 @@ export class SkillTreeViewportController extends EventManager {
     // 綁定事件
     this.bindEvents();
     
-    // 初始化視窗大小
-    this.updateViewportSize();
-    
-    // 計算邊界
-    this.calculateBounds();
-    
-    // 初始居中
-    this.centerViewport();
+    // 延遲初始化，確保DOM完全渲染
+    setTimeout(() => {
+      // 初始化視窗大小
+      this.updateViewportSize();
+      
+      // 計算邊界
+      this.calculateBounds();
+      
+      // 初始居中
+      this.centerViewport();
+      
+      console.log('SkillTreeViewportController: 延遲初始化完成');
+    }, 100);
   }
   
   /**
@@ -273,10 +278,17 @@ export class SkillTreeViewportController extends EventManager {
   handleMouseDown(event) {
     if (event.button !== 0) return; // 只處理左鍵
     
+    console.log('ViewportController: Mouse down', {
+      clientX: event.clientX,
+      clientY: event.clientY,
+      target: event.target.className
+    });
+    
     this.startDrag(event.clientX, event.clientY, event.timeStamp);
     this.container.style.cursor = 'grabbing';
     
     event.preventDefault();
+    event.stopPropagation();
   }
   
   /**
@@ -287,6 +299,7 @@ export class SkillTreeViewportController extends EventManager {
     
     this.updateDrag(event.clientX, event.clientY, event.timeStamp);
     event.preventDefault();
+    event.stopPropagation();
   }
   
   /**
@@ -295,8 +308,13 @@ export class SkillTreeViewportController extends EventManager {
   handleMouseUp(event) {
     if (!this.dragState.isDragging) return;
     
+    console.log('ViewportController: Mouse up');
+    
     this.endDrag(event.timeStamp);
     this.container.style.cursor = 'grab';
+    
+    event.preventDefault();
+    event.stopPropagation();
   }
   
   /**
@@ -399,8 +417,22 @@ export class SkillTreeViewportController extends EventManager {
       this.dragState.velocityY = deltaY / deltaTime * 1000;
     }
     
-    // 更新位置
-    this.translateViewport(deltaX, deltaY);
+    // 記錄原始位置
+    const oldX = this.viewport.x;
+    const oldY = this.viewport.y;
+    
+    // 直接更新視窗位置，避免累積誤差
+    const newX = this.viewport.x + deltaX;
+    const newY = this.viewport.y + deltaY;
+    
+    // 應用邊界限制
+    const clampedX = this.clampToBounds(newX, this.bounds.minX, this.bounds.maxX);
+    const clampedY = this.clampToBounds(newY, this.bounds.minY, this.bounds.maxY);
+    
+    this.viewport.x = clampedX;
+    this.viewport.y = clampedY;
+    
+    this.updateTransform();
     
     // 更新上次位置
     this.dragState.lastX = clientX;
@@ -412,6 +444,19 @@ export class SkillTreeViewportController extends EventManager {
       velocityX: this.dragState.velocityX, 
       velocityY: this.dragState.velocityY 
     });
+    
+    // 減少調試信息輸出，只在大幅度拖曳或邊界觸發時顯示
+    if ((Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) || (newX !== clampedX || newY !== clampedY)) {
+      console.log('Significant drag update:', {
+        delta: { x: deltaX, y: deltaY },
+        viewport: { x: this.viewport.x, y: this.viewport.y },
+        boundsHit: {
+          x: newX !== clampedX,
+          y: newY !== clampedY
+        },
+        bounds: this.bounds
+      });
+    }
   }
   
   /**
@@ -569,10 +614,13 @@ export class SkillTreeViewportController extends EventManager {
    * 平移視窗
    */
   translateViewport(deltaX, deltaY) {
-    this.viewport.x += deltaX;
-    this.viewport.y += deltaY;
+    // 直接更新位置並應用邊界
+    const newX = this.viewport.x + deltaX;
+    const newY = this.viewport.y + deltaY;
     
-    this.applyBounds();
+    this.viewport.x = this.clampToBounds(newX, this.bounds.minX, this.bounds.maxX);
+    this.viewport.y = this.clampToBounds(newY, this.bounds.minY, this.bounds.maxY);
+    
     this.updateTransform();
     
     this.emit('translate', { x: this.viewport.x, y: this.viewport.y });
@@ -584,21 +632,49 @@ export class SkillTreeViewportController extends EventManager {
   applyBounds() {
     if (!this.config.bounds.enabled) return;
     
-    const { bounds, config } = this;
+    const { bounds } = this;
     
-    if (this.config.bounds.elastic) {
-      // 彈性邊界
-      this.viewport.x = this.applyElasticBound(this.viewport.x, bounds.minX, bounds.maxX);
-      this.viewport.y = this.applyElasticBound(this.viewport.y, bounds.minY, bounds.maxY);
-    } else {
-      // 硬邊界
-      this.viewport.x = Math.max(bounds.minX, Math.min(bounds.maxX, this.viewport.x));
-      this.viewport.y = Math.max(bounds.minY, Math.min(bounds.maxY, this.viewport.y));
-    }
+    // 暫時關閉彈性邊界，使用硬邊界避免位置跳躍
+    this.viewport.x = this.clampToBounds(this.viewport.x, bounds.minX, bounds.maxX);
+    this.viewport.y = this.clampToBounds(this.viewport.y, bounds.minY, bounds.maxY);
   }
   
   /**
    * 應用彈性邊界
+   */
+  /**
+   * 簡單的邊界限制函數
+   */
+  clampToBounds(value, min, max) {
+    if (isNaN(value) || isNaN(min) || isNaN(max)) {
+      console.warn('clampToBounds: Invalid values', { value, min, max });
+      return 0;
+    }
+    
+    // 如果邊界範圍無效，不做限制
+    if (min > max) {
+      console.warn('clampToBounds: Invalid bounds', { min, max });
+      return value;
+    }
+    
+    const result = Math.max(min, Math.min(max, value));
+    
+    // 只在大幅度限制時輸出調試信息
+    if (result !== value && Math.abs(value - result) > 10) {
+      console.log('clampToBounds: Significant clamping', {
+        original: value,
+        min,
+        max,
+        result,
+        clampAmount: Math.abs(value - result)
+      });
+    }
+    
+    return result;
+  }
+  
+  /**
+   * 彈性邊界函數（暫時停用）
    */
   applyElasticBound(value, min, max) {
     if (value < min) {
@@ -627,33 +703,53 @@ export class SkillTreeViewportController extends EventManager {
   calculateBounds() {
     if (!this.contentContainer) return;
     
-    const containerRect = this.container.getBoundingClientRect();
-    const contentRect = this.contentContainer.getBoundingClientRect();
+    // 簡化邊界計算 - 給予寬鬆的拖曳範圍，確保所有技能都能看到
+    // 不精準計算，優先保證功能性
     
-    const scaledWidth = contentRect.width * this.viewport.scale;
-    const scaledHeight = contentRect.height * this.viewport.scale;
+    const baseRange = 1500; // 基礎拖曳範圍
+    const scaleMultiplier = this.viewport.scale; // 縮放倍數
+    const bufferMultiplier = 1.5; // 安全buffer倍數
     
-    const margin = this.config.bounds.margin;
+    // 簡單粗暴的邊界計算：給足夠大的拖曳範圍
+    const maxOffsetX = Math.max(
+      baseRange * scaleMultiplier * bufferMultiplier,
+      this.viewport.width * 0.8  // 至少80%視窗大小
+    );
+    
+    const maxOffsetY = Math.max(
+      baseRange * scaleMultiplier * bufferMultiplier, 
+      this.viewport.height * 0.8  // 至少80%視窗大小
+    );
     
     this.bounds = {
-      minX: -(scaledWidth - containerRect.width) - margin,
-      maxX: margin,
-      minY: -(scaledHeight - containerRect.height) - margin,
-      maxY: margin
+      minX: -maxOffsetX,
+      maxX: maxOffsetX,
+      minY: -maxOffsetY,
+      maxY: maxOffsetY
     };
+    
+    // 簡化調試信息
+    console.log('SkillTreeViewportController: 寬鬆邊界計算', {
+      scale: this.viewport.scale,
+      viewport: { width: this.viewport.width, height: this.viewport.height },
+      dragRange: { x: maxOffsetX * 2, y: maxOffsetY * 2 },
+      bounds: this.bounds
+    });
   }
   
   /**
    * 居中視窗
    */
   centerViewport() {
-    const containerRect = this.container.getBoundingClientRect();
-    const contentRect = this.contentContainer.getBoundingClientRect();
-    
-    this.viewport.x = (containerRect.width - contentRect.width * this.viewport.scale) / 2;
-    this.viewport.y = (containerRect.height - contentRect.height * this.viewport.scale) / 2;
-    
+    // 技能樹居中到網格中心 (1000, 1000)
+    // 視窗坐標系統中，(0, 0) 應該顯示網格中心
+    this.viewport.x = 0;
+    this.viewport.y = 0;
     this.updateTransform();
+    
+    console.log('SkillTreeViewportController: 視窗已居中', {
+      viewport: { x: this.viewport.x, y: this.viewport.y, scale: this.viewport.scale }
+    });
   }
   
   /**
@@ -806,8 +902,18 @@ export class SkillTreeViewportController extends EventManager {
    */
   updateViewportSize() {
     const rect = this.container.getBoundingClientRect();
-    this.viewport.width = rect.width;
-    this.viewport.height = rect.height;
+    
+    // 確保有有效的尺寸
+    const width = rect.width > 0 ? rect.width : 800; // 預設寬度
+    const height = rect.height > 0 ? rect.height : 600; // 預設高度
+    
+    this.viewport.width = width;
+    this.viewport.height = height;
+    
+    console.log('SkillTreeViewportController: 視窗尺寸更新', {
+      rect: { width: rect.width, height: rect.height },
+      viewport: { width: this.viewport.width, height: this.viewport.height }
+    });
   }
   
   /**
