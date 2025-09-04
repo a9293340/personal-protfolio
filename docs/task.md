@@ -230,44 +230,80 @@
     - [x] 分支折疊展開 (SkillTreeResponsiveAdapter)
     - [x] 移動端優化佈局 (三種響應式模式)
 
-#### Step 2.2: 專案展示系統 (基於 POC-002)
+#### Step 2.2: 專案展示系統模組 🎯 重點功能
 
-- [ ] 移植 3D 卡片翻轉動畫
-  - [ ] 將 POC-002 代碼遷移到新架構
-  - [ ] ProjectCard 組件重構
-  - [ ] CSS 3D Transform 優化
-  - [ ] 動畫性能優化
+**【技術要求】**
+- 使用成熟CSS動畫套件 (Animate.css + AOS.js + Hover.css)
+- Mobile-first 響應式設計
+- 穩定的3D翻轉動畫 (1s平滑動畫)
+- 完美的背景透明化處理
+- 常駐幾何轉動特效 (Epic/Legendary)
+- 跨平台適配 (移動端/桌面端)
 
-- [ ] 實現稀有度系統視覺差異化
-  - [ ] 稀有度等級定義 (Normal/Rare/Epic/Legendary)
-  - [ ] 視覺效果差異化
-    - [ ] 邊框顏色和效果
-    - [ ] 發光動畫效果
-    - [ ] 粒子特效整合
-    - [ ] 背景漸變效果
-  - [ ] 稀有度標識系統
+#### Step 2.2.1: 專案卡片核心組件設計 🔧 基礎建設
 
-- [ ] 配置驅動的專案數據
-  - [ ] 完善 `config/data/projects.data.js`
-    - [ ] 工作專案數據結構
-    - [ ] 個人專案數據結構
-    - [ ] 專案分類系統
-    - [ ] 技術標籤系統
-  - [ ] 專案數據驗證 Schema
-  - [ ] 專案圖片管理系統
+- [x] 建立 ProjectCard 基礎組件架構
+  - [x] 引入成熟動畫套件 (CDN方式)
+    - [x] Animate.css 4.1.1 (基礎動畫)
+    - [x] AOS.js 2.3.1 (滾動動畫)  
+    - [x] Hover.css 2.3.1 (懸停效果)
+  - [x] 建立響應式卡片容器結構
+    - [x] Mobile-first 響應式佈局
+    - [x] 自適應卡片尺寸 (280px-320px + 內容自適應高度)
+    - [x] 觸控友好的間距設計
+  - [x] 實現基礎3D翻轉動畫
+    - [x] 使用 perspective + transform-style
+    - [x] 1s 平滑翻轉動畫
+    - [x] cubic-bezier 緩動函數
+  - [x] 整合 projects.data.js 動態載入 (優化版)
 
-- [ ] 卡片懸停和點擊交互
-  - [ ] 懸停動畫效果
-  - [ ] 點擊反饋動畫
-  - [ ] 鍵盤導航支援
-  - [ ] 觸控互動優化
+#### Step 2.2.2: 稀有度視覺特效系統 ✨ 核心特色
 
-- [ ] 專案詳情模態框
-  - [ ] 模態框組件開發
-  - [ ] 專案詳情展示
-  - [ ] 圖片輪播功能
-  - [ ] 技術標籤展示
-  - [ ] 相關連結處理
+- [ ] 實現四級稀有度系統
+  - [ ] Normal (普通): 基礎樣式，無特效
+  - [ ] Rare (稀有): 藍色box-shadow光暈 + animate.css pulse
+  - [ ] Epic (史詩): 紫色強光暈 + 邊框閃爍 + hover.css buzz效果
+  - [ ] Legendary (傳說): 金色炫光 + animate.css flash + 多重特效
+- [ ] 使用純CSS box-shadow實現穩定光暈
+- [ ] 完美背景透明化，確保翻轉時無黑邊異常
+
+#### Step 2.2.3: 高級視覺特效 🌟 進階功能
+
+- [ ] Epic/Legendary 常駐幾何轉動特效
+  - [ ] Epic: 紫色旋轉邊框 (使用 border-image + animation)
+  - [ ] Legendary: 金色旋轉光環 (使用 ::before 偽元素)
+  - [ ] 穩定的CSS transform實現，不干擾翻轉
+- [ ] Hover互動效果增強  
+  - [ ] 平滑scale放大 (1.05x Desktop / 1.03x Mobile)
+  - [ ] 光暈動態增強 (opacity + blur變化)
+  - [ ] 立體陰影效果 (drop-shadow)
+
+#### Step 2.2.4: 響應式適配系統 📱 跨平台支援
+
+- [ ] 移動端優化 (max-width: 768px)
+  - [ ] 簡化動畫效果 (效能考量)
+  - [ ] 觸控專用卡片尺寸
+  - [ ] 減少同時顯示的特效數量
+- [ ] 桌面端優化 (min-width: 769px)  
+  - [ ] 完整特效展示
+  - [ ] 精確滑鼠hover控制
+  - [ ] 鍵盤Tab導航支援
+- [ ] 使用CSS媒體查詢統一管理斷點
+
+#### Step 2.2.5: 組件架構與系統整合 🔧
+
+- [ ] 模組化組件封裝
+  - [ ] `ProjectCard.js` - 主卡片組件
+  - [ ] `RarityEffects.js` - 稀有度特效管理器
+  - [ ] `ResponsiveHandler.js` - 響應式適配處理器  
+- [ ] Config系統深度整合
+  - [ ] 從 `projects.data.js` 動態載入專案數據
+  - [ ] 支援多語言配置切換
+  - [ ] 支援主題配色動態變更
+- [ ] 效能優化與測試
+  - [ ] GPU加速 (transform3d + will-change)
+  - [ ] 記憶體洩漏檢測
+  - [ ] 跨瀏覽器兼容性測試
 
 #### Step 2.3: 遊戲王卡牌系統 (基於 POC-003)
 
