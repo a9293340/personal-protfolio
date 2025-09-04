@@ -352,6 +352,9 @@ export class InteractiveTimeline extends BaseComponent {
         
         <div class="timeline-info">
           <div class="current-year"></div>
+          <div class="timeline-markers">
+            <!-- 年份標記將動態生成 -->
+          </div>
         </div>
       </div>
     `;
@@ -443,18 +446,57 @@ export class InteractiveTimeline extends BaseComponent {
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          border: 2px solid #ffffff;
+          background: radial-gradient(circle, var(--node-primary-color, #4a90e2) 0%, var(--node-secondary-color, #2171b5) 100%);
+          border: 2px solid var(--node-primary-color, #4a90e2);
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transform-origin: center;
+          box-shadow: 
+            0 0 10px var(--node-glow-color, rgba(74, 144, 226, 0.3)),
+            0 2px 8px rgba(0, 0, 0, 0.2);
           pointer-events: auto;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 12px;
+          color: white;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .node-icon {
+          font-size: 10px;
+          pointer-events: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
         }
         
         .project-node:hover {
           transform: scale(1.5);
+          box-shadow: 
+            0 0 20px var(--node-glow-color, rgba(74, 144, 226, 0.8)),
+            0 4px 12px rgba(0, 0, 0, 0.3);
+          border-color: var(--node-secondary-color, #64B5F6);
+        }
+        
+        /* 主題特定增強效果 */
+        .project-node.theme-active:hover {
+          animation: activeNodePulse 1s ease-in-out infinite alternate;
+        }
+        
+        .project-node.theme-recent {
+          animation: recentNodeGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes activeNodePulse {
+          0% { box-shadow: 0 0 15px var(--node-glow-color), 0 2px 8px rgba(0, 0, 0, 0.2); }
+          100% { box-shadow: 0 0 25px var(--node-glow-color), 0 4px 12px rgba(0, 0, 0, 0.3); }
+        }
+        
+        @keyframes recentNodeGlow {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
         }
         
         .project-node.current { 
@@ -546,6 +588,82 @@ export class InteractiveTimeline extends BaseComponent {
           justify-content: space-between;
           align-items: center;
           color: white;
+        }
+        
+        .timeline-markers {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 5;
+        }
+        
+        .year-marker {
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          pointer-events: none;
+          opacity: 0;
+          transform: translateY(10px);
+          animation: yearMarkerFadeIn 0.5s ease-out forwards;
+        }
+        
+        .year-marker .marker-line {
+          width: 2px;
+          height: 30px;
+          background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+          margin-bottom: 8px;
+        }
+        
+        .year-marker .marker-label {
+          font-size: 12px;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.8);
+          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+          background: rgba(0, 0, 0, 0.3);
+          padding: 4px 8px;
+          border-radius: 4px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          white-space: nowrap;
+        }
+        
+        .period-marker {
+          position: absolute;
+          height: 40px;
+          background: linear-gradient(90deg, transparent 0%, rgba(74, 144, 226, 0.1) 50%, transparent 100%);
+          border-top: 2px solid rgba(74, 144, 226, 0.3);
+          border-bottom: 2px solid rgba(74, 144, 226, 0.3);
+          pointer-events: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          animation: periodMarkerSlide 0.8s ease-out forwards;
+        }
+        
+        .period-marker .period-label {
+          font-size: 11px;
+          font-weight: 600;
+          color: rgba(74, 144, 226, 0.9);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          background: rgba(74, 144, 226, 0.1);
+          padding: 2px 8px;
+          border-radius: 3px;
+          border: 1px solid rgba(74, 144, 226, 0.3);
+        }
+        
+        @keyframes yearMarkerFadeIn {
+          0% { opacity: 0; transform: translateY(10px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes periodMarkerSlide {
+          0% { opacity: 0; transform: scaleX(0); }
+          100% { opacity: 0.6; transform: scaleX(1); }
         }
         
         .current-year {
@@ -760,12 +878,13 @@ export class InteractiveTimeline extends BaseComponent {
     const importanceScale = 0.8 + (project.importance / 5) * 0.4;
     nodeElement.style.transform = `translate(-50%, -50%) scale(${importanceScale})`;
     
-    // 節點內容
+    // 節點內容和樣式 - Step 2.2.2a 色彩主題整合
     const nodeIcon = this.getProjectIcon(project.category || 'general');
     const formattedDate = this.formatProjectDate(project.date);
+    const themeColors = this.getProjectThemeColors(project);
     
     nodeElement.innerHTML = `
-      ${nodeIcon}
+      <div class="node-icon">${nodeIcon}</div>
       <div class="node-label">
         <div class="label-title">${project.title}</div>
         <div class="label-date">${formattedDate}</div>
@@ -773,27 +892,94 @@ export class InteractiveTimeline extends BaseComponent {
       <div class="node-pulse"></div>
     `;
     
+    // 應用時期色彩主題
+    nodeElement.style.setProperty('--node-primary-color', themeColors.primary);
+    nodeElement.style.setProperty('--node-secondary-color', themeColors.secondary);
+    nodeElement.style.setProperty('--node-glow-color', themeColors.glow);
+    nodeElement.style.borderColor = themeColors.primary;
+    
+    // 添加分類和主題類別
+    nodeElement.classList.add(`category-${project.category || 'general'}`);
+    nodeElement.classList.add(`theme-${this.getProjectTheme(project)}`);
+    
     // 添加數據屬性
     nodeElement.dataset.projectId = project.id;
     nodeElement.dataset.projectIndex = index;
+    nodeElement.dataset.projectCategory = project.category || 'general';
     
     return nodeElement;
   }
 
   /**
-   * 獲取專案圖標
+   * 獲取專案圖標 - Step 2.2.2a 增強版
    */
   getProjectIcon(category) {
     const icons = {
-      frontend: '🎨',
-      backend: '⚙️',
-      fullstack: '🔗',
-      devops: '🚀',
-      ai: '🤖',
-      mobile: '📱',
-      general: '💡'
+      frontend: '🎨',     // 前端開發
+      backend: '⚙️',      // 後端開發
+      fullstack: '🔗',    // 全端開發
+      devops: '🚀',       // DevOps/部署
+      ai: '🤖',          // AI/機器學習
+      mobile: '📱',       // 移動端開發
+      blockchain: '⛓️',   // 區塊鏈
+      cloud: '☁️',        // 雲端服務
+      database: '🗄️',     // 資料庫
+      security: '🔒',     // 資訊安全
+      iot: '📡',         // 物聯網
+      game: '🎮',        // 遊戲開發
+      general: '💡'      // 通用/其他
     };
     return icons[category] || icons.general;
+  }
+
+  /**
+   * 獲取專案主題類別名稱 - Step 2.2.2a 輔助方法
+   */
+  getProjectTheme(project) {
+    const currentYear = new Date().getFullYear();
+    const projectYear = new Date(project.date).getFullYear();
+    const yearDiff = currentYear - projectYear;
+
+    if (project.status === 'current') return 'active';
+    if (yearDiff <= 1) return 'recent';
+    if (yearDiff <= 2) return 'medium';
+    return 'archive';
+  }
+
+  /**
+   * 獲取專案時期色彩主題 - Step 2.2.2a 新增
+   */
+  getProjectThemeColors(project) {
+    const currentYear = new Date().getFullYear();
+    const projectYear = new Date(project.date).getFullYear();
+    const yearDiff = currentYear - projectYear;
+
+    // 根據時間距離和專案狀態決定色彩主題
+    if (project.status === 'current') {
+      return {
+        primary: '#4CAF50',    // 活躍綠
+        secondary: '#81C784',   
+        glow: 'rgba(76, 175, 80, 0.6)'
+      };
+    } else if (yearDiff <= 1) {
+      return {
+        primary: '#2196F3',    // 近期藍
+        secondary: '#64B5F6',
+        glow: 'rgba(33, 150, 243, 0.5)'
+      };
+    } else if (yearDiff <= 2) {
+      return {
+        primary: '#FF9800',    // 中期橙
+        secondary: '#FFB74D',
+        glow: 'rgba(255, 152, 0, 0.4)'
+      };
+    } else {
+      return {
+        primary: '#795548',    // 歷史棕
+        secondary: '#A1887F',
+        glow: 'rgba(121, 85, 72, 0.3)'
+      };
+    }
   }
 
   /**
@@ -896,6 +1082,148 @@ export class InteractiveTimeline extends BaseComponent {
         x: rect.width * (index / total),
         y: rect.height * 0.5
       };
+    }
+  }
+
+  /**
+   * 設定時間軸標記系統 - Step 2.2.2b 核心實作
+   */
+  setupTimelineMarkers() {
+    console.log('[InteractiveTimeline] 設定時間軸年份標記系統');
+    
+    const markersContainer = this.element.querySelector('.timeline-markers');
+    const svg = this.element.querySelector('.timeline-svg');
+    const path = this.element.querySelector('.timeline-path');
+    
+    if (!markersContainer || !svg || !path) {
+      console.error('[InteractiveTimeline] 標記容器或路徑元素未找到');
+      return;
+    }
+
+    // 清空現有標記
+    markersContainer.innerHTML = '';
+    
+    // 收集專案年份並生成標記
+    this.generateYearMarkers(markersContainer, svg, path);
+    this.generatePeriodMarkers(markersContainer);
+    
+    console.log('[InteractiveTimeline] 時間軸標記系統設定完成');
+  }
+
+  /**
+   * 生成年份標記
+   */
+  generateYearMarkers(container, svg, path) {
+    // 收集所有專案年份
+    const years = [...new Set(this.timelineData.map(project => {
+      return new Date(project.date).getFullYear();
+    }))].sort();
+    
+    console.log('[InteractiveTimeline] 檢測到年份:', years);
+    
+    const isVertical = this.state.currentBreakpoint === 'mobile';
+    
+    years.forEach((year, index) => {
+      // 計算年份標記在路徑上的位置
+      const yearProgress = this.calculateYearProgress(year, years);
+      const markerPosition = this.calculateMarkerPosition(path, yearProgress);
+      
+      // 創建年份標記元素
+      const yearMarker = document.createElement('div');
+      yearMarker.className = 'year-marker';
+      yearMarker.style.animationDelay = `${index * 0.2}s`;
+      
+      if (isVertical) {
+        yearMarker.style.left = '10px';
+        yearMarker.style.top = `${markerPosition.y}px`;
+      } else {
+        yearMarker.style.left = `${markerPosition.x}px`;
+        yearMarker.style.top = '10px';
+      }
+      
+      yearMarker.innerHTML = `
+        <div class="marker-line"></div>
+        <div class="marker-label">${year}</div>
+      `;
+      
+      container.appendChild(yearMarker);
+    });
+  }
+
+  /**
+   * 生成時期標記
+   */
+  generatePeriodMarkers(container) {
+    const currentYear = new Date().getFullYear();
+    const isVertical = this.state.currentBreakpoint === 'mobile';
+    
+    const periods = [
+      { name: 'Current', years: [currentYear], color: '#4CAF50' },
+      { name: 'Recent', years: [currentYear - 1], color: '#2196F3' },
+      { name: 'Archive', years: [currentYear - 2, currentYear - 3, currentYear - 4], color: '#795548' }
+    ];
+    
+    periods.forEach((period, index) => {
+      const hasProjects = period.years.some(year => 
+        this.timelineData.some(project => 
+          new Date(project.date).getFullYear() === year
+        )
+      );
+      
+      if (!hasProjects) return;
+      
+      const periodMarker = document.createElement('div');
+      periodMarker.className = 'period-marker';
+      periodMarker.style.animationDelay = `${0.5 + index * 0.3}s`;
+      
+      // 根據時期設定位置和顏色
+      if (isVertical) {
+        periodMarker.style.left = '50px';
+        periodMarker.style.right = '20px';
+        periodMarker.style.top = `${60 + index * 80}px`;
+        periodMarker.style.width = 'auto';
+      } else {
+        periodMarker.style.left = `${100 + index * 150}px`;
+        periodMarker.style.right = 'auto';
+        periodMarker.style.top = '60px';
+        periodMarker.style.width = '120px';
+      }
+      
+      periodMarker.style.setProperty('--period-color', period.color);
+      periodMarker.innerHTML = `
+        <div class="period-label">${period.name}</div>
+      `;
+      
+      container.appendChild(periodMarker);
+    });
+  }
+
+  /**
+   * 計算年份在時間軸上的進度
+   */
+  calculateYearProgress(year, allYears) {
+    const minYear = Math.min(...allYears);
+    const maxYear = Math.max(...allYears);
+    
+    if (minYear === maxYear) return 0.5;
+    
+    return (year - minYear) / (maxYear - minYear);
+  }
+
+  /**
+   * 計算標記在路徑上的位置
+   */
+  calculateMarkerPosition(path, progress) {
+    try {
+      const pathLength = path.getTotalLength();
+      const point = path.getPointAtLength(pathLength * progress);
+      
+      // 轉換到實際坐標
+      const svg = this.element.querySelector('.timeline-svg');
+      return this.convertSVGToPixelCoordinates(svg, point);
+    } catch (error) {
+      console.warn('[InteractiveTimeline] 標記位置計算失敗:', error);
+      return { x: 100, y: 200 };
     }
   }
 
@@ -1158,6 +1486,7 @@ export class InteractiveTimeline extends BaseComponent {
         requestAnimationFrame(() => {
           this.setupTimeline();
           this.setupNodes();
+          this.setupTimelineMarkers(); // Step 2.2.2b 新增
           this.setupInteractions();
           this.setupResponsiveHandling();
           console.log('[InteractiveTimeline] DOM 掛載後設定完成');
