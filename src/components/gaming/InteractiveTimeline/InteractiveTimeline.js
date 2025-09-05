@@ -112,7 +112,19 @@ export class InteractiveTimeline extends BaseComponent {
       },
       
       // 專案數據
-      projects: []
+      projects: [],
+      
+      // Step 2.2.4a: 年份篩選系統配置
+      yearFilter: {
+        enabled: true,
+        showAll: true,
+        position: 'top', // top, bottom, left, right
+        style: 'dropdown', // dropdown, tabs, buttons
+        animation: {
+          duration: 0.5,
+          easing: 'power2.out'
+        }
+      }
     };
   }
 
@@ -131,6 +143,14 @@ export class InteractiveTimeline extends BaseComponent {
         context: null,
         animationFrame: null,
         particlePool: []
+      },
+      
+      // Step 2.2.4a: 年份篩選狀態
+      yearFilter: {
+        availableYears: [],
+        selectedYear: null, // null = 顯示所有年份
+        filteredProjects: [],
+        isFiltering: false
       }
     };
   }
@@ -357,14 +377,9 @@ export class InteractiveTimeline extends BaseComponent {
     
     return `
       <div class="timeline-container ${isVertical ? 'vertical' : 'horizontal'}">
-        <div class="timeline-navigation">
-          <button class="nav-btn prev-btn" data-direction="-1">
-            ${isVertical ? '↑' : '←'}
-          </button>
-          <button class="nav-btn next-btn" data-direction="1">
-            ${isVertical ? '↓' : '→'}
-          </button>
-        </div>
+        ${this.config.yearFilter.enabled ? `<div class="timeline-controls ${isVertical ? 'mobile-layout' : 'desktop-layout'}">
+          ${this.generateYearFilterHTML()}
+        </div>` : ''}
         
         <div class="timeline-viewport">
           <svg class="timeline-svg" width="100%" height="400" viewBox="0 0 ${isVertical ? '400 800' : '800 400'}" preserveAspectRatio="none">
@@ -398,6 +413,24 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
+   * 生成年份篩選器 HTML (Step 2.2.4a)
+   */
+  generateYearFilterHTML() {
+    return `
+      <div class="timeline-year-filter">
+        <label class="filter-label">篩選年份：</label>
+        <select class="year-selector">
+          <option value="">顯示所有</option>
+          <!-- 動態年份選項將在初始化時生成 -->
+        </select>
+        <div class="filter-status">
+          <span class="filtered-count"></span>
+        </div>
+      </div>
+    `;
+  }
+  
+  /**
    * 設定基礎樣式
    */
   applyBaseStyles() {
@@ -421,31 +454,95 @@ export class InteractiveTimeline extends BaseComponent {
           flex-direction: column;
         }
         
-        .timeline-navigation {
+        .timeline-container.vertical {
+          padding-top: 60px; /* 為手機版選單留出空間 */
+        }
+        
+        .timeline-controls.desktop-layout {
           position: absolute;
           top: 20px;
           right: 20px;
           z-index: 10;
-          display: flex;
-          gap: 10px;
         }
         
-        .nav-btn {
-          width: 40px;
-          height: 40px;
-          border: none;
-          border-radius: 50%;
+        .timeline-controls.mobile-layout {
+          position: absolute;
+          top: 15px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 10;
+          background: rgba(0, 0, 0, 0.85);
+          padding: 8px 12px;
+          border-radius: 6px;
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Step 2.2.4a: 年份篩選器樣式 */
+        .timeline-year-filter {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(0, 0, 0, 0.7);
+          padding: 12px 16px;
+          border-radius: 8px;
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          font-size: 14px;
+        }
+        
+        /* 手機版年份篩選器調整 */
+        .mobile-layout .timeline-year-filter {
+          padding: 8px 12px;
+          font-size: 13px;
+          gap: 8px;
+          background: rgba(0, 0, 0, 0.85);
+        }
+        
+        .filter-label {
+          color: rgba(255, 255, 255, 0.8);
+          font-weight: 500;
+          white-space: nowrap;
+        }
+        
+        .year-selector {
           background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 6px;
           color: white;
-          font-size: 18px;
+          padding: 6px 12px;
+          font-size: 14px;
           cursor: pointer;
           transition: all 0.3s ease;
-          backdrop-filter: blur(10px);
+          backdrop-filter: blur(5px);
         }
         
-        .nav-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
-          transform: scale(1.1);
+        .year-selector:hover {
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(74, 144, 226, 0.5);
+        }
+        
+        .year-selector:focus {
+          outline: none;
+          border-color: #4a90e2;
+          box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+        }
+        
+        .year-selector option {
+          background: #1a1a2e;
+          color: white;
+          padding: 8px;
+        }
+        
+        .filter-status {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.6);
+          white-space: nowrap;
+        }
+        
+        .filtered-count {
+          color: #4a90e2;
+          font-weight: 500;
         }
         
         .timeline-viewport {
@@ -642,6 +739,7 @@ export class InteractiveTimeline extends BaseComponent {
           justify-content: space-between;
           align-items: center;
           color: white;
+          z-index: 5;
         }
         
         .timeline-markers {
@@ -786,6 +884,16 @@ export class InteractiveTimeline extends BaseComponent {
             flex-direction: column;
             top: 50%;
             transform: translateY(-50%);
+          }
+          
+          .timeline-info {
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+          }
+          
+          .current-year {
+            font-size: 18px;
           }
           
           .particles-canvas {
@@ -2021,12 +2129,236 @@ export class InteractiveTimeline extends BaseComponent {
           this.setupParticleSystem(); // Step 2.2.2c 新增
           this.setupInteractions();
           this.setupResponsiveHandling();
+          this.setupYearFilter(); // Step 2.2.4a 新增年份篩選
           console.log('[InteractiveTimeline] DOM 掛載後設定完成');
         });
       });
       
     } catch (error) {
       console.error('[InteractiveTimeline] DOM 掛載後設定失敗:', error);
+    }
+  }
+
+  /**
+   * 設定年份篩選系統 (Step 2.2.4a)
+   */
+  setupYearFilter() {
+    if (!this.config.yearFilter.enabled) {
+      console.log('[InteractiveTimeline] 年份篩選功能已停用');
+      return;
+    }
+
+    console.log('[InteractiveTimeline] 初始化年份篩選系統');
+
+    // 收集所有可用年份
+    this.collectAvailableYears();
+
+    // 填充年份選項
+    this.populateYearOptions();
+
+    // 設定事件監聽器
+    this.setupYearFilterEvents();
+
+    // 初始化顯示狀態
+    this.updateFilterStatus();
+    this.updateCurrentYearDisplay();
+
+    console.log('[InteractiveTimeline] 年份篩選系統初始化完成');
+  }
+
+  /**
+   * 收集所有可用年份
+   */
+  collectAvailableYears() {
+    const years = [...new Set(this.timelineData.map(project => {
+      return new Date(project.date).getFullYear();
+    }))].sort((a, b) => b - a); // 降序排列，最新年份在前
+
+    this.state.yearFilter.availableYears = years;
+    console.log('[InteractiveTimeline] 收集到年份:', years);
+  }
+
+  /**
+   * 填充年份下拉選項
+   */
+  populateYearOptions() {
+    const yearSelector = this.element.querySelector('.year-selector');
+    if (!yearSelector) {
+      console.error('[InteractiveTimeline] 年份選擇器元素未找到');
+      return;
+    }
+
+    // 清空現有選項（保留"顯示所有"選項）
+    const allOption = yearSelector.querySelector('option[value=""]');
+    yearSelector.innerHTML = '';
+    if (allOption) {
+      yearSelector.appendChild(allOption);
+    } else {
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = '顯示所有';
+      yearSelector.appendChild(defaultOption);
+    }
+
+    // 添加年份選項
+    this.state.yearFilter.availableYears.forEach(year => {
+      const option = document.createElement('option');
+      option.value = year.toString();
+      option.textContent = `${year}年`;
+      yearSelector.appendChild(option);
+    });
+
+    console.log('[InteractiveTimeline] 年份選項已填充');
+  }
+
+  /**
+   * 設定年份篩選事件監聽器
+   */
+  setupYearFilterEvents() {
+    const yearSelector = this.element.querySelector('.year-selector');
+    if (!yearSelector) {
+      console.error('[InteractiveTimeline] 年份選擇器元素未找到');
+      return;
+    }
+
+    yearSelector.addEventListener('change', (event) => {
+      const selectedYear = event.target.value;
+      this.applyYearFilter(selectedYear);
+    });
+
+    console.log('[InteractiveTimeline] 年份篩選事件監聽器已設定');
+  }
+
+  /**
+   * 應用年份篩選
+   */
+  applyYearFilter(year) {
+    console.log(`[InteractiveTimeline] 應用年份篩選: ${year || '顯示所有'}`);
+
+    this.state.yearFilter.selectedYear = year || null;
+    this.state.yearFilter.isFiltering = !!year;
+
+    // 篩選專案數據
+    if (year) {
+      this.state.yearFilter.filteredProjects = this.timelineData.filter(project => {
+        const projectYear = new Date(project.date).getFullYear();
+        return projectYear.toString() === year;
+      });
+    } else {
+      this.state.yearFilter.filteredProjects = [...this.timelineData];
+    }
+
+    // 更新節點可見性
+    this.updateNodesVisibility();
+
+    // 更新狀態顯示
+    this.updateFilterStatus();
+    this.updateCurrentYearDisplay();
+
+    // 觸發自定義事件
+    this.element.dispatchEvent(new CustomEvent('yearFilterChanged', {
+      detail: {
+        selectedYear: year,
+        filteredProjects: this.state.yearFilter.filteredProjects,
+        totalProjects: this.timelineData.length
+      }
+    }));
+  }
+
+  /**
+   * 更新節點可見性動畫
+   */
+  updateNodesVisibility() {
+    if (!window.gsap) {
+      console.warn('[InteractiveTimeline] GSAP 未載入，跳過動畫');
+      return;
+    }
+
+    const { selectedYear, filteredProjects } = this.state.yearFilter;
+    const animationDuration = this.config.yearFilter.animation.duration;
+    const easing = this.config.yearFilter.animation.easing;
+
+    this.nodes.forEach((node, index) => {
+      const project = node.data;
+      const projectYear = new Date(project.date).getFullYear();
+      const shouldShow = !selectedYear || projectYear.toString() === selectedYear;
+
+      // 錯開動畫，創造波浪效果
+      const delay = index * 0.05;
+
+      if (shouldShow) {
+        // 顯示節點
+        gsap.to(node.element, {
+          duration: animationDuration,
+          delay: delay,
+          scale: 0.8 + (project.importance / 5) * 0.4,
+          opacity: 1,
+          ease: easing
+        });
+      } else {
+        // 隱藏節點
+        gsap.to(node.element, {
+          duration: animationDuration * 0.7,
+          delay: delay,
+          scale: 0.3,
+          opacity: 0.2,
+          ease: easing
+        });
+      }
+    });
+  }
+
+  /**
+   * 更新篩選狀態顯示
+   */
+  updateFilterStatus() {
+    const statusElement = this.element.querySelector('.filtered-count');
+    if (!statusElement) return;
+
+    const { filteredProjects } = this.state.yearFilter;
+    const totalProjects = this.timelineData.length;
+
+    if (this.state.yearFilter.isFiltering) {
+      statusElement.textContent = `${filteredProjects.length}/${totalProjects} 個專案`;
+    } else {
+      statusElement.textContent = `${totalProjects} 個專案`;
+    }
+  }
+
+  /**
+   * 更新當前年份顯示
+   */
+  updateCurrentYearDisplay() {
+    const currentYearElement = this.element.querySelector('.current-year');
+    if (!currentYearElement) return;
+
+    const { selectedYear } = this.state.yearFilter;
+
+    if (selectedYear) {
+      // 顯示選中的特定年份
+      currentYearElement.textContent = selectedYear;
+    } else {
+      // 顯示所有年份時，顯示年份範圍
+      if (this.state.yearFilter.availableYears.length > 0) {
+        const years = [...this.state.yearFilter.availableYears].sort((a, b) => a - b);
+        const minYear = years[0];
+        const maxYear = years[years.length - 1];
+        
+        if (minYear === maxYear) {
+          currentYearElement.textContent = minYear.toString();
+        } else {
+          currentYearElement.textContent = `${minYear}~${maxYear}`;
+        }
+      } else if (this.timelineData.length > 0) {
+        // 降級方案：從專案數據計算
+        const years = [...new Set(this.timelineData.map(project => {
+          return new Date(project.date).getFullYear();
+        }))].sort((a, b) => a - b);
+        
+        const minYear = years[0];
+        const maxYear = years[years.length - 1];
+        currentYearElement.textContent = minYear === maxYear ? minYear.toString() : `${minYear}~${maxYear}`;
+      }
     }
   }
 
