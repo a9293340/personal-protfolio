@@ -382,7 +382,7 @@ export class InteractiveTimeline extends BaseComponent {
         </div>` : ''}
         
         <div class="timeline-viewport">
-          <svg class="timeline-svg" width="100%" height="400" viewBox="0 0 ${isVertical ? '400 800' : '800 400'}" preserveAspectRatio="none">
+          <svg class="timeline-svg" width="100%" height="${isVertical ? '900' : '400'}" viewBox="0 0 ${isVertical ? '400 900' : '800 400'}" preserveAspectRatio="none">
             <defs>
               <linearGradient id="timelineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" style="stop-color:${this.config.colors.timeline};stop-opacity:0.3" />
@@ -550,6 +550,14 @@ export class InteractiveTimeline extends BaseComponent {
           position: relative;
           overflow: hidden;
           min-height: 350px;
+        }
+        
+        /* 手機版 viewport 需要更多高度 */
+        @media (max-width: 768px) {
+          .timeline-viewport {
+            min-height: 900px;
+            padding-bottom: 20px;
+          }
         }
         
         .timeline-svg {
@@ -739,7 +747,8 @@ export class InteractiveTimeline extends BaseComponent {
           justify-content: space-between;
           align-items: center;
           color: white;
-          z-index: 5;
+          z-index: 100;
+          pointer-events: none;
         }
         
         .timeline-markers {
@@ -821,7 +830,10 @@ export class InteractiveTimeline extends BaseComponent {
         .current-year {
           font-size: 24px;
           font-weight: bold;
-          color: ${this.config.colors.timeline};
+          color: #4a90e2;
+          text-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+          display: block !important;
+          visibility: visible !important;
         }
         
         .timeline-controls {
@@ -873,7 +885,9 @@ export class InteractiveTimeline extends BaseComponent {
         /* 響應式設計 */
         @media (max-width: 768px) {
           .interactive-timeline {
-            height: 600px;
+            height: 960px; /* 增加高度，底部多留空間 */
+            min-height: 960px;
+            padding-bottom: 30px; /* 增加底部padding */
           }
           
           .timeline-container.vertical {
@@ -887,17 +901,35 @@ export class InteractiveTimeline extends BaseComponent {
           }
           
           .timeline-info {
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
+            display: none !important; /* 手機版直接隱藏年份顯示 */
           }
           
           .current-year {
             font-size: 18px;
+            font-weight: bold;
           }
           
           .particles-canvas {
             opacity: 0.5;
+          }
+        }
+        
+        /* 桌面版也稍微增加高度 */
+        @media (min-width: 769px) {
+          .interactive-timeline {
+            height: 450px; /* 桌面版也稍微增加 */
+            min-height: 450px;
+          }
+          
+          .timeline-info {
+            z-index: 10; /* 確保在最上層 */
+            bottom: 20px;
+            left: 20px;
+          }
+          
+          .current-year {
+            color: #4a90e2;
+            text-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
           }
         }
       </style>
@@ -962,18 +994,18 @@ export class InteractiveTimeline extends BaseComponent {
     const curveIntensity = 0.3;
     
     if (isVertical) {
-      // 垂直時間軸 (手機版)
-      const startY = padding;
-      const endY = height - padding;
-      const centerX = width / 2;
+      // 垂直時間軸 (手機版) - 簡單直線，確保節點對齊
+      const startY = 60;
+      const endY = height - 40; // 延伸到接近底部，確保覆蓋最後節點
+      const centerX = 200; // 固定在中心
       
-      // 創建自然的 S 型曲線
-      const controlOffset = width * 0.15;
-      const midY = height / 2;
+      // 創建幾乎直線的路徑，最小曲線
+      const controlOffset = width * 0.04; // 更小的曲線，接近直線
+      const midY = (startY + endY) / 2;
       
       return `M ${centerX} ${startY} 
-              Q ${centerX - controlOffset} ${midY * 0.7} ${centerX} ${midY}
-              Q ${centerX + controlOffset} ${midY * 1.3} ${centerX} ${endY}`;
+              Q ${centerX - controlOffset} ${midY - 30} ${centerX} ${midY}
+              Q ${centerX + controlOffset} ${midY + 30} ${centerX} ${endY}`;
     } else {
       // 水平時間軸 (桌面版)
       const startX = padding;
@@ -1705,6 +1737,17 @@ export class InteractiveTimeline extends BaseComponent {
       
       const progress = total === 1 ? 0.5 : index / (total - 1);
       const point = path.getPointAtLength(pathLength * progress);
+      
+      // 手機版強制對齊中心線
+      const isVertical = this.state.currentBreakpoint === 'mobile';
+      if (isVertical) {
+        // 最後節點強制對齊到中心
+        if (index === total - 1) {
+          point.x = 200; // 強制對齊中心
+        }
+        // 其他節點也稍微調整靠近中心
+        point.x = 200 + (point.x - 200) * 0.5;
+      }
       
       console.log(`[InteractiveTimeline] 節點 ${index} 位置: (${point.x}, ${point.y})`);
       

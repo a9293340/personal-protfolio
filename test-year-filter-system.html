@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 2.2.4a - 年份篩選系統測試</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .test-header h1 {
+            font-size: 2.5em;
+            color: #4a90e2;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
+        }
+
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: #4a90e2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .timeline-showcase {
+            margin: 40px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .loading-message {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 1.2em;
+            opacity: 0.7;
+        }
+
+        .test-instructions {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .test-instructions h3 {
+            color: #4a90e2;
+            margin-top: 0;
+        }
+
+        .test-instructions ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .test-instructions li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>📅 Step 2.2.4a 年份篩選系統</h1>
+            <p>測試年份篩選功能：動態年份選單 → 專案過濾 → 節點顯示/隱藏動畫 → 狀態統計</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="initializeTimelineWithYearFilter()">📅 初始化年份篩選時間軸</button>
+        </div>
+
+        <div class="test-instructions">
+            <h3>🧪 測試步驟</h3>
+            <ul>
+                <li><strong>步驟 1:</strong> 點擊上方按鈕初始化時間軸系統</li>
+                <li><strong>步驟 2:</strong> 觀察右上角的年份篩選器 (下拉選單)</li>
+                <li><strong>步驟 3:</strong> 選擇不同年份，觀察節點動畫變化</li>
+                <li><strong>步驟 4:</strong> 注意篩選狀態顯示 (x/y 個專案)</li>
+                <li><strong>步驟 5:</strong> 選擇"顯示所有"恢復完整顯示</li>
+            </ul>
+            
+            <h3>✅ 預期行為</h3>
+            <ul>
+                <li>年份選單應包含：2020, 2021, 2022, 2023, 2024</li>
+                <li>篩選時，不符合的節點會縮小並變透明</li>
+                <li>符合的節點保持正常大小和透明度</li>
+                <li>動畫應該流暢，有錯開效果</li>
+                <li>統計數字即時更新</li>
+            </ul>
+        </div>
+
+        <div id="loading" class="loading-message">
+            ⏳ 正在載入年份篩選時間軸系統...
+        </div>
+
+        <div id="timelineShowcase" class="timeline-showcase" style="display: none;">
+            <div id="timelineContainer">
+                <!-- 互動時間軸將在此顯示 -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { InteractiveTimeline } from './src/components/gaming/InteractiveTimeline/InteractiveTimeline.js';
+
+        window.InteractiveTimeline = InteractiveTimeline;
+        window.timelineInstance = null;
+        
+        // 測試用專案數據 - 跨多年份範圍，測試年份篩選
+        const yearFilterTestData = [
+            {
+                id: 'current-ai-project',
+                title: 'AI驅動專案',
+                date: '2024-11-01',
+                description: '當前最重要的AI專案，使用最新機器學習技術',
+                category: 'ai',
+                importance: 5,
+                status: 'current'
+            },
+            {
+                id: 'recent-fullstack-2024',
+                title: '全端電商系統',
+                date: '2024-03-15',
+                description: '2024年度主要專案，整合前後端技術',
+                category: 'fullstack',
+                importance: 4,
+                status: 'recent'
+            },
+            {
+                id: 'spring-project-2024',
+                title: '春季產品發布',
+                date: '2024-01-20',
+                description: '2024年初的重要產品發布',
+                category: 'frontend',
+                importance: 3,
+                status: 'recent'
+            },
+            {
+                id: 'blockchain-2023',
+                title: '區塊鏈研究',
+                date: '2023-08-10',
+                description: '2023年深度研究專案',
+                category: 'blockchain',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'devops-2023',
+                title: 'DevOps自動化',
+                date: '2023-02-15',
+                description: '2023年雲端部署優化',
+                category: 'devops',
+                importance: 4,
+                status: 'recent'
+            },
+            {
+                id: 'winter-project-2023',
+                title: '冬季系統升級',
+                date: '2023-12-01',
+                description: '2023年底系統大改版',
+                category: 'backend',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'mobile-2022',
+                title: '移動端APP',
+                date: '2022-09-20',
+                description: '2022年移動應用開發',
+                category: 'mobile',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'summer-project-2022',
+                title: '夏季創新計畫',
+                date: '2022-06-15',
+                description: '2022年創新技術研發',
+                category: 'general',
+                importance: 2,
+                status: 'past'
+            },
+            {
+                id: 'archive-2021',
+                title: '早期專案',
+                date: '2021-12-01',
+                description: '2021年歷史學習專案',
+                category: 'general',
+                importance: 2,
+                status: 'archive'
+            },
+            {
+                id: 'legacy-2020',
+                title: '基礎專案',
+                date: '2020-06-15',
+                description: '2020年職涯起點專案',
+                category: 'frontend',
+                importance: 2,
+                status: 'archive'
+            }
+        ];
+
+        window.initializeTimelineWithYearFilter = async function() {
+            try {
+                const loadingEl = document.getElementById('loading');
+                const showcaseEl = document.getElementById('timelineShowcase');
+                const containerEl = document.getElementById('timelineContainer');
+                
+                loadingEl.style.display = 'block';
+                showcaseEl.style.display = 'none';
+                
+                if (window.timelineInstance) {
+                    window.timelineInstance.destroy();
+                    window.timelineInstance = null;
+                }
+                
+                containerEl.innerHTML = '';
+                
+                console.log('📅 開始創建年份篩選時間軸系統');
+                
+                window.timelineInstance = new InteractiveTimeline({
+                    container: containerEl,
+                    projects: yearFilterTestData,
+                    height: '500px',
+                    // 確保年份篩選功能啟用
+                    yearFilter: {
+                        enabled: true,
+                        showAll: true,
+                        position: 'top',
+                        style: 'dropdown'
+                    }
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const timelineElement = window.timelineInstance.getElement();
+                if (timelineElement) {
+                    containerEl.appendChild(timelineElement);
+                    window.timelineInstance.setupAfterMount();
+                    
+                    loadingEl.style.display = 'none';
+                    showcaseEl.style.display = 'block';
+                    
+                    console.log('✅ 年份篩選時間軸系統初始化完成');
+                } else {
+                    throw new Error('時間軸元素創建失敗');
+                }
+                
+            } catch (error) {
+                console.error('❌ 年份篩選時間軸初始化失敗:', error);
+                document.getElementById('loading').innerHTML = 
+                    `<div style="color: #e74c3c;">❌ 初始化失敗: ${error.message}</div>`;
+            }
+        };
+
+        // 自動初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📅 年份篩選測試頁面載入完成');
+            setTimeout(() => {
+                window.initializeTimelineWithYearFilter();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
