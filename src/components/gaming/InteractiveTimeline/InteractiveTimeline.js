@@ -1735,7 +1735,8 @@ export class InteractiveTimeline extends BaseComponent {
         };
       }
       
-      const progress = total === 1 ? 0.5 : index / (total - 1);
+      // 調整節點分布：讓節點更緊密，不要佔滿整個路徑
+      const progress = total === 1 ? 0.5 : (index / (total - 1)) * 0.85 + 0.05; // 壓縮到路徑的85%，從5%開始
       const point = path.getPointAtLength(pathLength * progress);
       
       // 手機版強制對齊中心線
