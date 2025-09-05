@@ -25,6 +25,9 @@ export class InteractiveTimeline extends BaseComponent {
     this.currentPosition = 0;
     this.isDragging = false;
     
+    // 粒子系統屬性 (Step 2.2.2c)
+    this.particleSystem = null;
+    
     this.init();
   }
 
@@ -82,6 +85,32 @@ export class InteractiveTimeline extends BaseComponent {
         particles: '#ffffff'
       },
       
+      // 粒子系統配置 (Step 2.2.2c)
+      particles: {
+        enabled: true,
+        count: 50,
+        size: {
+          min: 1,
+          max: 3
+        },
+        speed: {
+          min: 0.5,
+          max: 2.0
+        },
+        opacity: {
+          min: 0.2,
+          max: 0.8
+        },
+        colors: ['#4a90e2', '#64b5f6', '#90caf9', '#bbdefb'],
+        flowDirection: 'timeline', // 沿時間軸方向流動
+        respawn: true,
+        performance: {
+          mobile: { count: 25, size: { min: 0.5, max: 2 } },
+          tablet: { count: 35, size: { min: 0.8, max: 2.5 } },
+          desktop: { count: 50, size: { min: 1, max: 3 } }
+        }
+      },
+      
       // 專案數據
       projects: []
     };
@@ -94,7 +123,15 @@ export class InteractiveTimeline extends BaseComponent {
       isLoading: false,
       selectedNode: null,
       timelineLength: 0,
-      viewportPosition: 0
+      viewportPosition: 0,
+      // 粒子系統狀態 (Step 2.2.2c)
+      particles: {
+        isActive: false,
+        canvas: null,
+        context: null,
+        animationFrame: null,
+        particlePool: []
+      }
     };
   }
 
@@ -346,7 +383,7 @@ export class InteractiveTimeline extends BaseComponent {
           </div>
           
           <div class="timeline-particles">
-            <!-- 背景粒子效果 -->
+            <canvas class="particles-canvas" width="800" height="400"></canvas>
           </div>
         </div>
         
@@ -691,6 +728,33 @@ export class InteractiveTimeline extends BaseComponent {
           background: rgba(255, 255, 255, 0.2);
         }
         
+        /* 粒子系統樣式 (Step 2.2.2c) */
+        .timeline-particles {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 1;
+          overflow: hidden;
+        }
+        
+        .particles-canvas {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          display: block;
+          opacity: 0.7;
+          transition: opacity 0.5s ease;
+        }
+        
+        .timeline-particles.active .particles-canvas {
+          opacity: 1;
+        }
+        
         /* 響應式設計 */
         @media (max-width: 768px) {
           .interactive-timeline {
@@ -705,6 +769,10 @@ export class InteractiveTimeline extends BaseComponent {
             flex-direction: column;
             top: 50%;
             transform: translateY(-50%);
+          }
+          
+          .particles-canvas {
+            opacity: 0.5;
           }
         }
       </style>
@@ -1487,6 +1555,7 @@ export class InteractiveTimeline extends BaseComponent {
           this.setupTimeline();
           this.setupNodes();
           this.setupTimelineMarkers(); // Step 2.2.2b 新增
+          this.setupParticleSystem(); // Step 2.2.2c 新增
           this.setupInteractions();
           this.setupResponsiveHandling();
           console.log('[InteractiveTimeline] DOM 掛載後設定完成');
@@ -1499,9 +1568,284 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
+   * 初始化粒子系統 (Step 2.2.2c)
+   */
+  setupParticleSystem() {
+    console.log('[InteractiveTimeline] 初始化背景粒子流動系統');
+    
+    if (!this.config.particles.enabled) {
+      console.log('[InteractiveTimeline] 粒子系統已停用');
+      return;
+    }
+    
+    const canvas = this.element.querySelector('.particles-canvas');
+    if (!canvas) {
+      console.error('[InteractiveTimeline] 粒子 Canvas 元素未找到');
+      return;
+    }
+    
+    const context = canvas.getContext('2d');
+    if (!context) {
+      console.error('[InteractiveTimeline] Canvas Context 取得失敗');
+      return;
+    }
+    
+    // 設定響應式 Canvas 尺寸
+    this.setupCanvasSize(canvas);
+    
+    // 初始化粒子狀態
+    this.state.particles.canvas = canvas;
+    this.state.particles.context = context;
+    this.state.particles.isActive = true;
+    
+    // 創建粒子池
+    this.createParticlePool();
+    
+    // 啟動動畫循環
+    this.startParticleAnimation();
+    
+    // 標記粒子容器為活躍
+    const particleContainer = this.element.querySelector('.timeline-particles');
+    if (particleContainer) {
+      particleContainer.classList.add('active');
+    }
+    
+    console.log('[InteractiveTimeline] 粒子系統初始化完成');
+  }
+  
+  /**
+   * 設定響應式 Canvas 尺寸
+   */
+  setupCanvasSize(canvas) {
+    const container = canvas.closest('.timeline-viewport');
+    if (!container) return;
+    
+    const updateCanvasSize = () => {
+      const rect = container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      
+      // 設定顯示尺寸
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      
+      // 設定實際解析度
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      
+      // 縮放 context 以適應 DPI
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+    };
+    
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+  }
+  
+  /**
+   * 創建粒子對象池
+   */
+  createParticlePool() {
+    const breakpoint = this.state.currentBreakpoint;
+    const particleConfig = this.config.particles.performance[breakpoint] || this.config.particles;
+    const count = particleConfig.count || this.config.particles.count;
+    
+    this.state.particles.particlePool = [];
+    
+    for (let i = 0; i < count; i++) {
+      this.state.particles.particlePool.push(this.createParticle());
+    }
+    
+    console.log(`[InteractiveTimeline] 創建 ${count} 個粒子 (${breakpoint})`);
+  }
+  
+  /**
+   * 創建單個粒子
+   */
+  createParticle() {
+    const canvas = this.state.particles.canvas;
+    const isVertical = this.state.currentBreakpoint === 'mobile';
+    const colors = this.config.particles.colors;
+    const sizeConfig = this.config.particles.size;
+    const speedConfig = this.config.particles.speed;
+    const opacityConfig = this.config.particles.opacity;
+    
+    // 使用顯示尺寸而非像素尺寸
+    const displayWidth = canvas.offsetWidth;
+    const displayHeight = canvas.offsetHeight;
+    
+    return {
+      // 位置 - 初始隨機分佈
+      x: Math.random() * displayWidth,
+      y: Math.random() * displayHeight,
+      
+      // 起始位置 (用於重生)
+      startX: isVertical ? Math.random() * displayWidth : -10,
+      startY: isVertical ? -10 : Math.random() * displayHeight,
+      
+      // 速度
+      vx: isVertical ? 
+          (Math.random() - 0.5) * 0.5 : 
+          speedConfig.min + Math.random() * (speedConfig.max - speedConfig.min),
+      vy: isVertical ? 
+          speedConfig.min + Math.random() * (speedConfig.max - speedConfig.min) :
+          (Math.random() - 0.5) * 0.5,
+      
+      // 視覺屬性
+      size: sizeConfig.min + Math.random() * (sizeConfig.max - sizeConfig.min),
+      opacity: opacityConfig.min + Math.random() * (opacityConfig.max - opacityConfig.min),
+      color: colors[Math.floor(Math.random() * colors.length)],
+      
+      // 生命週期
+      life: 1.0,
+      maxLife: 1.0,
+      
+      // 動畫屬性
+      pulse: Math.random() * Math.PI * 2, // 脈衝相位
+      pulseSpeed: 0.02 + Math.random() * 0.02
+    };
+  }
+  
+  /**
+   * 啟動粒子動畫循環
+   */
+  startParticleAnimation() {
+    if (this.state.particles.animationFrame) {
+      cancelAnimationFrame(this.state.particles.animationFrame);
+    }
+    
+    const animate = () => {
+      if (!this.state.particles.isActive) return;
+      
+      this.updateParticles();
+      this.renderParticles();
+      
+      this.state.particles.animationFrame = requestAnimationFrame(animate);
+    };
+    
+    animate();
+  }
+  
+  /**
+   * 更新粒子位置和狀態
+   */
+  updateParticles() {
+    const canvas = this.state.particles.canvas;
+    const particles = this.state.particles.particlePool;
+    const isVertical = this.state.currentBreakpoint === 'mobile';
+    
+    // 使用顯示尺寸進行邊界檢測
+    const displayWidth = canvas.offsetWidth;
+    const displayHeight = canvas.offsetHeight;
+    
+    particles.forEach(particle => {
+      // 更新位置
+      particle.x += particle.vx;
+      particle.y += particle.vy;
+      
+      // 更新脈衝動畫
+      particle.pulse += particle.pulseSpeed;
+      
+      // 檢查邊界並重生粒子
+      let needsRespawn = false;
+      
+      if (isVertical) {
+        // 垂直流動：從上到下
+        if (particle.y > displayHeight + 20) {
+          needsRespawn = true;
+        }
+      } else {
+        // 水平流動：從左到右
+        if (particle.x > displayWidth + 20) {
+          needsRespawn = true;
+        }
+      }
+      
+      // 重生粒子 - 從邊界外重新開始
+      if (needsRespawn && this.config.particles.respawn) {
+        if (isVertical) {
+          // 垂直流動重生在頂部
+          particle.x = Math.random() * displayWidth;
+          particle.y = -10;
+          particle.vx = (Math.random() - 0.5) * 0.5;
+          particle.vy = this.config.particles.speed.min + Math.random() * (this.config.particles.speed.max - this.config.particles.speed.min);
+        } else {
+          // 水平流動重生在左側
+          particle.x = -10;
+          particle.y = Math.random() * displayHeight;
+          particle.vx = this.config.particles.speed.min + Math.random() * (this.config.particles.speed.max - this.config.particles.speed.min);
+          particle.vy = (Math.random() - 0.5) * 0.5;
+        }
+        // 重置其他屬性
+        particle.pulse = Math.random() * Math.PI * 2;
+        particle.opacity = this.config.particles.opacity.min + Math.random() * (this.config.particles.opacity.max - this.config.particles.opacity.min);
+      }
+    });
+  }
+  
+  /**
+   * 渲染粒子到 Canvas
+   */
+  renderParticles() {
+    const canvas = this.state.particles.canvas;
+    const ctx = this.state.particles.context;
+    const particles = this.state.particles.particlePool;
+    
+    // 使用顯示尺寸清空畫布（因為 ctx 已經被縮放）
+    const displayWidth = canvas.offsetWidth;
+    const displayHeight = canvas.offsetHeight;
+    ctx.clearRect(0, 0, displayWidth, displayHeight);
+    
+    // 渲染每個粒子
+    particles.forEach(particle => {
+      const pulseFactor = 0.8 + 0.2 * Math.sin(particle.pulse);
+      const renderSize = particle.size * pulseFactor;
+      const renderOpacity = particle.opacity * pulseFactor;
+      
+      ctx.save();
+      
+      // 設定粒子樣式
+      ctx.globalAlpha = renderOpacity;
+      ctx.fillStyle = particle.color;
+      
+      // 繪製發光效果
+      ctx.shadowColor = particle.color;
+      ctx.shadowBlur = renderSize * 3;
+      
+      // 繪製粒子
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, renderSize, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+    });
+  }
+  
+  /**
+   * 停止粒子系統
+   */
+  stopParticleSystem() {
+    this.state.particles.isActive = false;
+    
+    if (this.state.particles.animationFrame) {
+      cancelAnimationFrame(this.state.particles.animationFrame);
+      this.state.particles.animationFrame = null;
+    }
+    
+    const particleContainer = this.element?.querySelector('.timeline-particles');
+    if (particleContainer) {
+      particleContainer.classList.remove('active');
+    }
+    
+    console.log('[InteractiveTimeline] 粒子系統已停止');
+  }
+
+  /**
    * 銷毀組件
    */
   destroy() {
+    // 停止粒子系統
+    this.stopParticleSystem();
+    
     if (this.element && this.element.parentNode) {
       this.element.parentNode.removeChild(this.element);
     }
