@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 2.2.3b - 卡片飛出動畫系統測試</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .test-header h1 {
+            font-size: 2.5em;
+            color: #4a90e2;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
+        }
+
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: #4a90e2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .timeline-showcase {
+            margin: 40px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .loading-message {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 1.2em;
+            opacity: 0.7;
+        }
+        
+        /* Step 2.2.3a 測試頁面動畫 */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎮 Step 2.2.3b 卡片飛出動畫系統</h1>
+            <p>測試卡片飛出功能：節點點擊 → 卡片創建 → 3D旋轉軌跡 → 詳情展示 → 互動關閉</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="initializeTimelineWithThemes()">🎮 初始化卡片飛出時間軸</button>
+        </div>
+
+        <div id="loading" class="loading-message">
+            ⏳ 正在載入卡片飛出時間軸系統...
+        </div>
+
+        <div id="timelineShowcase" class="timeline-showcase" style="display: none;">
+            <div id="timelineContainer">
+                <!-- 互動時間軸將在此顯示 -->
+            </div>
+        </div>
+
+        <!-- 已移除測試說明卡片，保持測試頁面簡潔 -->
+    </div>
+
+    <script type="module">
+        import { InteractiveTimeline } from './src/components/gaming/InteractiveTimeline/InteractiveTimeline.js';
+
+        window.InteractiveTimeline = InteractiveTimeline;
+        window.timelineInstance = null;
+        
+        // 測試用專案數據 - 跨多年份範圍，測試年份標記
+        const themeTestData = [
+            {
+                id: 'current-ai-project',
+                title: 'AI驅動專案',
+                date: '2024-11-01',
+                description: '當前最重要的AI專案',
+                category: 'ai',
+                importance: 5,
+                status: 'current'
+            },
+            {
+                id: 'recent-fullstack-2024',
+                title: '全端電商系統',
+                date: '2024-03-15',
+                description: '2024年度專案',
+                category: 'fullstack',
+                importance: 4,
+                status: 'recent'
+            },
+            {
+                id: 'blockchain-2023',
+                title: '區塊鏈研究',
+                date: '2023-08-10',
+                description: '2023年研究專案',
+                category: 'blockchain',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'devops-2023',
+                title: 'DevOps自動化',
+                date: '2023-02-15',
+                description: '2023年雲端部署',
+                category: 'devops',
+                importance: 4,
+                status: 'recent'
+            },
+            {
+                id: 'mobile-2022',
+                title: '移動端APP',
+                date: '2022-09-20',
+                description: '2022年移動專案',
+                category: 'mobile',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'archive-2021',
+                title: '早期專案',
+                date: '2021-12-01',
+                description: '歷史學習專案',
+                category: 'general',
+                importance: 2,
+                status: 'archive'
+            },
+            {
+                id: 'legacy-2020',
+                title: '基礎專案',
+                date: '2020-06-15',
+                description: '職涯起點專案',
+                category: 'frontend',
+                importance: 2,
+                status: 'archive'
+            }
+        ];
+
+        window.initializeTimelineWithThemes = async function() {
+            try {
+                const loadingEl = document.getElementById('loading');
+                const showcaseEl = document.getElementById('timelineShowcase');
+                const containerEl = document.getElementById('timelineContainer');
+                
+                loadingEl.style.display = 'block';
+                showcaseEl.style.display = 'none';
+                
+                if (window.timelineInstance) {
+                    window.timelineInstance.destroy();
+                    window.timelineInstance = null;
+                }
+                
+                containerEl.innerHTML = '';
+                
+                console.log('🎨 開始創建主題增強時間軸系統');
+                
+                window.timelineInstance = new InteractiveTimeline({
+                    container: containerEl,
+                    projects: themeTestData,
+                    height: '500px'
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const timelineElement = window.timelineInstance.getElement();
+                if (timelineElement) {
+                    containerEl.appendChild(timelineElement);
+                    window.timelineInstance.setupAfterMount();
+                    
+                    loadingEl.style.display = 'none';
+                    showcaseEl.style.display = 'block';
+                    
+                    console.log('✅ 主題增強時間軸系統初始化完成');
+                } else {
+                    throw new Error('時間軸元素創建失敗');
+                }
+                
+            } catch (error) {
+                console.error('❌ 主題時間軸初始化失敗:', error);
+                document.getElementById('loading').innerHTML = 
+                    `<div style="color: #e74c3c;">❌ 初始化失敗: ${error.message}</div>`;
+            }
+        };
+
+        // 監聽節點點擊事件 (Step 2.2.3b 測試)
+        function setupNodeClickListener() {
+            const timelineContainer = document.getElementById('timelineContainer');
+            if (timelineContainer) {
+                timelineContainer.addEventListener('nodeClick', (event) => {
+                    const { project, index, nodeElement } = event.detail;
+                    console.log('🎮 節點點擊事件觸發，卡片即將飛出:', project.title);
+                    
+                    // 顯示卡片飛出提示
+                    showCardFlyoutFeedback(project);
+                });
+            }
+        }
+        
+        // 顯示卡片飛出反饋訊息
+        function showCardFlyoutFeedback(project) {
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(74, 144, 226, 0.9);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                font-size: 14px;
+                max-width: 300px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            feedbackDiv.innerHTML = `
+                <strong>🎮 卡片正在飛出</strong><br>
+                📄 專案: ${project.title}<br>
+                📅 日期: ${project.date}<br>
+                📂 分類: ${project.category || 'general'}<br>
+                <small style="opacity: 0.7;">點擊卡片外部或 ✕ 按鈕關閉</small>
+            `;
+            
+            document.body.appendChild(feedbackDiv);
+            
+            // 3秒後自動移除
+            setTimeout(() => {
+                if (feedbackDiv.parentNode) {
+                    feedbackDiv.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => {
+                        feedbackDiv.remove();
+                    }, 300);
+                }
+            }, 3000);
+        }
+
+        // 自動初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎯 節點點擊測試頁面載入完成');
+            
+            // 設定節點點擊監聽器
+            setTimeout(() => {
+                setupNodeClickListener();
+                window.initializeTimelineWithThemes();
+            }, 1000);
+        });
+
+    </script>
+</body>
+</html>

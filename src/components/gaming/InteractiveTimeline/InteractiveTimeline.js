@@ -558,6 +558,23 @@ export class InteractiveTimeline extends BaseComponent {
           box-shadow: 0 0 20px #ffffff88;
         }
         
+        /* 節點點擊狀態樣式 (Step 2.2.3a) */
+        .project-node.clicking {
+          pointer-events: none;
+          z-index: 10;
+        }
+        
+        .project-node:focus {
+          outline: 2px solid #4a90e2;
+          outline-offset: 2px;
+        }
+        
+        .project-node {
+          cursor: pointer;
+          user-select: none;
+          transition: all 0.2s ease;
+        }
+        
         .node-pulse {
           position: absolute;
           top: 50%;
@@ -975,7 +992,453 @@ export class InteractiveTimeline extends BaseComponent {
     nodeElement.dataset.projectIndex = index;
     nodeElement.dataset.projectCategory = project.category || 'general';
     
+    // 添加點擊事件監聽器 (Step 2.2.3a)
+    this.setupNodeClickHandler(nodeElement, project, index);
+    
     return nodeElement;
+  }
+
+  /**
+   * 設定節點點擊事件處理器 (Step 2.2.3a)
+   */
+  setupNodeClickHandler(nodeElement, project, index) {
+    // 點擊事件監聽
+    nodeElement.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.handleNodeClick(nodeElement, project, index, event);
+    });
+    
+    // 鍵盤可訪問性
+    nodeElement.setAttribute('tabindex', '0');
+    nodeElement.setAttribute('role', 'button');
+    nodeElement.setAttribute('aria-label', `專案: ${project.title}, ${project.date}`);
+    
+    // 鍵盤事件監聽
+    nodeElement.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        this.handleNodeClick(nodeElement, project, index, event);
+      }
+    });
+    
+    console.log(`[InteractiveTimeline] 節點點擊處理器已設定: ${project.title}`);
+  }
+  
+  /**
+   * 處理節點點擊事件 (Step 2.2.3a)
+   */
+  handleNodeClick(nodeElement, project, index, event) {
+    console.log(`[InteractiveTimeline] 節點被點擊: ${project.title}`);
+    
+    // 防止重複點擊
+    if (nodeElement.classList.contains('clicking')) {
+      return;
+    }
+    
+    // 設定當前選中節點
+    this.setSelectedNode(nodeElement, project, index);
+    
+    // 執行點擊反饋動畫
+    this.playNodeClickAnimation(nodeElement);
+    
+    // Step 2.2.3b: 卡片飛出動畫
+    setTimeout(() => {
+      this.createAndAnimateProjectCard(nodeElement, project, index);
+    }, 300); // 等待點擊動畫完成
+    
+    // 觸發自定義事件
+    this.element.dispatchEvent(new CustomEvent('nodeClick', {
+      detail: { project, index, nodeElement, event }
+    }));
+  }
+  
+  /**
+   * 設定選中節點狀態 (Step 2.2.3a)
+   */
+  setSelectedNode(nodeElement, project, index) {
+    // 清除之前選中的節點
+    const prevSelected = this.element.querySelector('.timeline-node.selected');
+    if (prevSelected) {
+      prevSelected.classList.remove('selected');
+    }
+    
+    // 設定新選中節點
+    nodeElement.classList.add('selected');
+    this.state.selectedNode = {
+      element: nodeElement,
+      project: project,
+      index: index
+    };
+    
+    console.log(`[InteractiveTimeline] 設定選中節點: ${project.title}`);
+  }
+  
+  /**
+   * 播放節點點擊動畫 (Step 2.2.3a)
+   */
+  playNodeClickAnimation(nodeElement) {
+    // 添加點擊狀態類
+    nodeElement.classList.add('clicking');
+    
+    // 使用 GSAP 創建點擊反饋動畫
+    const tl = gsap.timeline({
+      onComplete: () => {
+        nodeElement.classList.remove('clicking');
+      }
+    });
+    
+    // 點擊縮放動畫
+    tl.to(nodeElement, {
+      duration: 0.1,
+      scale: 0.9,
+      ease: "power2.out"
+    })
+    .to(nodeElement, {
+      duration: 0.2,
+      scale: 1.1,
+      ease: "back.out(2)"
+    })
+    .to(nodeElement, {
+      duration: 0.15,
+      scale: 1.0,
+      ease: "power2.out"
+    });
+    
+    // 脈衝光環動畫
+    const pulseRing = nodeElement.querySelector('.node-pulse');
+    if (pulseRing) {
+      gsap.fromTo(pulseRing, {
+        scale: 0,
+        opacity: 0.8
+      }, {
+        duration: 0.6,
+        scale: 2,
+        opacity: 0,
+        ease: "power2.out"
+      });
+    }
+    
+    console.log(`[InteractiveTimeline] 播放節點點擊動畫: ${nodeElement.dataset.projectId}`);
+  }
+
+  /**
+   * 創建並動畫化專案卡片 (Step 2.2.3b)
+   */
+  createAndAnimateProjectCard(nodeElement, project, index) {
+    console.log(`[InteractiveTimeline] 創建專案卡片: ${project.title}`);
+    
+    // 防止重複創建卡片
+    const existingCard = document.querySelector('.project-flying-card');
+    if (existingCard) {
+      this.closeProjectCard(existingCard);
+      return;
+    }
+    
+    // 創建卡片元素
+    const card = this.createProjectCard(project, nodeElement);
+    
+    // 計算飛出軌跡
+    const trajectory = this.calculateCardTrajectory(nodeElement);
+    
+    // 執行飛出動畫
+    this.animateCardFlyOut(card, trajectory);
+  }
+  
+  /**
+   * 創建專案詳情卡片 (Step 2.2.3b)
+   */
+  createProjectCard(project, nodeElement) {
+    const card = document.createElement('div');
+    card.className = 'project-flying-card';
+    
+    // 獲取節點的世界座標作為起始位置
+    const nodeRect = nodeElement.getBoundingClientRect();
+    const startX = nodeRect.left + nodeRect.width / 2;
+    const startY = nodeRect.top + nodeRect.height / 2;
+    
+    // 計算大尺寸卡片 (95% 畫面，無最大限制)
+    const cardWidth = window.innerWidth * 0.95;
+    const cardHeight = window.innerHeight * 0.92;
+    
+    // 設定卡片初始位置和樣式 (大尺寸版)
+    card.style.cssText = `
+      position: fixed;
+      left: ${startX - cardWidth/2}px;
+      top: ${startY - cardHeight/2}px;
+      width: ${cardWidth}px;
+      height: ${cardHeight}px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 2px solid ${this.getProjectThemeColors(project).primary};
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      opacity: 0;
+      transform: scale(0.1);
+      transform-origin: center center;
+      pointer-events: auto;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    `;
+    
+    // 卡片內容
+    const themeColors = this.getProjectThemeColors(project);
+    const categoryIcon = this.getProjectIcon(project.category || 'general');
+    
+    card.innerHTML = `
+      <div class="card-header" style="
+        background: linear-gradient(90deg, ${themeColors.primary}33 0%, ${themeColors.secondary}33 100%);
+        padding: 25px 30px;
+        border-bottom: 2px solid ${themeColors.primary}66;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 120px;
+      ">
+        <div style="display: flex; align-items: center; gap: 20px;">
+          <div style="
+            font-size: 60px;
+            padding: 15px;
+            background: ${themeColors.primary}22;
+            border-radius: 12px;
+            border: 2px solid ${themeColors.primary}44;
+          ">${categoryIcon}</div>
+          <div>
+            <h2 style="margin: 0 0 8px 0; font-size: 28px; color: ${themeColors.primary}; font-weight: 700;">${project.title}</h2>
+            <p style="margin: 0; font-size: 16px; opacity: 0.8;">${this.formatProjectDate(project.date)}</p>
+            <div style="margin-top: 8px;">
+              <span style="
+                background: ${themeColors.primary}33;
+                color: ${themeColors.primary};
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 500;
+              ">${project.category || 'general'}</span>
+            </div>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 18px; color: ${themeColors.primary};">
+            重要性: ${'★'.repeat(project.importance || 1)}
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-content" style="
+        padding: 25px 30px 50px 30px;
+        height: calc(100% - 140px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        box-sizing: border-box;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(74, 144, 226, 0.5) rgba(255, 255, 255, 0.1);
+      ">
+        <div>
+          <h3 style="margin: 0 0 12px 0; font-size: 18px; color: ${themeColors.secondary};">專案描述</h3>
+          <p style="margin: 0; font-size: 16px; line-height: 1.6; opacity: 0.9;">${project.description}</p>
+        </div>
+        
+        <div>
+          <h3 style="margin: 0 0 12px 0; font-size: 18px; color: ${themeColors.secondary};">技術亮點</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+              <div style="font-weight: 600; margin-bottom: 5px;">開發時間</div>
+              <div style="opacity: 0.8;">${this.formatProjectDate(project.date)}</div>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+              <div style="font-weight: 600; margin-bottom: 5px;">專案類型</div>
+              <div style="opacity: 0.8;">${project.category || 'general'}</div>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+              <div style="font-weight: 600; margin-bottom: 5px;">專案狀態</div>
+              <div style="opacity: 0.8;">${project.status || 'completed'}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top: auto;">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button style="
+              background: ${themeColors.primary};
+              color: white;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 600;
+              transition: all 0.2s ease;
+            " onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              📖 查看詳情
+            </button>
+            <button style="
+              background: transparent;
+              color: ${themeColors.secondary};
+              border: 2px solid ${themeColors.secondary};
+              padding: 12px 24px;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 600;
+              transition: all 0.2s ease;
+            " onmouseover="this.style.background='${themeColors.secondary}22'" onmouseout="this.style.background='transparent'">
+              🔗 線上展示
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-close" style="
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 20px;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(5px);
+      " onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">✕</div>
+    `;
+    
+    // 添加自定義滾動條樣式 (WebKit browsers)
+    const style = document.createElement('style');
+    style.textContent = `
+      .project-flying-card .card-content::-webkit-scrollbar {
+        width: 8px;
+      }
+      .project-flying-card .card-content::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+      }
+      .project-flying-card .card-content::-webkit-scrollbar-thumb {
+        background: rgba(74, 144, 226, 0.5);
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .project-flying-card .card-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(74, 144, 226, 0.7);
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // 添加關閉事件
+    const closeBtn = card.querySelector('.card-close');
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.closeProjectCard(card);
+    });
+    
+    // 點擊卡片外部關閉
+    document.addEventListener('click', this.handleOutsideClick.bind(this, card), { once: true });
+    
+    document.body.appendChild(card);
+    return card;
+  }
+  
+  /**
+   * 計算卡片飛出軌跡 (Step 2.2.3b) - 修復定位
+   */
+  calculateCardTrajectory(nodeElement) {
+    const nodeRect = nodeElement.getBoundingClientRect();
+    const startX = nodeRect.left + nodeRect.width / 2;
+    const startY = nodeRect.top + nodeRect.height / 2;
+    
+    // 計算目標位置 (螢幕中央)
+    const endX = window.innerWidth / 2;
+    const endY = window.innerHeight / 2;
+    
+    // 控制點：創建弧形軌跡
+    const controlX = startX + (endX - startX) * 0.5;
+    const controlY = Math.min(startY, endY) - 100;
+    
+    return {
+      start: { x: startX, y: startY },
+      control: { x: controlX, y: controlY },
+      end: { x: endX, y: endY }
+    };
+  }
+  
+  /**
+   * 執行卡片飛出動畫 (Step 2.2.3b)
+   */
+  animateCardFlyOut(card, trajectory) {
+    console.log(`[InteractiveTimeline] 執行卡片飛出動畫 - 流暢版`);
+    
+    // GSAP 時間軸動畫 - 流暢旋轉版本
+    const tl = gsap.timeline();
+    
+    // 第一階段：飛出並旋轉 - 使用連續旋轉
+    tl.to(card, {
+      duration: 0.8,
+      opacity: 1,
+      scale: 1,
+      rotateY: 720, // 兩圈完整旋轉，更加流暢
+      left: (window.innerWidth / 2) - ((window.innerWidth * 0.95) / 2), // 移動到螢幕中央
+      top: (window.innerHeight / 2) - ((window.innerHeight * 0.92) / 2),
+      ease: "power2.out"
+    })
+    // 第二階段：穩定落地
+    .to(card, {
+      duration: 0.3,
+      scale: 1.05,
+      ease: "back.out(1.7)"
+    })
+    // 第三階段：最終定位
+    .to(card, {
+      duration: 0.2,
+      scale: 1,
+      ease: "power2.out"
+    });
+    
+    // 添加發光脈衝效果
+    gsap.to(card, {
+      duration: 2,
+      repeat: -1,
+      yoyo: true,
+      ease: "power2.inOut",
+      boxShadow: "0 8px 32px rgba(74, 144, 226, 0.4), 0 0 0 1px rgba(74, 144, 226, 0.2)"
+    });
+  }
+  
+  /**
+   * 關閉專案卡片 (Step 2.2.3b)
+   */
+  closeProjectCard(card) {
+    console.log(`[InteractiveTimeline] 關閉專案卡片`);
+    
+    gsap.to(card, {
+      duration: 0.4,
+      scale: 0,
+      rotateY: 180,
+      opacity: 0,
+      ease: "back.in(2)",
+      onComplete: () => {
+        if (card.parentNode) {
+          card.remove();
+        }
+      }
+    });
+  }
+  
+  /**
+   * 處理點擊外部關閉卡片
+   */
+  handleOutsideClick(card, event) {
+    if (!card.contains(event.target)) {
+      this.closeProjectCard(card);
+    }
   }
 
   /**
@@ -1366,15 +1829,15 @@ export class InteractiveTimeline extends BaseComponent {
     
     // 點擊事件 (為 Step 2.2.3 準備)
     element.addEventListener('click', () => {
-      this.handleNodeClick(node);
+      this.handleNodeClickLegacy(node);
     });
   }
 
   /**
-   * 處理節點點擊 (為 Step 2.2.3 飛出卡片準備)
+   * 處理節點點擊 (舊版本 - 將在 Step 2.2.3 更新為卡片飛出)
    */
-  handleNodeClick(node) {
-    console.log(`[InteractiveTimeline] 節點被點擊: ${node.data.title}`);
+  handleNodeClickLegacy(node) {
+    console.log(`[InteractiveTimeline] 節點被點擊 (舊版): ${node.data.title}`);
     
     // 設定選中狀態
     this.state.selectedNode = node;
