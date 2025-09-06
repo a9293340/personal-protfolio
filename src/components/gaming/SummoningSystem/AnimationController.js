@@ -30,6 +30,7 @@ export class AnimationController extends BaseComponent {
     this.magicCircle = null;
     this.particleSystem = null;
     this.cardSummoning = null;
+    this.audioManager = null;
     
     // 動畫控制
     this.masterTimeline = null;
@@ -104,7 +105,8 @@ export class AnimationController extends BaseComponent {
       componentsReady: {
         magicCircle: false,
         particleSystem: false,
-        cardSummoning: false
+        cardSummoning: false,
+        audioManager: false
       },
       lastError: null
     };
@@ -146,15 +148,17 @@ export class AnimationController extends BaseComponent {
   /**
    * 設置組件實例
    */
-  setComponents({ magicCircle, particleSystem, cardSummoning }) {
+  setComponents({ magicCircle, particleSystem, cardSummoning, audioManager }) {
     this.magicCircle = magicCircle;
     this.particleSystem = particleSystem;
     this.cardSummoning = cardSummoning;
+    this.audioManager = audioManager;
     
     console.log('🔗 [AnimationController] 組件設置:', {
       magicCircle: !!this.magicCircle,
       particleSystem: !!this.particleSystem,
-      cardSummoning: !!this.cardSummoning
+      cardSummoning: !!this.cardSummoning,
+      audioManager: !!this.audioManager
     });
   }
 
@@ -209,6 +213,15 @@ export class AnimationController extends BaseComponent {
       initPromises.push(
         safeInit(this.cardSummoning, 'CardSummoning').then(() => {
           this.state.componentsReady.cardSummoning = true;
+        })
+      );
+    }
+    
+    // 初始化音效管理器
+    if (this.audioManager) {
+      initPromises.push(
+        safeInit(this.audioManager, 'AudioManager').then(() => {
+          this.state.componentsReady.audioManager = true;
         })
       );
     }
@@ -322,6 +335,14 @@ export class AnimationController extends BaseComponent {
     }
 
     console.log('🔮 [AnimationController] 開始魔法陣展開');
+    
+    // 播放魔法陣音效
+    if (this.audioManager) {
+      this.audioManager.playPhaseSound('magicCircle').catch(err => 
+        console.warn('[AnimationController] 魔法陣音效播放失敗:', err)
+      );
+    }
+    
     await this.magicCircle.expand();
     console.log('✅ [AnimationController] 魔法陣展開完成');
   }
@@ -336,6 +357,14 @@ export class AnimationController extends BaseComponent {
     }
 
     console.log('🌀 [AnimationController] 開始能量聚集');
+    
+    // 播放能量聚集音效
+    if (this.audioManager) {
+      this.audioManager.playPhaseSound('energyGather').catch(err => 
+        console.warn('[AnimationController] 能量聚集音效播放失敗:', err)
+      );
+    }
+    
     await this.particleSystem.playRingFlow();
     console.log('✅ [AnimationController] 能量聚集完成');
   }
@@ -350,6 +379,13 @@ export class AnimationController extends BaseComponent {
     }
 
     console.log('💥 [AnimationController] 開始粒子爆發');
+    
+    // 播放粒子爆發音效
+    if (this.audioManager) {
+      this.audioManager.playPhaseSound('particleBurst').catch(err => 
+        console.warn('[AnimationController] 粒子爆發音效播放失敗:', err)
+      );
+    }
     
     try {
       // 確保粒子系統準備就緒
@@ -375,6 +411,14 @@ export class AnimationController extends BaseComponent {
     }
 
     console.log('🎴 [AnimationController] 開始卡牌召喚');
+    
+    // 播放卡牌召喚音效
+    if (this.audioManager) {
+      this.audioManager.playPhaseSound('cardSummoning').catch(err => 
+        console.warn('[AnimationController] 卡牌召喚音效播放失敗:', err)
+      );
+    }
+    
     // 傳入專案數據（如果有的話）
     const projectData = this.state.projectData || { title: '召喚卡牌' };
     await this.cardSummoning.playSummoningAnimation(projectData);
@@ -386,6 +430,13 @@ export class AnimationController extends BaseComponent {
    */
   async executeTransitionPhase() {
     console.log('🌟 [AnimationController] 開始轉場準備');
+    
+    // 播放轉場音效
+    if (this.audioManager) {
+      this.audioManager.playPhaseSound('transition').catch(err => 
+        console.warn('[AnimationController] 轉場音效播放失敗:', err)
+      );
+    }
     
     // 這裡可以添加轉場到專案詳情模態框的邏輯
     // 目前只是完成標記

@@ -345,6 +345,7 @@
     import { ParticleSystem } from './src/components/gaming/SummoningSystem/ParticleSystem.js';
     import { CardSummoning } from './src/components/gaming/SummoningSystem/CardSummoning.js';
     import { AnimationController } from './src/components/gaming/SummoningSystem/AnimationController.js';
+    import { AudioManager } from './src/components/gaming/SummoningSystem/AudioManager.js';
 
     class SummoningSystemTest {
       constructor() {
@@ -352,7 +353,8 @@
         this.components = {
           magicCircle: null,
           particleSystem: null,
-          cardSummoning: null
+          cardSummoning: null,
+          audioManager: null
         };
         this.init();
       }
@@ -458,6 +460,14 @@
           card: { backImageUrl: './src/assets/images/卡背.webp' }
         });
         
+        // 創建音效管理器
+        this.components.audioManager = new AudioManager('audio-test-container', {
+          enabled: true,
+          masterVolume: 0.7,
+          enableSummoningSounds: true,
+          enableUISounds: true
+        });
+        
         // 手動初始化需要初始化的組件
         try {
           // ParticleSystem 需要初始化
@@ -468,6 +478,11 @@
           // CardSummoning 需要初始化
           if (this.components.cardSummoning.init) {
             await this.components.cardSummoning.init();
+          }
+          
+          // AudioManager 需要初始化
+          if (this.components.audioManager.init) {
+            await this.components.audioManager.init();
           }
           
           console.log('✅ [SummoningSystemTest] 組件初始化完成');

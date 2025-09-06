@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AudioManager 音效系統測試</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .title {
+      font-size: 2.5em;
+      color: #d4af37;
+      margin: 0;
+      text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      color: #b0b0b0;
+      margin: 10px 0 0 0;
+    }
+
+    .test-section {
+      margin-bottom: 30px;
+      padding: 25px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .section-title {
+      font-size: 1.4em;
+      color: #4a9eff;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-icon {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .control-group {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .control-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #c0c0c0;
+    }
+
+    button {
+      background: linear-gradient(45deg, #2980b9, #3498db);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      min-width: 120px;
+    }
+
+    button:hover {
+      background: linear-gradient(45deg, #3498db, #5dade2);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.danger {
+      background: linear-gradient(45deg, #c0392b, #e74c3c);
+    }
+
+    button.danger:hover {
+      background: linear-gradient(45deg, #e74c3c, #ec7063);
+    }
+
+    button.success {
+      background: linear-gradient(45deg, #27ae60, #2ecc71);
+    }
+
+    button.success:hover {
+      background: linear-gradient(45deg, #2ecc71, #58d68d);
+    }
+
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 8px 0;
+    }
+
+    .volume-display {
+      text-align: center;
+      font-size: 0.9em;
+      color: #d4af37;
+      font-weight: bold;
+    }
+
+    .status-panel {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .status-item {
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-key {
+      color: #4a9eff;
+    }
+
+    .status-value {
+      color: #d4af37;
+      font-weight: bold;
+    }
+
+    .phase-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .phase-button {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .phase-button.active {
+      background: linear-gradient(45deg, #d4af37, #f1c40f);
+      animation: pulse 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
+      100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 30px rgba(212, 175, 55, 0.4); }
+    }
+
+    .ui-sounds {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .ui-sounds button {
+      min-width: 100px;
+      font-size: 13px;
+      padding: 8px 15px;
+    }
+
+    .warning-message {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      color: #ffc107;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .error-message {
+      background: rgba(220, 53, 69, 0.1);
+      border: 1px solid rgba(220, 53, 69, 0.3);
+      color: #dc3545;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .title {
+        font-size: 2em;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .phase-buttons {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">🎵 AudioManager 音效系統測試</h1>
+      <p class="subtitle">遊戲王召喚特效音效系統完整測試環境</p>
+    </div>
+
+    <div id="warningMessage" class="warning-message" style="display: none;">
+      ⚠️ 需要用戶互動才能啟動音效系統。請點擊任何按鈕開始測試。
+    </div>
+
+    <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+    <!-- 系統狀態 -->
+    <div class="test-section">
+      <h3 class="section-title">
+        📊 系統狀態監控
+      </h3>
+      <div id="statusPanel" class="status-panel">
+        <div class="status-item">
+          <span class="status-key">初始化狀態:</span>
+          <span id="initStatus" class="status-value">未初始化</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">AudioContext:</span>
+          <span id="contextStatus" class="status-value">暫停</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">音效啟用:</span>
+          <span id="enabledStatus" class="status-value">是</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">當前階段:</span>
+          <span id="currentPhase" class="status-value">無</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">活躍音效:</span>
+          <span id="activeSounds" class="status-value">0</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">設備性能:</span>
+          <span id="deviceCapability" class="status-value">未知</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 系統控制 -->
+    <div class="test-section">
+      <h3 class="section-title">
+        🎛️ 系統控制
+      </h3>
+      <div class="controls">
+        <div class="control-group">
+          <button id="initBtn" onclick="initAudioManager()">初始化音效系統</button>
+        </div>
+        <div class="control-group">
+          <button id="enableBtn" onclick="toggleAudioEnabled()" class="success">啟用音效</button>
+        </div>
+        <div class="control-group">
+          <button onclick="stopAllSounds()" class="danger">停止所有音效</button>
+        </div>
+        <div class="control-group">
+          <button onclick="getAudioStatus()">刷新狀態</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 音量控制 -->
+    <div class="test-section">
+      <h3 class="section-title">
+        🔊 音量控制
+      </h3>
+      <div class="controls">
+        <div class="control-group">
+          <label class="control-label">主音量</label>
+          <input type="range" id="masterVolume" min="0" max="1" step="0.1" value="0.7" 
+                 oninput="setVolume('master', this.value)">
+          <div id="masterVolumeDisplay" class="volume-display">70%</div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">音效音量</label>
+          <input type="range" id="sfxVolume" min="0" max="1" step="0.1" value="0.8" 
+                 oninput="setVolume('sfx', this.value)">
+          <div id="sfxVolumeDisplay" class="volume-display">80%</div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">背景音量</label>
+          <input type="range" id="bgmVolume" min="0" max="1" step="0.1" value="0.5" 
+                 oninput="setVolume('bgm', this.value)">
+          <div id="bgmVolumeDisplay" class="volume-display">50%</div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">UI 音量</label>
+          <input type="range" id="uiVolume" min="0" max="1" step="0.1" value="0.6" 
+                 oninput="setVolume('ui', this.value)">
+          <div id="uiVolumeDisplay" class="volume-display">60%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 召喚階段音效測試 -->
+    <div class="test-section">
+      <h3 class="section-title">
+        ⚡ 召喚階段音效測試
+      </h3>
+      <div class="phase-buttons">
+        <button id="magicCircleBtn" onclick="playPhaseSound('magicCircle')" class="phase-button">
+          🔮 魔法陣展開 (2s)
+        </button>
+        <button id="energyGatherBtn" onclick="playPhaseSound('energyGather')" class="phase-button">
+          💫 能量聚集 (1.5s)
+        </button>
+        <button id="particleBurstBtn" onclick="playPhaseSound('particleBurst')" class="phase-button">
+          ✨ 粒子爆發 (1s)
+        </button>
+        <button id="cardSummoningBtn" onclick="playPhaseSound('cardSummoning')" class="phase-button">
+          🃏 卡牌召喚 (3.5s)
+        </button>
+        <button id="transitionBtn" onclick="playPhaseSound('transition')" class="phase-button">
+          🌀 轉場準備 (0.5s)
+        </button>
+        <button onclick="playFullSequence()" class="success">
+          🎬 完整序列播放 (8秒)
+        </button>
+      </div>
+    </div>
+
+    <!-- UI 音效測試 -->
+    <div class="test-section">
+      <h3 class="section-title">
+        🖱️ UI 音效測試
+      </h3>
+      <div class="ui-sounds">
+        <button onclick="playUISound('click')">點擊音效</button>
+        <button onclick="playUISound('hover')">懸停音效</button>
+        <button onclick="playUISound('error')">錯誤音效</button>
+        <button onclick="playUISound('success')">成功音效</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { AudioManager } from './src/components/gaming/SummoningSystem/AudioManager.js';
+
+    let audioManager = null;
+    let isInitialized = false;
+
+    // 綁定全域函數
+    window.initAudioManager = initAudioManager;
+    window.toggleAudioEnabled = toggleAudioEnabled;
+    window.stopAllSounds = stopAllSounds;
+    window.getAudioStatus = getAudioStatus;
+    window.setVolume = setVolume;
+    window.playPhaseSound = playPhaseSound;
+    window.playUISound = playUISound;
+    window.playFullSequence = playFullSequence;
+
+    // 初始化顯示
+    updateUI();
+    showWarning();
+
+    async function initAudioManager() {
+      try {
+        showMessage('正在初始化 AudioManager...', 'info');
+        
+        audioManager = new AudioManager('audio-test-container', {
+          enabled: true,
+          masterVolume: 0.7,
+          enableSummoningSounds: true,
+          enableUISounds: true
+        });
+
+        // 監聽事件
+        audioManager.on('audioManagerReady', (data) => {
+          console.log('AudioManager ready:', data);
+          showMessage('AudioManager 初始化完成！', 'success');
+          hideWarning();
+          updateUI();
+        });
+
+        audioManager.on('phaseAudioStart', (data) => {
+          console.log('Phase audio started:', data);
+          highlightPhaseButton(data.phase, true);
+        });
+
+        audioManager.on('phaseAudioEnd', (data) => {
+          console.log('Phase audio ended:', data);
+          highlightPhaseButton(data.phase, false);
+          updateUI();
+        });
+
+        audioManager.on('audioContextResumed', () => {
+          console.log('AudioContext resumed');
+          updateUI();
+        });
+
+        audioManager.on('volumeChanged', (data) => {
+          console.log('Volume changed:', data);
+          updateVolumeDisplay(data.type, data.value);
+        });
+
+        await audioManager.init();
+        isInitialized = true;
+        
+        // 更新按鈕狀態
+        document.getElementById('initBtn').textContent = '重新初始化';
+        document.getElementById('initBtn').disabled = false;
+
+      } catch (error) {
+        console.error('Failed to initialize AudioManager:', error);
+        showMessage(`初始化失敗: ${error.message}`, 'error');
+      }
+    }
+
+    function toggleAudioEnabled() {
+      if (!audioManager) return;
+      
+      const newState = !audioManager.isEnabled;
+      audioManager.setEnabled(newState);
+      
+      const btn = document.getElementById('enableBtn');
+      btn.textContent = newState ? '禁用音效' : '啟用音效';
+      btn.className = newState ? 'danger' : 'success';
+      
+      updateUI();
+    }
+
+    function stopAllSounds() {
+      if (!audioManager) return;
+      
+      audioManager.pauseAllSounds();
+      
+      // 清除所有高亮
+      document.querySelectorAll('.phase-button.active').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      showMessage('已停止所有音效', 'info');
+      updateUI();
+    }
+
+    function getAudioStatus() {
+      if (!audioManager) return;
+      
+      const status = audioManager.getAudioStatus();
+      console.log('Audio Status:', status);
+      updateUI();
+      showMessage('狀態已刷新', 'info');
+    }
+
+    function setVolume(type, value) {
+      if (!audioManager) return;
+      
+      audioManager.setVolume(type, parseFloat(value));
+      updateVolumeDisplay(type, value);
+    }
+
+    async function playPhaseSound(phase) {
+      if (!audioManager) {
+        showMessage('請先初始化 AudioManager', 'error');
+        return;
+      }
+      
+      try {
+        await audioManager.playPhaseSound(phase);
+        updateUI();
+      } catch (error) {
+        console.error('Failed to play phase sound:', error);
+        showMessage(`播放失敗: ${error.message}`, 'error');
+      }
+    }
+
+    async function playUISound(type) {
+      if (!audioManager) {
+        showMessage('請先初始化 AudioManager', 'error');
+        return;
+      }
+      
+      try {
+        await audioManager.playUISound(type);
+      } catch (error) {
+        console.error('Failed to play UI sound:', error);
+        showMessage(`播放失敗: ${error.message}`, 'error');
+      }
+    }
+
+    async function playFullSequence() {
+      if (!audioManager) {
+        showMessage('請先初始化 AudioManager', 'error');
+        return;
+      }
+      
+      try {
+        showMessage('開始播放完整召喚序列 (8秒)...', 'info');
+        
+        // 按照時序播放各階段
+        setTimeout(() => playPhaseSound('magicCircle'), 0);
+        setTimeout(() => playPhaseSound('energyGather'), 2000);
+        setTimeout(() => playPhaseSound('particleBurst'), 3500);
+        setTimeout(() => playPhaseSound('cardSummoning'), 4500);
+        setTimeout(() => playPhaseSound('transition'), 8000);
+        
+        setTimeout(() => {
+          showMessage('完整召喚序列播放完成！', 'success');
+        }, 8500);
+        
+      } catch (error) {
+        console.error('Failed to play full sequence:', error);
+        showMessage(`序列播放失敗: ${error.message}`, 'error');
+      }
+    }
+
+    function updateUI() {
+      if (!audioManager) {
+        document.getElementById('initStatus').textContent = '未初始化';
+        document.getElementById('contextStatus').textContent = '不可用';
+        document.getElementById('enabledStatus').textContent = '不可用';
+        document.getElementById('currentPhase').textContent = '無';
+        document.getElementById('activeSounds').textContent = '0';
+        document.getElementById('deviceCapability').textContent = '未知';
+        return;
+      }
+      
+      const status = audioManager.getAudioStatus();
+      
+      document.getElementById('initStatus').textContent = status.isInitialized ? '已初始化' : '未初始化';
+      document.getElementById('contextStatus').textContent = 
+        status.audioContextState === 'running' ? '運行中' : 
+        status.audioContextState === 'suspended' ? '暫停' : 
+        status.audioContextState;
+      document.getElementById('enabledStatus').textContent = status.isEnabled ? '是' : '否';
+      document.getElementById('currentPhase').textContent = audioManager.state.currentPhase || '無';
+      document.getElementById('activeSounds').textContent = status.activeSoundsCount;
+      
+      const capability = status.deviceCapability;
+      if (typeof capability === 'object') {
+        document.getElementById('deviceCapability').textContent = capability.performance || '未知';
+      } else {
+        document.getElementById('deviceCapability').textContent = '未知';
+      }
+    }
+
+    function updateVolumeDisplay(type, value) {
+      const percentage = Math.round(value * 100);
+      const displayId = `${type}VolumeDisplay`;
+      const displayElement = document.getElementById(displayId);
+      if (displayElement) {
+        displayElement.textContent = `${percentage}%`;
+      }
+    }
+
+    function highlightPhaseButton(phase, active) {
+      const btnId = `${phase}Btn`;
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        if (active) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      }
+    }
+
+    function showWarning() {
+      document.getElementById('warningMessage').style.display = 'block';
+    }
+
+    function hideWarning() {
+      document.getElementById('warningMessage').style.display = 'none';
+    }
+
+    function showMessage(message, type = 'info') {
+      console.log(`[${type.toUpperCase()}] ${message}`);
+      
+      if (type === 'error') {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        setTimeout(() => {
+          errorDiv.style.display = 'none';
+        }, 5000);
+      }
+    }
+
+    // 定期更新狀態
+    setInterval(updateUI, 1000);
+  </script>
+</body>
+</html>
