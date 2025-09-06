@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CardSummoning 卡牌召喚動畫測試</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .test-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .control-panel {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      z-index: 2000;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .test-btn {
+      background: linear-gradient(135deg, #d4af37, #f4d03f);
+      color: #0a0a0a;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .test-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    }
+
+    .test-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-info {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 2000;
+      max-width: 300px;
+    }
+
+    .status-info h3 {
+      color: #d4af37;
+      margin-bottom: 10px;
+    }
+
+    .status-item {
+      margin: 5px 0;
+    }
+
+    .status-value {
+      color: #4a90e2;
+      font-weight: bold;
+    }
+
+    .animation-info {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 2000;
+      max-width: 250px;
+    }
+
+    .animation-info h3 {
+      color: #f4d03f;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      width: 200px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #d4af37, #f4d03f);
+      width: 0%;
+      transition: width 0.1s ease;
+      border-radius: 4px;
+    }
+
+    #card-display {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+    
+    /* 確保卡牌容器不被裁剪 */
+    .card-summoning-container {
+      overflow: visible !important;
+    }
+
+    /* 設備響應式 */
+    @media (max-width: 768px) {
+      .control-panel {
+        flex-direction: column;
+        align-items: center;
+        top: 10px;
+      }
+      
+      .status-info, .animation-info {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        margin: 10px;
+        max-width: 90vw;
+      }
+      
+      .test-container {
+        padding-top: 200px;
+      }
+    }
+
+    /* 卡牌點擊效果 */
+    .summoning-card {
+      transition: transform 0.3s ease;
+    }
+
+    .summoning-card:hover {
+      transform: scale(1.05) !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <!-- 控制面板 -->
+    <div class="control-panel">
+      <button id="summon-btn" class="test-btn">🎴 開始召喚</button>
+      <button id="phase-test-btn" class="test-btn">🎬 分階段測試</button>
+      <button id="quick-summon-btn" class="test-btn">⚡ 快速召喚</button>
+      <button id="reset-btn" class="test-btn">🔄 重置狀態</button>
+    </div>
+
+    <!-- 狀態信息 -->
+    <div class="status-info">
+      <h3>🎴 卡牌召喚狀態</h3>
+      <div class="status-item">
+        階段: <span id="phase-status" class="status-value">idle</span>
+      </div>
+      <div class="status-item">
+        可見性: <span id="visibility-status" class="status-value">false</span>
+      </div>
+      <div class="status-item">
+        動畫狀態: <span id="animation-status" class="status-value">停止</span>
+      </div>
+      <div class="status-item">
+        卡背載入: <span id="cardback-status" class="status-value">檢查中...</span>
+      </div>
+      <div class="status-item">
+        GSAP狀態: <span id="gsap-status" class="status-value">檢查中...</span>
+      </div>
+    </div>
+
+    <!-- 動畫進度信息 -->
+    <div class="animation-info">
+      <h3>🎬 動畫進度</h3>
+      <div class="status-item">
+        總進度: <span id="total-progress" class="status-value">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+      <div class="status-item">
+        當前階段: <span id="current-phase" class="status-value">待機</span>
+      </div>
+      <div class="status-item">
+        持續時間: <span id="duration-status" class="status-value">8.0s</span>
+      </div>
+      <div class="status-item">
+        特效: <span id="effects-status" class="status-value">全息+發光</span>
+      </div>
+    </div>
+
+    <!-- 卡牌顯示區域 -->
+    <div id="card-display"></div>
+  </div>
+
+  <!-- GSAP 庫 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- 測試腳本 -->
+  <script type="module">
+    // 導入必要的組件
+    import { BaseComponent } from './src/core/components/BaseComponent.js';
+    import { CardSummoning } from './src/components/gaming/SummoningSystem/CardSummoning.js';
+
+    class CardSummoningTest {
+      constructor() {
+        this.cardSummoning = null;
+        this.animationTimer = null;
+        this.init();
+      }
+
+      async init() {
+        console.log('🧪 [CardSummoningTest] 初始化卡牌召喚測試');
+        
+        try {
+          // 等待 GSAP 載入
+          await this.waitForGSAP();
+          
+          // 檢查 GSAP 可用性
+          if (!window.gsap) {
+            throw new Error('GSAP 未載入');
+          }
+
+          // 顯示系統信息
+          this.displaySystemInfo();
+
+          // 創建卡牌召喚實例
+          this.cardSummoning = new CardSummoning({
+            // 測試用配置
+            card: {
+              backImageUrl: './src/assets/images/卡背.webp' // 測試卡背路徑
+            },
+            animation: {
+              totalDuration: 8000 // 8秒完整動畫
+            }
+          });
+
+          // 初始化組件
+          await this.cardSummoning.init();
+
+          // 創建元素並添加到頁面
+          const element = this.cardSummoning.createElement();
+          document.getElementById('card-display').appendChild(element);
+
+          // 綁定控制按鈕事件
+          this.bindEvents();
+
+          // 開始狀態監控
+          this.startStatusMonitoring();
+
+          console.log('✅ [CardSummoningTest] 測試環境準備完成');
+
+        } catch (error) {
+          console.error('❌ [CardSummoningTest] 初始化失敗:', error);
+          alert('測試初始化失敗，請檢查控制台錯誤信息');
+        }
+      }
+
+      // 等待 GSAP 載入
+      waitForGSAP() {
+        return new Promise((resolve, reject) => {
+          if (window.gsap) {
+            console.log('✅ [CardSummoningTest] GSAP 已載入');
+            resolve();
+            return;
+          }
+
+          let attempts = 0;
+          const maxAttempts = 50; // 最多等待5秒
+          
+          const checkGSAP = () => {
+            attempts++;
+            if (window.gsap) {
+              console.log(`✅ [CardSummoningTest] GSAP 載入完成 (嘗試 ${attempts} 次)`);
+              resolve();
+            } else if (attempts >= maxAttempts) {
+              reject(new Error(`GSAP 載入超時 (嘗試了 ${maxAttempts} 次)`));
+            } else {
+              setTimeout(checkGSAP, 100);
+            }
+          };
+          
+          checkGSAP();
+        });
+      }
+
+      displaySystemInfo() {
+        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // GSAP 狀態
+        const gsapVersion = window.gsap ? window.gsap.version : 'Not Loaded';
+        document.getElementById('gsap-status').textContent = gsapVersion;
+        
+        // 卡背載入狀態
+        const testImage = new Image();
+        testImage.onload = () => {
+          document.getElementById('cardback-status').textContent = '載入成功';
+        };
+        testImage.onerror = () => {
+          document.getElementById('cardback-status').textContent = '載入失敗';
+        };
+        testImage.src = './src/assets/images/卡背.webp';
+      }
+
+      bindEvents() {
+        const summonBtn = document.getElementById('summon-btn');
+        const phaseTestBtn = document.getElementById('phase-test-btn');
+        const quickSummonBtn = document.getElementById('quick-summon-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        summonBtn.addEventListener('click', async () => {
+          console.log('🎴 [Test] 用戶點擊開始召喚');
+          summonBtn.disabled = true;
+          
+          try {
+            const testProjectData = {
+              id: 'test-project',
+              title: '測試專案',
+              description: '這是一個測試用的專案卡牌召喚',
+              type: 'legendary'
+            };
+            
+            await this.cardSummoning.playSummoningAnimation(testProjectData);
+            console.log('✅ [Test] 召喚動畫完成');
+            
+          } catch (error) {
+            console.error('召喚動畫失敗:', error);
+          } finally {
+            summonBtn.disabled = false;
+          }
+        });
+
+        phaseTestBtn.addEventListener('click', async () => {
+          console.log('🎬 [Test] 用戶點擊分階段測試');
+          phaseTestBtn.disabled = true;
+          
+          try {
+            await this.testPhaseByPhase();
+          } catch (error) {
+            console.error('分階段測試失敗:', error);
+          } finally {
+            phaseTestBtn.disabled = false;
+          }
+        });
+
+        quickSummonBtn.addEventListener('click', async () => {
+          console.log('⚡ [Test] 用戶點擊快速召喚');
+          quickSummonBtn.disabled = true;
+          
+          // 臨時修改動畫時長為2秒
+          const originalDuration = this.cardSummoning.config.animation.totalDuration;
+          this.cardSummoning.config.animation.totalDuration = 2000;
+          
+          try {
+            await this.cardSummoning.playSummoningAnimation({ title: '快速測試卡牌' });
+          } catch (error) {
+            console.error('快速召喚失敗:', error);
+          } finally {
+            // 恢復原始時長
+            this.cardSummoning.config.animation.totalDuration = originalDuration;
+            quickSummonBtn.disabled = false;
+          }
+        });
+
+        resetBtn.addEventListener('click', () => {
+          console.log('🔄 [Test] 用戶點擊重置狀態');
+          this.cardSummoning.reset();
+          
+          // 重新啟用所有按鈕
+          [summonBtn, phaseTestBtn, quickSummonBtn].forEach(btn => {
+            btn.disabled = false;
+          });
+          
+          // 清理計時器
+          if (this.animationTimer) {
+            clearInterval(this.animationTimer);
+            this.animationTimer = null;
+          }
+        });
+      }
+
+      async testPhaseByPhase() {
+        console.log('🎬 [Test] 開始分階段測試');
+        
+        const phases = [
+          { name: 'Phase 1: 物質化', duration: 2000 },
+          { name: 'Phase 2: 旋轉展示', duration: 2000 },
+          { name: 'Phase 3: 發光強化', duration: 2000 },
+          { name: 'Phase 4: 穩定懸浮', duration: 2000 }
+        ];
+        
+        for (let i = 0; i < phases.length; i++) {
+          const phase = phases[i];
+          console.log(`🎯 [Test] ${phase.name}`);
+          document.getElementById('current-phase').textContent = phase.name;
+          
+          await this.delay(phase.duration);
+        }
+        
+        console.log('✅ [Test] 分階段測試完成');
+      }
+
+      delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      startStatusMonitoring() {
+        const updateStatus = () => {
+          if (!this.cardSummoning) return;
+
+          const state = this.cardSummoning.state;
+          
+          // 更新狀態顯示
+          document.getElementById('phase-status').textContent = state.currentPhase;
+          document.getElementById('visibility-status').textContent = state.isVisible ? 'true' : 'false';
+          document.getElementById('animation-status').textContent = this.cardSummoning.isAnimating ? '運行中' : '停止';
+          
+          // 更新動畫進度
+          const progress = Math.round(state.animationProgress * 100);
+          document.getElementById('total-progress').textContent = `${progress}%`;
+          document.getElementById('progress-fill').style.width = `${progress}%`;
+          
+          // 階段名稱映射
+          const phaseNames = {
+            'idle': '待機',
+            'summoning': '召喚中',
+            'materialized': '物質化完成',
+            'rotating': '旋轉展示中',
+            'glowing': '發光強化中',
+            'stabilizing': '穩定懸浮中',
+            'completed': '召喚完成'
+          };
+          
+          document.getElementById('current-phase').textContent = 
+            phaseNames[state.currentPhase] || state.currentPhase;
+        };
+
+        // 每100ms更新一次狀態以保持流暢
+        setInterval(updateStatus, 100);
+      }
+    }
+
+    // 等待頁面載入完成後啟動測試
+    document.addEventListener('DOMContentLoaded', () => {
+      new CardSummoningTest();
+    });
+  </script>
+</body>
+</html>

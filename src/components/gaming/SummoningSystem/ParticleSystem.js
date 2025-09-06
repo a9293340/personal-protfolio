@@ -571,18 +571,25 @@ export class ParticleSystem extends BaseComponent {
     const container = document.createElement('div');
     container.className = 'particle-system-container';
     container.style.cssText = `
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       pointer-events: none;
-      z-index: 5;
+      z-index: 15;
       overflow: visible;
     `;
     
     // 添加 Three.js 渲染器的 canvas
-    container.appendChild(this.renderer.domElement);
+    const canvas = this.renderer.domElement;
+    canvas.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    `;
+    container.appendChild(canvas);
     
     this.element = container;
     return container;

@@ -419,8 +419,8 @@
 - [ ] **POC-003 核心組件移植**
   - [x] 移植 MagicCircle.js - SVG 魔法陣組件（旋轉動畫、符文點亮、中心寶石脈衝）
   - [x] 移植 ParticleSystem.js - Three.js 3D 粒子系統（環形粒子流、星塵爆發）
-  - [ ] 移植 CardSummoning.js - 卡牌召喚動畫控制（8秒完整動畫序列）
-  - [ ] 移植 AnimationController.js - 動畫流程總控制器（時序管理、狀態機）
+  - [x] 移植 CardSummoning.js - 卡牌召喚動畫控制（8秒完整動畫序列）
+  - [x] 移植 AnimationController.js - 動畫流程總控制器（時序管理、狀態機）
   - [ ] 移植 AudioManager.js - 動態音效生成系統（召喚音效、環境音）
 
 - [ ] **架構整合與適配**

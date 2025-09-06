@@ -74,7 +74,7 @@ export class MagicCircle extends BaseComponent {
       position: {
         x: '50%',                     // 水平中心
         y: '50%',                     // 垂直中心
-        zIndex: 1000                  // 圖層順序
+        zIndex: 10                    // 圖層順序 - 最底層
       }
     };
   }
@@ -97,7 +97,7 @@ export class MagicCircle extends BaseComponent {
     
     // 應用基礎樣式
     container.style.cssText = `
-      position: absolute;
+      position: fixed;
       left: ${this.config.position.x};
       top: ${this.config.position.y};
       transform: translate(-50%, -50%);

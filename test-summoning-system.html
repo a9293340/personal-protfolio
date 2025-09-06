@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>完整遊戲王召喚特效系統測試</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .test-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .control-panel {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      z-index: 2000;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .test-btn {
+      background: linear-gradient(135deg, #d4af37, #f4d03f);
+      color: #0a0a0a;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .test-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    }
+
+    .test-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-panel {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 2000;
+    }
+
+    .status-card {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      max-width: 280px;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .status-card h3 {
+      color: #d4af37;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .status-item {
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .status-value {
+      color: #4a90e2;
+      font-weight: bold;
+    }
+
+    .progress-panel {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      max-width: 300px;
+      border: 1px solid rgba(244, 208, 63, 0.3);
+      z-index: 2000;
+    }
+
+    .progress-panel h3 {
+      color: #f4d03f;
+      margin-bottom: 15px;
+    }
+
+    .progress-bar {
+      width: 250px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #d4af37, #f4d03f);
+      width: 0%;
+      transition: width 0.1s ease;
+      border-radius: 4px;
+    }
+
+    .phase-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .phase-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .phase-dot.active {
+      background: #d4af37;
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+      transform: scale(1.3);
+    }
+
+    .phase-dot.completed {
+      background: #4a90e2;
+    }
+
+    .performance-info {
+      background: rgba(26, 26, 46, 0.8);
+    }
+
+    .error-display {
+      background: rgba(139, 0, 0, 0.8);
+      border-color: rgba(139, 0, 0, 0.5);
+      display: none;
+    }
+
+    .error-display.show {
+      display: block;
+    }
+
+    #summoning-display {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+      .control-panel {
+        flex-direction: column;
+        align-items: center;
+        top: 10px;
+      }
+      
+      .status-panel {
+        position: relative;
+        top: auto;
+        left: auto;
+        align-items: center;
+        margin: 20px;
+      }
+      
+      .progress-panel {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin: 20px;
+      }
+      
+      .test-container {
+        padding-top: 200px;
+      }
+    }
+
+    /* 動畫效果 */
+    .status-value.updating {
+      animation: pulse 0.5s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); color: #f4d03f; }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <!-- 控制面板 -->
+    <div class="control-panel">
+      <button id="full-summon-btn" class="test-btn">🎮 完整召喚序列</button>
+      <button id="quick-test-btn" class="test-btn">⚡ 快速測試</button>
+      <button id="phase-test-btn" class="test-btn">🎬 分階段測試</button>
+      <button id="reset-btn" class="test-btn">🔄 重置系統</button>
+    </div>
+
+    <!-- 狀態面板 -->
+    <div class="status-panel">
+      <!-- 組件狀態 -->
+      <div class="status-card">
+        <h3>🎯 組件狀態</h3>
+        <div class="status-item">
+          <span>魔法陣:</span>
+          <span id="magic-circle-status" class="status-value">未初始化</span>
+        </div>
+        <div class="status-item">
+          <span>粒子系統:</span>
+          <span id="particle-system-status" class="status-value">未初始化</span>
+        </div>
+        <div class="status-item">
+          <span>卡牌召喚:</span>
+          <span id="card-summoning-status" class="status-value">未初始化</span>
+        </div>
+        <div class="status-item">
+          <span>動畫控制:</span>
+          <span id="animation-controller-status" class="status-value">未初始化</span>
+        </div>
+      </div>
+
+      <!-- 系統狀態 -->
+      <div class="status-card performance-info">
+        <h3>⚙️ 系統信息</h3>
+        <div class="status-item">
+          <span>GSAP:</span>
+          <span id="gsap-version" class="status-value">檢查中...</span>
+        </div>
+        <div class="status-item">
+          <span>Three.js:</span>
+          <span id="threejs-version" class="status-value">檢查中...</span>
+        </div>
+        <div class="status-item">
+          <span>設備類型:</span>
+          <span id="device-type" class="status-value">檢測中...</span>
+        </div>
+        <div class="status-item">
+          <span>性能模式:</span>
+          <span id="performance-mode" class="status-value">自動</span>
+        </div>
+      </div>
+
+      <!-- 錯誤顯示 -->
+      <div class="status-card error-display" id="error-display">
+        <h3>❌ 錯誤信息</h3>
+        <div id="error-content"></div>
+      </div>
+    </div>
+
+    <!-- 進度面板 -->
+    <div class="progress-panel">
+      <h3>🎬 召喚進度</h3>
+      
+      <div class="status-item">
+        <span>總進度:</span>
+        <span id="total-progress" class="status-value">0%</span>
+      </div>
+      
+      <div class="progress-bar">
+        <div id="total-progress-fill" class="progress-fill"></div>
+      </div>
+      
+      <div class="status-item">
+        <span>當前階段:</span>
+        <span id="current-phase" class="status-value">待機</span>
+      </div>
+      
+      <div class="status-item">
+        <span>階段進度:</span>
+        <span id="phase-progress" class="status-value">0%</span>
+      </div>
+      
+      <div class="progress-bar">
+        <div id="phase-progress-fill" class="progress-fill"></div>
+      </div>
+      
+      <!-- 階段指示器 -->
+      <div class="phase-indicator">
+        <div class="phase-dot" id="phase-dot-1" title="魔法陣展開"></div>
+        <div class="phase-dot" id="phase-dot-2" title="能量聚集"></div>
+        <div class="phase-dot" id="phase-dot-3" title="粒子爆發"></div>
+        <div class="phase-dot" id="phase-dot-4" title="卡牌召喚"></div>
+        <div class="phase-dot" id="phase-dot-5" title="轉場準備"></div>
+      </div>
+
+      <div class="status-item">
+        <span>動畫狀態:</span>
+        <span id="animation-status" class="status-value">停止</span>
+      </div>
+    </div>
+
+    <!-- 召喚特效顯示區域 -->
+    <div id="summoning-display"></div>
+  </div>
+
+  <!-- 載入庫 -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- 測試腳本 -->
+  <script type="module">
+    // 導入組件
+    import { BaseComponent } from './src/core/components/BaseComponent.js';
+    import { MagicCircle } from './src/components/gaming/SummoningSystem/MagicCircle.js';
+    import { ParticleSystem } from './src/components/gaming/SummoningSystem/ParticleSystem.js';
+    import { CardSummoning } from './src/components/gaming/SummoningSystem/CardSummoning.js';
+    import { AnimationController } from './src/components/gaming/SummoningSystem/AnimationController.js';
+
+    class SummoningSystemTest {
+      constructor() {
+        this.animationController = null;
+        this.components = {
+          magicCircle: null,
+          particleSystem: null,
+          cardSummoning: null
+        };
+        this.init();
+      }
+
+      async init() {
+        console.log('🧪 [SummoningSystemTest] 初始化完整召喚系統測試');
+        
+        try {
+          // 等待庫載入
+          await this.waitForLibraries();
+          
+          // 顯示系統信息
+          this.displaySystemInfo();
+          
+          // 創建各組件實例
+          await this.createComponents();
+          
+          // 創建動畫控制器
+          await this.createAnimationController();
+          
+          // 創建顯示元素
+          this.createDisplayElements();
+          
+          // 綁定控制事件
+          this.bindEvents();
+          
+          // 開始狀態監控
+          this.startStatusMonitoring();
+          
+          console.log('✅ [SummoningSystemTest] 測試環境準備完成');
+          
+        } catch (error) {
+          console.error('❌ [SummoningSystemTest] 初始化失敗:', error);
+          this.showError('初始化失敗', error);
+        }
+      }
+
+      // 等待庫載入
+      async waitForLibraries() {
+        const checkLibrary = (lib, name) => {
+          return new Promise((resolve, reject) => {
+            if (lib) {
+              console.log(`✅ [SummoningSystemTest] ${name} 已載入`);
+              resolve();
+              return;
+            }
+            
+            let attempts = 0;
+            const check = () => {
+              attempts++;
+              if (window[lib] || (lib === 'THREE' && window.THREE)) {
+                console.log(`✅ [SummoningSystemTest] ${name} 載入完成`);
+                resolve();
+              } else if (attempts > 50) {
+                reject(new Error(`${name} 載入超時`));
+              } else {
+                setTimeout(check, 100);
+              }
+            };
+            check();
+          });
+        };
+
+        await Promise.all([
+          checkLibrary(window.gsap, 'GSAP'),
+          checkLibrary(window.THREE, 'Three.js')
+        ]);
+      }
+
+      displaySystemInfo() {
+        // GSAP 版本
+        document.getElementById('gsap-version').textContent = 
+          window.gsap ? window.gsap.version : 'Not Loaded';
+        
+        // Three.js 版本
+        document.getElementById('threejs-version').textContent = 
+          window.THREE ? 'r159' : 'Not Loaded';
+        
+        // 設備類型
+        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        document.getElementById('device-type').textContent = isMobile ? 'Mobile' : 'Desktop';
+        
+        // 性能模式
+        document.getElementById('performance-mode').textContent = 'Auto';
+      }
+
+      async createComponents() {
+        console.log('🔧 [SummoningSystemTest] 創建組件實例');
+        
+        // 創建魔法陣
+        this.components.magicCircle = new MagicCircle({
+          circle: { size: 400 },
+          position: { x: '50%', y: '50%' }
+        });
+        
+        // 創建粒子系統
+        this.components.particleSystem = new ParticleSystem({
+          container: { width: window.innerWidth, height: window.innerHeight }
+        });
+        
+        // 創建卡牌召喚
+        this.components.cardSummoning = new CardSummoning({
+          card: { backImageUrl: './src/assets/images/卡背.webp' }
+        });
+        
+        // 手動初始化需要初始化的組件
+        try {
+          // ParticleSystem 需要初始化
+          if (this.components.particleSystem.init) {
+            await this.components.particleSystem.init();
+          }
+          
+          // CardSummoning 需要初始化
+          if (this.components.cardSummoning.init) {
+            await this.components.cardSummoning.init();
+          }
+          
+          console.log('✅ [SummoningSystemTest] 組件初始化完成');
+        } catch (error) {
+          console.error('❌ [SummoningSystemTest] 組件初始化失敗:', error);
+          throw error;
+        }
+        
+        console.log('✅ [SummoningSystemTest] 組件實例創建完成');
+      }
+
+      async createAnimationController() {
+        console.log('🎮 [SummoningSystemTest] 創建動畫控制器');
+        
+        this.animationController = new AnimationController({
+          sequence: {
+            totalDuration: 8000,
+            phases: {
+              magicCircle: { start: 0, duration: 2000, name: '魔法陣展開' },
+              energyGather: { start: 2000, duration: 1500, name: '能量聚集' },
+              particleBurst: { start: 3500, duration: 1000, name: '粒子爆發' },
+              cardSummoning: { start: 4500, duration: 3500, name: '卡牌召喚' },
+              transition: { start: 8000, duration: 500, name: '轉場準備' }
+            }
+          }
+        });
+        
+        // 初始化動畫控制器
+        await this.animationController.init(this.components);
+        
+        // 綁定事件
+        this.bindAnimationEvents();
+        
+        console.log('✅ [SummoningSystemTest] 動畫控制器創建完成');
+      }
+
+      createDisplayElements() {
+        const displayContainer = document.getElementById('summoning-display');
+        const controllerElement = this.animationController.createElement();
+        displayContainer.appendChild(controllerElement);
+      }
+
+      bindAnimationEvents() {
+        this.animationController.on('sequenceStart', () => {
+          console.log('🎬 [Test] 召喚序列開始');
+          this.updateAnimationStatus('運行中');
+        });
+        
+        this.animationController.on('phaseChange', ({ phase, config }) => {
+          console.log(`🎯 [Test] 階段變更: ${config.name}`);
+          this.updateCurrentPhase(config.name);
+          this.updatePhaseIndicator(phase);
+        });
+        
+        this.animationController.on('progressUpdate', ({ total, phase }) => {
+          this.updateProgress(total, phase);
+        });
+        
+        this.animationController.on('sequenceComplete', (data) => {
+          console.log('✅ [Test] 召喚序列完成:', data);
+          this.updateAnimationStatus('完成');
+        });
+        
+        this.animationController.on('phaseError', ({ phase, error }) => {
+          console.error(`❌ [Test] 階段錯誤 ${phase}:`, error);
+          this.showError(`階段 ${phase} 錯誤`, error);
+        });
+      }
+
+      bindEvents() {
+        const fullSummonBtn = document.getElementById('full-summon-btn');
+        const quickTestBtn = document.getElementById('quick-test-btn');
+        const phaseTestBtn = document.getElementById('phase-test-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        fullSummonBtn.addEventListener('click', async () => {
+          console.log('🎮 [Test] 用戶點擊完整召喚序列');
+          this.disableAllButtons();
+          
+          try {
+            const projectData = {
+              id: 'test-legendary-project',
+              title: '傳說級專案',
+              description: '這是一個傳說級的專案召喚測試',
+              type: 'legendary'
+            };
+            
+            await this.animationController.playSummoningSequence(projectData);
+            console.log('✅ [Test] 完整召喚序列完成');
+            
+          } catch (error) {
+            console.error('召喚序列失敗:', error);
+            this.showError('召喚序列失敗', error);
+          } finally {
+            this.enableAllButtons();
+          }
+        });
+
+        quickTestBtn.addEventListener('click', async () => {
+          console.log('⚡ [Test] 用戶點擊快速測試');
+          this.disableAllButtons();
+          
+          // 臨時修改為快速模式
+          const originalDuration = this.animationController.config.sequence.totalDuration;
+          this.animationController.config.sequence.totalDuration = 3000;
+          
+          try {
+            await this.animationController.playSummoningSequence({ title: '快速測試' });
+          } catch (error) {
+            console.error('快速測試失敗:', error);
+            this.showError('快速測試失敗', error);
+          } finally {
+            // 恢復原始時長
+            this.animationController.config.sequence.totalDuration = originalDuration;
+            this.enableAllButtons();
+          }
+        });
+
+        phaseTestBtn.addEventListener('click', async () => {
+          console.log('🎬 [Test] 用戶點擊分階段測試');
+          this.disableAllButtons();
+          
+          try {
+            await this.testPhaseByPhase();
+          } catch (error) {
+            console.error('分階段測試失敗:', error);
+            this.showError('分階段測試失敗', error);
+          } finally {
+            this.enableAllButtons();
+          }
+        });
+
+        resetBtn.addEventListener('click', () => {
+          console.log('🔄 [Test] 用戶點擊重置系統');
+          this.animationController.reset();
+          this.resetUI();
+          this.enableAllButtons();
+        });
+      }
+
+      async testPhaseByPhase() {
+        const phases = [
+          { name: '魔法陣展開', component: 'magicCircle', method: 'expand' },
+          { name: '環形粒子流', component: 'particleSystem', method: 'playRingFlow' },
+          { name: '粒子爆發', component: 'particleSystem', method: 'playBurst' },
+          { name: '卡牌召喚', component: 'cardSummoning', method: 'playSummoningAnimation' }
+        ];
+        
+        for (let i = 0; i < phases.length; i++) {
+          const phase = phases[i];
+          console.log(`🎯 [Test] 測試階段: ${phase.name}`);
+          this.updateCurrentPhase(phase.name);
+          
+          const component = this.components[phase.component];
+          if (component && component[phase.method]) {
+            await component[phase.method]();
+          }
+          
+          await this.delay(500); // 階段間隔
+        }
+      }
+
+      delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      updateProgress(total, phase) {
+        const totalPercent = Math.round(total * 100);
+        const phasePercent = Math.round(phase * 100);
+        
+        document.getElementById('total-progress').textContent = `${totalPercent}%`;
+        document.getElementById('total-progress-fill').style.width = `${totalPercent}%`;
+        document.getElementById('phase-progress').textContent = `${phasePercent}%`;
+        document.getElementById('phase-progress-fill').style.width = `${phasePercent}%`;
+      }
+
+      updateCurrentPhase(phaseName) {
+        const element = document.getElementById('current-phase');
+        element.textContent = phaseName;
+        element.classList.add('updating');
+        setTimeout(() => element.classList.remove('updating'), 500);
+      }
+
+      updatePhaseIndicator(currentPhase) {
+        const phases = ['magicCircle', 'energyGather', 'particleBurst', 'cardSummoning', 'transition'];
+        const currentIndex = phases.indexOf(currentPhase);
+        
+        phases.forEach((phase, index) => {
+          const dot = document.getElementById(`phase-dot-${index + 1}`);
+          if (index < currentIndex) {
+            dot.className = 'phase-dot completed';
+          } else if (index === currentIndex) {
+            dot.className = 'phase-dot active';
+          } else {
+            dot.className = 'phase-dot';
+          }
+        });
+      }
+
+      updateAnimationStatus(status) {
+        document.getElementById('animation-status').textContent = status;
+      }
+
+      disableAllButtons() {
+        document.querySelectorAll('.test-btn').forEach(btn => btn.disabled = true);
+      }
+
+      enableAllButtons() {
+        document.querySelectorAll('.test-btn').forEach(btn => btn.disabled = false);
+      }
+
+      resetUI() {
+        this.updateProgress(0, 0);
+        this.updateCurrentPhase('待機');
+        this.updateAnimationStatus('停止');
+        document.querySelectorAll('.phase-dot').forEach(dot => dot.className = 'phase-dot');
+        this.hideError();
+      }
+
+      showError(title, error) {
+        const errorDisplay = document.getElementById('error-display');
+        const errorContent = document.getElementById('error-content');
+        errorContent.innerHTML = `
+          <div style="margin-bottom: 10px; font-weight: bold;">${title}</div>
+          <div style="font-size: 11px; color: #ff6b6b;">${error.message || error}</div>
+        `;
+        errorDisplay.classList.add('show');
+      }
+
+      hideError() {
+        document.getElementById('error-display').classList.remove('show');
+      }
+
+      startStatusMonitoring() {
+        setInterval(() => {
+          // 更新組件狀態
+          this.updateComponentStatus('magic-circle-status', this.components.magicCircle);
+          this.updateComponentStatus('particle-system-status', this.components.particleSystem);
+          this.updateComponentStatus('card-summoning-status', this.components.cardSummoning);
+          
+          // 更新動畫控制器狀態
+          if (this.animationController) {
+            const status = this.animationController.isAnimating ? '運行中' : '就緒';
+            document.getElementById('animation-controller-status').textContent = status;
+          }
+        }, 500);
+      }
+
+      updateComponentStatus(elementId, component) {
+        const element = document.getElementById(elementId);
+        if (!component) {
+          element.textContent = '未創建';
+          return;
+        }
+        
+        const status = component.isAnimating ? '動畫中' : 
+                      component.state?.isVisible ? '顯示中' : '就緒';
+        element.textContent = status;
+      }
+    }
+
+    // 等待頁面載入完成後啟動測試
+    document.addEventListener('DOMContentLoaded', () => {
+      new SummoningSystemTest();
+    });
+  </script>
+</body>
+</html>
