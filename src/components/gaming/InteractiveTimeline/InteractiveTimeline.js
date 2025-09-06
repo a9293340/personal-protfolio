@@ -439,11 +439,13 @@ export class InteractiveTimeline extends BaseComponent {
    * 生成年份篩選器 HTML (Step 2.2.4a)
    */
   generateYearFilterHTML() {
+    const isMobile = this.state?.currentBreakpoint === 'mobile';
+    
     return `
       <div class="timeline-year-filter">
         <label class="filter-label">篩選年份：</label>
         <select class="year-selector">
-          <option value="">顯示所有</option>
+          ${!isMobile ? '<option value="">顯示所有</option>' : ''}
           <!-- 動態年份選項將在初始化時生成 -->
         </select>
         <div class="filter-status">
@@ -1068,17 +1070,25 @@ export class InteractiveTimeline extends BaseComponent {
    * 計算 SVG 動態尺寸 - 根據專案數量調整
    */
   calculateSVGDimensions() {
-    const projectCount = this.timelineData.length || 20; // 預設20個專案
     const isVertical = this.state?.currentBreakpoint === 'mobile';
     
+    // 手機版根據篩選狀態決定專案數量
+    let projectCount;
+    if (isVertical && this.state?.yearFilter?.isFiltering) {
+      projectCount = this.state.yearFilter.filteredProjects?.length || 1;
+    } else {
+      projectCount = this.timelineData.length || 20;
+    }
+    
     if (isVertical) {
-      // 垂直模式：每個專案需要約 120px 高度，確保足夠空間顯示所有節點
-      // 計算總高度時考慮額外緩衝
-      const baseHeight = projectCount * 120; // 每個節點 120px（增加間距）
-      const padding = 600; // 上下額外緩衝空間（增加到 600px）
+      // 垂直模式：根據實際要顯示的專案數量計算高度
+      // 年份篩選時使用較小的間距
+      const spacing = this.state?.yearFilter?.isFiltering ? 150 : 120;
+      const baseHeight = projectCount * spacing;
+      const padding = this.state?.yearFilter?.isFiltering ? 300 : 600; // 篩選時減少緩衝
       return {
         width: 400,
-        height: Math.max(3000, baseHeight + padding) // 確保最小高度 3000px
+        height: Math.max(600, baseHeight + padding) // 篩選時最小高度降低
       };
     } else {
       // 水平模式：每個專案需要約 100px 寬度，確保有足夠空間
@@ -1180,7 +1190,7 @@ export class InteractiveTimeline extends BaseComponent {
   /**
    * 設定專案節點 - Step 2.2.2 核心實作
    */
-  setupNodes() {
+  setupNodes(useFilteredData = false) {
     console.log('[InteractiveTimeline] 設定動態專案節點');
     
     const nodesContainer = this.element.querySelector('.timeline-nodes');
@@ -1196,12 +1206,19 @@ export class InteractiveTimeline extends BaseComponent {
     nodesContainer.innerHTML = '';
     this.nodes = [];
     
+    // 決定要使用的數據源
+    const dataToUse = (useFilteredData && this.state.yearFilter?.isFiltering) 
+      ? this.state.yearFilter.filteredProjects 
+      : this.timelineData;
+    
+    console.log(`[InteractiveTimeline] 使用 ${dataToUse.length} 個專案建立節點`);
+    
     // 為每個專案創建節點
-    this.timelineData.forEach((project, index) => {
+    dataToUse.forEach((project, index) => {
       const nodeElement = this.createProjectNode(project, index);
       
       // 計算節點在路徑上的位置（根據時間分佈）
-      const svgPosition = this.calculateNodePosition(path, project, this.timelineData);
+      const svgPosition = this.calculateNodePosition(path, project, dataToUse);
       
       // 轉換 SVG 坐標到實際像素坐標
       const actualPosition = this.convertSVGToPixelCoordinates(svg, svgPosition);
@@ -2458,12 +2475,13 @@ export class InteractiveTimeline extends BaseComponent {
       return;
     }
 
-    // 清空現有選項（保留"顯示所有"選項）
-    const allOption = yearSelector.querySelector('option[value=""]');
+    const isMobile = this.state.currentBreakpoint === 'mobile';
+    
+    // 清空現有選項
     yearSelector.innerHTML = '';
-    if (allOption) {
-      yearSelector.appendChild(allOption);
-    } else {
+    
+    // 桌面版添加"顯示所有"選項
+    if (!isMobile) {
       const defaultOption = document.createElement('option');
       defaultOption.value = '';
       defaultOption.textContent = '顯示所有';
@@ -2478,7 +2496,15 @@ export class InteractiveTimeline extends BaseComponent {
       yearSelector.appendChild(option);
     });
 
-    console.log('[InteractiveTimeline] 年份選項已填充');
+    // 手機版預設選擇最新年份
+    if (isMobile && this.state.yearFilter.availableYears.length > 0) {
+      const latestYear = this.state.yearFilter.availableYears[0];
+      yearSelector.value = latestYear.toString();
+      // 立即應用篩選
+      this.applyYearFilter(latestYear.toString());
+    }
+
+    console.log('[InteractiveTimeline] 年份選項已填充' + (isMobile ? '（手機版）' : '（桌面版）'));
   }
 
   /**
@@ -2535,8 +2561,13 @@ export class InteractiveTimeline extends BaseComponent {
       this.state.yearFilter.filteredProjects = [...this.timelineData];
     }
 
-    // 更新節點可見性
-    this.updateNodesVisibility();
+    // 手機版：重新建立整個時間軸只顯示該年份區段
+    if (this.state.currentBreakpoint === 'mobile') {
+      this.rebuildMobileTimeline();
+    } else {
+      // 桌面版：更新節點可見性
+      this.updateNodesVisibility();
+    }
 
     // 更新狀態顯示
     this.updateFilterStatus();
@@ -2550,6 +2581,51 @@ export class InteractiveTimeline extends BaseComponent {
         totalProjects: this.timelineData.length
       }
     }));
+  }
+
+  /**
+   * 手機版：重新建立時間軸（只顯示篩選的年份）
+   */
+  rebuildMobileTimeline() {
+    console.log('[InteractiveTimeline] 重建手機版時間軸');
+    
+    // 取得要顯示的專案數量
+    const projectsToShow = this.state.yearFilter.isFiltering ? 
+      this.state.yearFilter.filteredProjects : 
+      this.timelineData;
+    
+    console.log(`[InteractiveTimeline] 篩選後專案數: ${projectsToShow.length}`);
+    
+    // 重新設定 SVG 和路徑尺寸
+    const svg = this.element.querySelector('.timeline-svg');
+    const dimensions = this.calculateSVGDimensions();
+    
+    if (svg) {
+      svg.setAttribute('width', dimensions.width);
+      svg.setAttribute('height', dimensions.height);
+      svg.setAttribute('viewBox', `0 0 ${dimensions.width} ${dimensions.height}`);
+    }
+    
+    // 重新計算和設定路徑
+    this.setupTimeline();
+    
+    // 重新建立節點（使用篩選後的數據）
+    this.setupNodes(true);
+    
+    // 更新容器高度
+    const viewport = this.element.querySelector('.timeline-viewport');
+    const container = this.element.querySelector('.timeline-container');
+    const timelineContent = this.element.querySelector('.timeline-content');
+    
+    if (viewport) {
+      viewport.style.minHeight = `${dimensions.height}px`;
+    }
+    
+    if (timelineContent) {
+      timelineContent.style.height = `${dimensions.height}px`;
+    }
+    
+    console.log(`[InteractiveTimeline] 手機版時間軸重建完成，顯示 ${projectsToShow.length} 個專案`);
   }
 
   /**
