@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 2.2.4c - 桌面端增強功能測試</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .test-header h1 {
+            font-size: 2.5em;
+            color: #4a90e2;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
+        }
+
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: #4a90e2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .timeline-showcase {
+            margin: 40px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .loading-message {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 1.2em;
+            opacity: 0.7;
+        }
+
+        .test-instructions {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .test-instructions h3 {
+            color: #4a90e2;
+            margin-top: 0;
+        }
+
+        .test-instructions ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .test-instructions li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .shortcut-hint {
+            background: rgba(74, 144, 226, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid rgba(74, 144, 226, 0.5);
+        }
+
+        .shortcut-hint h4 {
+            margin-top: 0;
+            color: #64b5f6;
+        }
+
+        .shortcut-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .key {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-family: monospace;
+            font-size: 12px;
+            min-width: 60px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🖥️ Step 2.2.4c 桌面端增強功能</h1>
+            <p>測試滑鼠滾輪縮放、水平拖曳、視覺特效增強</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="initializeDesktopTimeline()">🚀 初始化桌面端時間軸</button>
+        </div>
+
+        <div class="shortcut-hint">
+            <h4>⌨️ 鍵盤快捷鍵</h4>
+            <div class="shortcut-list">
+                <div class="shortcut-item">
+                    <span class="key">Ctrl + 滾輪</span>
+                    <span>縮放時間軸</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="key">Ctrl + +/-</span>
+                    <span>放大/縮小</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="key">Ctrl + 0</span>
+                    <span>重置縮放</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="key">← →</span>
+                    <span>左右滾動</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="key">滑鼠拖曳</span>
+                    <span>拖動時間軸</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-instructions">
+            <h3>🧪 測試步驟</h3>
+            <ul>
+                <li><strong>縮放測試:</strong> 按住 Ctrl/Cmd + 滾輪縮放時間軸</li>
+                <li><strong>拖曳測試:</strong> 滑鼠點擊並拖曳時間軸左右移動</li>
+                <li><strong>懸停效果:</strong> 滑鼠懸停在節點上查看增強動畫</li>
+                <li><strong>鍵盤操作:</strong> 使用方向鍵和快捷鍵控制</li>
+                <li><strong>路徑動畫:</strong> 觀察時間軸路徑的流動光效</li>
+            </ul>
+            
+            <h3>✅ 預期效果</h3>
+            <ul>
+                <li>平滑的縮放效果（0.5x - 2.0x）</li>
+                <li>流暢的拖曳體驗</li>
+                <li>節點懸停時脈動發光效果</li>
+                <li>路徑上有流動的光線</li>
+                <li>所有快捷鍵正常響應</li>
+            </ul>
+        </div>
+
+        <div id="loading" class="loading-message">
+            ⏳ 正在載入桌面端增強時間軸系統...
+        </div>
+
+        <div id="timelineShowcase" class="timeline-showcase" style="display: none;">
+            <div id="timelineContainer">
+                <!-- 互動時間軸將在此顯示 -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { InteractiveTimeline } from './src/components/gaming/InteractiveTimeline/InteractiveTimeline.js';
+
+        window.InteractiveTimeline = InteractiveTimeline;
+        window.timelineInstance = null;
+        
+        // 測試用專案數據
+        const desktopTestData = [
+            {
+                id: 'project-1',
+                title: '專案一',
+                date: '2024-01-01',
+                description: '測試專案描述',
+                category: 'frontend',
+                importance: 5,
+                status: 'current'
+            },
+            {
+                id: 'project-2',
+                title: '專案二',
+                date: '2024-02-15',
+                description: '測試專案描述',
+                category: 'backend',
+                importance: 4,
+                status: 'recent'
+            },
+            {
+                id: 'project-3',
+                title: '專案三',
+                date: '2024-03-20',
+                description: '測試專案描述',
+                category: 'fullstack',
+                importance: 4,
+                status: 'recent'
+            },
+            {
+                id: 'project-4',
+                title: '專案四',
+                date: '2024-04-10',
+                description: '測試專案描述',
+                category: 'ai',
+                importance: 5,
+                status: 'current'
+            },
+            {
+                id: 'project-5',
+                title: '專案五',
+                date: '2024-05-05',
+                description: '測試專案描述',
+                category: 'devops',
+                importance: 3,
+                status: 'recent'
+            },
+            {
+                id: 'project-6',
+                title: '專案六',
+                date: '2024-06-15',
+                description: '測試專案描述',
+                category: 'mobile',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'project-7',
+                title: '專案七',
+                date: '2024-07-20',
+                description: '測試專案描述',
+                category: 'blockchain',
+                importance: 4,
+                status: 'recent'
+            },
+            {
+                id: 'project-8',
+                title: '專案八',
+                date: '2024-08-25',
+                description: '測試專案描述',
+                category: 'general',
+                importance: 2,
+                status: 'past'
+            }
+        ];
+
+        window.initializeDesktopTimeline = async function() {
+            try {
+                const loadingEl = document.getElementById('loading');
+                const showcaseEl = document.getElementById('timelineShowcase');
+                const containerEl = document.getElementById('timelineContainer');
+                
+                loadingEl.style.display = 'block';
+                showcaseEl.style.display = 'none';
+                
+                if (window.timelineInstance) {
+                    window.timelineInstance.destroy();
+                    window.timelineInstance = null;
+                }
+                
+                containerEl.innerHTML = '';
+                
+                console.log('🖥️ 開始創建桌面端增強時間軸系統');
+                
+                window.timelineInstance = new InteractiveTimeline({
+                    container: containerEl,
+                    projects: desktopTestData,
+                    height: '500px'
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const timelineElement = window.timelineInstance.getElement();
+                if (timelineElement) {
+                    containerEl.appendChild(timelineElement);
+                    window.timelineInstance.setupAfterMount();
+                    
+                    loadingEl.style.display = 'none';
+                    showcaseEl.style.display = 'block';
+                    
+                    console.log('✅ 桌面端增強時間軸系統初始化完成');
+                    
+                    // 聚焦到時間軸以啟用鍵盤快捷鍵
+                    timelineElement.setAttribute('tabindex', '0');
+                    timelineElement.focus();
+                } else {
+                    throw new Error('時間軸元素創建失敗');
+                }
+                
+            } catch (error) {
+                console.error('❌ 桌面端時間軸初始化失敗:', error);
+                document.getElementById('loading').innerHTML = 
+                    `<div style="color: #e74c3c;">❌ 初始化失敗: ${error.message}</div>`;
+            }
+        };
+
+        // 自動初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🖥️ 桌面端增強測試頁面載入完成');
+            setTimeout(() => {
+                window.initializeDesktopTimeline();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

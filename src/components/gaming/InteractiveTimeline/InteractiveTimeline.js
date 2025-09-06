@@ -2234,6 +2234,7 @@ export class InteractiveTimeline extends BaseComponent {
           this.setupResponsiveHandling();
           this.setupYearFilter(); // Step 2.2.4a 新增年份篩選
           this.setupTouchGestures(); // Step 2.2.4b 新增觸控手勢
+          this.setupDesktopEnhancements(); // Step 2.2.4c 新增桌面端增強
           console.log('[InteractiveTimeline] DOM 掛載後設定完成');
         });
       });
@@ -2921,6 +2922,233 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
+   * 設定桌面端增強功能 (Step 2.2.4c)
+   */
+  setupDesktopEnhancements() {
+    // 只在桌面端啟用（包含平板）
+    if (this.state.currentBreakpoint === 'mobile') {
+      console.log('[InteractiveTimeline] 移動端，跳過桌面端增強功能');
+      return;
+    }
+
+    console.log('[InteractiveTimeline] 設定桌面端增強功能');
+
+    // 初始化桌面端狀態
+    this.state.desktop = {
+      zoom: 1,
+      minZoom: 0.5,
+      maxZoom: 2,
+      isDragging: false,
+      dragStartX: 0,
+      currentX: 0,
+      translateX: 0,
+      maxTranslateX: 0
+    };
+
+    const timelineContainer = this.element.querySelector('.timeline-container');
+    if (!timelineContainer) return;
+
+    // 設定滑鼠滾輪縮放
+    this.setupMouseWheelZoom(timelineContainer);
+    
+    // 設定水平拖曳
+    this.setupHorizontalDrag(timelineContainer);
+    
+    // 設定鍵盤快捷鍵
+    this.setupKeyboardShortcuts();
+    
+    // 增強視覺特效
+    this.enhanceVisualEffects();
+  }
+
+  /**
+   * 設定滑鼠滾輪縮放功能
+   */
+  setupMouseWheelZoom(container) {
+    container.addEventListener('wheel', (event) => {
+      // 只在按住 Ctrl 或 Cmd 時縮放
+      if (!event.ctrlKey && !event.metaKey) return;
+      
+      event.preventDefault();
+      
+      const viewport = this.element.querySelector('.timeline-viewport');
+      if (!viewport) return;
+
+      // 計算縮放
+      const delta = event.deltaY * -0.001;
+      const newZoom = Math.max(
+        this.state.desktop.minZoom,
+        Math.min(this.state.desktop.maxZoom, this.state.desktop.zoom + delta)
+      );
+
+      // 計算縮放中心點
+      const rect = container.getBoundingClientRect();
+      const centerX = (event.clientX - rect.left) / rect.width;
+
+      // 應用縮放
+      this.state.desktop.zoom = newZoom;
+      viewport.style.transform = `scale(${newZoom}) translateX(${this.state.desktop.translateX}px)`;
+      viewport.style.transformOrigin = `${centerX * 100}% center`;
+
+      console.log('[DesktopEnhancement] 縮放:', newZoom.toFixed(2));
+    }, { passive: false });
+  }
+
+  /**
+   * 設定水平拖曳功能
+   */
+  setupHorizontalDrag(container) {
+    let isDragging = false;
+    let startX = 0;
+    let currentTranslate = 0;
+
+    // 滑鼠按下
+    container.addEventListener('mousedown', (event) => {
+      // 忽略節點點擊
+      if (event.target.closest('.project-node')) return;
+      
+      isDragging = true;
+      startX = event.clientX;
+      currentTranslate = this.state.desktop.translateX || 0;
+      container.style.cursor = 'grabbing';
+      
+      event.preventDefault();
+    });
+
+    // 滑鼠移動
+    window.addEventListener('mousemove', (event) => {
+      if (!isDragging) return;
+
+      const deltaX = event.clientX - startX;
+      const viewport = this.element.querySelector('.timeline-viewport');
+      
+      if (viewport) {
+        this.state.desktop.translateX = currentTranslate + deltaX;
+        viewport.style.transform = `scale(${this.state.desktop.zoom}) translateX(${this.state.desktop.translateX}px)`;
+      }
+    });
+
+    // 滑鼠放開
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        container.style.cursor = 'grab';
+      }
+    });
+
+    // 預設游標
+    container.style.cursor = 'grab';
+  }
+
+  /**
+   * 設定鍵盤快捷鍵
+   */
+  setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (event) => {
+      // 只在時間軸有焦點時響應
+      if (!this.element?.contains(document.activeElement) && 
+          document.activeElement !== document.body) return;
+
+      const viewport = this.element?.querySelector('.timeline-viewport');
+      if (!viewport) return;
+
+      switch(event.key) {
+        case '+':
+        case '=':
+          // 放大
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            this.state.desktop.zoom = Math.min(this.state.desktop.maxZoom, this.state.desktop.zoom + 0.1);
+            viewport.style.transform = `scale(${this.state.desktop.zoom}) translateX(${this.state.desktop.translateX}px)`;
+          }
+          break;
+        case '-':
+          // 縮小
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            this.state.desktop.zoom = Math.max(this.state.desktop.minZoom, this.state.desktop.zoom - 0.1);
+            viewport.style.transform = `scale(${this.state.desktop.zoom}) translateX(${this.state.desktop.translateX}px)`;
+          }
+          break;
+        case '0':
+          // 重置縮放
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            this.state.desktop.zoom = 1;
+            this.state.desktop.translateX = 0;
+            viewport.style.transform = 'scale(1) translateX(0)';
+          }
+          break;
+        case 'ArrowLeft':
+          // 向左滾動
+          this.state.desktop.translateX += 50;
+          viewport.style.transform = `scale(${this.state.desktop.zoom}) translateX(${this.state.desktop.translateX}px)`;
+          break;
+        case 'ArrowRight':
+          // 向右滾動
+          this.state.desktop.translateX -= 50;
+          viewport.style.transform = `scale(${this.state.desktop.zoom}) translateX(${this.state.desktop.translateX}px)`;
+          break;
+      }
+    });
+  }
+
+  /**
+   * 增強視覺特效
+   */
+  enhanceVisualEffects() {
+    // 增強節點懸停效果
+    const nodes = this.element.querySelectorAll('.project-node');
+    nodes.forEach(node => {
+      node.addEventListener('mouseenter', (event) => {
+        if (window.gsap) {
+          // 更強的懸停動畫
+          window.gsap.to(node, {
+            scale: 1.6,
+            duration: 0.3,
+            ease: "back.out(1.7)",
+            boxShadow: "0 0 30px rgba(74, 144, 226, 0.8), 0 6px 20px rgba(0, 0, 0, 0.4)"
+          });
+
+          // 添加脈動效果
+          window.gsap.to(node, {
+            boxShadow: "0 0 40px rgba(74, 144, 226, 1), 0 8px 25px rgba(0, 0, 0, 0.5)",
+            duration: 0.8,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut"
+          });
+        }
+      });
+
+      node.addEventListener('mouseleave', (event) => {
+        if (window.gsap) {
+          window.gsap.killTweensOf(node);
+          window.gsap.to(node, {
+            scale: 1,
+            duration: 0.3,
+            boxShadow: "0 0 10px rgba(74, 144, 226, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)"
+          });
+        }
+      });
+    });
+
+    // 增強路徑動畫
+    const path = this.element.querySelector('.timeline-path');
+    if (path && window.gsap) {
+      // 流動光效
+      window.gsap.to(path, {
+        strokeDashoffset: -100,
+        duration: 10,
+        repeat: -1,
+        ease: "none"
+      });
+    }
+
+    console.log('[DesktopEnhancement] 視覺特效增強完成');
+  }
+
+  /**
    * 銷毀組件
    */
   destroy() {
@@ -2930,6 +3158,11 @@ export class InteractiveTimeline extends BaseComponent {
     // 停止觸控動畫
     if (this.state.touch?.animationFrame) {
       cancelAnimationFrame(this.state.touch.animationFrame);
+    }
+    
+    // 清理事件監聽器
+    if (this.state.desktop) {
+      // 清理桌面端事件
     }
     
     if (this.element && this.element.parentNode) {
