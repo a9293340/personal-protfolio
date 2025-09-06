@@ -136,6 +136,14 @@ export class InteractiveTimeline extends BaseComponent {
         animation: {
           duration: 0.5,
           easing: 'power2.out'
+        },
+        // Step 2.2.4d: 年份切換體驗優化
+        instantSwitch: true, // 立即切換節點，無動畫延遲
+        autoCenter: false, // 停用年份切換後自動居中
+        centerAnimation: {
+          enabled: false, // 停用自動居中動畫
+          duration: 0.6,
+          easing: 'power2.out'
         }
       }
     };
@@ -579,7 +587,7 @@ export class InteractiveTimeline extends BaseComponent {
         .timeline-viewport {
           flex: 1;
           position: relative;
-          overflow: hidden;
+          overflow: hidden; /* 桌面版保持 hidden */
           min-height: 350px;
           cursor: grab;
         }
@@ -599,8 +607,29 @@ export class InteractiveTimeline extends BaseComponent {
         /* 手機版 viewport 需要更多高度 */
         @media (max-width: 768px) {
           .timeline-viewport {
-            min-height: 900px;
-            padding-bottom: 20px;
+            position: relative;
+            min-height: 100vh;
+            overflow: visible; /* 讓內容可以超出 */
+          }
+          
+          .timeline-container.vertical {
+            position: relative;
+            min-height: 100vh;
+            overflow-y: auto; /* 整個容器可滾動 */
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+          }
+          
+          .timeline-content {
+            position: absolute; /* 保持絕對定位以支援節點定位 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            /* 高度會在 JS 中動態設定 */
+          }
+          
+          .timeline-nodes {
+            /* 移除相對定位，保持絕對定位 */
           }
         }
         
@@ -624,6 +653,18 @@ export class InteractiveTimeline extends BaseComponent {
           height: 100%;
           pointer-events: none;
           z-index: 10;
+        }
+        
+        /* 手機版節點容器需要擴展高度 */
+        @media (max-width: 768px) {
+          .timeline-nodes {
+            /* 保持絕對定位系統 */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            /* 高度將在 JS 中動態設定 */
+          }
         }
         
         .project-node {
@@ -1031,10 +1072,13 @@ export class InteractiveTimeline extends BaseComponent {
     const isVertical = this.state?.currentBreakpoint === 'mobile';
     
     if (isVertical) {
-      // 垂直模式：每個專案需要約 60px 高度
+      // 垂直模式：每個專案需要約 120px 高度，確保足夠空間顯示所有節點
+      // 計算總高度時考慮額外緩衝
+      const baseHeight = projectCount * 120; // 每個節點 120px（增加間距）
+      const padding = 600; // 上下額外緩衝空間（增加到 600px）
       return {
         width: 400,
-        height: Math.max(800, projectCount * 60)
+        height: Math.max(3000, baseHeight + padding) // 確保最小高度 3000px
       };
     } else {
       // 水平模式：每個專案需要約 100px 寬度，確保有足夠空間
@@ -1170,7 +1214,7 @@ export class InteractiveTimeline extends BaseComponent {
       this.nodes.push({
         element: nodeElement,
         data: project,
-        position: actualPosition
+        position: actualPosition // 存儲節點的像素位置用於邊界計算
       });
       
       // 立即顯示節點，後續添加動畫
@@ -1193,6 +1237,30 @@ export class InteractiveTimeline extends BaseComponent {
         });
       }
     });
+    
+    // 手機版：動態設定容器高度以確保所有節點可見
+    if (this.state.currentBreakpoint === 'mobile' && this.nodes.length > 0) {
+      // 使用 SVG 的計算高度作為基準
+      const svgDimensions = this.calculateSVGDimensions();
+      const totalHeight = svgDimensions.height;
+      
+      // 設定節點容器高度
+      nodesContainer.style.height = `${totalHeight}px`;
+      
+      // 設定 timeline-content 高度
+      const timelineContent = this.element.querySelector('.timeline-content');
+      if (timelineContent) {
+        timelineContent.style.height = `${totalHeight}px`;
+      }
+      
+      // 設定 viewport 高度以包含所有內容
+      const viewport = this.element.querySelector('.timeline-viewport');
+      if (viewport) {
+        viewport.style.minHeight = `${totalHeight}px`;
+      }
+      
+      console.log(`[InteractiveTimeline] 手機版容器高度設定為: ${totalHeight}px`);
+    }
     
     console.log(`[InteractiveTimeline] 創建了 ${this.nodes.length} 個專案節點`);
   }
@@ -2485,46 +2553,235 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
-   * 更新節點可見性動畫
+   * 更新節點可見性 - Step 2.2.4d 立即響應版本
    */
   updateNodesVisibility() {
-    if (!window.gsap) {
-      console.warn('[InteractiveTimeline] GSAP 未載入，跳過動畫');
-      return;
-    }
-
     const { selectedYear, filteredProjects } = this.state.yearFilter;
-    const animationDuration = this.config.yearFilter.animation.duration;
-    const easing = this.config.yearFilter.animation.easing;
+    
+    // Step 2.2.4d: 立即切換，無動畫延遲
 
     this.nodes.forEach((node, index) => {
       const project = node.data;
       const projectYear = new Date(project.date).getFullYear();
       const shouldShow = !selectedYear || projectYear.toString() === selectedYear;
 
-      // 錯開動畫，創造波浪效果
-      const delay = index * 0.05;
-
+      
       if (shouldShow) {
-        // 顯示節點
-        gsap.to(node.element, {
-          duration: animationDuration,
-          delay: delay,
-          scale: 0.8 + (project.importance / 5) * 0.4,
-          opacity: 1,
-          ease: easing
-        });
+        // 立即顯示節點
+        const importanceScale = 0.8 + (project.importance / 5) * 0.4;
+        node.element.style.opacity = '1';
+        node.element.style.transform = `translate(-50%, -50%) scale(${importanceScale})`;
+        node.element.style.visibility = 'visible';
+        node.element.style.pointerEvents = 'auto';
       } else {
-        // 隱藏節點
-        gsap.to(node.element, {
-          duration: animationDuration * 0.7,
-          delay: delay,
-          scale: 0.3,
-          opacity: 0.2,
-          ease: easing
-        });
+        // 立即隱藏節點
+        node.element.style.opacity = '0';
+        node.element.style.transform = 'translate(-50%, -50%) scale(0)';
+        node.element.style.visibility = 'hidden';
+        node.element.style.pointerEvents = 'none';
       }
     });
+    
+    console.log(`[InteractiveTimeline] 節點可見性立即更新: ${selectedYear || '顯示所有'}`);
+    
+    // Step 2.2.4d: 年份切換後自動居中
+    if (selectedYear && this.config.yearFilter.autoCenter) {
+      this.centerViewportOnYear(selectedYear);
+    }
+  }
+
+  /**
+   * Step 2.2.4d: 視窗自動居中到指定年份
+   */
+  centerViewportOnYear(selectedYear) {
+    const yearNodes = this.nodes.filter(node => {
+      const projectYear = new Date(node.data.date).getFullYear();
+      return projectYear.toString() === selectedYear;
+    });
+    
+    if (yearNodes.length === 0) {
+      console.warn(`[InteractiveTimeline] 未找到 ${selectedYear} 年的節點`);
+      return;
+    }
+    
+    // 計算年份節點的邊界框
+    const bounds = this.calculateNodesBounds(yearNodes);
+    
+    // 計算視窗居中偏移
+    const centerOffset = this.calculateCenterOffset(bounds);
+    
+    // 應用視窗變換
+    this.applyViewportTransform(centerOffset);
+    
+    console.log(`[InteractiveTimeline] 視窗自動居中到 ${selectedYear} 年，偏移: (${centerOffset.x}, ${centerOffset.y})`);
+  }
+
+  /**
+   * 計算節點邊界框 - Step 2.2.4d 修復座標計算
+   */
+  calculateNodesBounds(nodes) {
+    if (nodes.length === 0) return { minX: 0, maxX: 0, minY: 0, maxY: 0, centerX: 0, centerY: 0 };
+    
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    
+    nodes.forEach(node => {
+      // 修復：使用節點創建時儲存的正確位置
+      let x, y;
+      
+      if (node.position) {
+        // 使用已儲存的像素座標
+        x = node.position.x;
+        y = node.position.y;
+      } else {
+        // 回退方案：從 style 屬性解析
+        const nodeStyle = node.element.style;
+        x = parseFloat(nodeStyle.left) || 0;
+        y = parseFloat(nodeStyle.top) || 0;
+      }
+      
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+      
+      console.log(`[DEBUG] 節點 ${node.data.title} 位置: (${x}, ${y})`);
+    });
+    
+    const bounds = {
+      minX,
+      maxX,
+      minY,
+      maxY,
+      centerX: (minX + maxX) / 2,
+      centerY: (minY + maxY) / 2,
+      width: maxX - minX,
+      height: maxY - minY
+    };
+    
+    console.log(`[DEBUG] 節點邊界框:`, bounds);
+    return bounds;
+  }
+
+  /**
+   * 計算居中偏移量 - Step 2.2.4d 修復偏移計算
+   */
+  calculateCenterOffset(bounds) {
+    const viewport = this.element.querySelector('.timeline-viewport');
+    
+    const viewportCenterX = viewport.clientWidth / 2;
+    const viewportCenterY = viewport.clientHeight / 2;
+    
+    // 獲取當前變換狀態
+    const timelineContent = this.element.querySelector('.timeline-content');
+    const currentTransform = timelineContent.style.transform || '';
+    const scaleMatch = currentTransform.match(/scale\(([^)]+)\)/);
+    const currentScale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+    
+    // 計算需要移動的距離讓節點中心對齊視窗中心
+    // 節點位置已經是像素坐標，不需要再次縮放調整
+    const targetX = viewportCenterX - bounds.centerX;
+    const targetY = viewportCenterY - bounds.centerY;
+    
+    console.log(`[DEBUG] 視窗中心: (${viewportCenterX}, ${viewportCenterY})`);
+    console.log(`[DEBUG] 節點中心: (${bounds.centerX}, ${bounds.centerY})`);
+    console.log(`[DEBUG] 當前縮放: ${currentScale}`);
+    console.log(`[DEBUG] 目標偏移: (${targetX}, ${targetY})`);
+    
+    return {
+      x: targetX,
+      y: targetY
+    };
+  }
+
+  /**
+   * 應用視窗變換
+   */
+  applyViewportTransform(offset) {
+    const timelineContent = this.element.querySelector('.timeline-content');
+    if (!timelineContent) {
+      console.log('[InteractiveTimeline] applyViewportTransform: timelineContent 未找到');
+      return;
+    }
+    
+    // 獲取當前變換
+    const currentTransform = timelineContent.style.transform || '';
+    const scaleMatch = currentTransform.match(/scale\(([^)]+)\)/);
+    const currentScale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+    
+    console.log(`[InteractiveTimeline] 當前變換: ${currentTransform}, 縮放: ${currentScale}`);
+    console.log(`[InteractiveTimeline] 目標偏移: (${offset.x}, ${offset.y})`);
+    
+    // 計算邊界限制
+    const viewport = this.element.querySelector('.timeline-viewport');
+    const contentDimensions = this.calculateSVGDimensions();
+    
+    if (viewport) {
+      const viewportWidth = viewport.clientWidth;
+      const viewportHeight = viewport.clientHeight;
+      const scaledContentWidth = contentDimensions.width * currentScale;
+      const scaledContentHeight = contentDimensions.height * currentScale;
+      
+      console.log(`[InteractiveTimeline] 視窗尺寸: ${viewportWidth}x${viewportHeight}`);
+      console.log(`[InteractiveTimeline] 內容尺寸: ${contentDimensions.width}x${contentDimensions.height} (縮放後: ${scaledContentWidth}x${scaledContentHeight})`);
+      
+      // 設定合理的邊界限制 - 允許足夠的移動空間用於年份切換
+      const padding = Math.max(viewportWidth, viewportHeight); // 預留足夠的移動空間
+      const maxTranslateX = scaledContentWidth + padding;
+      const minTranslateX = -scaledContentWidth - padding;
+      const maxTranslateY = scaledContentHeight + padding;
+      const minTranslateY = -scaledContentHeight - padding;
+      
+      console.log(`[InteractiveTimeline] X 邊界: ${minTranslateX} ~ ${maxTranslateX}`);
+      console.log(`[InteractiveTimeline] Y 邊界: ${minTranslateY} ~ ${maxTranslateY}`);
+      
+      // 應用邊界限制但保持足夠寬鬆以支持年份切換
+      const boundedX = Math.max(minTranslateX, Math.min(maxTranslateX, offset.x));
+      const boundedY = Math.max(minTranslateY, Math.min(maxTranslateY, offset.y));
+      
+      console.log(`[InteractiveTimeline] 邊界處理後偏移: (${boundedX}, ${boundedY})`);
+      
+      // 檢查是否啟用動畫
+      const useAnimation = window.gsap && 
+                          this.config.yearFilter && 
+                          this.config.yearFilter.centerAnimation && 
+                          this.config.yearFilter.centerAnimation.enabled;
+                          
+      console.log(`[InteractiveTimeline] 使用動畫: ${useAnimation}`);
+      
+      // 平滑過渡到新位置（如果啟用動畫）
+      if (useAnimation) {
+        console.log(`[InteractiveTimeline] 執行 GSAP 動畫到: translateX(${boundedX}px) translateY(${boundedY}px) scale(${currentScale})`);
+        window.gsap.to(timelineContent, {
+          duration: this.config.yearFilter.centerAnimation.duration || 0.8,
+          ease: this.config.yearFilter.centerAnimation.easing || 'power2.out',
+          transform: `translateX(${boundedX}px) translateY(${boundedY}px) scale(${currentScale})`,
+          onComplete: () => {
+            console.log('[InteractiveTimeline] GSAP 動畫完成');
+            // 更新桌面端狀態
+            if (this.state.desktop) {
+              this.state.desktop.translateX = boundedX;
+              this.state.desktop.translateY = boundedY;
+            }
+          }
+        });
+      } else {
+        // 立即設定（無動畫或GSAP未載入）
+        const newTransform = `translateX(${boundedX}px) translateY(${boundedY}px) scale(${currentScale})`;
+        console.log(`[InteractiveTimeline] 立即設定變換: ${newTransform}`);
+        timelineContent.style.transform = newTransform;
+        
+        if (this.state.desktop) {
+          this.state.desktop.translateX = boundedX;
+          this.state.desktop.translateY = boundedY;
+        }
+        
+        // 確認設定是否成功
+        setTimeout(() => {
+          const actualTransform = timelineContent.style.transform;
+          console.log(`[InteractiveTimeline] 設定後實際變換: ${actualTransform}`);
+        }, 100);
+      }
+    }
   }
 
   /**
@@ -3318,16 +3575,34 @@ export class InteractiveTimeline extends BaseComponent {
       });
     });
 
-    // 增強路徑動畫
+    // 增強路徑動畫 - Step 2.2.4d 優化閃爍效果
     const path = this.element.querySelector('.timeline-path');
     if (path && window.gsap) {
-      // 流動光效
-      window.gsap.to(path, {
-        strokeDashoffset: -100,
-        duration: 10,
-        repeat: -1,
-        ease: "none"
-      });
+      // 設置基礎透明度和虛線樣式
+      const pathLength = path.getTotalLength();
+      path.style.strokeDasharray = `${pathLength * 0.3}, ${pathLength * 0.1}`; // 30% 實線, 10% 間隔
+      
+      // 流動光效 - 保留基礎痕跡
+      const timeline = window.gsap.timeline({ repeat: -1 });
+      timeline
+        .to(path, {
+          strokeDashoffset: -pathLength * 0.4,
+          duration: 8,
+          ease: "none"
+        })
+        .to(path, {
+          strokeDashoffset: -pathLength * 0.8,
+          duration: 8,
+          ease: "none"
+        });
+      
+      // 添加基礎路徑（始終可見的淡化版本）
+      const basePath = path.cloneNode(true);
+      basePath.style.strokeDasharray = 'none';
+      basePath.style.opacity = '0.2';
+      basePath.style.strokeWidth = '2';
+      basePath.classList.add('timeline-base-path');
+      path.parentNode.insertBefore(basePath, path);
     }
 
     console.log('[DesktopEnhancement] 視覺特效增強完成');

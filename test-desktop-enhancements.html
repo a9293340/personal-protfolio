@@ -206,79 +206,476 @@
         window.InteractiveTimeline = InteractiveTimeline;
         window.timelineInstance = null;
         
-        // 測試用專案數據
+        // 桌面端增強功能測試數據 - 25年技術歷程 (2000-2024)
         const desktopTestData = [
+            // 2000-2002 早期網站開發
             {
-                id: 'project-1',
-                title: '專案一',
-                date: '2024-01-01',
-                description: '測試專案描述',
+                id: 'project-2000-1',
+                title: '個人網站建置',
+                date: '2000-03-15',
+                description: 'HTML + CSS 靜態網站',
                 category: 'frontend',
-                importance: 5,
-                status: 'current'
+                importance: 2,
+                status: 'past'
             },
             {
-                id: 'project-2',
-                title: '專案二',
-                date: '2024-02-15',
-                description: '測試專案描述',
+                id: 'project-2000-2',
+                title: 'Flash 動畫作品',
+                date: '2000-08-20',
+                description: 'Flash MX 互動動畫',
+                category: 'general',
+                importance: 2,
+                status: 'past'
+            },
+            {
+                id: 'project-2001-1',
+                title: 'ASP 留言板',
+                date: '2001-05-10',
+                description: 'ASP + Access 資料庫',
                 category: 'backend',
-                importance: 4,
-                status: 'recent'
+                importance: 3,
+                status: 'past'
             },
             {
-                id: 'project-3',
-                title: '專案三',
-                date: '2024-03-20',
-                description: '測試專案描述',
+                id: 'project-2002-1',
+                title: 'PHP 購物車',
+                date: '2002-02-28',
+                description: 'PHP + MySQL 電商系統',
+                category: 'fullstack',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'project-2002-2',
+                title: 'JavaScript 特效庫',
+                date: '2002-09-15',
+                description: 'DHTML 動態效果集合',
+                category: 'frontend',
+                importance: 2,
+                status: 'past'
+            },
+            
+            // 2003-2005 Web 2.0 時代
+            {
+                id: 'project-2003-1',
+                title: 'AJAX 聊天室',
+                date: '2003-06-12',
+                description: '即時通訊網頁應用',
                 category: 'fullstack',
                 importance: 4,
-                status: 'recent'
+                status: 'past'
             },
             {
-                id: 'project-4',
-                title: '專案四',
-                date: '2024-04-10',
-                description: '測試專案描述',
+                id: 'project-2004-1',
+                title: 'CMS 內容管理',
+                date: '2004-01-20',
+                description: '自製內容管理系統',
+                category: 'fullstack',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'project-2004-2',
+                title: 'RSS 聚合器',
+                date: '2004-11-08',
+                description: '新聞訂閱聚合平台',
+                category: 'backend',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'project-2005-1',
+                title: 'Blog 系統開發',
+                date: '2005-03-25',
+                description: '多用戶部落格平台',
+                category: 'fullstack',
+                importance: 4,
+                status: 'past'
+            },
+            
+            // 2006-2008 框架崛起
+            {
+                id: 'project-2006-1',
+                title: 'jQuery 特效網站',
+                date: '2006-07-15',
+                description: '視覺效果豐富的企業網站',
+                category: 'frontend',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'project-2006-2',
+                title: 'Web Service API',
+                date: '2006-12-03',
+                description: 'SOAP/REST API 開發',
+                category: 'backend',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2007-1',
+                title: '社群網站平台',
+                date: '2007-04-18',
+                description: '仿 Facebook 社群系統',
+                category: 'fullstack',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2008-1',
+                title: 'iPhone Web App',
+                date: '2008-09-12',
+                description: 'Mobile Safari 優化',
+                category: 'mobile',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2008-2',
+                title: 'CodeIgniter 框架',
+                date: '2008-11-30',
+                description: 'PHP MVC 架構重構',
+                category: 'backend',
+                importance: 4,
+                status: 'past'
+            },
+            
+            // 2009-2011 雲端與移動
+            {
+                id: 'project-2009-1',
+                title: '雲端相簿服務',
+                date: '2009-06-05',
+                description: 'AWS S3 整合相簿',
+                category: 'cloud',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2010-1',
+                title: 'Android 原生 APP',
+                date: '2010-02-14',
+                description: 'Java Android 開發',
+                category: 'mobile',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2010-2',
+                title: 'HTML5 遊戲',
+                date: '2010-08-22',
+                description: 'Canvas 2D 小遊戲',
+                category: 'game',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'project-2011-1',
+                title: 'Node.js 即時應用',
+                date: '2011-05-17',
+                description: 'Socket.io 即時通訊',
+                category: 'backend',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2011-2',
+                title: 'Responsive 設計',
+                date: '2011-10-09',
+                description: '響應式網頁設計',
+                category: 'frontend',
+                importance: 4,
+                status: 'past'
+            },
+            
+            // 2012-2014 SPA 與框架
+            {
+                id: 'project-2012-1',
+                title: 'Backbone.js SPA',
+                date: '2012-03-11',
+                description: '單頁應用程式',
+                category: 'frontend',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2012-2',
+                title: 'RESTful API 設計',
+                date: '2012-09-28',
+                description: '完整 REST 架構',
+                category: 'backend',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2013-1',
+                title: 'AngularJS 企業系統',
+                date: '2013-01-20',
+                description: '大型企業管理系統',
+                category: 'frontend',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2013-2',
+                title: 'MongoDB 大數據',
+                date: '2013-07-15',
+                description: 'NoSQL 資料庫應用',
+                category: 'database',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2014-1',
+                title: 'Hybrid App 開發',
+                date: '2014-04-03',
+                description: 'Cordova 跨平台開發',
+                category: 'mobile',
+                importance: 4,
+                status: 'past'
+            },
+            
+            // 2015-2017 現代化工具
+            {
+                id: 'project-2015-1',
+                title: 'React.js 重構',
+                date: '2015-08-12',
+                description: '組件化架構轉換',
+                category: 'frontend',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2015-2',
+                title: 'Webpack 建置工具',
+                date: '2015-11-25',
+                description: '模組化建置流程',
+                category: 'devops',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2016-1',
+                title: 'Docker 容器化',
+                date: '2016-02-18',
+                description: '應用容器化部署',
+                category: 'devops',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2016-2',
+                title: 'Redux 狀態管理',
+                date: '2016-06-30',
+                description: '可預測狀態容器',
+                category: 'frontend',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2017-1',
+                title: 'GraphQL API',
+                date: '2017-09-14',
+                description: 'Facebook GraphQL 採用',
+                category: 'backend',
+                importance: 4,
+                status: 'past'
+            },
+            
+            // 2018-2020 雲原生時代
+            {
+                id: 'project-2018-1',
+                title: 'Kubernetes 部署',
+                date: '2018-01-25',
+                description: '容器編排系統',
+                category: 'devops',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2018-2',
+                title: 'Vue.js 3.0 升級',
+                date: '2018-05-20',
+                description: 'Composition API 重寫',
+                category: 'frontend',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2019-1',
+                title: 'Serverless 架構',
+                date: '2019-03-08',
+                description: 'AWS Lambda 無伺服器',
+                category: 'cloud',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2019-2',
+                title: 'PWA 漸進式應用',
+                date: '2019-08-16',
+                description: 'Service Worker 快取',
+                category: 'mobile',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2020-1',
+                title: 'TypeScript 重構',
+                date: '2020-02-11',
+                description: '靜態類型系統導入',
+                category: 'frontend',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2020-2',
+                title: '微服務架構',
+                date: '2020-07-29',
+                description: '服務拆分與治理',
+                category: 'backend',
+                importance: 5,
+                status: 'past'
+            },
+            
+            // 2021-2022 新興技術
+            {
+                id: 'project-2021-1',
+                title: 'Next.js SSR',
+                date: '2021-01-20',
+                description: '伺服器端渲染優化',
+                category: 'fullstack',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2021-2',
+                title: 'DeFi 智能合約',
+                date: '2021-05-15',
+                description: 'Solidity 區塊鏈開發',
+                category: 'blockchain',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2021-3',
+                title: 'Rust 後端服務',
+                date: '2021-09-10',
+                description: '高效能系統程式',
+                category: 'backend',
+                importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'project-2022-1',
+                title: 'Web3 錢包整合',
+                date: '2022-02-28',
+                description: 'MetaMask 連接應用',
+                category: 'blockchain',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2022-2',
+                title: 'TensorFlow.js AI',
+                date: '2022-06-18',
+                description: '瀏覽器端機器學習',
+                category: 'ai',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2022-3',
+                title: 'WebAssembly 優化',
+                date: '2022-10-05',
+                description: '高效能計算模組',
+                category: 'general',
+                importance: 3,
+                status: 'past'
+            },
+            
+            // 2023 年專案
+            {
+                id: 'project-2023-1',
+                title: '雲端架構重構',
+                date: '2023-01-15',
+                description: '企業級雲端系統架構升級',
+                category: 'devops',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2023-2',
+                title: 'ChatGPT API 整合',
+                date: '2023-04-10',
+                description: 'OpenAI GPT 智能助手',
+                category: 'ai',
+                importance: 5,
+                status: 'past'
+            },
+            {
+                id: 'project-2023-3',
+                title: 'React Server Components',
+                date: '2023-07-20',
+                description: '新一代 React 架構',
+                category: 'frontend',
+                importance: 4,
+                status: 'past'
+            },
+            {
+                id: 'project-2023-4',
+                title: 'Bun.js 運行時',
+                date: '2023-11-12',
+                description: '超快速 JavaScript 運行時',
+                category: 'backend',
+                importance: 3,
+                status: 'past'
+            },
+            
+            // 2024 年專案
+            {
+                id: 'project-2024-1',
+                title: 'AI 聊天機器人',
+                date: '2024-01-01',
+                description: '智能客服系統開發',
                 category: 'ai',
                 importance: 5,
                 status: 'current'
             },
             {
-                id: 'project-5',
-                title: '專案五',
-                date: '2024-05-05',
-                description: '測試專案描述',
-                category: 'devops',
-                importance: 3,
-                status: 'recent'
-            },
-            {
-                id: 'project-6',
-                title: '專案六',
-                date: '2024-06-15',
-                description: '測試專案描述',
-                category: 'mobile',
-                importance: 3,
-                status: 'past'
-            },
-            {
-                id: 'project-7',
-                title: '專案七',
-                date: '2024-07-20',
-                description: '測試專案描述',
-                category: 'blockchain',
+                id: 'project-2024-2',
+                title: 'Edge Computing 平台',
+                date: '2024-03-15',
+                description: 'CDN 邊緣計算服務',
+                category: 'cloud',
                 importance: 4,
                 status: 'recent'
             },
             {
-                id: 'project-8',
-                title: '專案八',
-                date: '2024-08-25',
-                description: '測試專案描述',
+                id: 'project-2024-3',
+                title: 'WebGPU 圖形引擎',
+                date: '2024-06-20',
+                description: '瀏覽器高效能渲染',
                 category: 'general',
-                importance: 2,
-                status: 'past'
+                importance: 4,
+                status: 'recent'
+            },
+            {
+                id: 'project-2024-4',
+                title: 'Quantum ML 實驗',
+                date: '2024-09-10',
+                description: '量子計算機器學習',
+                category: 'ai',
+                importance: 5,
+                status: 'current'
+            },
+            {
+                id: 'project-2024-5',
+                title: '全息投影介面',
+                date: '2024-12-01',
+                description: '未來互動介面原型',
+                category: 'general',
+                importance: 3,
+                status: 'current'
             }
         ];
 
