@@ -105,9 +105,22 @@ export class InteractiveTimeline extends BaseComponent {
         flowDirection: 'timeline', // 沿時間軸方向流動
         respawn: true,
         performance: {
-          mobile: { count: 25, size: { min: 0.5, max: 2 } },
-          tablet: { count: 35, size: { min: 0.8, max: 2.5 } },
-          desktop: { count: 50, size: { min: 1, max: 3 } }
+          mobile: { 
+            count: 20, // Step 2.2.4b: 進一步減少移動端粒子數量
+            size: { min: 0.5, max: 2 },
+            frameRate: 30, // 限制移動端到30fps
+            simplifyRendering: true // 啟用簡化渲染
+          },
+          tablet: { 
+            count: 35, 
+            size: { min: 0.8, max: 2.5 },
+            frameRate: 45
+          },
+          desktop: { 
+            count: 50, 
+            size: { min: 1, max: 3 },
+            frameRate: 60
+          }
         }
       },
       
@@ -602,6 +615,46 @@ export class InteractiveTimeline extends BaseComponent {
           justify-content: center;
           color: white;
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Step 2.2.4b: 觸控區域優化 */
+        .project-node::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 44px; /* 擴大觸控區域到44px (iOS推薦最小觸控尺寸) */
+          height: 44px;
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          background: transparent;
+          pointer-events: auto;
+        }
+        
+        /* 移動端觸控增強 */
+        @media (max-width: 768px) {
+          .project-node {
+            width: 24px; /* 移動端節點稍大 */
+            height: 24px;
+            border-width: 3px; /* 更粗的邊框 */
+          }
+          
+          .project-node::before {
+            width: 48px; /* 移動端更大的觸控區域 */
+            height: 48px;
+          }
+          
+          /* 觸控按下效果 */
+          .project-node:active {
+            transform: scale(1.1);
+            box-shadow: 
+              0 0 20px var(--node-glow-color, rgba(74, 144, 226, 0.6)),
+              0 4px 12px rgba(0, 0, 0, 0.3);
+          }
+          
+          .node-icon {
+            font-size: 11px; /* 移動端圖標稍大 */
+          }
         }
         
         .node-icon {
@@ -2104,6 +2157,12 @@ export class InteractiveTimeline extends BaseComponent {
       if (newBreakpoint !== this.state.currentBreakpoint) {
         this.state.currentBreakpoint = newBreakpoint;
         this.rebuildTimeline();
+        
+        // 更新觸控狀態 (Step 2.2.4b)
+        if (this.state.touch) {
+          this.state.touch.isEnabled = newBreakpoint === 'mobile';
+          console.log('[TouchGesture] 更新觸控狀態:', this.state.touch.isEnabled);
+        }
       }
     }, 300);
     
@@ -2174,6 +2233,7 @@ export class InteractiveTimeline extends BaseComponent {
           this.setupInteractions();
           this.setupResponsiveHandling();
           this.setupYearFilter(); // Step 2.2.4a 新增年份篩選
+          this.setupTouchGestures(); // Step 2.2.4b 新增觸控手勢
           console.log('[InteractiveTimeline] DOM 掛載後設定完成');
         });
       });
@@ -2552,16 +2612,28 @@ export class InteractiveTimeline extends BaseComponent {
       cancelAnimationFrame(this.state.particles.animationFrame);
     }
     
-    const animate = () => {
+    // Step 2.2.4b: 獲取性能配置
+    const breakpoint = this.state.currentBreakpoint;
+    const particleConfig = this.config.particles.performance[breakpoint] || this.config.particles;
+    const targetFrameRate = particleConfig.frameRate || 60;
+    const frameInterval = 1000 / targetFrameRate; // ms per frame
+    
+    let lastFrameTime = 0;
+    
+    const animate = (currentTime) => {
       if (!this.state.particles.isActive) return;
       
-      this.updateParticles();
-      this.renderParticles();
+      // 幀率控制
+      if (currentTime - lastFrameTime >= frameInterval) {
+        this.updateParticles();
+        this.renderParticles();
+        lastFrameTime = currentTime;
+      }
       
       this.state.particles.animationFrame = requestAnimationFrame(animate);
     };
     
-    animate();
+    animate(0);
   }
   
   /**
@@ -2679,11 +2751,186 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
+   * 設定觸控手勢系統 (Step 2.2.4b)
+   */
+  setupTouchGestures() {
+    const timelineContainer = this.element.querySelector('.timeline-container');
+    if (!timelineContainer) {
+      console.warn('[InteractiveTimeline] 找不到時間軸容器，跳過觸控手勢設定');
+      return;
+    }
+
+    // 初始化觸控狀態
+    this.state.touch = {
+      isEnabled: this.state.currentBreakpoint === 'mobile',
+      isDragging: false,
+      startY: 0,
+      currentY: 0,
+      velocity: 0,
+      lastMoveTime: 0,
+      scrollOffset: 0,
+      maxScroll: 0
+    };
+
+    // 只在移動端啟用觸控手勢
+    if (!this.state.touch.isEnabled) {
+      console.log('[InteractiveTimeline] 非移動端，跳過觸控手勢設定');
+      return;
+    }
+
+    console.log('[InteractiveTimeline] 設定移動端觸控拖曳手勢');
+
+    // 觸控開始
+    timelineContainer.addEventListener('touchstart', (event) => {
+      this.handleTouchStart(event);
+    }, { passive: false });
+
+    // 觸控移動
+    timelineContainer.addEventListener('touchmove', (event) => {
+      this.handleTouchMove(event);
+    }, { passive: false });
+
+    // 觸控結束
+    timelineContainer.addEventListener('touchend', (event) => {
+      this.handleTouchEnd(event);
+    }, { passive: true });
+
+    // 計算可滾動範圍
+    this.updateScrollBounds();
+  }
+
+  /**
+   * 處理觸控開始事件
+   */
+  handleTouchStart(event) {
+    if (event.touches.length !== 1) return; // 只處理單指觸控
+
+    this.state.touch.isDragging = true;
+    this.state.touch.startY = event.touches[0].clientY;
+    this.state.touch.currentY = event.touches[0].clientY;
+    this.state.touch.velocity = 0;
+    this.state.touch.lastMoveTime = Date.now();
+
+    // 停止當前動畫
+    if (this.state.touch.animationFrame) {
+      cancelAnimationFrame(this.state.touch.animationFrame);
+      this.state.touch.animationFrame = null;
+    }
+
+    console.log('[TouchGesture] 觸控開始:', event.touches[0].clientY);
+  }
+
+  /**
+   * 處理觸控移動事件
+   */
+  handleTouchMove(event) {
+    if (!this.state.touch.isDragging || event.touches.length !== 1) return;
+
+    event.preventDefault(); // 防止頁面滾動
+
+    const currentY = event.touches[0].clientY;
+    const deltaY = currentY - this.state.touch.currentY;
+    const currentTime = Date.now();
+    const deltaTime = currentTime - this.state.touch.lastMoveTime;
+
+    // 計算速度
+    if (deltaTime > 0) {
+      this.state.touch.velocity = deltaY / deltaTime;
+    }
+
+    // 更新滾動偏移
+    this.state.touch.scrollOffset -= deltaY * 0.5; // 減速係數
+    this.state.touch.scrollOffset = Math.max(0, Math.min(this.state.touch.scrollOffset, this.state.touch.maxScroll));
+
+    // 應用滾動變換
+    this.applyScrollTransform();
+
+    this.state.touch.currentY = currentY;
+    this.state.touch.lastMoveTime = currentTime;
+  }
+
+  /**
+   * 處理觸控結束事件
+   */
+  handleTouchEnd(event) {
+    if (!this.state.touch.isDragging) return;
+
+    this.state.touch.isDragging = false;
+
+    // 慣性滾動
+    if (Math.abs(this.state.touch.velocity) > 0.1) {
+      this.startInertiaAnimation();
+    }
+
+    console.log('[TouchGesture] 觸控結束，速度:', this.state.touch.velocity);
+  }
+
+  /**
+   * 開始慣性動畫
+   */
+  startInertiaAnimation() {
+    const animate = () => {
+      // 速度衰減
+      this.state.touch.velocity *= 0.95;
+
+      // 更新位置
+      this.state.touch.scrollOffset -= this.state.touch.velocity * 16;
+      this.state.touch.scrollOffset = Math.max(0, Math.min(this.state.touch.scrollOffset, this.state.touch.maxScroll));
+
+      this.applyScrollTransform();
+
+      // 繼續動畫或停止
+      if (Math.abs(this.state.touch.velocity) > 0.01) {
+        this.state.touch.animationFrame = requestAnimationFrame(animate);
+      } else {
+        this.state.touch.animationFrame = null;
+      }
+    };
+
+    this.state.touch.animationFrame = requestAnimationFrame(animate);
+  }
+
+  /**
+   * 應用滾動變換
+   */
+  applyScrollTransform() {
+    const timelineViewport = this.element.querySelector('.timeline-viewport');
+    if (timelineViewport) {
+      timelineViewport.style.transform = `translateY(-${this.state.touch.scrollOffset}px)`;
+    }
+  }
+
+  /**
+   * 更新滾動邊界
+   */
+  updateScrollBounds() {
+    const container = this.element.querySelector('.timeline-container');
+    const viewport = this.element.querySelector('.timeline-viewport');
+    
+    if (container && viewport) {
+      const containerHeight = container.clientHeight;
+      const viewportHeight = viewport.scrollHeight;
+      this.state.touch.maxScroll = Math.max(0, viewportHeight - containerHeight + 100); // 額外100px緩衝
+      
+      console.log('[TouchGesture] 滾動邊界:', {
+        container: containerHeight,
+        viewport: viewportHeight,
+        maxScroll: this.state.touch.maxScroll
+      });
+    }
+  }
+
+  /**
    * 銷毀組件
    */
   destroy() {
     // 停止粒子系統
     this.stopParticleSystem();
+    
+    // 停止觸控動畫
+    if (this.state.touch?.animationFrame) {
+      cancelAnimationFrame(this.state.touch.animationFrame);
+    }
     
     if (this.element && this.element.parentNode) {
       this.element.parentNode.removeChild(this.element);
