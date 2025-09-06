@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimelineNavigator 組件測試</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #d4af37;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .timeline-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            cursor: grab;
+        }
+        
+        .timeline-container:active {
+            cursor: grabbing;
+        }
+        
+        .timeline-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .timeline-path {
+            stroke: #d4af37;
+            stroke-width: 3;
+            fill: none;
+            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+        }
+        
+        .timeline-node {
+            fill: #d4af37;
+            stroke: rgba(212, 175, 55, 0.6);
+            stroke-width: 2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-node:hover {
+            fill: #f4d03f;
+            stroke-width: 3;
+        }
+        
+        .navigation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .nav-btn, .zoom-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-btn:hover, .zoom-btn:hover {
+            background: linear-gradient(135deg, #f4d03f, #ffeb3b);
+            transform: translateY(-1px);
+        }
+        
+        .nav-btn:active, .zoom-btn:active {
+            transform: translateY(0);
+        }
+        
+        .status-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .status-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .status-label {
+            font-size: 12px;
+            color: #d4af37;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .status-value {
+            font-size: 14px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+        
+        .log-area {
+            height: 120px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .instructions {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #d4af37;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .shortcuts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .shortcut {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .shortcut-key {
+            color: #d4af37;
+            font-weight: bold;
+        }
+    </style>
+    
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🎮 TimelineNavigator 組件測試</h1>
+        
+        <div class="instructions">
+            <strong>🎯 測試說明：</strong><br>
+            • 在時間軸區域內拖曳滑鼠進行平移<br>
+            • 使用 Ctrl+滾輪 進行縮放<br>
+            • 點擊導航/縮放按鈕測試控制功能<br>
+            • 使用鍵盤快捷鍵（需先點擊時間軸區域獲得焦點）<br>
+            
+            <div class="shortcuts">
+                <div class="shortcut">
+                    <span class="shortcut-key">←→↑↓</span>
+                    <span>導航</span>
+                </div>
+                <div class="shortcut">
+                    <span class="shortcut-key">Ctrl + =</span>
+                    <span>放大</span>
+                </div>
+                <div class="shortcut">
+                    <span class="shortcut-key">Ctrl + -</span>
+                    <span>縮小</span>
+                </div>
+                <div class="shortcut">
+                    <span class="shortcut-key">Ctrl + 0</span>
+                    <span>重置</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📐 基本導航測試</h3>
+            
+            <div class="navigation-controls">
+                <button class="nav-btn" onclick="timelineNavigator.navigateLeft()">← 左移</button>
+                <button class="nav-btn" onclick="timelineNavigator.navigateRight()">右移 →</button>
+                <button class="nav-btn" onclick="timelineNavigator.navigateBy(0, -50)">↑ 上移</button>
+                <button class="nav-btn" onclick="timelineNavigator.navigateBy(0, 50)">下移 ↓</button>
+            </div>
+            
+            <div class="navigation-controls">
+                <button class="zoom-btn" onclick="timelineNavigator.zoomIn()">🔍 放大</button>
+                <button class="zoom-btn" onclick="timelineNavigator.zoomOut()">🔍 縮小</button>
+                <button class="zoom-btn" onclick="timelineNavigator.resetZoom()">🎯 重置</button>
+                <button class="zoom-btn" onclick="toggleBreakpoint()">📱 切換模式</button>
+            </div>
+            
+            <div class="timeline-container" id="timeline-container" tabindex="0">
+                <svg class="timeline-svg" id="timeline-svg" width="800" height="400">
+                    <!-- 時間軸路徑 -->
+                    <path class="timeline-path" d="M 50 200 Q 200 100 400 200 Q 600 300 750 200" />
+                    
+                    <!-- 示例節點 -->
+                    <circle class="timeline-node" cx="100" cy="180" r="8" />
+                    <circle class="timeline-node" cx="250" cy="120" r="10" />
+                    <circle class="timeline-node" cx="400" cy="200" r="12" />
+                    <circle class="timeline-node" cx="550" cy="280" r="10" />
+                    <circle class="timeline-node" cx="700" cy="200" r="8" />
+                    
+                    <!-- 網格線 -->
+                    <defs>
+                        <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(212, 175, 55, 0.1)" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                </svg>
+            </div>
+            
+            <div class="status-panel">
+                <div class="status-item">
+                    <div class="status-label">位置 X</div>
+                    <div class="status-value" id="pos-x">0</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">位置 Y</div>
+                    <div class="status-value" id="pos-y">0</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">縮放</div>
+                    <div class="status-value" id="zoom">1.00</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">拖曳狀態</div>
+                    <div class="status-value" id="dragging">否</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">當前模式</div>
+                    <div class="status-value" id="breakpoint">desktop</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">拖曳軸向</div>
+                    <div class="status-value" id="drag-axis">x</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📱 觸控手勢測試</h3>
+            
+            <div class="timeline-container" id="touch-container" tabindex="0">
+                <svg class="timeline-svg" id="touch-svg" width="600" height="300">
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                    <path class="timeline-path" d="M 50 150 L 200 80 L 350 220 L 500 100 L 550 150" />
+                    <circle class="timeline-node" cx="50" cy="150" r="6" />
+                    <circle class="timeline-node" cx="200" cy="80" r="8" />
+                    <circle class="timeline-node" cx="350" cy="220" r="10" />
+                    <circle class="timeline-node" cx="500" cy="100" r="8" />
+                    <circle class="timeline-node" cx="550" cy="150" r="6" />
+                </svg>
+            </div>
+            
+            <div class="instructions">
+                <strong>觸控測試：</strong>在時間軸上進行單指滑動，體驗慣性滑動效果
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 操作日誌</h3>
+            <div class="log-area" id="log-area"></div>
+            <div class="navigation-controls">
+                <button class="nav-btn" onclick="clearLog()">清除日誌</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 導入組件
+        import { TimelineNavigator } from './src/components/gaming/InteractiveTimeline/TimelineNavigator.js';
+        
+        // 全域變數
+        window.TimelineNavigator = TimelineNavigator;
+        window.timelineNavigator = null;
+        window.touchNavigator = null;
+        window.currentBreakpoint = 'desktop';
+        
+        // 日誌函數
+        window.log = function(message) {
+            const logArea = document.getElementById('log-area');
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logArea.scrollTop = logArea.scrollHeight;
+        };
+        
+        // 更新狀態顯示
+        function updateStatus() {
+            if (!timelineNavigator) return;
+            
+            const state = timelineNavigator.getState();
+            
+            document.getElementById('pos-x').textContent = state.position.x.toFixed(1);
+            document.getElementById('pos-y').textContent = state.position.y.toFixed(1);
+            document.getElementById('zoom').textContent = state.zoom.toFixed(2);
+            document.getElementById('dragging').textContent = state.isDragging ? '是' : '否';
+            document.getElementById('breakpoint').textContent = currentBreakpoint;
+            document.getElementById('drag-axis').textContent = timelineNavigator.getCurrentDragAxis();
+        }
+        
+        // 初始化主要導航器
+        function initMainNavigator() {
+            const container = document.getElementById('timeline-container');
+            
+            window.timelineNavigator = new TimelineNavigator({
+                navigation: {
+                    enabled: true,
+                    step: 80,
+                    animationDuration: 0.4
+                },
+                zoom: {
+                    enabled: true,
+                    min: 0.3,
+                    max: 3.0,
+                    step: 0.2
+                },
+                drag: {
+                    enabled: true,
+                    axis: 'x',
+                    inertia: true
+                },
+                touch: {
+                    enabled: true,
+                    inertiaDecay: 0.92
+                }
+            });
+            
+            const callbacks = {
+                onNavigationChange: (data) => {
+                    log(`🧭 導航變更: ${data.type} (${data.delta?.x || 0}, ${data.delta?.y || 0})`);
+                    updateStatus();
+                },
+                onZoomChange: (data) => {
+                    log(`🔍 縮放變更: ${data.oldZoom.toFixed(2)} → ${data.zoom.toFixed(2)}`);
+                    updateStatus();
+                },
+                onDragStart: (position) => {
+                    log(`🤏 拖曳開始: (${position.x.toFixed(1)}, ${position.y.toFixed(1)})`);
+                    updateStatus();
+                },
+                onDragEnd: (position) => {
+                    log(`🤏 拖曳結束: (${position.x.toFixed(1)}, ${position.y.toFixed(1)})`);
+                    updateStatus();
+                }
+            };
+            
+            timelineNavigator.initialize(container, callbacks);
+            updateStatus();
+            
+            log('🚀 主要導航器初始化完成');
+        }
+        
+        // 初始化觸控導航器
+        function initTouchNavigator() {
+            const container = document.getElementById('touch-container');
+            
+            window.touchNavigator = new TimelineNavigator({
+                navigation: { enabled: false },
+                zoom: { enabled: false },
+                drag: {
+                    enabled: true,
+                    axis: 'both',
+                    inertia: true
+                },
+                touch: {
+                    enabled: true,
+                    swipeThreshold: 30,
+                    velocityThreshold: 0.3,
+                    inertiaDecay: 0.95,
+                    maxInertiaDistance: 400
+                },
+                keyboard: { enabled: false }
+            });
+            
+            const callbacks = {
+                onNavigationChange: (data) => {
+                    log(`📱 觸控導航: ${data.type} (${data.delta?.x || 0}, ${data.delta?.y || 0})`);
+                },
+                onDragStart: () => {
+                    log('📱 觸控拖曳開始');
+                },
+                onDragEnd: () => {
+                    log('📱 觸控拖曳結束');
+                }
+            };
+            
+            touchNavigator.initialize(container, callbacks);
+            
+            log('📱 觸控導航器初始化完成');
+        }
+        
+        // 切換響應式斷點
+        window.toggleBreakpoint = function() {
+            const breakpoints = ['mobile', 'tablet', 'desktop'];
+            const currentIndex = breakpoints.indexOf(currentBreakpoint);
+            const nextIndex = (currentIndex + 1) % breakpoints.length;
+            currentBreakpoint = breakpoints[nextIndex];
+            
+            if (timelineNavigator) {
+                timelineNavigator.updateBreakpoint(currentBreakpoint);
+            }
+            if (touchNavigator) {
+                touchNavigator.updateBreakpoint(currentBreakpoint);
+            }
+            
+            updateStatus();
+            log(`📱 切換到 ${currentBreakpoint} 模式`);
+        };
+        
+        // 清除日誌
+        window.clearLog = function() {
+            document.getElementById('log-area').innerHTML = '';
+        };
+        
+        // 定期更新狀態
+        setInterval(updateStatus, 100);
+        
+        // 頁面載入完成後初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                initMainNavigator();
+                initTouchNavigator();
+            }, 100);
+        });
+        
+        // 頁面卸載時清理資源
+        window.addEventListener('beforeunload', () => {
+            if (timelineNavigator) timelineNavigator.destroy();
+            if (touchNavigator) touchNavigator.destroy();
+        });
+        
+        console.log('🎮 TimelineNavigator 測試頁面已載入');
+        log('TimelineNavigator 測試頁面已載入');
+    </script>
+</body>
+</html>

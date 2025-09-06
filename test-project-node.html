@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectNode 組件測試</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #d4af37;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .test-area {
+            position: relative;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .test-controls {
+            margin: 20px 0;
+        }
+        
+        .test-controls button {
+            margin: 5px 10px 5px 0;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .test-controls button:hover {
+            background: linear-gradient(135deg, #f4d03f, #ffeb3b);
+        }
+        
+        .log-area {
+            height: 100px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        /* 工具提示樣式 */
+        .node-tooltip {
+            position: absolute !important;
+            background: rgba(26, 26, 46, 0.95) !important;
+            color: #ffffff !important;
+            padding: 8px 12px !important;
+            border-radius: 6px !important;
+            font-size: 12px !important;
+            line-height: 1.4 !important;
+            white-space: nowrap !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+            z-index: 1000 !important;
+            pointer-events: none !important;
+        }
+        
+        .tooltip-title {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .tooltip-date {
+            color: #d4af37;
+            font-size: 11px;
+        }
+        
+        .tooltip-category {
+            color: #aaa;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+    </style>
+    
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/MotionPathPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🎯 ProjectNode 組件測試</h1>
+        
+        <div class="test-section">
+            <h3>📍 基本節點渲染測試</h3>
+            <div class="test-area" id="basic-test"></div>
+            <div class="test-controls">
+                <button onclick="createBasicNode()">創建基本節點</button>
+                <button onclick="clearArea('basic-test')">清除</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎨 不同類型節點測試</h3>
+            <div class="test-area" id="types-test"></div>
+            <div class="test-controls">
+                <button onclick="createMultipleNodes()">創建多種類型節點</button>
+                <button onclick="clearArea('types-test')">清除</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>⚡ 互動功能測試</h3>
+            <div class="test-area" id="interaction-test"></div>
+            <div class="test-controls">
+                <button onclick="createInteractiveNode()">創建互動節點</button>
+                <button onclick="toggleNodeState()">切換節點狀態</button>
+                <button onclick="clearArea('interaction-test')">清除</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📱 響應式測試</h3>
+            <div class="test-area" id="responsive-test"></div>
+            <div class="test-controls">
+                <button onclick="createResponsiveNode()">創建響應式節點</button>
+                <button onclick="switchToMobile()">切換到手機模式</button>
+                <button onclick="switchToDesktop()">切換到桌面模式</button>
+                <button onclick="clearArea('responsive-test')">清除</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 事件日誌</h3>
+            <div class="log-area" id="log-area"></div>
+            <div class="test-controls">
+                <button onclick="clearLog()">清除日誌</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 導入組件
+        import { ProjectNode } from './src/components/gaming/InteractiveTimeline/ProjectNode.js';
+        
+        // 全域變數
+        window.ProjectNode = ProjectNode;
+        window.testNodes = [];
+        
+        // 測試數據
+        window.testProjects = [
+            {
+                id: 'test-backend',
+                title: '微服務電商系統',
+                date: '2023-08',
+                category: 'backend',
+                status: 'completed'
+            },
+            {
+                id: 'test-frontend', 
+                title: '互動時間軸系統',
+                date: '2024-01',
+                category: 'frontend',
+                status: 'inProgress'
+            },
+            {
+                id: 'test-fullstack',
+                title: '配置驅動CMS',
+                date: '2024-03', 
+                category: 'fullstack',
+                status: 'completed'
+            },
+            {
+                id: 'test-architecture',
+                title: '分散式系統架構',
+                date: '2024-05',
+                category: 'architecture', 
+                status: 'planned'
+            },
+            {
+                id: 'test-opensource',
+                title: '開源工具庫',
+                date: '2024-07',
+                category: 'opensource',
+                status: 'inProgress'
+            }
+        ];
+        
+        // 日誌函數
+        window.log = function(message) {
+            const logArea = document.getElementById('log-area');
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logArea.scrollTop = logArea.scrollHeight;
+        };
+        
+        console.log('🚀 ProjectNode 測試頁面已載入');
+        log('ProjectNode 測試頁面已載入');
+    </script>
+
+    <script>
+        // 測試函數
+        function createBasicNode() {
+            const container = document.getElementById('basic-test');
+            const project = testProjects[0];
+            
+            const node = new ProjectNode({
+                nodeSize: 20,
+                animations: { enabled: true }
+            });
+            
+            const callbacks = {
+                onNodeClick: (element, project, index, event) => {
+                    log(`節點被點擊: ${project.title}`);
+                },
+                onNodeHover: (project, index, action, event) => {
+                    log(`節點懸停${action}: ${project.title}`);
+                }
+            };
+            
+            const element = node.initialize(project, 0, callbacks);
+            node.updatePosition({ x: 100, y: 75 });
+            
+            container.appendChild(element);
+            testNodes.push(node);
+            
+            log(`創建基本節點: ${project.title}`);
+        }
+        
+        function createMultipleNodes() {
+            const container = document.getElementById('types-test');
+            
+            testProjects.forEach((project, index) => {
+                const node = new ProjectNode({
+                    nodeSize: 16,
+                    animations: { enabled: true, hoverScale: 1.4 }
+                });
+                
+                const callbacks = {
+                    onNodeClick: (element, project, index, event) => {
+                        log(`${project.category} 節點被點擊: ${project.title}`);
+                    },
+                    onNodeHover: (project, index, action) => {
+                        if (action === 'enter') {
+                            log(`懸停 ${project.category} 節點: ${project.title}`);
+                        }
+                    }
+                };
+                
+                const element = node.initialize(project, index, callbacks);
+                node.updatePosition({ 
+                    x: 50 + index * 60, 
+                    y: 75 
+                });
+                
+                container.appendChild(element);
+                testNodes.push(node);
+            });
+            
+            log(`創建 ${testProjects.length} 個不同類型節點`);
+        }
+        
+        let interactiveNode = null;
+        
+        function createInteractiveNode() {
+            const container = document.getElementById('interaction-test');
+            const project = testProjects[1];
+            
+            interactiveNode = new ProjectNode({
+                nodeSize: 24,
+                animations: { 
+                    enabled: true, 
+                    hoverScale: 1.5,
+                    clickScale: 1.8
+                },
+                interaction: {
+                    enabled: true,
+                    keyboard: true,
+                    tooltip: true,
+                    clickFeedback: true
+                }
+            });
+            
+            const callbacks = {
+                onNodeClick: (element, project, index, event) => {
+                    log(`🎯 互動節點被點擊: ${project.title} (位置: ${event.clientX}, ${event.clientY})`);
+                },
+                onNodeHover: (project, index, action, event) => {
+                    log(`✨ 互動節點懸停${action}: ${project.title}`);
+                }
+            };
+            
+            const element = interactiveNode.initialize(project, 1, callbacks);
+            interactiveNode.updatePosition({ x: 150, y: 75 });
+            
+            container.appendChild(element);
+            testNodes.push(interactiveNode);
+            
+            log(`創建互動節點: ${project.title} (支援鍵盤導航)`);
+        }
+        
+        function toggleNodeState() {
+            if (!interactiveNode) {
+                log('⚠️ 請先創建互動節點');
+                return;
+            }
+            
+            const currentState = interactiveNode.getNodeState();
+            const newActiveState = !currentState.isActive;
+            
+            interactiveNode.setNodeState({ isActive: newActiveState });
+            
+            log(`🔄 節點狀態切換: ${newActiveState ? '激活' : '取消激活'}`);
+        }
+        
+        let responsiveNode = null;
+        
+        function createResponsiveNode() {
+            const container = document.getElementById('responsive-test');
+            const project = testProjects[2];
+            
+            responsiveNode = new ProjectNode({
+                responsive: {
+                    mobile: { nodeSize: 14, hoverScale: 1.2 },
+                    tablet: { nodeSize: 18, hoverScale: 1.3 },
+                    desktop: { nodeSize: 22, hoverScale: 1.4 }
+                },
+                animations: { enabled: true }
+            });
+            
+            const callbacks = {
+                onNodeClick: (element, project, index, event) => {
+                    const state = responsiveNode.getNodeState();
+                    log(`📱 響應式節點被點擊: ${project.title} (斷點: ${responsiveNode.state.currentBreakpoint})`);
+                },
+                onNodeHover: (project, index, action) => {
+                    if (action === 'enter') {
+                        log(`📱 響應式節點懸停: 斷點 ${responsiveNode.state.currentBreakpoint}`);
+                    }
+                }
+            };
+            
+            const element = responsiveNode.initialize(project, 2, callbacks);
+            responsiveNode.updatePosition({ x: 100, y: 75 });
+            
+            container.appendChild(element);
+            testNodes.push(responsiveNode);
+            
+            log(`創建響應式節點: ${project.title}`);
+        }
+        
+        function switchToMobile() {
+            if (!responsiveNode) {
+                log('⚠️ 請先創建響應式節點');
+                return;
+            }
+            
+            responsiveNode.updateBreakpoint('mobile');
+            log('📱 切換到手機模式 (14px, 1.2x hover)');
+        }
+        
+        function switchToDesktop() {
+            if (!responsiveNode) {
+                log('⚠️ 請先創建響應式節點');
+                return;
+            }
+            
+            responsiveNode.updateBreakpoint('desktop');
+            log('🖥️ 切換到桌面模式 (22px, 1.4x hover)');
+        }
+        
+        function clearArea(areaId) {
+            const area = document.getElementById(areaId);
+            area.innerHTML = '';
+            
+            // 清理對應的測試節點
+            testNodes.forEach(node => {
+                if (area.contains(node.element)) {
+                    node.destroy();
+                }
+            });
+            
+            testNodes = testNodes.filter(node => node.element && node.element.parentNode);
+            
+            if (areaId === 'interaction-test') {
+                interactiveNode = null;
+            }
+            if (areaId === 'responsive-test') {
+                responsiveNode = null;
+            }
+            
+            log(`清除測試區域: ${areaId}`);
+        }
+        
+        function clearLog() {
+            document.getElementById('log-area').innerHTML = '';
+        }
+        
+        // 頁面卸載時清理資源
+        window.addEventListener('beforeunload', () => {
+            testNodes.forEach(node => node.destroy());
+        });
+    </script>
+</body>
+</html>

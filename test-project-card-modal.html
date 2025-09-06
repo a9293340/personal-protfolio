@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectCardModal 組件測試</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #d4af37;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .demo-timeline {
+            position: relative;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .demo-node {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #d4af37;
+            border: 2px solid rgba(212, 175, 55, 0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        
+        .demo-node:hover {
+            background: #f4d03f;
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+        }
+        
+        .demo-node.backend { background: #2196F3; }
+        .demo-node.frontend { background: #FF9800; }
+        .demo-node.fullstack { background: #4CAF50; }
+        .demo-node.architecture { background: #9C27B0; }
+        .demo-node.opensource { background: #F44336; }
+        
+        .test-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .test-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .test-btn:hover {
+            background: linear-gradient(135deg, #f4d03f, #ffeb3b);
+            transform: translateY(-1px);
+        }
+        
+        .status-panel {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        
+        .status-label {
+            color: #d4af37;
+        }
+        
+        .status-value {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .log-area {
+            height: 150px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .instructions {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #d4af37;
+            margin: 20px 0;
+            line-height: 1.5;
+        }
+        
+        .demo-projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .demo-project-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .demo-project-card:hover {
+            border-color: rgba(212, 175, 55, 0.6);
+            background: rgba(212, 175, 55, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .project-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .project-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #d4af37;
+        }
+        
+        .project-category {
+            font-size: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+        
+        /* 模擬時間軸背景 */
+        .timeline-path {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+    </style>
+    
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🎴 ProjectCardModal 組件測試</h1>
+        
+        <div class="instructions">
+            <strong>🎯 測試說明：</strong><br>
+            • 點擊時間軸上的節點觀看卡片飛出動畫<br>
+            • 點擊卡片外部或按 ESC 鍵關閉卡片<br>
+            • 觀察不同類型專案的卡片內容<br>
+            • 測試響應式行為和動畫效果<br>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎯 互動式時間軸節點測試</h3>
+            
+            <div class="demo-timeline" id="demo-timeline">
+                <!-- 時間軸路徑背景 -->
+                <svg class="timeline-path" viewBox="0 0 1000 400">
+                    <defs>
+                        <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#d4af37;stop-opacity:0.3"/>
+                            <stop offset="50%" style="stop-color:#f4d03f;stop-opacity:0.5"/>
+                            <stop offset="100%" style="stop-color:#d4af37;stop-opacity:0.3"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M 50 200 Q 250 100 500 200 Q 750 300 950 200" 
+                          stroke="url(#pathGradient)" 
+                          stroke-width="3" 
+                          fill="none"/>
+                </svg>
+                
+                <!-- 動態生成節點將插入這裡 -->
+            </div>
+            
+            <div class="test-controls">
+                <button class="test-btn" onclick="createTimelineNodes()">創建時間軸節點</button>
+                <button class="test-btn" onclick="clearTimeline()">清除節點</button>
+                <button class="test-btn" onclick="toggleBreakpoint()">切換響應式模式</button>
+            </div>
+            
+            <div class="status-panel">
+                <div class="status-item">
+                    <span class="status-label">卡片狀態:</span>
+                    <span class="status-value" id="card-status">關閉</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">動畫狀態:</span>
+                    <span class="status-value" id="animation-status">無</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">當前模式:</span>
+                    <span class="status-value" id="current-breakpoint">desktop</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">打開的專案:</span>
+                    <span class="status-value" id="current-project">無</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📋 專案類型快速測試</h3>
+            
+            <div class="demo-projects-grid" id="projects-grid">
+                <!-- 動態生成專案卡片 -->
+            </div>
+            
+            <div class="test-controls">
+                <button class="test-btn" onclick="testAllProjects()">測試所有專案類型</button>
+                <button class="test-btn" onclick="testRandomProject()">隨機測試專案</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>⚙️ 動畫配置測試</h3>
+            
+            <div class="test-controls">
+                <button class="test-btn" onclick="setTrajectory('arc')">弧形軌跡</button>
+                <button class="test-btn" onclick="setTrajectory('spiral')">螺旋軌跡</button>
+                <button class="test-btn" onclick="setTrajectory('direct')">直線軌跡</button>
+                <button class="test-btn" onclick="toggleAnimations()">切換動畫</button>
+            </div>
+            
+            <div class="instructions">
+                <strong>軌跡測試：</strong>點擊不同軌跡按鈕後，再點擊節點觀察飛出動畫的不同路徑
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 操作日誌</h3>
+            <div class="log-area" id="log-area"></div>
+            <div class="test-controls">
+                <button class="test-btn" onclick="clearLog()">清除日誌</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 導入組件
+        import { ProjectCardModal } from './src/components/gaming/InteractiveTimeline/ProjectCardModal.js';
+        
+        // 全域變數
+        window.ProjectCardModal = ProjectCardModal;
+        window.cardModal = null;
+        window.currentBreakpoint = 'desktop';
+        window.animationsEnabled = true;
+        
+        // 測試專案數據
+        window.testProjects = [
+            {
+                id: 'ecommerce-system',
+                title: '微服務電商系統',
+                category: 'architecture',
+                date: '2023-08',
+                description: '大型電商平台的微服務架構設計與實現，採用 Domain-Driven Design (DDD) 進行服務拆分，實現了用戶管理、商品管理、訂單處理、支付系統、庫存管理等核心服務。系統能夠處理每秒 10,000+ 的請求量，支援水平擴展，並具備完整的監控、日誌和災難恢復機制。',
+                // thumbnail: 'https://via.placeholder.com/600x300/1a1a2e/d4af37?text=微服務電商系統', // 註釋掉避免網路錯誤
+                technologies: [
+                    { name: 'Node.js', category: 'backend' },
+                    { name: 'PostgreSQL', category: 'database' },
+                    { name: 'Redis', category: 'cache' },
+                    { name: 'Docker', category: 'containerization' },
+                    { name: 'Kubernetes', category: 'orchestration' }
+                ],
+                stats: {
+                    complexity: 10,
+                    innovation: 9,
+                    utility: 10,
+                    developmentTime: '8 months',
+                    teamSize: 6,
+                    linesOfCode: '45,000+'
+                },
+                highlights: [
+                    '微服務架構設計與實現',
+                    '分散式交易一致性處理',
+                    '高併發系統優化',
+                    '容器化部署與編排'
+                ],
+                links: {
+                    github: 'https://github.com/example/microservices-ecommerce',
+                    demo: 'https://ecommerce-demo.example.com',
+                    documentation: 'https://docs.example.com/ecommerce'
+                }
+            },
+            {
+                id: 'realtime-chat',
+                title: '即時聊天系統',
+                category: 'backend',
+                date: '2023-12',
+                description: '基於 WebSocket 和訊息佇列技術構建的大規模即時聊天系統，支援文字、圖片、檔案分享，群組聊天，以及豐富的表情和互動功能。',
+                // thumbnail: 'https://via.placeholder.com/600x300/2196F3/ffffff?text=即時聊天系統',
+                technologies: [
+                    { name: 'Node.js', category: 'backend' },
+                    { name: 'Socket.io', category: 'realtime' },
+                    { name: 'MongoDB', category: 'database' },
+                    { name: 'React', category: 'frontend' }
+                ],
+                stats: {
+                    complexity: 8,
+                    innovation: 7,
+                    utility: 9,
+                    developmentTime: '4 months',
+                    concurrentUsers: '100k+',
+                    messagesPerSecond: '50k+'
+                },
+                highlights: [
+                    'WebSocket 長連接管理',
+                    '分散式訊息同步',
+                    '百萬級用戶支援',
+                    '實時訊息推送'
+                ],
+                links: {
+                    github: 'https://github.com/example/realtime-chat',
+                    demo: 'https://chat-demo.example.com'
+                }
+            },
+            {
+                id: 'interactive-portfolio',
+                title: '互動式個人網站',
+                category: 'frontend',
+                date: '2024-01',
+                description: '融合遊戲化元素的個人作品集網站，採用 Config-Driven 架構設計，展現創新的互動體驗和視覺效果。',
+                // thumbnail: 'https://via.placeholder.com/600x300/FF9800/ffffff?text=互動式個人網站',
+                technologies: [
+                    { name: 'JavaScript', category: 'frontend' },
+                    { name: 'GSAP', category: 'animation' },
+                    { name: 'CSS3', category: 'styling' },
+                    { name: 'Vite', category: 'build' }
+                ],
+                stats: {
+                    complexity: 7,
+                    innovation: 9,
+                    utility: 8,
+                    developmentTime: '6 months',
+                    components: '25+',
+                    animations: '50+'
+                },
+                highlights: [
+                    'GSAP 專業動畫系統',
+                    'Config-Driven 架構',
+                    '響應式互動設計',
+                    '遊戲化用戶體驗'
+                ],
+                links: {
+                    github: 'https://github.com/example/interactive-portfolio',
+                    demo: 'https://portfolio-demo.example.com',
+                    article: 'https://blog.example.com/interactive-portfolio'
+                }
+            },
+            {
+                id: 'cms-system',
+                title: '配置驅動CMS',
+                category: 'fullstack',
+                date: '2024-03',
+                description: '完全配置驅動的無頭 CMS 系統，支援動態表單和內容類型定義，提供靈活的內容管理解決方案。',
+                // thumbnail: 'https://via.placeholder.com/600x300/4CAF50/ffffff?text=配置驅動CMS',
+                technologies: [
+                    { name: 'FastAPI', category: 'backend' },
+                    { name: 'Vue.js', category: 'frontend' },
+                    { name: 'PostgreSQL', category: 'database' }
+                ],
+                stats: {
+                    complexity: 7,
+                    innovation: 8,
+                    utility: 8,
+                    developmentTime: '3 months',
+                    contentTypes: '20+',
+                    apiEndpoints: '35+'
+                },
+                highlights: [
+                    '動態表單生成',
+                    '配置驅動架構',
+                    'RESTful API 設計',
+                    '響應式管理介面'
+                ],
+                links: {
+                    github: 'https://github.com/example/config-cms',
+                    demo: 'https://cms-demo.example.com'
+                }
+            },
+            {
+                id: 'open-source-toolkit',
+                title: '開源工具庫',
+                category: 'opensource',
+                date: '2024-07',
+                description: '為開發社群提供的實用工具庫，包含常用的算法、數據結構和工具函數，幫助開發者提升開發效率。',
+                // thumbnail: 'https://via.placeholder.com/600x300/F44336/ffffff?text=開源工具庫',
+                technologies: [
+                    { name: 'TypeScript', category: 'language' },
+                    { name: 'Jest', category: 'testing' },
+                    { name: 'Rollup', category: 'build' }
+                ],
+                stats: {
+                    complexity: 5,
+                    innovation: 6,
+                    utility: 9,
+                    developmentTime: '2 months',
+                    downloads: '10k+',
+                    contributors: '15+'
+                },
+                highlights: [
+                    '完整的 TypeScript 支援',
+                    '100% 測試覆蓋率',
+                    '樹搖優化支援',
+                    '詳細的文檔和範例'
+                ],
+                links: {
+                    github: 'https://github.com/example/toolkit',
+                    documentation: 'https://toolkit-docs.example.com'
+                }
+            }
+        ];
+        
+        // 日誌函數
+        window.log = function(message) {
+            const logArea = document.getElementById('log-area');
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logArea.scrollTop = logArea.scrollHeight;
+        };
+        
+        // 更新狀態顯示
+        function updateStatus() {
+            if (!cardModal) return;
+            
+            const state = cardModal.getState();
+            
+            document.getElementById('card-status').textContent = state.isOpen ? '打開' : '關閉';
+            document.getElementById('animation-status').textContent = state.isAnimating ? '動畫中' : '無';
+            document.getElementById('current-breakpoint').textContent = currentBreakpoint;
+            
+            if (state.isOpen && state.currentCard) {
+                const project = state.currentCard._projectData;
+                document.getElementById('current-project').textContent = project?.title || '未知';
+            } else {
+                document.getElementById('current-project').textContent = '無';
+            }
+        }
+        
+        // 初始化卡片模態框
+        function initCardModal() {
+            window.cardModal = new ProjectCardModal({
+                animations: {
+                    enabled: animationsEnabled,
+                    flyOutDuration: 0.8,
+                    flyBackDuration: 0.6
+                },
+                trajectory: {
+                    type: 'arc',
+                    intensity: 1.2,
+                    rotations: 2
+                },
+                interaction: {
+                    closeOnOutsideClick: true,
+                    closeOnEscape: true,
+                    preventBodyScroll: true
+                }
+            });
+            
+            const callbacks = {
+                onCardOpen: (project, sourceNode, index) => {
+                    log(`🎴 卡片打開: ${project.title}`);
+                    updateStatus();
+                },
+                onCardClose: () => {
+                    log('🎴 卡片關閉');
+                    updateStatus();
+                },
+                onCardClick: (project, event) => {
+                    log(`🎴 卡片內部點擊: ${project.title}`);
+                }
+            };
+            
+            cardModal.initialize(callbacks);
+            
+            log('🚀 ProjectCardModal 初始化完成');
+        }
+        
+        // 創建時間軸節點
+        window.createTimelineNodes = function() {
+            const timeline = document.getElementById('demo-timeline');
+            
+            // 清除現有節點
+            const existingNodes = timeline.querySelectorAll('.demo-node');
+            existingNodes.forEach(node => node.remove());
+            
+            // 節點位置配置 (對應時間軸路徑)
+            const nodePositions = [
+                { x: 100, y: 180, project: testProjects[0] },   // 微服務電商
+                { x: 250, y: 120, project: testProjects[1] },   // 即時聊天
+                { x: 500, y: 200, project: testProjects[2] },   // 互動網站
+                { x: 750, y: 280, project: testProjects[3] },   // CMS系統
+                { x: 900, y: 200, project: testProjects[4] }    // 開源工具
+            ];
+            
+            nodePositions.forEach((pos, index) => {
+                const node = document.createElement('div');
+                node.className = `demo-node ${pos.project.category}`;
+                node.style.left = `${pos.x}px`;
+                node.style.top = `${pos.y}px`;
+                
+                // 添加圖標
+                const icons = {
+                    backend: '⚡',
+                    frontend: '🎨', 
+                    fullstack: '🚀',
+                    architecture: '🏗️',
+                    opensource: '❤️'
+                };
+                node.textContent = icons[pos.project.category] || '●';
+                
+                // 添加點擊事件
+                node.addEventListener('click', () => {
+                    if (cardModal) {
+                        cardModal.showProjectCard(pos.project, node, index);
+                        // 存儲專案數據供狀態顯示使用
+                        node._projectData = pos.project;
+                    }
+                });
+                
+                timeline.appendChild(node);
+            });
+            
+            log(`創建了 ${nodePositions.length} 個時間軸節點`);
+        };
+        
+        // 清除時間軸
+        window.clearTimeline = function() {
+            const timeline = document.getElementById('demo-timeline');
+            const nodes = timeline.querySelectorAll('.demo-node');
+            nodes.forEach(node => node.remove());
+            log('清除所有時間軸節點');
+        };
+        
+        // 創建專案網格
+        function createProjectsGrid() {
+            const grid = document.getElementById('projects-grid');
+            
+            testProjects.forEach((project, index) => {
+                const card = document.createElement('div');
+                card.className = 'demo-project-card';
+                
+                const icons = {
+                    backend: '⚡',
+                    frontend: '🎨',
+                    fullstack: '🚀', 
+                    architecture: '🏗️',
+                    opensource: '❤️'
+                };
+                
+                card.innerHTML = `
+                    <div class="project-icon">${icons[project.category]}</div>
+                    <div class="project-title">${project.title}</div>
+                    <div class="project-category">${project.category}</div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    if (cardModal) {
+                        cardModal.showProjectCard(project, card, index);
+                        card._projectData = project;
+                    }
+                });
+                
+                grid.appendChild(card);
+            });
+        }
+        
+        // 測試所有專案類型
+        window.testAllProjects = function() {
+            let delay = 0;
+            testProjects.forEach((project, index) => {
+                setTimeout(() => {
+                    const dummyNode = document.createElement('div');
+                    dummyNode.style.position = 'fixed';
+                    dummyNode.style.left = `${200 + index * 100}px`;
+                    dummyNode.style.top = '300px';
+                    dummyNode.style.width = '20px';
+                    dummyNode.style.height = '20px';
+                    dummyNode.style.visibility = 'hidden';
+                    document.body.appendChild(dummyNode);
+                    
+                    if (cardModal) {
+                        cardModal.showProjectCard(project, dummyNode, index);
+                    }
+                    
+                    setTimeout(() => {
+                        if (cardModal && cardModal.getState().isOpen) {
+                            cardModal.closeCard();
+                        }
+                        document.body.removeChild(dummyNode);
+                    }, 2000);
+                    
+                }, delay);
+                delay += 2500;
+            });
+            
+            log('開始測試所有專案類型 (每個顯示2秒)');
+        };
+        
+        // 隨機測試專案
+        window.testRandomProject = function() {
+            const randomProject = testProjects[Math.floor(Math.random() * testProjects.length)];
+            
+            const dummyNode = document.createElement('div');
+            dummyNode.style.position = 'fixed';
+            dummyNode.style.left = `${Math.random() * (window.innerWidth - 100) + 50}px`;
+            dummyNode.style.top = `${Math.random() * (window.innerHeight - 100) + 50}px`;
+            dummyNode.style.width = '20px';
+            dummyNode.style.height = '20px';
+            dummyNode.style.background = '#d4af37';
+            dummyNode.style.borderRadius = '50%';
+            dummyNode.style.zIndex = '1000';
+            document.body.appendChild(dummyNode);
+            
+            if (cardModal) {
+                cardModal.showProjectCard(randomProject, dummyNode, 0);
+            }
+            
+            setTimeout(() => {
+                document.body.removeChild(dummyNode);
+            }, 5000);
+            
+            log(`隨機測試專案: ${randomProject.title}`);
+        };
+        
+        // 設置軌跡類型
+        window.setTrajectory = function(type) {
+            if (cardModal) {
+                cardModal.config.trajectory.type = type;
+                log(`設置軌跡類型: ${type}`);
+            }
+        };
+        
+        // 切換動畫
+        window.toggleAnimations = function() {
+            animationsEnabled = !animationsEnabled;
+            if (cardModal) {
+                cardModal.config.animations.enabled = animationsEnabled;
+            }
+            log(`動畫${animationsEnabled ? '啟用' : '停用'}`);
+        };
+        
+        // 切換響應式斷點
+        window.toggleBreakpoint = function() {
+            const breakpoints = ['mobile', 'tablet', 'desktop'];
+            const currentIndex = breakpoints.indexOf(currentBreakpoint);
+            const nextIndex = (currentIndex + 1) % breakpoints.length;
+            currentBreakpoint = breakpoints[nextIndex];
+            
+            if (cardModal) {
+                cardModal.updateBreakpoint(currentBreakpoint);
+            }
+            
+            updateStatus();
+            log(`切換到 ${currentBreakpoint} 模式`);
+        };
+        
+        // 清除日誌
+        window.clearLog = function() {
+            document.getElementById('log-area').innerHTML = '';
+        };
+        
+        // 定期更新狀態
+        setInterval(updateStatus, 200);
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                initCardModal();
+                createProjectsGrid();
+                createTimelineNodes();
+            }, 100);
+        });
+        
+        // 頁面卸載時清理
+        window.addEventListener('beforeunload', () => {
+            if (cardModal) cardModal.destroy();
+        });
+        
+        console.log('🎴 ProjectCardModal 測試頁面已載入');
+        log('ProjectCardModal 測試頁面已載入');
+    </script>
+</body>
+</html>

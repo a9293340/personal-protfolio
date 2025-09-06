@@ -1953,7 +1953,7 @@ export class InteractiveTimeline extends BaseComponent {
         // 不同日期：根據實際時間分佈，但加入防重疊機制
         const timeSpan = maxDate.getTime() - minDate.getTime();
         const projectOffset = projectDate.getTime() - minDate.getTime();
-        let timeBasedProgress = (projectOffset / timeSpan) * 0.9 + 0.05;
+        const timeBasedProgress = (projectOffset / timeSpan) * 0.9 + 0.05;
         
         // 防重疊：檢查是否與其他節點太接近
         const minSpacing = 0.8 / Math.max(allProjects.length - 1, 1); // 最小間距
