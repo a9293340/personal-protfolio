@@ -242,23 +242,25 @@ export class TimelineLayoutEngine extends BaseComponent {
             let verticalOffset = 0;
 
             switch (strategy) {
-                case 'weighted':
+                case 'weighted': {
                     // 重要專案靠近中心，普通專案分散
                     const centerPull = (1 - importance) * centerBias;
                     const randomScatter = (Math.random() - 0.5) * (1 - centerPull);
                     verticalOffset = randomScatter * verticalRange;
                     break;
+                }
 
                 case 'linear':
                     // 線性分佈：重要性高的在上方
                     verticalOffset = (importance - 0.5) * verticalRange;
                     break;
 
-                case 'exponential':
+                case 'exponential': {
                     // 指數分佈：突出最重要的專案
                     const expFactor = Math.pow(importance, 2);
                     verticalOffset = (expFactor - 0.5) * verticalRange;
                     break;
+                }
 
                 default:
                     // 隨機分佈

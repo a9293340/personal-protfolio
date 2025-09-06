@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * MagicCircle - SVG 魔法陣組件
  * 

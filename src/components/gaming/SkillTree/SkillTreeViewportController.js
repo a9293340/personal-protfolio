@@ -1,3 +1,4 @@
+/* global performance */
 /**
  * SkillTreeViewportController - 技能樹視窗控制器
  * 

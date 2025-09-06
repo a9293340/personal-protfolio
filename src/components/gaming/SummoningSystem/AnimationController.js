@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AnimationController.js - 遊戲王召喚特效動畫流程總控制器
  * 

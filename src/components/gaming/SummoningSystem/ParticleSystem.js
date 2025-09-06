@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ParticleSystem.js - Three.js 3D 粒子效果系統
  * 

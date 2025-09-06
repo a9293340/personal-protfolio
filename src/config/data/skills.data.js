@@ -739,7 +739,7 @@ export const skillsDataConfig = {
   },
   
   // 技能評估標準
-  proficiencyLevels: {
+  proficiencyScale: {
     0: { name: "未接觸", description: "完全沒有經驗" },
     20: { name: "入門", description: "基本概念理解" },
     40: { name: "初級", description: "能完成簡單任務" }, 

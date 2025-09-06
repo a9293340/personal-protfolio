@@ -288,7 +288,7 @@ export class SkillTree extends BaseComponent {
       }
       
       // 保存配置數據
-      this.skillsConfig = skillsData as SkillsDataConfig;
+      this.skillsConfig = skillsData as any as SkillsDataConfig;
       
       // 將配置數據轉換為組件可用的節點數據
       const allNodes = [

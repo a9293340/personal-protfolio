@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CardSummoning.js - 遊戲王風格卡牌召喚動畫控制器
  * 

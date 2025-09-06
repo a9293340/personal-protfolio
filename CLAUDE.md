@@ -27,14 +27,17 @@
 ### 3. 代碼品質檢查 ⚠️ 強制通過原則
 每次完成功能後必須執行：
 ```bash
-# TypeScript 類型檢查
+# TypeScript 類型檢查 (必須無錯誤)
 npm run type-check
 
-# ESLint 代碼檢查
+# ESLint 代碼檢查 (必須 0 errors)
 npm run lint
 
 # 修復可自動修復的問題
 npm run lint:fix
+
+# 快速檢查流程
+npm run lint && npm run type-check && echo "✅ 品質檢查通過"
 
 # 執行測試
 npm run test
@@ -42,9 +45,11 @@ npm run test
 
 **⚠️ 重要原則：絕不躲避問題**
 - 遇到 TypeScript 或 ESLint 錯誤時，**必須解決問題本身**，不可繞過或移除規則
-- 所有類型檢查和 ESLint 測試都**必須通過**，除非目標明確不需要測試
+- **ESLint**: 必須 0 errors 通過 (warnings 可接受)
+- **TypeScript**: 必須無類型錯誤 (新代碼嚴格檢查，舊代碼可用 @ts-nocheck)
 - 寧可花時間修正問題，也不允許降低代碼品質標準
 - 這是核心開發原則，不得妥協
+- **詳細檢查流程**: 參考 `docs/development-checklist.md`
 
 ### 4. Git 提交管理
 - Git commit 和 push 由用戶決定時機

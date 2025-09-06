@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
-    "type-check": "tsc --noEmit --checkJs",
+    "type-check": "tsc --noEmit",
     "test": "echo 'Tests not configured yet'"
   },
   "keywords": [

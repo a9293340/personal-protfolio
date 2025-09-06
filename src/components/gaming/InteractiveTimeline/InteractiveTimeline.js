@@ -1,3 +1,4 @@
+/* global HTMLElement, CustomEvent */
 /**
  * InteractiveTimeline 互動時間軸組件
  * 
@@ -3914,30 +3915,34 @@ export class InteractiveTimeline extends BaseComponent {
             timelineContent.style.transform = 'translateX(0px) translateY(0px) scale(1)';
           }
           break;
-        case 'ArrowLeft':
+        case 'ArrowLeft': {
           // 向左滾動
           this.state.desktop.translateX += 50;
           const leftTranslateY = this.state.desktop.translateY || 0;
           timelineContent.style.transform = `translateX(${this.state.desktop.translateX}px) translateY(${leftTranslateY}px) scale(${this.state.desktop.zoom})`;
           break;
-        case 'ArrowRight':
+        }
+        case 'ArrowRight': {
           // 向右滾動
           this.state.desktop.translateX -= 50;
           const rightTranslateY = this.state.desktop.translateY || 0;
           timelineContent.style.transform = `translateX(${this.state.desktop.translateX}px) translateY(${rightTranslateY}px) scale(${this.state.desktop.zoom})`;
           break;
-        case 'ArrowUp':
+        }
+        case 'ArrowUp': {
           // 向上滾動
           this.state.desktop.translateY += 50;
           const upTranslateX = this.state.desktop.translateX || 0;
           timelineContent.style.transform = `translateX(${upTranslateX}px) translateY(${this.state.desktop.translateY}px) scale(${this.state.desktop.zoom})`;
           break;
-        case 'ArrowDown':
+        }
+        case 'ArrowDown': {
           // 向下滾動
           this.state.desktop.translateY -= 50;
           const downTranslateX = this.state.desktop.translateX || 0;
           timelineContent.style.transform = `translateX(${downTranslateX}px) translateY(${this.state.desktop.translateY}px) scale(${this.state.desktop.zoom})`;
           break;
+        }
       }
     });
   }

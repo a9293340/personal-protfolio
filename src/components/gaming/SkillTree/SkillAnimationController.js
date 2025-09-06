@@ -299,7 +299,7 @@ export class SkillAnimationController extends EventManager {
         break;
         
       case AnimationType.STATUS_CHANGE:
-      default:
+      default: {
         const statusConfig = this.getStatusVisualConfig(newStatus);
         keyframes.push(
           { 
@@ -315,6 +315,7 @@ export class SkillAnimationController extends EventManager {
           }
         );
         break;
+      }
     }
     
     return keyframes;

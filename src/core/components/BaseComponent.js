@@ -36,7 +36,7 @@ export class BaseComponent {
     const result = { ...target };
     
     for (const key in source) {
-      if (source.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
         if (this.isObject(source[key]) && this.isObject(target[key])) {
           result[key] = this.deepMerge(target[key], source[key]);
         } else {

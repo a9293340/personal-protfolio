@@ -415,7 +415,7 @@ export class SkillsDataValidator {
     });
     
     allNodes.forEach(node => {
-      if (node.category && categoryCount.hasOwnProperty(node.category)) {
+      if (node.category && Object.prototype.hasOwnProperty.call(categoryCount, node.category)) {
         categoryCount[node.category]++;
       } else {
         this.errors.push(`技能 ${node.id} 的類別 ${node.category} 未在 categories 中定義`);

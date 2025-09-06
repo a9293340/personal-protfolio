@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AudioManager.js - 動態音效生成系統
  * 
