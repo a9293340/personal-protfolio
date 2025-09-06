@@ -395,23 +395,25 @@ export class InteractiveTimeline extends BaseComponent {
         </div>` : ''}
         
         <div class="timeline-viewport">
-          <svg class="timeline-svg" width="100%" height="${isVertical ? '900' : '400'}" viewBox="0 0 ${isVertical ? '400 900' : '800 400'}" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="timelineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style="stop-color:${this.config.colors.timeline};stop-opacity:0.3" />
-                <stop offset="50%" style="stop-color:${this.config.colors.timeline};stop-opacity:1" />
-                <stop offset="100%" style="stop-color:${this.config.colors.timeline};stop-opacity:0.3" />
-              </linearGradient>
-            </defs>
-            <path class="timeline-path" stroke="url(#timelineGradient)" fill="none"/>
-          </svg>
-          
-          <div class="timeline-nodes">
-            <!-- 動態生成的節點 -->
-          </div>
-          
-          <div class="timeline-particles">
-            <canvas class="particles-canvas" width="800" height="400"></canvas>
+          <div class="timeline-content">
+            <svg class="timeline-svg" width="${this.calculateSVGDimensions().width}" height="${this.calculateSVGDimensions().height}" viewBox="0 0 ${this.calculateSVGDimensions().width} ${this.calculateSVGDimensions().height}" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="timelineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:${this.config.colors.timeline};stop-opacity:0.3" />
+                  <stop offset="50%" style="stop-color:${this.config.colors.timeline};stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:${this.config.colors.timeline};stop-opacity:0.3" />
+                </linearGradient>
+              </defs>
+              <path class="timeline-path" stroke="url(#timelineGradient)" fill="none"/>
+            </svg>
+            
+            <div class="timeline-nodes">
+              <!-- 動態生成的節點 -->
+            </div>
+            
+            <div class="timeline-particles">
+              <canvas class="particles-canvas" width="${this.calculateSVGDimensions().width}" height="${this.calculateSVGDimensions().height}"></canvas>
+            </div>
           </div>
         </div>
         
@@ -493,6 +495,10 @@ export class InteractiveTimeline extends BaseComponent {
         
         /* Step 2.2.4a: 年份篩選器樣式 */
         .timeline-year-filter {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          z-index: 1000;
           display: flex;
           align-items: center;
           gap: 10px;
@@ -502,14 +508,24 @@ export class InteractiveTimeline extends BaseComponent {
           backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 255, 255, 0.1);
           font-size: 14px;
+          pointer-events: auto;
+          cursor: default;
         }
         
         /* 手機版年份篩選器調整 */
         .mobile-layout .timeline-year-filter {
+          position: absolute;
+          top: 15px;
+          left: 50%;
+          right: auto;
+          transform: translateX(-50%);
+          z-index: 1000;
           padding: 8px 12px;
           font-size: 13px;
           gap: 8px;
           background: rgba(0, 0, 0, 0.85);
+          pointer-events: auto;
+          cursor: default;
         }
         
         .filter-label {
@@ -528,6 +544,8 @@ export class InteractiveTimeline extends BaseComponent {
           cursor: pointer;
           transition: all 0.3s ease;
           backdrop-filter: blur(5px);
+          pointer-events: auto;
+          z-index: 1001;
         }
         
         .year-selector:hover {
@@ -563,6 +581,19 @@ export class InteractiveTimeline extends BaseComponent {
           position: relative;
           overflow: hidden;
           min-height: 350px;
+          cursor: grab;
+        }
+        
+        .timeline-viewport:active {
+          cursor: grabbing;
+        }
+        
+        .timeline-content {
+          position: absolute;
+          top: 0;
+          left: 0;
+          transition: transform 0.3s ease-out;
+          transform-origin: top left;
         }
         
         /* 手機版 viewport 需要更多高度 */
@@ -577,8 +608,7 @@ export class InteractiveTimeline extends BaseComponent {
           position: absolute;
           top: 0;
           left: 0;
-          width: 100%;
-          height: 100%;
+          display: block;
         }
         
         .timeline-path {
@@ -994,6 +1024,28 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
+   * 計算 SVG 動態尺寸 - 根據專案數量調整
+   */
+  calculateSVGDimensions() {
+    const projectCount = this.timelineData.length || 20; // 預設20個專案
+    const isVertical = this.state?.currentBreakpoint === 'mobile';
+    
+    if (isVertical) {
+      // 垂直模式：每個專案需要約 60px 高度
+      return {
+        width: 400,
+        height: Math.max(800, projectCount * 60)
+      };
+    } else {
+      // 水平模式：每個專案需要約 100px 寬度，確保有足夠空間
+      return {
+        width: Math.max(1200, projectCount * 100),
+        height: 400
+      };
+    }
+  }
+
+  /**
    * 設定時間軸路徑 - Step 2.2.2 核心實作
    */
   setupTimeline() {
@@ -1009,15 +1061,19 @@ export class InteractiveTimeline extends BaseComponent {
 
     const isVertical = this.state.currentBreakpoint === 'mobile';
     
-    // 根據斷點使用不同的 viewBox 尺寸
-    const svgWidth = isVertical ? 400 : 800;
-    const svgHeight = isVertical ? 800 : 400;
+    // 使用動態尺寸計算
+    const dimensions = this.calculateSVGDimensions();
+    const svgWidth = dimensions.width;
+    const svgHeight = dimensions.height;
     
     console.log(`[InteractiveTimeline] 使用響應式 SVG 尺寸: ${svgWidth}x${svgHeight}, 斷點: ${this.state.currentBreakpoint}`);
     
     // 計算時間軸路徑
     const pathData = this.generateTimelinePath(svgWidth, svgHeight, isVertical);
     console.log(`[InteractiveTimeline] 生成路徑數據: ${pathData}`);
+    
+    // 更新 SVG viewBox 以匹配動態尺寸
+    svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
     
     // 設定 SVG 路徑
     path.setAttribute('d', pathData);
@@ -1100,8 +1156,8 @@ export class InteractiveTimeline extends BaseComponent {
     this.timelineData.forEach((project, index) => {
       const nodeElement = this.createProjectNode(project, index);
       
-      // 計算節點在路徑上的位置
-      const svgPosition = this.calculateNodePosition(path, index, this.timelineData.length);
+      // 計算節點在路徑上的位置（根據時間分佈）
+      const svgPosition = this.calculateNodePosition(path, project, this.timelineData);
       
       // 轉換 SVG 坐標到實際像素坐標
       const actualPosition = this.convertSVGToPixelCoordinates(svg, svgPosition);
@@ -1734,11 +1790,11 @@ export class InteractiveTimeline extends BaseComponent {
    */
   convertSVGToPixelCoordinates(svg, svgPosition) {
     const svgRect = svg.getBoundingClientRect();
-    const isVertical = this.state.currentBreakpoint === 'mobile';
     
-    // 根據斷點使用不同的 viewBox 尺寸
-    const viewBoxWidth = isVertical ? 400 : 800;
-    const viewBoxHeight = isVertical ? 800 : 400;
+    // 使用動態尺寸計算
+    const dimensions = this.calculateSVGDimensions();
+    const viewBoxWidth = dimensions.width;
+    const viewBoxHeight = dimensions.height;
     
     // SVG 尺寸檢查和降級處理
     if (svgRect.width === 0 || svgRect.height === 0) {
@@ -1757,6 +1813,7 @@ export class InteractiveTimeline extends BaseComponent {
     const scaleX = svgRect.width / viewBoxWidth;
     const scaleY = svgRect.height / viewBoxHeight;
     
+    const isVertical = this.state?.currentBreakpoint === 'mobile';
     console.log(`[InteractiveTimeline] 坐標轉換 (${isVertical ? '垂直' : '水平'}): SVG(${svgPosition.x}, ${svgPosition.y}) -> 像素(${svgPosition.x * scaleX}, ${svgPosition.y * scaleY})`);
     console.log(`[InteractiveTimeline] viewBox: ${viewBoxWidth}x${viewBoxHeight}, 實際: ${svgRect.width}x${svgRect.height}, 縮放: ${scaleX}x${scaleY}`);
     
@@ -1767,43 +1824,82 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
-   * 計算節點在路徑上的位置
+   * 計算節點在路徑上的位置 - 根據時間分佈
    */
-  calculateNodePosition(path, index, total) {
-    if (!path || total === 0) {
+  calculateNodePosition(path, project, allProjects) {
+    if (!path || allProjects.length === 0) {
       return { x: 0, y: 0 };
     }
     
     try {
       const pathLength = path.getTotalLength();
-      console.log(`[InteractiveTimeline] 路徑長度: ${pathLength}, 節點 ${index}/${total}`);
+      console.log(`[InteractiveTimeline] 路徑長度: ${pathLength}, 專案: ${project.title}`);
       
       if (pathLength === 0) {
         console.error('[InteractiveTimeline] SVG 路徑長度為 0，使用降級方案');
         const container = this.element.querySelector('.timeline-viewport');
         const rect = container.getBoundingClientRect();
+        const index = allProjects.indexOf(project);
         return {
-          x: rect.width * 0.1 + (rect.width * 0.8 * (index / Math.max(total - 1, 1))),
+          x: rect.width * 0.1 + (rect.width * 0.8 * (index / Math.max(allProjects.length - 1, 1))),
           y: rect.height * 0.5
         };
       }
       
-      // 調整節點分布：讓節點更緊密，不要佔滿整個路徑
-      const progress = total === 1 ? 0.5 : (index / (total - 1)) * 0.85 + 0.05; // 壓縮到路徑的85%，從5%開始
-      const point = path.getPointAtLength(pathLength * progress);
+      // 根據實際時間計算進度
+      const projectDate = new Date(project.date);
+      const dates = allProjects.map(p => new Date(p.date)).sort((a, b) => a - b);
+      const minDate = dates[0];
+      const maxDate = dates[dates.length - 1];
       
-      // 手機版強制對齊中心線
-      const isVertical = this.state.currentBreakpoint === 'mobile';
-      if (isVertical) {
-        // 最後節點強制對齊到中心
-        if (index === total - 1) {
-          point.x = 200; // 強制對齊中心
+      // 優化的節點分佈演算法
+      let progress;
+      
+      if (minDate.getTime() === maxDate.getTime()) {
+        // 相同日期：均勻分佈所有節點
+        const index = allProjects.findIndex(p => p.id === project.id);
+        if (allProjects.length === 1) {
+          progress = 0.5;
+        } else {
+          // 使用更大的分佈範圍，確保節點分散得更開
+          progress = (index / (allProjects.length - 1)) * 0.9 + 0.05;
         }
-        // 其他節點也稍微調整靠近中心
-        point.x = 200 + (point.x - 200) * 0.5;
+      } else {
+        // 不同日期：根據實際時間分佈，但加入防重疊機制
+        const timeSpan = maxDate.getTime() - minDate.getTime();
+        const projectOffset = projectDate.getTime() - minDate.getTime();
+        let timeBasedProgress = (projectOffset / timeSpan) * 0.9 + 0.05;
+        
+        // 防重疊：檢查是否與其他節點太接近
+        const minSpacing = 0.8 / Math.max(allProjects.length - 1, 1); // 最小間距
+        const sortedProjects = allProjects.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+        const currentIndex = sortedProjects.findIndex(p => p.id === project.id);
+        
+        // 確保節點之間有最小間距
+        const idealProgress = (currentIndex / Math.max(allProjects.length - 1, 1)) * 0.9 + 0.05;
+        
+        // 在時間精確度和均勻分佈之間找平衡
+        progress = timeBasedProgress * 0.7 + idealProgress * 0.3;
       }
       
-      console.log(`[InteractiveTimeline] 節點 ${index} 位置: (${point.x}, ${point.y})`);
+      const point = path.getPointAtLength(pathLength * progress);
+      
+      // 手機版垂直佈局優化
+      const isVertical = this.state.currentBreakpoint === 'mobile';
+      if (isVertical) {
+        // 垂直模式下，所有節點水平居中，只在垂直軸上分佈
+        point.x = this.calculateSVGDimensions().width / 2; // 水平居中
+        
+        // 確保垂直分佈均勻
+        const sortedByDate = allProjects.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+        const currentIndex = sortedByDate.findIndex(p => p.id === project.id);
+        const totalHeight = this.calculateSVGDimensions().height;
+        
+        // 在總高度的 80% 範圍內均勻分佈，上下各留 10% 邊距
+        point.y = (totalHeight * 0.1) + (currentIndex / Math.max(allProjects.length - 1, 1)) * (totalHeight * 0.8);
+      }
+      
+      console.log(`[InteractiveTimeline] 節點 ${project.title} 位置: (${point.x}, ${point.y})`);
       
       return {
         x: point.x,
@@ -1813,9 +1909,10 @@ export class InteractiveTimeline extends BaseComponent {
       console.error('[InteractiveTimeline] 計算節點位置失敗:', error);
       // 回傳預設位置
       const container = this.element.querySelector('.timeline-viewport');
-      const rect = container.getBoundingClientRect();
+      const rect = container?.getBoundingClientRect() || { width: 800, height: 400 };
+      const projectIndex = allProjects.findIndex(p => p.id === project.id);
       return {
-        x: rect.width * (index / total),
+        x: rect.width * (projectIndex / Math.max(allProjects.length - 1, 1)),
         y: rect.height * 0.5
       };
     }
@@ -2326,7 +2423,24 @@ export class InteractiveTimeline extends BaseComponent {
       return;
     }
 
+    console.log('[DEBUG] 找到年份選擇器:', yearSelector);
+    console.log('[DEBUG] 年份選擇器樣式:', window.getComputedStyle(yearSelector));
+    
+    // 添加多種事件監聽器來調試
+    yearSelector.addEventListener('click', (event) => {
+      console.log('[DEBUG] 年份選擇器被點擊:', event);
+    });
+    
+    yearSelector.addEventListener('mousedown', (event) => {
+      console.log('[DEBUG] 年份選擇器 mousedown:', event);
+    });
+    
+    yearSelector.addEventListener('focus', (event) => {
+      console.log('[DEBUG] 年份選擇器獲得焦點:', event);
+    });
+
     yearSelector.addEventListener('change', (event) => {
+      console.log('[DEBUG] 年份選擇器值變化:', event.target.value);
       const selectedYear = event.target.value;
       this.applyYearFilter(selectedYear);
     });
@@ -2940,9 +3054,13 @@ export class InteractiveTimeline extends BaseComponent {
       maxZoom: 2,
       isDragging: false,
       dragStartX: 0,
+      dragStartY: 0,
       currentX: 0,
+      currentY: 0,
       translateX: 0,
-      maxTranslateX: 0
+      translateY: 0,
+      maxTranslateX: 0,
+      maxTranslateY: 0
     };
 
     const timelineContainer = this.element.querySelector('.timeline-container');
@@ -2987,8 +3105,13 @@ export class InteractiveTimeline extends BaseComponent {
 
       // 應用縮放
       this.state.desktop.zoom = newZoom;
-      viewport.style.transform = `scale(${newZoom}) translateX(${this.state.desktop.translateX}px)`;
-      viewport.style.transformOrigin = `${centerX * 100}% center`;
+      const timelineContent = this.element.querySelector('.timeline-content');
+      if (timelineContent) {
+        const translateX = this.state.desktop.translateX || 0;
+        const translateY = this.state.desktop.translateY || 0;
+        timelineContent.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(${newZoom})`;
+        timelineContent.style.transformOrigin = `${centerX * 100}% center`;
+      }
 
       console.log('[DesktopEnhancement] 縮放:', newZoom.toFixed(2));
     }, { passive: false });
@@ -3000,16 +3123,33 @@ export class InteractiveTimeline extends BaseComponent {
   setupHorizontalDrag(container) {
     let isDragging = false;
     let startX = 0;
-    let currentTranslate = 0;
+    let startY = 0;
+    let initialTranslateX = 0;
+    let initialTranslateY = 0;
 
     // 滑鼠按下
     container.addEventListener('mousedown', (event) => {
-      // 忽略節點點擊
-      if (event.target.closest('.project-node')) return;
+      // 忽略節點點擊和年份選擇器點擊
+      if (event.target.closest('.project-node') || 
+          event.target.closest('.timeline-year-filter') ||
+          event.target.closest('.year-selector')) {
+        console.log('[DEBUG] 跳過拖曳: 點擊在', event.target.closest('.project-node') ? '節點' : '年份選擇器');
+        return;
+      }
       
+      console.log('[DEBUG] 開始拖曳:', event.target);
       isDragging = true;
       startX = event.clientX;
-      currentTranslate = this.state.desktop.translateX || 0;
+      startY = event.clientY;
+      
+      const timelineContent = this.element.querySelector('.timeline-content');
+      if (timelineContent) {
+        const transform = timelineContent.style.transform || '';
+        const translateXMatch = transform.match(/translateX\(([^)]+)px\)/);
+        const translateYMatch = transform.match(/translateY\(([^)]+)px\)/);
+        initialTranslateX = translateXMatch ? parseFloat(translateXMatch[1]) : 0;
+        initialTranslateY = translateYMatch ? parseFloat(translateYMatch[1]) : 0;
+      }
       container.style.cursor = 'grabbing';
       
       event.preventDefault();
@@ -3020,11 +3160,38 @@ export class InteractiveTimeline extends BaseComponent {
       if (!isDragging) return;
 
       const deltaX = event.clientX - startX;
-      const viewport = this.element.querySelector('.timeline-viewport');
+      const deltaY = event.clientY - startY;
+      const timelineContent = this.element.querySelector('.timeline-content');
       
-      if (viewport) {
-        this.state.desktop.translateX = currentTranslate + deltaX;
-        viewport.style.transform = `scale(${this.state.desktop.zoom}) translateX(${this.state.desktop.translateX}px)`;
+      if (timelineContent) {
+        let newTranslateX = initialTranslateX + deltaX;
+        let newTranslateY = initialTranslateY + deltaY;
+        
+        // 計算邊界限制
+        const viewport = this.element.querySelector('.timeline-viewport');
+        const contentDimensions = this.calculateSVGDimensions();
+        
+        if (viewport) {
+          const viewportWidth = viewport.clientWidth;
+          const viewportHeight = viewport.clientHeight;
+          
+          // 水平邊界限制
+          const maxTranslateX = 0;
+          const minTranslateX = Math.min(0, viewportWidth - contentDimensions.width);
+          
+          // 垂直邊界限制
+          const maxTranslateY = 0;
+          const minTranslateY = Math.min(0, viewportHeight - contentDimensions.height);
+          
+          newTranslateX = Math.max(minTranslateX, Math.min(maxTranslateX, newTranslateX));
+          newTranslateY = Math.max(minTranslateY, Math.min(maxTranslateY, newTranslateY));
+          
+          const zoom = this.state.desktop.zoom || 1;
+          timelineContent.style.transform = `translateX(${newTranslateX}px) translateY(${newTranslateY}px) scale(${zoom})`;
+          
+          this.state.desktop.translateX = newTranslateX;
+          this.state.desktop.translateY = newTranslateY;
+        }
       }
     });
 
@@ -3049,8 +3216,8 @@ export class InteractiveTimeline extends BaseComponent {
       if (!this.element?.contains(document.activeElement) && 
           document.activeElement !== document.body) return;
 
-      const viewport = this.element?.querySelector('.timeline-viewport');
-      if (!viewport) return;
+      const timelineContent = this.element?.querySelector('.timeline-content');
+      if (!timelineContent) return;
 
       switch(event.key) {
         case '+':
@@ -3059,7 +3226,9 @@ export class InteractiveTimeline extends BaseComponent {
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
             this.state.desktop.zoom = Math.min(this.state.desktop.maxZoom, this.state.desktop.zoom + 0.1);
-            viewport.style.transform = `scale(${this.state.desktop.zoom}) translateX(${this.state.desktop.translateX}px)`;
+            const translateX = this.state.desktop.translateX || 0;
+            const translateY = this.state.desktop.translateY || 0;
+            timelineContent.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(${this.state.desktop.zoom})`;
           }
           break;
         case '-':
@@ -3067,7 +3236,9 @@ export class InteractiveTimeline extends BaseComponent {
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
             this.state.desktop.zoom = Math.max(this.state.desktop.minZoom, this.state.desktop.zoom - 0.1);
-            viewport.style.transform = `scale(${this.state.desktop.zoom}) translateX(${this.state.desktop.translateX}px)`;
+            const translateX = this.state.desktop.translateX || 0;
+            const translateY = this.state.desktop.translateY || 0;
+            timelineContent.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(${this.state.desktop.zoom})`;
           }
           break;
         case '0':
@@ -3076,18 +3247,32 @@ export class InteractiveTimeline extends BaseComponent {
             event.preventDefault();
             this.state.desktop.zoom = 1;
             this.state.desktop.translateX = 0;
-            viewport.style.transform = 'scale(1) translateX(0)';
+            timelineContent.style.transform = 'translateX(0px) translateY(0px) scale(1)';
           }
           break;
         case 'ArrowLeft':
           // 向左滾動
           this.state.desktop.translateX += 50;
-          viewport.style.transform = `scale(${this.state.desktop.zoom}) translateX(${this.state.desktop.translateX}px)`;
+          const leftTranslateY = this.state.desktop.translateY || 0;
+          timelineContent.style.transform = `translateX(${this.state.desktop.translateX}px) translateY(${leftTranslateY}px) scale(${this.state.desktop.zoom})`;
           break;
         case 'ArrowRight':
           // 向右滾動
           this.state.desktop.translateX -= 50;
-          viewport.style.transform = `scale(${this.state.desktop.zoom}) translateX(${this.state.desktop.translateX}px)`;
+          const rightTranslateY = this.state.desktop.translateY || 0;
+          timelineContent.style.transform = `translateX(${this.state.desktop.translateX}px) translateY(${rightTranslateY}px) scale(${this.state.desktop.zoom})`;
+          break;
+        case 'ArrowUp':
+          // 向上滾動
+          this.state.desktop.translateY += 50;
+          const upTranslateX = this.state.desktop.translateX || 0;
+          timelineContent.style.transform = `translateX(${upTranslateX}px) translateY(${this.state.desktop.translateY}px) scale(${this.state.desktop.zoom})`;
+          break;
+        case 'ArrowDown':
+          // 向下滾動
+          this.state.desktop.translateY -= 50;
+          const downTranslateX = this.state.desktop.translateX || 0;
+          timelineContent.style.transform = `translateX(${downTranslateX}px) translateY(${this.state.desktop.translateY}px) scale(${this.state.desktop.zoom})`;
           break;
       }
     });
