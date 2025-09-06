@@ -10,13 +10,33 @@
  * 
  * 動畫序列：
  * Phase 1: 卡牌從虛空顯現 (0-2s)
- * Phase 2: 3D 旋轉展示 (2-4s)  
+ * Phase 2: 3D 旋轉展示 (2-4s) - 卡面在220度時顯現
  * Phase 3: 發光強化效果 (4-6s)
  * Phase 4: 穩定懸浮展示 (6-8s)
- * Phase 5: 轉場到詳情模態 (8s+)
+ * Phase 5: 延長卡面展示 (8-10s) - 增強質感停留
+ * Phase 6: 轉場到詳情模態 (10s+)
  */
 
 import { BaseComponent } from '../../../core/components/BaseComponent.js';
+
+// 動態導入卡牌數據系統 (避免循環依賴)
+let cardsDataModule = null;
+let cardConfigModule = null;
+
+async function loadCardDataSystems() {
+  if (!cardsDataModule || !cardConfigModule) {
+    try {
+      [cardsDataModule, cardConfigModule] = await Promise.all([
+        import('../../../config/data/cards.data.js'),
+        import('../../../config/data/card.config.js')
+      ]);
+      console.log('🃏 [CardSummoning] 卡牌數據系統載入完成');
+    } catch (error) {
+      console.warn('⚠️ [CardSummoning] 卡牌數據系統載入失敗:', error);
+    }
+  }
+  return { cardsDataModule, cardConfigModule };
+}
 
 export class CardSummoning extends BaseComponent {
   constructor(config = {}) {
@@ -39,6 +59,9 @@ export class CardSummoning extends BaseComponent {
     // 專案數據
     this.projectData = null;
     
+    // 翻轉狀態追蹤
+    this.isCardFlipped = false;
+    
     console.log('🎴 [CardSummoning] 卡牌召喚系統初始化，配置:', this.config);
   }
 
@@ -55,12 +78,13 @@ export class CardSummoning extends BaseComponent {
         backImageUrl: '/src/assets/images/卡背.webp' // 遊戲王卡背圖片
       },
       animation: {
-        totalDuration: 8000,      // 總動畫時長 8秒
+        totalDuration: 10000,     // 總動畫時長 10秒 (延長2秒)
         phases: {
           materialize: 2000,      // Phase 1: 物質化 (0-2s)
           rotation: 2000,         // Phase 2: 旋轉展示 (2-4s)  
           glow: 2000,            // Phase 3: 發光強化 (4-6s)
-          stabilize: 2000         // Phase 4: 穩定懸浮 (6-8s)
+          stabilize: 2000,        // Phase 4: 穩定懸浮 (6-8s)
+          display: 2000          // Phase 5: 延長展示 (8-10s)
         },
         easing: {
           materialize: 'power3.out',
@@ -137,6 +161,12 @@ export class CardSummoning extends BaseComponent {
    * 創建卡牌 DOM 元素
    */
   createCardElements() {
+    // 檢查設備類型並調整尺寸
+    const isMobile = window.innerWidth < 768;
+    const scale = isMobile ? this.config.responsive.mobile.scale : 1;
+    const finalWidth = this.config.card.width * scale;
+    const finalHeight = this.config.card.height * scale;
+
     // 主容器
     this.cardContainer = document.createElement('div');
     this.cardContainer.className = 'card-summoning-container';
@@ -145,8 +175,8 @@ export class CardSummoning extends BaseComponent {
       top: 45%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: ${this.config.card.width}px;
-      height: ${this.config.card.height}px;
+      width: ${finalWidth}px;
+      height: ${finalHeight}px;
       transform-style: preserve-3d;
       perspective: 1000px;
       z-index: 30;
@@ -183,7 +213,9 @@ export class CardSummoning extends BaseComponent {
 
     // 組裝元素
     this.cardElement.appendChild(this.cardBack);
-    this.cardElement.appendChild(this.holographicOverlay);
+    if (this.holographicOverlay) {
+      this.cardElement.appendChild(this.holographicOverlay);
+    }
     this.cardContainer.appendChild(this.cardElement);
     
     this.element = this.cardContainer;
@@ -206,6 +238,8 @@ export class CardSummoning extends BaseComponent {
       border-radius: ${this.config.card.borderRadius}px;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       overflow: hidden;
+      z-index: 2;
+      opacity: 1;
     `;
 
     // 卡背圖片
@@ -421,16 +455,25 @@ export class CardSummoning extends BaseComponent {
     // Phase 2: 3D 旋轉展示 (2-4s)
     this.masterTimeline
       .to(this.cardElement, {
-        rotationY: this.config.effects.rotation.y,
+        rotationY: 220, // 先轉到220度 (略過180度最佳翻轉點，增加懸念)
         rotationX: this.config.effects.rotation.x,
         rotationZ: this.config.effects.rotation.z,
-        duration: 2.0,
+        duration: 1.2, // 前段：旋轉到220度 (稍長一點)
         ease: this.config.animation.easing.rotation,
         onStart: () => {
           this.state.currentPhase = 'rotating';
           console.log('🌀 [CardSummoning] Phase 2 開始：旋轉展示');
+        },
+        onComplete: () => {
+          // 在220度時執行翻轉 (更晚一點的時機)
+          this.executeCardFlip();
         }
-      }, '2');
+      }, '2')
+      .to(this.cardElement, {
+        rotationY: this.config.effects.rotation.y, // 繼續旋轉到360度
+        duration: 0.8, // 後段：完成剩餘旋轉 (稍短一點)
+        ease: this.config.animation.easing.rotation
+      });
 
     // Phase 3: 發光強化 (4-6s) 
     this.masterTimeline
@@ -457,9 +500,28 @@ export class CardSummoning extends BaseComponent {
           console.log('🎯 [CardSummoning] Phase 4 開始：穩定懸浮');
         },
         onComplete: () => {
-          this.startHoverAnimation();
+          console.log('✨ [CardSummoning] Phase 4 完成：懸浮穩定');
         }
-      }, '6');
+      }, '6')
+      
+    // Phase 5: 延長卡面展示 (8-10s) - 增強質感停留 
+    .to(this.cardElement, {
+        y: 0, // 保持位置
+        rotationY: 360, // 完美回正
+        rotationX: 0,
+        rotationZ: 0,
+        duration: 2.0,
+        ease: 'none', // 靜態停留
+        onStart: () => {
+          this.state.currentPhase = 'displaying';
+          console.log('🎨 [CardSummoning] Phase 5 開始：延長展示 - 質感停留');
+          this.startHoverAnimation(); // 開始悬浮動畫
+        },
+        onComplete: () => {
+          this.state.currentPhase = 'completed';
+          console.log('✅ [CardSummoning] 完整動畫序列結束，準備轉場');
+        }
+      }, '8');
   }
 
   /**
@@ -517,28 +579,436 @@ export class CardSummoning extends BaseComponent {
 
     console.log('🎴 [CardSummoning] 開始播放召喚動畫');
     
-    // 存儲專案數據
-    this.projectData = projectData;
-    
-    // 重置動畫狀態
-    this.reset();
-    
-    // 顯示卡牌容器
-    this.state.isVisible = true;
-    this.state.currentPhase = 'summoning';
-    
-    // 播放主動畫時間軸
-    this.masterTimeline.restart();
+    try {
+      // 載入卡牌數據系統
+      const { cardsDataModule, cardConfigModule } = await loadCardDataSystems();
+      
+      // 存儲專案數據和轉換為卡牌數據
+      this.projectData = projectData;
+      this.cardData = await this.getCardData(projectData, cardsDataModule, cardConfigModule);
+      
+      console.log('🃏 [CardSummoning] 卡牌數據:', this.cardData);
+      
+      // 根據卡牌稀有度更新視覺效果
+      this.updateVisualEffects();
+      
+      // 更新卡牌內容
+      await this.updateCardContent();
+      
+      // 重置動畫狀態
+      this.reset();
+      
+      // 重置翻轉狀態
+      this.isCardFlipped = false;
+      
+      // 顯示卡牌容器
+      this.state.isVisible = true;
+      this.state.currentPhase = 'summoning';
+      
+      // 播放主動畫時間軸
+      this.masterTimeline.restart();
+      
+    } catch (error) {
+      console.error('❌ [CardSummoning] 召喚動畫啟動失敗:', error);
+      // 降級處理：使用原始專案數據
+      this.projectData = projectData;
+      this.reset();
+      this.state.isVisible = true;
+      this.state.currentPhase = 'summoning';
+      this.masterTimeline.restart();
+    }
     
     return new Promise((resolve) => {
       // 監聽動畫完成事件
       const handleComplete = () => {
         this.off('summoningComplete', handleComplete);
-        resolve(this.projectData);
+        resolve({
+          projectData: this.projectData,
+          cardData: this.cardData
+        });
       };
       
       this.on('summoningComplete', handleComplete);
     });
+  }
+
+  /**
+   * 獲取卡牌數據
+   */
+  async getCardData(projectData, cardsDataModule, cardConfigModule) {
+    if (!projectData || !cardsDataModule || !cardConfigModule) {
+      return null;
+    }
+
+    try {
+      // 如果有專案ID，直接從卡牌數據中獲取
+      if (projectData.id && cardsDataModule.getCardData) {
+        const cardData = cardsDataModule.getCardData(projectData.id);
+        if (cardData) {
+          return cardData;
+        }
+      }
+      
+      // 如果沒有找到，嘗試動態轉換
+      if (cardConfigModule.CardDataConverter) {
+        return cardConfigModule.CardDataConverter.convertProjectToCard(projectData);
+      }
+      
+      return null;
+      
+    } catch (error) {
+      console.warn('⚠️ [CardSummoning] 卡牌數據獲取失敗:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 根據卡牌稀有度更新視覺效果
+   */
+  updateVisualEffects() {
+    if (!this.cardData || !this.cardData.rarityConfig) {
+      return;
+    }
+
+    const rarity = this.cardData.rarity;
+    const rarityConfig = this.cardData.rarityConfig;
+    
+    console.log(`✨ [CardSummoning] 更新視覺效果: ${rarity}級卡牌`);
+    
+    // 更新發光顏色
+    this.config.card.glowColor = rarityConfig.color;
+    
+    // 根據稀有度調整粒子和動畫強度
+    if (rarityConfig.particleCount) {
+      this.config.effects.particleIntensity = rarityConfig.particleCount / 1000;
+    }
+    
+    if (rarityConfig.animationIntensity) {
+      this.config.effects.glow.maxIntensity = rarityConfig.animationIntensity;
+    }
+    
+    // 更新卡牌邊框發光效果
+    if (this.cardElement) {
+      this.cardElement.style.boxShadow = `
+        0 0 20px ${rarityConfig.glowColor},
+        0 0 40px ${rarityConfig.glowColor},
+        inset 0 0 20px rgba(255, 255, 255, 0.1)
+      `;
+    }
+  }
+
+  /**
+   * 更新卡牌內容顯示
+   */
+  async updateCardContent() {
+    console.log('🔧 [CardSummoning] 開始更新卡牌內容，數據狀態:', !!this.cardData);
+    
+    try {
+      if (!this.cardData) {
+        console.log('🎴 [CardSummoning] 無完整卡牌數據，創建基礎卡面');
+        // 即使沒有完整數據，也創建基本的卡面內容
+        await this.createBasicCardFront();
+      } else {
+        console.log('🎴 [CardSummoning] 有完整卡牌數據，創建詳細卡面');
+        console.log('📋 [CardSummoning] 卡牌數據詳情:', this.cardData);
+        // 創建完整的卡牌正面內容
+        await this.createCardFront();
+      }
+      
+      // 檢查卡面元素是否成功創建
+      if (this.cardFront) {
+        console.log('✅ [CardSummoning] 卡面元素創建成功');
+        console.log('🔄 [CardSummoning] 卡牌翻轉將由旋轉動畫時程控制');
+      } else {
+        console.error('❌ [CardSummoning] 卡面元素創建失敗');
+      }
+      
+    } catch (error) {
+      console.error('❌ [CardSummoning] 卡牌內容更新失敗:', error);
+      // 錯誤降級：創建最基本的卡面
+      try {
+        await this.createBasicCardFront();
+        console.log('🔄 [CardSummoning] 基礎卡牌翻轉將由旋轉動畫時程控制');
+      } catch (fallbackError) {
+        console.error('❌ [CardSummoning] 基礎卡面創建也失敗:', fallbackError);
+      }
+    }
+  }
+
+  /**
+   * 創建卡牌正面內容
+   */
+  async createCardFront() {
+    if (this.cardFront) {
+      this.cardFront.remove();
+    }
+
+    this.cardFront = document.createElement('div');
+    this.cardFront.className = 'card-front';
+    this.cardFront.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: ${this.config.card.borderRadius}px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 2px solid ${this.cardData.rarityConfig.borderColor};
+      opacity: 0;
+      transform: rotateY(-180deg);
+      backface-visibility: hidden;
+      overflow: hidden;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      z-index: 1;
+    `;
+    
+    // 確保卡背在正面之上，初始時可見
+    if (this.cardBack) {
+      this.cardBack.style.zIndex = '2';
+      this.cardBack.style.opacity = '1';
+    }
+
+    // 卡牌內容
+    this.cardFront.innerHTML = `
+      <div class="card-content" style="
+        padding: 12px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      ">
+        <!-- 卡牌標題 -->
+        <div class="card-header" style="text-align: center; margin-bottom: 10px;">
+          <h3 style="
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: ${this.cardData.rarityConfig.color};
+            text-shadow: 0 0 5px ${this.cardData.rarityConfig.glowColor};
+            line-height: 1.2;
+          ">${this.cardData.name}</h3>
+          <div style="
+            font-size: 10px;
+            color: ${this.cardData.attributeConfig.color};
+            margin-top: 2px;
+          ">
+            ${this.cardData.attributeConfig.icon} ${this.cardData.attributeConfig.name}
+          </div>
+        </div>
+
+        <!-- 等級星星 -->
+        <div class="card-level" style="
+          text-align: center;
+          margin-bottom: 8px;
+        ">
+          ${'★'.repeat(this.cardData.level)}
+        </div>
+
+        <!-- 卡牌圖片區域 -->
+        <div class="card-image" style="
+          flex-grow: 1;
+          background: linear-gradient(45deg, #2a2a4e, #3a3a6e);
+          border-radius: 6px;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          color: ${this.cardData.attributeConfig.color};
+        ">
+          ${this.cardData.attributeConfig.icon}
+        </div>
+
+        <!-- 攻擊力/防禦力 -->
+        <div class="card-stats" style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-weight: bold;
+          font-size: 14px;
+        ">
+          <span style="color: #ff6b6b;">ATK/${this.cardData.attack}</span>
+          <span style="color: #4ecdc4;">DEF/${this.cardData.defense}</span>
+        </div>
+
+        <!-- 卡牌效果 -->
+        <div class="card-effect" style="
+          font-size: 8px;
+          line-height: 1.2;
+          background: rgba(0,0,0,0.3);
+          padding: 4px;
+          border-radius: 3px;
+          margin-top: 4px;
+          max-height: 60px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        ">
+          ${this.cardData.effect || this.cardData.flavorText || ''}
+        </div>
+      </div>
+    `;
+
+    // 添加到卡牌元素
+    this.cardElement.appendChild(this.cardFront);
+    
+    console.log('🎨 [CardSummoning] 卡牌正面內容創建完成');
+  }
+
+  /**
+   * 創建基礎卡牌正面內容（無完整數據時的降級版本）
+   */
+  async createBasicCardFront() {
+    if (this.cardFront) {
+      this.cardFront.remove();
+    }
+
+    this.cardFront = document.createElement('div');
+    this.cardFront.className = 'card-front basic';
+    this.cardFront.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: ${this.config.card.borderRadius}px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 2px solid #d4af37;
+      opacity: 0;
+      transform: rotateY(-180deg);
+      backface-visibility: hidden;
+      overflow: hidden;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      z-index: 1;
+    `;
+    
+    // 確保卡背在正面之上，初始時可見
+    if (this.cardBack) {
+      this.cardBack.style.zIndex = '2';
+      this.cardBack.style.opacity = '1';
+    }
+
+    // 基礎卡牌內容 - 使用專案數據或默認內容
+    const projectName = this.projectData?.name || this.projectData?.title || '神秘專案';
+    const projectType = this.projectData?.rarity || this.projectData?.type || 'unknown';
+    
+    this.cardFront.innerHTML = `
+      <div class="card-content" style="
+        padding: 12px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      ">
+        <!-- 卡牌標題 -->
+        <div class="card-header" style="text-align: center; margin-bottom: 10px;">
+          <h3 style="
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: #d4af37;
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.8);
+            line-height: 1.2;
+          ">${projectName}</h3>
+          <div style="
+            font-size: 10px;
+            color: #4ecdc4;
+            margin-top: 2px;
+          ">
+            ⚡ ${projectType.toUpperCase()}
+          </div>
+        </div>
+
+        <!-- 等級星星 (基礎3星) -->
+        <div class="card-level" style="
+          text-align: center;
+          margin-bottom: 8px;
+        ">
+          ⭐⭐⭐
+        </div>
+
+        <!-- 卡牌圖片區域 -->
+        <div class="card-image" style="
+          flex-grow: 1;
+          background: linear-gradient(45deg, #2a2a4e, #3a3a6e);
+          border-radius: 6px;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 48px;
+          color: #d4af37;
+        ">
+          🎮
+        </div>
+
+        <!-- 攻擊力/防禦力 (基礎數值) -->
+        <div class="card-stats" style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-weight: bold;
+          font-size: 14px;
+        ">
+          <span style="color: #ff6b6b;">ATK/1500</span>
+          <span style="color: #4ecdc4;">DEF/1200</span>
+        </div>
+
+        <!-- 卡牌效果 -->
+        <div class="card-effect" style="
+          font-size: 8px;
+          line-height: 1.2;
+          background: rgba(0,0,0,0.3);
+          padding: 4px;
+          border-radius: 3px;
+          margin-top: 4px;
+          text-align: center;
+        ">
+          【召喚效果】這張卡代表了一個精彩的專案作品，展現了開發者的創意與技術實力。
+        </div>
+      </div>
+    `;
+
+    // 添加到卡牌元素
+    this.cardElement.appendChild(this.cardFront);
+    
+    console.log('🎨 [CardSummoning] 基礎卡牌正面內容創建完成');
+  }
+
+  /**
+   * 執行卡牌翻轉（在旋轉到180度時調用）
+   */
+  executeCardFlip() {
+    console.log('🔄 [CardSummoning] 在旋轉180度時執行卡牌翻轉');
+    
+    if (!this.cardFront) {
+      console.warn('⚠️ [CardSummoning] 卡面元素不存在，無法翻轉');
+      return;
+    }
+    
+    if (!this.cardBack) {
+      console.warn('⚠️ [CardSummoning] 卡背元素不存在，無法翻轉');
+      return;
+    }
+    
+    console.log('🔄 [CardSummoning] 執行卡牌翻轉到正面');
+    
+    // 瞬間翻轉：隱藏卡背，顯示卡面
+    window.gsap.set(this.cardBack, {
+      opacity: 0,
+      zIndex: 1
+    });
+    
+    window.gsap.set(this.cardFront, {
+      opacity: 1,
+      zIndex: 2,
+      rotateY: 0, // 確保卡面正向顯示
+      backfaceVisibility: 'visible'
+    });
+    
+    this.isCardFlipped = true; // 標記翻轉完成
+    console.log('✅ [CardSummoning] 卡面翻轉完成，設置翻轉狀態為 true');
   }
 
   /**
@@ -553,16 +1023,93 @@ export class CardSummoning extends BaseComponent {
   }
 
   /**
-   * 重置動畫狀態
+   * 軟重置 - 保持卡牌翻轉狀態的重置
+   */
+  softReset() {
+    console.log('🔄 [CardSummoning] 軟重置 - 保持卡牌顯示狀態');
+    
+    // 停止動畫但不重置視覺狀態
+    this.isAnimating = false;
+    this.state.currentPhase = 'idle';
+    
+    // 停止懸浮動畫
+    if (this.hoverAnimation) {
+      this.hoverAnimation.kill();
+      this.hoverAnimation = null;
+    }
+    
+    if (this.swayAnimation) {
+      this.swayAnimation.kill();
+      this.swayAnimation = null;
+    }
+    
+    // 停止時間軸
+    if (this.masterTimeline) {
+      this.masterTimeline.pause(0);
+    }
+    
+    // 如果已翻轉，保持卡面顯示
+    if (this.isCardFlipped) {
+      console.log('🎴 [CardSummoning] 保持卡面顯示狀態');
+      
+      // 確保容器和卡面都正確顯示
+      if (this.cardContainer) {
+        window.gsap.set(this.cardContainer, {
+          opacity: 1,
+          scale: 1,
+          rotationY: 0,
+          z: 0,
+          y: 0,
+          visibility: 'visible',
+          display: 'block'
+        });
+        console.log('🔧 [CardSummoning] 確保卡牌容器可見');
+      }
+      
+      if (this.cardBack) {
+        window.gsap.set(this.cardBack, {
+          opacity: 0,
+          zIndex: 1,
+          visibility: 'hidden'
+        });
+        console.log('🔧 [CardSummoning] 確保卡背隱藏');
+      }
+      
+      if (this.cardFront) {
+        window.gsap.set(this.cardFront, {
+          opacity: 1,
+          transform: 'rotateY(0deg)',
+          zIndex: 2,
+          visibility: 'visible',
+          display: 'block'
+        });
+        console.log('🔧 [CardSummoning] 確保卡面可見');
+      }
+      
+      // 調試：輸出當前狀態
+      console.log('🔍 [CardSummoning] 調試信息:');
+      console.log('  - 容器opacity:', this.cardContainer?.style.opacity);
+      console.log('  - 容器visibility:', this.cardContainer?.style.visibility);
+      console.log('  - 卡面opacity:', this.cardFront?.style.opacity);
+      console.log('  - 卡面visibility:', this.cardFront?.style.visibility);
+      console.log('  - 卡面transform:', this.cardFront?.style.transform);
+    }
+  }
+
+  /**
+   * 完全重置動畫狀態
    */
   reset() {
-    console.log('🔄 [CardSummoning] 重置召喚狀態');
+    console.log('🔄 [CardSummoning] 完全重置召喚狀態');
     
     // 停止所有動畫
     this.isAnimating = false;
     this.state.currentPhase = 'idle';
     this.state.isVisible = false;
     this.state.animationProgress = 0;
+    
+    // 重置翻轉狀態
+    this.isCardFlipped = false;
     
     // 停止懸浮動畫
     if (this.hoverAnimation) {
@@ -585,9 +1132,20 @@ export class CardSummoning extends BaseComponent {
       this.holographicOverlay.style.opacity = '0';
     }
     
-    // 重置主時間軸
-    if (this.masterTimeline) {
-      this.masterTimeline.pause(0);
+    // 重置到卡背顯示
+    if (this.cardBack) {
+      window.gsap.set(this.cardBack, {
+        opacity: 1,
+        zIndex: 2
+      });
+    }
+    
+    if (this.cardFront) {
+      window.gsap.set(this.cardFront, {
+        opacity: 0,
+        transform: 'rotateY(-180deg)',
+        zIndex: 1
+      });
     }
     
     // 重置容器樣式
@@ -598,6 +1156,11 @@ export class CardSummoning extends BaseComponent {
       z: -200,
       y: 0
     });
+    
+    // 重置主時間軸
+    if (this.masterTimeline) {
+      this.masterTimeline.pause(0);
+    }
     
     window.gsap.set(this.cardElement, {
       rotationX: 0,

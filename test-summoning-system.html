@@ -230,9 +230,12 @@
   <div class="test-container">
     <!-- 控制面板 -->
     <div class="control-panel">
-      <button id="full-summon-btn" class="test-btn">🎮 完整召喚序列</button>
+      <button id="full-summon-btn" class="test-btn">🎮 隨機召喚</button>
+      <button id="legendary-btn" class="test-btn">👑 傳說卡牌</button>
+      <button id="super-rare-btn" class="test-btn">⭐ 超稀有</button>
+      <button id="rare-btn" class="test-btn">💎 稀有</button>
+      <button id="normal-btn" class="test-btn">🔹 普通</button>
       <button id="quick-test-btn" class="test-btn">⚡ 快速測試</button>
-      <button id="phase-test-btn" class="test-btn">🎬 分階段測試</button>
       <button id="reset-btn" class="test-btn">🔄 重置系統</button>
     </div>
 
@@ -554,8 +557,11 @@
 
       bindEvents() {
         const fullSummonBtn = document.getElementById('full-summon-btn');
+        const legendaryBtn = document.getElementById('legendary-btn');
+        const superRareBtn = document.getElementById('super-rare-btn');
+        const rareBtn = document.getElementById('rare-btn');
+        const normalBtn = document.getElementById('normal-btn');
         const quickTestBtn = document.getElementById('quick-test-btn');
-        const phaseTestBtn = document.getElementById('phase-test-btn');
         const resetBtn = document.getElementById('reset-btn');
 
         fullSummonBtn.addEventListener('click', async () => {
@@ -563,15 +569,28 @@
           this.disableAllButtons();
           
           try {
-            const projectData = {
-              id: 'test-legendary-project',
-              title: '傳說級專案',
-              description: '這是一個傳說級的專案召喚測試',
-              type: 'legendary'
-            };
+            // 使用真實專案數據進行測試
+            const testProjects = [
+              { id: 'microservices-ecommerce', name: '微服務電商系統', rarity: 'legendary' },
+              { id: 'real-time-chat-system', name: '即時聊天系統', rarity: 'superRare' },
+              { id: 'config-driven-cms', name: '配置驅動CMS', rarity: 'rare' },
+              { id: 'task-management-api', name: '任務管理API', rarity: 'normal' }
+            ];
             
-            await this.animationController.playSummoningSequence(projectData);
+            // 隨機選擇一個專案進行召喚
+            const randomProject = testProjects[Math.floor(Math.random() * testProjects.length)];
+            console.log(`🎯 [Test] 召喚專案: ${randomProject.name} (${randomProject.rarity})`);
+            
+            await this.animationController.playSummoningSequence(randomProject);
             console.log('✅ [Test] 完整召喚序列完成');
+            
+            // 延遲重置，讓卡牌展示有時間完成 (現在是10秒動畫)
+            console.log('⏳ [Test] 等待完整卡牌展示完成...');
+            await this.delay(3000); // 等待3秒讓延長展示階段完成
+            
+            // 使用軟重置保持卡牌顯示
+            console.log('🔧 [Test] 執行軟重置保持卡牌顯示');
+            this.animationController.softReset();
             
           } catch (error) {
             console.error('召喚序列失敗:', error);
@@ -580,6 +599,57 @@
             this.enableAllButtons();
           }
         });
+
+        // 稀有度特定召喚事件
+        const rarityProjects = {
+          legendary: [
+            { id: 'microservices-ecommerce', name: '微服務電商系統', rarity: 'legendary' }
+          ],
+          superRare: [
+            { id: 'real-time-chat-system', name: '即時聊天系統', rarity: 'superRare' }
+          ],
+          rare: [
+            { id: 'config-driven-cms', name: '配置驅動CMS', rarity: 'rare' }
+          ],
+          normal: [
+            { id: 'task-management-api', name: '任務管理API', rarity: 'normal' }
+          ]
+        };
+
+        const createRarityHandler = (rarity) => {
+          return async () => {
+            console.log(`🎯 [Test] 用戶點擊 ${rarity} 卡牌召喚`);
+            this.disableAllButtons();
+            
+            try {
+              const projects = rarityProjects[rarity];
+              const randomProject = projects[Math.floor(Math.random() * projects.length)];
+              console.log(`✨ [Test] 召喚 ${rarity} 專案: ${randomProject.name}`);
+              
+              await this.animationController.playSummoningSequence(randomProject);
+              console.log(`✅ [Test] ${rarity} 卡牌召喚完成`);
+              
+              // 延遲重置，讓卡牌展示有時間完成（等待完整動畫）
+              console.log(`⏳ [Test] 等待 ${rarity} 卡牌完整展示...`);
+              await this.delay(3000); // 等待3秒讓延長展示階段完成
+              
+              // 使用軟重置保持卡牌顯示
+              console.log(`🔧 [Test] 執行軟重置保持卡牌顯示`);
+              this.animationController.softReset();
+              
+            } catch (error) {
+              console.error(`❌ [Test] ${rarity} 召喚失敗:`, error);
+              this.showError(`${rarity} 召喚失敗`, error);
+            } finally {
+              this.enableAllButtons();
+            }
+          };
+        };
+
+        legendaryBtn.addEventListener('click', createRarityHandler('legendary'));
+        superRareBtn.addEventListener('click', createRarityHandler('superRare'));
+        rareBtn.addEventListener('click', createRarityHandler('rare'));
+        normalBtn.addEventListener('click', createRarityHandler('normal'));
 
         quickTestBtn.addEventListener('click', async () => {
           console.log('⚡ [Test] 用戶點擊快速測試');
@@ -590,7 +660,17 @@
           this.animationController.config.sequence.totalDuration = 3000;
           
           try {
-            await this.animationController.playSummoningSequence({ title: '快速測試' });
+            const testProject = { id: 'quick-test', name: '快速測試', rarity: 'normal' };
+            await this.animationController.playSummoningSequence(testProject);
+            
+            // 即使是快速測試也要等待基本展示
+            console.log('⏳ [Test] 快速測試等待基本展示...');
+            await this.delay(2000); // 快速測試等2秒看到翻轉效果
+            
+            // 使用軟重置保持卡牌顯示
+            console.log('🔧 [Test] 快速測試軟重置');
+            this.animationController.softReset();
+            
           } catch (error) {
             console.error('快速測試失敗:', error);
             this.showError('快速測試失敗', error);
@@ -601,48 +681,12 @@
           }
         });
 
-        phaseTestBtn.addEventListener('click', async () => {
-          console.log('🎬 [Test] 用戶點擊分階段測試');
-          this.disableAllButtons();
-          
-          try {
-            await this.testPhaseByPhase();
-          } catch (error) {
-            console.error('分階段測試失敗:', error);
-            this.showError('分階段測試失敗', error);
-          } finally {
-            this.enableAllButtons();
-          }
-        });
-
         resetBtn.addEventListener('click', () => {
           console.log('🔄 [Test] 用戶點擊重置系統');
           this.animationController.reset();
           this.resetUI();
           this.enableAllButtons();
         });
-      }
-
-      async testPhaseByPhase() {
-        const phases = [
-          { name: '魔法陣展開', component: 'magicCircle', method: 'expand' },
-          { name: '環形粒子流', component: 'particleSystem', method: 'playRingFlow' },
-          { name: '粒子爆發', component: 'particleSystem', method: 'playBurst' },
-          { name: '卡牌召喚', component: 'cardSummoning', method: 'playSummoningAnimation' }
-        ];
-        
-        for (let i = 0; i < phases.length; i++) {
-          const phase = phases[i];
-          console.log(`🎯 [Test] 測試階段: ${phase.name}`);
-          this.updateCurrentPhase(phase.name);
-          
-          const component = this.components[phase.component];
-          if (component && component[phase.method]) {
-            await component[phase.method]();
-          }
-          
-          await this.delay(500); // 階段間隔
-        }
       }
 
       delay(ms) {

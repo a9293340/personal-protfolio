@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>遊戲王卡牌數據系統測試</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .title {
+      font-size: 2.5em;
+      color: #d4af37;
+      margin: 0;
+      text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      color: #b0b0b0;
+      margin: 10px 0 0 0;
+    }
+
+    .test-section {
+      margin-bottom: 40px;
+      padding: 25px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .section-title {
+      font-size: 1.4em;
+      color: #4a9eff;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: linear-gradient(45deg, #2980b9, #3498db);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      min-width: 120px;
+    }
+
+    button:hover {
+      background: linear-gradient(45deg, #3498db, #5dade2);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    button.success {
+      background: linear-gradient(45deg, #27ae60, #2ecc71);
+    }
+
+    button.success:hover {
+      background: linear-gradient(45deg, #2ecc71, #58d68d);
+    }
+
+    select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 14px;
+    }
+
+    .data-display {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 20px;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .card-preview {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+      border-radius: 12px;
+      padding: 20px;
+      border: 2px solid;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-preview.normal { border-color: #8a8a8a; }
+    .card-preview.rare { border-color: #4a90e2; }
+    .card-preview.superRare { border-color: #d4af37; }
+    .card-preview.legendary { border-color: #ff6b6b; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .card-name {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    .card-level {
+      background: #333;
+      border-radius: 15px;
+      padding: 4px 12px;
+      font-size: 0.9em;
+      color: #ffd700;
+    }
+
+    .card-stats {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+
+    .attack { color: #ff4757; }
+    .defense { color: #3742fa; }
+
+    .card-effect {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      line-height: 1.4;
+      margin: 10px 0;
+    }
+
+    .card-attribute {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.5em;
+    }
+
+    .rarity-badge {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .rarity-badge.normal { background: #8a8a8a; }
+    .rarity-badge.rare { background: #4a90e2; }
+    .rarity-badge.superRare { background: #d4af37; }
+    .rarity-badge.legendary { background: #ff6b6b; }
+
+    .statistics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #d4af37;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      color: #b0b0b0;
+    }
+
+    .error-message {
+      background: rgba(220, 53, 69, 0.1);
+      border: 1px solid rgba(220, 53, 69, 0.3);
+      color: #dc3545;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .title {
+        font-size: 2em;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">🎴 遊戲王卡牌數據系統測試</h1>
+      <p class="subtitle">專案數據轉換為遊戲王風格卡牌展示系統</p>
+    </div>
+
+    <!-- 系統統計 -->
+    <div class="test-section">
+      <h3 class="section-title">
+        📊 卡牌數據統計
+      </h3>
+      <div id="statisticsDisplay" class="statistics">
+        <div class="stat-item">
+          <div class="stat-value" id="totalCards">-</div>
+          <div class="stat-label">總卡牌數</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="legendaryCount">-</div>
+          <div class="stat-label">傳說卡牌</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="maxAttack">-</div>
+          <div class="stat-label">最高攻擊力</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="maxDefense">-</div>
+          <div class="stat-label">最高防禦力</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="avgLevel">-</div>
+          <div class="stat-label">平均等級</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡牌展示控制 -->
+    <div class="test-section">
+      <h3 class="section-title">
+        🎮 卡牌展示控制
+      </h3>
+      <div class="controls">
+        <button onclick="showAllCards()">顯示所有卡牌</button>
+        <button onclick="showFeaturedCards()">精選卡牌</button>
+        <select id="rarityFilter" onchange="filterByRarity()">
+          <option value="">所有稀有度</option>
+          <option value="normal">普通</option>
+          <option value="rare">稀有</option>
+          <option value="superRare">超稀有</option>
+          <option value="legendary">傳說</option>
+        </select>
+        <select id="attributeFilter" onchange="filterByAttribute()">
+          <option value="">所有屬性</option>
+          <option value="backend">後端</option>
+          <option value="architecture">架構</option>
+          <option value="fullstack">全端</option>
+          <option value="opensource">開源</option>
+        </select>
+        <button onclick="drawRandomCard()" class="success">隨機抽卡</button>
+      </div>
+      
+      <div id="cardsContainer" class="card-grid">
+        <!-- 卡牌將在這裡動態載入 -->
+      </div>
+    </div>
+
+    <!-- 卡包模擬 -->
+    <div class="test-section">
+      <h3 class="section-title">
+        📦 卡包模擬系統
+      </h3>
+      <div class="controls">
+        <button onclick="openCardPack('starter')">開啟新手包 (5張)</button>
+        <button onclick="openCardPack('professional')">開啟專業包 (8張)</button>
+        <button onclick="openCardPack('master')">開啟大師包 (10張)</button>
+      </div>
+      
+      <div id="packResults" class="card-grid" style="display: none;">
+        <!-- 卡包開啟結果 -->
+      </div>
+    </div>
+
+    <!-- 原始數據檢視 -->
+    <div class="test-section">
+      <h3 class="section-title">
+        🔍 原始數據檢視
+      </h3>
+      <div class="controls">
+        <button onclick="showRawCardData()">顯示卡牌數據</button>
+        <button onclick="showCardConfig()">顯示配置數據</button>
+        <button onclick="showStatistics()">顯示統計數據</button>
+      </div>
+      
+      <div id="rawDataDisplay" class="data-display" style="display: none;">
+        <!-- 原始數據顯示 -->
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    let cardsData = null;
+    let cardConfig = null;
+    let cardStatistics = null;
+
+    // 動態導入模組並初始化
+    async function initializeCardSystem() {
+      try {
+        const cardsModule = await import('./src/config/data/cards.data.js');
+        const configModule = await import('./src/config/data/card.config.js');
+        
+        cardsData = cardsModule.cardsData;
+        cardConfig = configModule.default;
+        cardStatistics = cardsModule.cardStatistics;
+        
+        console.log('Card system initialized:', { cardsData, cardConfig, cardStatistics });
+        
+        // 更新統計信息
+        updateStatistics();
+        
+        // 預設顯示所有卡牌
+        showAllCards();
+        
+      } catch (error) {
+        console.error('Failed to initialize card system:', error);
+        showError('系統初始化失敗: ' + error.message);
+      }
+    }
+
+    // 更新統計信息
+    function updateStatistics() {
+      if (!cardStatistics) return;
+      
+      document.getElementById('totalCards').textContent = cardStatistics.total.cards;
+      document.getElementById('legendaryCount').textContent = cardStatistics.total.byRarity.legendary?.length || 0;
+      document.getElementById('maxAttack').textContent = cardStatistics.stats.maxAttack;
+      document.getElementById('maxDefense').textContent = cardStatistics.stats.maxDefense;
+      document.getElementById('avgLevel').textContent = cardStatistics.stats.averageLevel;
+    }
+
+    // 顯示錯誤信息
+    function showError(message) {
+      const container = document.getElementById('cardsContainer');
+      container.innerHTML = `<div class="error-message">${message}</div>`;
+    }
+
+    // 顯示所有卡牌
+    window.showAllCards = function() {
+      if (!cardsData) return;
+      displayCards(Object.values(cardsData.cards));
+    };
+
+    // 顯示精選卡牌
+    window.showFeaturedCards = function() {
+      if (!cardsData) return;
+      const featuredCards = cardsData.featured.map(id => cardsData.cards[id]).filter(Boolean);
+      displayCards(featuredCards);
+    };
+
+    // 按稀有度篩選
+    window.filterByRarity = function() {
+      if (!cardsData) return;
+      const rarity = document.getElementById('rarityFilter').value;
+      
+      if (!rarity) {
+        showAllCards();
+        return;
+      }
+      
+      const filteredCards = Object.values(cardsData.cards).filter(card => card.rarity === rarity);
+      displayCards(filteredCards);
+    };
+
+    // 按屬性篩選
+    window.filterByAttribute = function() {
+      if (!cardsData) return;
+      const attribute = document.getElementById('attributeFilter').value;
+      
+      if (!attribute) {
+        showAllCards();
+        return;
+      }
+      
+      const filteredCards = Object.values(cardsData.cards).filter(card => card.attribute === attribute);
+      displayCards(filteredCards);
+    };
+
+    // 隨機抽卡
+    window.drawRandomCard = function() {
+      if (!cardsData) return;
+      
+      const allCards = Object.values(cardsData.cards);
+      const randomCard = allCards[Math.floor(Math.random() * allCards.length)];
+      displayCards([randomCard]);
+    };
+
+    // 開啟卡包
+    window.openCardPack = async function(packType) {
+      if (!cardsData) return;
+      
+      try {
+        const cardsModule = await import('./src/config/data/cards.data.js');
+        const drawnCards = cardsModule.openCardPack(packType);
+        
+        const packResults = document.getElementById('packResults');
+        packResults.style.display = 'grid';
+        displayCards(drawnCards, 'packResults');
+        
+        // 滾動到結果
+        packResults.scrollIntoView({ behavior: 'smooth' });
+        
+      } catch (error) {
+        console.error('Failed to open card pack:', error);
+        showError('開包失敗: ' + error.message);
+      }
+    };
+
+    // 顯示卡牌
+    function displayCards(cards, containerId = 'cardsContainer') {
+      const container = document.getElementById(containerId);
+      
+      if (!cards || cards.length === 0) {
+        container.innerHTML = '<div class="error-message">沒有找到符合條件的卡牌</div>';
+        return;
+      }
+      
+      container.innerHTML = cards.map(card => `
+        <div class="card-preview ${card.rarity}">
+          <div class="card-attribute">${card.attributeConfig?.icon || '⚡'}</div>
+          <div class="card-header">
+            <div class="card-name">${card.name}</div>
+            <div class="card-level">★${card.level}</div>
+          </div>
+          
+          <div class="card-stats">
+            <span class="attack">ATK/${card.attack}</span>
+            <span class="defense">DEF/${card.defense}</span>
+          </div>
+          
+          <div class="card-effect">
+            ${card.effect}
+          </div>
+          
+          <div style="font-size: 0.8em; color: #aaa; margin-top: 10px; font-style: italic;">
+            ${card.flavorText}
+          </div>
+          
+          <div class="rarity-badge ${card.rarity}">
+            ${card.rarityConfig?.name || card.rarity}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 顯示原始數據
+    window.showRawCardData = function() {
+      if (!cardsData) return;
+      const display = document.getElementById('rawDataDisplay');
+      display.style.display = 'block';
+      display.innerHTML = `<pre>${JSON.stringify(cardsData, null, 2)}</pre>`;
+    };
+
+    window.showCardConfig = function() {
+      if (!cardConfig) return;
+      const display = document.getElementById('rawDataDisplay');
+      display.style.display = 'block';
+      display.innerHTML = `<pre>${JSON.stringify(cardConfig, null, 2)}</pre>`;
+    };
+
+    window.showStatistics = function() {
+      if (!cardStatistics) return;
+      const display = document.getElementById('rawDataDisplay');
+      display.style.display = 'block';
+      display.innerHTML = `<pre>${JSON.stringify(cardStatistics, null, 2)}</pre>`;
+    };
+
+    // 初始化系統
+    initializeCardSystem();
+  </script>
+</body>
+</html>

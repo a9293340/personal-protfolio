@@ -632,10 +632,45 @@ export class AnimationController extends BaseComponent {
   }
 
   /**
-   * 重置動畫控制器
+   * 軟重置 - 保持卡牌顯示狀態
+   */
+  softReset() {
+    console.log('🔄 [AnimationController] 軟重置動畫控制器 - 保持卡牌顯示');
+    
+    // 停止主控時間軸
+    if (this.masterTimeline) {
+      this.masterTimeline.pause(0);
+    }
+    
+    // 重置狀態
+    this.isAnimating = false;
+    this.currentPhase = 'idle';
+    this.state.currentPhase = 'idle';
+    this.state.totalProgress = 0;
+    this.state.phaseProgress = 0;
+    this.state.lastError = null;
+    
+    // 軟重置各組件
+    if (this.magicCircle) {
+      this.magicCircle.reset();
+    }
+    
+    if (this.particleSystem) {
+      this.particleSystem.reset();
+    }
+    
+    if (this.cardSummoning) {
+      this.cardSummoning.softReset(); // 使用軟重置保持卡面顯示
+    }
+    
+    console.log('✅ [AnimationController] 軟重置完成');
+  }
+
+  /**
+   * 完全重置動畫控制器
    */
   reset() {
-    console.log('🔄 [AnimationController] 重置動畫控制器');
+    console.log('🔄 [AnimationController] 完全重置動畫控制器');
     
     // 停止主控時間軸
     if (this.masterTimeline) {
