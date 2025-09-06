@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ParticleSystem 3D 粒子系統測試</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .test-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .control-panel {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      z-index: 2000;
+    }
+
+    .test-btn {
+      background: linear-gradient(135deg, #d4af37, #f4d03f);
+      color: #0a0a0a;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .test-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    }
+
+    .test-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-info {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 2000;
+      max-width: 300px;
+    }
+
+    .status-info h3 {
+      color: #d4af37;
+      margin-bottom: 10px;
+    }
+
+    .status-item {
+      margin: 5px 0;
+    }
+
+    .status-value {
+      color: #4a90e2;
+      font-weight: bold;
+    }
+
+    #particle-display {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+    
+    /* 確保粒子容器不被裁剪 */
+    .particle-system-container {
+      overflow: visible !important;
+    }
+
+    /* Three.js Canvas 樣式 */
+    canvas {
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .performance-info {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 2000;
+      max-width: 250px;
+    }
+
+    .performance-info h3 {
+      color: #f4d03f;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <!-- 控制面板 -->
+    <div class="control-panel">
+      <button id="ring-flow-btn" class="test-btn">環形粒子流</button>
+      <button id="burst-btn" class="test-btn">星塵爆發</button>
+      <button id="combined-btn" class="test-btn">組合動畫</button>
+      <button id="reset-btn" class="test-btn">重置系統</button>
+    </div>
+
+    <!-- 狀態信息 -->
+    <div class="status-info">
+      <h3>🌟 粒子系統狀態</h3>
+      <div class="status-item">
+        階段: <span id="phase-status" class="status-value">idle</span>
+      </div>
+      <div class="status-item">
+        可見性: <span id="visibility-status" class="status-value">false</span>
+      </div>
+      <div class="status-item">
+        粒子數量: <span id="particles-status" class="status-value">0</span>
+      </div>
+      <div class="status-item">
+        動畫狀態: <span id="animation-status" class="status-value">停止</span>
+      </div>
+      <div class="status-item">
+        WebGL支援: <span id="webgl-status" class="status-value">檢查中...</span>
+      </div>
+    </div>
+
+    <!-- 性能信息 -->
+    <div class="performance-info">
+      <h3>📊 性能監控</h3>
+      <div class="status-item">
+        FPS: <span id="fps-status" class="status-value">0</span>
+      </div>
+      <div class="status-item">
+        設備: <span id="device-status" class="status-value">檢測中...</span>
+      </div>
+      <div class="status-item">
+        最佳粒子數: <span id="optimal-particles" class="status-value">0</span>
+      </div>
+      <div class="status-item">
+        GPU: <span id="gpu-status" class="status-value">檢測中...</span>
+      </div>
+    </div>
+
+    <!-- 粒子顯示區域 -->
+    <div id="particle-display"></div>
+  </div>
+
+  <!-- Three.js 庫 - 直接載入全域版本 -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js" 
+          onerror="console.warn('Primary Three.js CDN failed, trying backup...'); 
+                   this.src='https://unpkg.com/three@0.159.0/build/three.min.js'"></script>
+  <!-- GSAP 庫 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- 測試腳本 -->
+  <script type="module">
+    
+    // 導入必要的組件
+    import { BaseComponent } from './src/core/components/BaseComponent.js';
+    import { ParticleSystem } from './src/components/gaming/SummoningSystem/ParticleSystem.js';
+
+    class ParticleSystemTest {
+      constructor() {
+        this.particleSystem = null;
+        this.fpsCounter = 0;
+        this.lastTime = performance.now();
+        this.init();
+      }
+
+      // 等待 Three.js 載入
+      waitForThreeJS() {
+        // ES Module 已直接載入，Three.js 應該立即可用
+        return new Promise((resolve) => {
+          if (window.THREE) {
+            console.log('✅ [ParticleSystemTest] Three.js 已載入');
+            resolve();
+          } else {
+            // 給一點時間讓 ES Module 完成載入
+            setTimeout(() => {
+              if (window.THREE) {
+                console.log('✅ [ParticleSystemTest] Three.js 載入完成');
+                resolve();
+              } else {
+                console.error('❌ [ParticleSystemTest] Three.js 載入失敗');
+                resolve(); // 不阻塞，讓錯誤在後續處理中顯示
+              }
+            }, 100);
+          }
+        });
+      }
+
+      // 等待 GSAP 載入
+      waitForGSAP() {
+        return new Promise((resolve, reject) => {
+          if (window.gsap) {
+            console.log('✅ [ParticleSystemTest] GSAP 已載入');
+            resolve();
+            return;
+          }
+
+          let attempts = 0;
+          const maxAttempts = 50; // 最多等待5秒
+          
+          const checkGSAP = () => {
+            attempts++;
+            if (window.gsap) {
+              console.log(`✅ [ParticleSystemTest] GSAP 載入完成 (嘗試 ${attempts} 次)`);
+              resolve();
+            } else if (attempts >= maxAttempts) {
+              reject(new Error(`GSAP 載入超時 (嘗試了 ${maxAttempts} 次)`));
+            } else {
+              setTimeout(checkGSAP, 100);
+            }
+          };
+          
+          checkGSAP();
+        });
+      }
+
+      async init() {
+        console.log('🧪 [ParticleSystemTest] 初始化粒子系統測試');
+        
+        try {
+          // 等待 Three.js 載入
+          await this.waitForThreeJS();
+          
+          // 等待 GSAP 載入
+          await this.waitForGSAP();
+          
+          // 檢查 Three.js 可用性
+          if (!window.THREE) {
+            throw new Error('Three.js 未載入');
+          }
+
+          // 檢查 GSAP 可用性
+          if (!window.gsap) {
+            throw new Error('GSAP 未載入');
+          }
+
+          // 顯示設備信息
+          this.displayDeviceInfo();
+
+          // 創建粒子系統實例
+          this.particleSystem = new ParticleSystem({
+            container: {
+              width: window.innerWidth,
+              height: window.innerHeight
+            }
+          });
+
+          // 初始化組件
+          await this.particleSystem.init();
+
+          // 創建元素並添加到頁面
+          const element = this.particleSystem.createElement();
+          document.getElementById('particle-display').appendChild(element);
+
+          // 綁定控制按鈕事件
+          this.bindEvents();
+
+          // 開始狀態監控
+          this.startStatusMonitoring();
+
+          // 開始性能監控
+          this.startPerformanceMonitoring();
+
+          console.log('✅ [ParticleSystemTest] 測試環境準備完成');
+
+        } catch (error) {
+          console.error('❌ [ParticleSystemTest] 初始化失敗:', error);
+          alert('測試初始化失敗，請檢查控制台錯誤信息');
+        }
+      }
+
+      displayDeviceInfo() {
+        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const deviceType = isMobile ? 'Mobile' : 'Desktop';
+        
+        // WebGL 檢測
+        const canvas = document.createElement('canvas');
+        const webglSupported = !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+        const webgl2Supported = !!canvas.getContext('webgl2');
+        
+        // GPU 檢測
+        let gpuInfo = 'Unknown';
+        if (webglSupported) {
+          try {
+            const gl = canvas.getContext('webgl');
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+              gpuInfo = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            }
+          } catch (e) {
+            gpuInfo = 'Detection Failed';
+          }
+        }
+
+        // 更新 UI
+        document.getElementById('device-status').textContent = deviceType;
+        document.getElementById('webgl-status').textContent = webglSupported ? (webgl2Supported ? 'WebGL2' : 'WebGL1') : 'No';
+        document.getElementById('gpu-status').textContent = gpuInfo.slice(0, 30) + (gpuInfo.length > 30 ? '...' : '');
+        
+        // 顯示最佳粒子數
+        if (this.particleSystem) {
+          const optimalCount = this.particleSystem.getOptimalParticleCount();
+          document.getElementById('optimal-particles').textContent = optimalCount;
+        }
+      }
+
+      bindEvents() {
+        const ringFlowBtn = document.getElementById('ring-flow-btn');
+        const burstBtn = document.getElementById('burst-btn');
+        const combinedBtn = document.getElementById('combined-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        ringFlowBtn.addEventListener('click', async () => {
+          console.log('🌀 [Test] 用戶點擊環形粒子流按鈕');
+          ringFlowBtn.disabled = true;
+          
+          try {
+            await this.particleSystem.playRingFlow();
+          } catch (error) {
+            console.error('環形粒子流動畫失敗:', error);
+          } finally {
+            ringFlowBtn.disabled = false;
+          }
+        });
+
+        burstBtn.addEventListener('click', async () => {
+          console.log('💥 [Test] 用戶點擊星塵爆發按鈕');
+          burstBtn.disabled = true;
+          
+          try {
+            await this.particleSystem.playBurst();
+          } catch (error) {
+            console.error('星塵爆發動畫失敗:', error);
+          } finally {
+            burstBtn.disabled = false;
+          }
+        });
+
+        combinedBtn.addEventListener('click', async () => {
+          console.log('🎆 [Test] 用戶點擊組合動畫按鈕');
+          combinedBtn.disabled = true;
+          
+          try {
+            // 先播放環形粒子流，再播放爆發
+            await this.particleSystem.playRingFlow();
+            await this.delay(200); // 短暫間隔
+            await this.particleSystem.playBurst();
+          } catch (error) {
+            console.error('組合動畫失敗:', error);
+          } finally {
+            combinedBtn.disabled = false;
+          }
+        });
+
+        resetBtn.addEventListener('click', () => {
+          console.log('🔄 [Test] 用戶點擊重置按鈕');
+          this.particleSystem.reset();
+          
+          // 重新啟用所有按鈕
+          [ringFlowBtn, burstBtn, combinedBtn].forEach(btn => {
+            btn.disabled = false;
+          });
+        });
+      }
+
+      delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      startStatusMonitoring() {
+        const updateStatus = () => {
+          if (!this.particleSystem) return;
+
+          const state = this.particleSystem.state;
+          
+          // 更新狀態顯示
+          document.getElementById('phase-status').textContent = state.currentPhase;
+          document.getElementById('visibility-status').textContent = state.isVisible ? 'true' : 'false';
+          document.getElementById('animation-status').textContent = this.particleSystem.isAnimating ? '運行中' : '停止';
+          
+          // 計算總粒子數
+          let totalParticles = 0;
+          if (this.particleSystem.ringFlowParticles) {
+            totalParticles += this.particleSystem.ringFlowParticles.geometry.attributes.position.count;
+          }
+          if (this.particleSystem.burstParticles) {
+            totalParticles += this.particleSystem.burstParticles.geometry.attributes.position.count;
+          }
+          document.getElementById('particles-status').textContent = totalParticles;
+        };
+
+        // 每500ms更新一次狀態
+        setInterval(updateStatus, 500);
+      }
+
+      startPerformanceMonitoring() {
+        const updatePerformance = () => {
+          const now = performance.now();
+          const delta = now - this.lastTime;
+          this.lastTime = now;
+          
+          this.fpsCounter++;
+          
+          if (this.fpsCounter % 60 === 0) { // 每60幀更新一次FPS顯示
+            const fps = Math.round(1000 / delta);
+            document.getElementById('fps-status').textContent = fps;
+          }
+          
+          requestAnimationFrame(updatePerformance);
+        };
+        
+        updatePerformance();
+      }
+    }
+
+    // 等待頁面載入完成後啟動測試
+    document.addEventListener('DOMContentLoaded', () => {
+      new ParticleSystemTest();
+    });
+  </script>
+</body>
+</html>
