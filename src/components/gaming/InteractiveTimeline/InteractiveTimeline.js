@@ -10,6 +10,9 @@
  */
 
 import { BaseComponent } from '../../../core/components/BaseComponent.js';
+import { DataAdapter } from './DataAdapter.js';
+import { TimelineLayoutEngine } from './TimelineLayoutEngine.js';
+import { ImportanceScoring } from './ImportanceScoring.js';
 
 export class InteractiveTimeline extends BaseComponent {
   constructor(config = {}) {
@@ -27,6 +30,13 @@ export class InteractiveTimeline extends BaseComponent {
     
     // 粒子系統屬性 (Step 2.2.2c)
     this.particleSystem = null;
+    
+    // Step 2.2.5c: 數據管理系統組件 
+    this.dataAdapter = null;
+    this.layoutEngine = null;
+    this.importanceScoring = null;
+    this.adaptedProjects = [];
+    this.layoutNodes = [];
     
     this.init();
   }
@@ -191,8 +201,30 @@ export class InteractiveTimeline extends BaseComponent {
       await this.loadProjectData();
       this.createElement();
       
+      // 將元素添加到容器中
+      if (this.config.container) {
+        if (typeof this.config.container === 'string') {
+          const container = document.querySelector(this.config.container);
+          if (container) {
+            container.innerHTML = ''; // 清空容器
+            container.appendChild(this.element);
+          }
+        } else if (this.config.container instanceof HTMLElement) {
+          this.config.container.innerHTML = ''; // 清空容器
+          this.config.container.appendChild(this.element);
+        }
+        
+        // DOM 掛載後的設定
+        this.setupAfterMount();
+      }
+      
       this.state.isInitialized = true;
       console.log('[InteractiveTimeline] 互動時間軸初始化完成');
+      
+      // 觸發數據載入回調
+      if (this.config.callbacks && this.config.callbacks.onDataLoaded) {
+        this.config.callbacks.onDataLoaded(this.timelineData);
+      }
       
     } catch (error) {
       console.error('[InteractiveTimeline] 初始化失敗:', error);
@@ -275,31 +307,226 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
-   * 載入專案時間軸數據
+   * 載入並處理專案時間軸數據 (Step 2.2.5c 整合)
    */
   async loadProjectData() {
     try {
+      console.log('[InteractiveTimeline] 🚀 開始載入並處理專案數據');
+      
+      // 1. 初始化數據管理組件
+      await this.initializeDataManagementSystem();
+      
+      let projectsConfig;
+      
       if (this.config.projects && this.config.projects.length > 0) {
-        this.timelineData = this.config.projects;
+        // 使用配置傳入的專案數據
+        console.log('[InteractiveTimeline] 使用配置傳入的專案數據');
+        projectsConfig = { all: this.config.projects };
       } else {
         // 載入真實專案數據
+        console.log('[InteractiveTimeline] 載入真實專案數據 projects.data.js');
         const projectsModule = await import('../../../config/data/projects.data.js');
-        const projectsConfig = projectsModule.projectsDataConfig || projectsModule.default;
-        
-        // 轉換為時間軸數據格式
-        this.timelineData = this.convertProjectsToTimelineData(projectsConfig);
+        projectsConfig = projectsModule.projectsDataConfig || projectsModule.default;
       }
       
-      // 按時間排序
-      this.timelineData.sort((a, b) => new Date(a.date) - new Date(b.date));
+      // 2. 使用 DataAdapter 適配專案數據
+      this.adaptedProjects = await this.dataAdapter.loadProjectsData(projectsConfig);
       
-      console.log(`[InteractiveTimeline] 載入 ${this.timelineData.length} 個專案節點`);
+      // 3. 計算智能時間軸佈局
+      await this.calculateTimelineLayout();
+      
+      // 4. 生成傳統格式的 timelineData 以保持向後兼容性
+      this.timelineData = this.adaptedProjects.map(project => ({
+        id: project.id,
+        title: project.title,
+        date: project.date,
+        description: project.details.shortDescription,
+        technologies: project.details.technologies,
+        importance: project.timeline.importance,
+        category: project.category,
+        status: project.status,
+        // 新增的增強數據
+        rarity: project.visual.rarity,
+        nodeSize: project.visual.nodeSize,
+        position: project.layoutPosition || { x: 0, y: 0 },
+        originalData: project.originalData
+      }));
+      
+      // 5. 更新年份篩選數據
+      this.updateYearFilterOptions();
+      
+      console.log(`✅ [InteractiveTimeline] 成功載入並處理 ${this.adaptedProjects.length} 個專案`);
+      console.log('[InteractiveTimeline] 📊 數據統計:', this.dataAdapter.getDataStatistics());
       
     } catch (error) {
-      console.error('[InteractiveTimeline] 載入專案數據失敗:', error);
-      // 使用預設測試數據
-      this.timelineData = this.getDefaultTimelineData();
+      console.error('❌ [InteractiveTimeline] 載入專案數據失敗:', error);
+      
+      // 降級處理：使用簡單的測試數據
+      await this.fallbackToTestData();
     }
+  }
+
+  /**
+   * 初始化數據管理系統組件
+   */
+  async initializeDataManagementSystem() {
+    console.log('[InteractiveTimeline] 🔧 初始化數據管理系統');
+    
+    // 1. 初始化數據適配器
+    this.dataAdapter = new DataAdapter({
+      // 從主配置繼承相關設置
+      timeline: {
+        minYear: 2020,
+        maxYear: new Date().getFullYear() + 1,
+      },
+      importanceWeights: this.config.importanceWeights || {},
+      rarityScores: this.config.rarityScores || {}
+    });
+
+    // 2. 初始化智能佈局引擎
+    this.layoutEngine = new TimelineLayoutEngine({
+      layout: {
+        timelineHeight: parseInt(this.config.height) || 600,
+        timelineWidth: 800, // 初始寬度，後續會根據容器調整
+        type: this.config.layoutStrategy || 'adaptive'
+      },
+      responsive: this.config.responsive || {}
+    });
+
+    // 3. 初始化重要性評分系統
+    this.importanceScoring = new ImportanceScoring({
+      strategy: {
+        type: this.config.scoringStrategy || 'weighted_multi_factor'
+      },
+      dimensions: this.config.scoringDimensions || {}
+    });
+
+    console.log('✅ [InteractiveTimeline] 數據管理系統初始化完成');
+  }
+
+  /**
+   * 計算智能時間軸佈局
+   */
+  async calculateTimelineLayout() {
+    if (!this.adaptedProjects || this.adaptedProjects.length === 0) {
+      console.warn('[InteractiveTimeline] ⚠️ 沒有專案數據可供佈局計算');
+      return;
+    }
+
+    console.log('[InteractiveTimeline] 🧮 開始計算智能時間軸佈局');
+
+    // 獲取容器尺寸
+    const viewport = this.getViewportDimensions();
+    
+    // 使用佈局引擎計算節點位置
+    this.layoutNodes = this.layoutEngine.calculateLayout(this.adaptedProjects, viewport);
+    
+    // 將佈局結果應用到適配的專案數據
+    this.adaptedProjects.forEach((project, index) => {
+      const layoutNode = this.layoutNodes.find(node => node.id === project.id);
+      if (layoutNode) {
+        project.layoutPosition = layoutNode.position;
+        project.connectionPath = layoutNode.connectionPath;
+        project.layoutMetadata = {
+          weight: layoutNode.weight,
+          importance: layoutNode.importance,
+          adjustmentIterations: layoutNode.layoutState.adjustmentIterations
+        };
+      }
+    });
+
+    console.log('✅ [InteractiveTimeline] 智能佈局計算完成');
+    console.log('[InteractiveTimeline] 📊 佈局統計:', this.layoutEngine.getLayoutStatistics());
+  }
+
+  /**
+   * 獲取視窗尺寸
+   */
+  getViewportDimensions() {
+    // 如果元素還沒創建，使用預設值
+    if (!this.element) {
+      return {
+        width: 800,
+        height: 600,
+        scale: 1
+      };
+    }
+
+    const rect = this.element.getBoundingClientRect();
+    return {
+      width: rect.width || 800,
+      height: rect.height || 600,
+      scale: this.state.viewport?.scale || 1
+    };
+  }
+
+  /**
+   * 降級處理：使用測試數據
+   */
+  async fallbackToTestData() {
+    console.log('[InteractiveTimeline] 🔄 使用降級測試數據');
+    
+    // 使用原有的測試數據邏輯
+    this.timelineData = this.getDefaultTimelineData();
+    
+    // 嘗試初始化基礎的數據管理系統（如果可能）
+    try {
+      await this.initializeDataManagementSystem();
+      
+      // 創建簡化的適配數據
+      this.adaptedProjects = this.timelineData.map((project, index) => ({
+        id: project.id,
+        title: project.title,
+        date: project.date,
+        category: project.category || 'general',
+        status: project.status || 'completed',
+        visual: {
+          rarity: 'normal',
+          nodeSize: 16,
+          glowIntensity: 0.3
+        },
+        timeline: {
+          importance: project.importance || 5,
+          weight: 1,
+          position: index / this.timelineData.length
+        },
+        details: {
+          shortDescription: project.description,
+          technologies: project.technologies || [],
+          highlights: [],
+          stats: {}
+        }
+      }));
+      
+    } catch (error) {
+      console.warn('[InteractiveTimeline] ⚠️ 降級模式下的數據管理系統初始化也失敗:', error);
+    }
+  }
+
+  /**
+   * 更新年份篩選選項
+   */
+  updateYearFilterOptions() {
+    if (!this.adaptedProjects || this.adaptedProjects.length === 0) {
+      return;
+    }
+
+    const years = new Set();
+    
+    this.adaptedProjects.forEach(project => {
+      if (project.timeline && project.timeline.coordinates) {
+        years.add(project.timeline.coordinates.year);
+      } else {
+        // 備用：從日期字串解析年份
+        const yearMatch = project.date.match(/(\d{4})/);
+        if (yearMatch) {
+          years.add(parseInt(yearMatch[1]));
+        }
+      }
+    });
+
+    this.state.yearFilter.availableYears = Array.from(years).sort((a, b) => b - a);
+    console.log('[InteractiveTimeline] 📅 更新年份篩選選項:', this.state.yearFilter.availableYears);
   }
 
   convertProjectsToTimelineData(projectsConfig) {
@@ -389,7 +616,16 @@ export class InteractiveTimeline extends BaseComponent {
     this.element.className = 'interactive-timeline';
     this.element.innerHTML = this.generateHTML();
     
+    // 應用基礎樣式
     this.applyBaseStyles();
+    
+    // 設置容器尺寸
+    if (this.config.width) {
+      this.element.style.width = this.config.width;
+    }
+    if (this.config.height) {
+      this.element.style.height = this.config.height;
+    }
   }
 
   generateHTML() {
@@ -496,11 +732,11 @@ export class InteractiveTimeline extends BaseComponent {
           left: 50%;
           transform: translateX(-50%);
           z-index: 10;
-          background: rgba(0, 0, 0, 0.85);
-          padding: 8px 12px;
-          border-radius: 6px;
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.15);
+          /* 移除突兀的黑色背景和邊框 */
+          background: transparent;
+          padding: 0;
+          border: none;
+          backdrop-filter: none;
         }
         
         /* Step 2.2.4a: 年份篩選器樣式 */
@@ -643,6 +879,7 @@ export class InteractiveTimeline extends BaseComponent {
         }
         
         .timeline-path {
+          stroke: ${this.config.colors.timeline} !important;
           stroke-width: 4;
           stroke-linecap: round;
         }
@@ -1126,24 +1363,42 @@ export class InteractiveTimeline extends BaseComponent {
     const pathData = this.generateTimelinePath(svgWidth, svgHeight, isVertical);
     console.log(`[InteractiveTimeline] 生成路徑數據: ${pathData}`);
     
-    // 更新 SVG viewBox 以匹配動態尺寸
+    // 更新 SVG 尺寸和 viewBox 以匹配動態尺寸
+    svg.setAttribute('width', svgWidth);
+    svg.setAttribute('height', svgHeight);
     svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
     
+    // 強制設定 SVG CSS 尺寸，確保有實際的客戶端尺寸
+    svg.style.width = svgWidth + 'px';
+    svg.style.height = svgHeight + 'px';
+    svg.style.display = 'block';
+    
+    // 同步更新粒子畫布尺寸
+    const canvas = this.element.querySelector('.particles-canvas');
+    if (canvas) {
+      canvas.setAttribute('width', svgWidth);
+      canvas.setAttribute('height', svgHeight);
+    }
+
     // 設定 SVG 路徑
     path.setAttribute('d', pathData);
     path.setAttribute('stroke-width', this.config.responsive[this.state.currentBreakpoint].lineWidth);
     
-    // 動畫顯示路徑
+    // 確保路徑有顏色 - 強制設定藍色，覆蓋任何 CSS
+    path.setAttribute('stroke', this.config.colors.timeline);
+    path.setAttribute('fill', 'none');
+    path.style.stroke = this.config.colors.timeline + ' !important';
+    
+    // 確保路徑立即可見，但保留後續流動效果的空間
     if (window.gsap) {
-      const pathLength = path.getTotalLength();
-      path.style.strokeDasharray = pathLength;
-      path.style.strokeDashoffset = pathLength;
-      
-      window.gsap.to(path, {
-        strokeDashoffset: 0,
-        duration: 2,
-        ease: "power2.inOut"
-      });
+      // 簡單的淡入動畫，不設置 dash 屬性以免與後續流動效果衝突
+      window.gsap.fromTo(path, 
+        { opacity: 0 },
+        { opacity: 1, duration: 1, ease: "power2.out" }
+      );
+    } else {
+      // 沒有GSAP時確保路徑基本可見
+      path.style.opacity = '1';
     }
     
     console.log('[InteractiveTimeline] 時間軸路徑設定完成');
@@ -1173,7 +1428,7 @@ export class InteractiveTimeline extends BaseComponent {
       // 水平時間軸 (桌面版)
       const startX = padding;
       const endX = width - padding;
-      const centerY = height / 2;
+      const centerY = height * 0.85; // 調整到85%高度位置，讓節點更靠下
       
       // 創建自然的波浪曲線
       const controlOffset = height * 0.2;
@@ -3377,6 +3632,8 @@ export class InteractiveTimeline extends BaseComponent {
       console.log('[InteractiveTimeline] 移動端，跳過桌面端增強功能');
       return;
     }
+    
+    console.log(`[InteractiveTimeline] 當前斷點: ${this.state.currentBreakpoint}, 視窗寬度: ${window.innerWidth}px`);
 
     console.log('[InteractiveTimeline] 設定桌面端增強功能');
 
@@ -3402,6 +3659,9 @@ export class InteractiveTimeline extends BaseComponent {
     // 設定滑鼠滾輪縮放
     this.setupMouseWheelZoom(timelineContainer);
     
+    // 設定初始居中位置
+    this.setInitialCenterPosition();
+    
     // 設定水平拖曳
     this.setupHorizontalDrag(timelineContainer);
     
@@ -3413,14 +3673,46 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
+   * 設定初始居中位置
+   */
+  setInitialCenterPosition() {
+    const timelineContent = this.element.querySelector('.timeline-content');
+    const viewport = this.element.querySelector('.timeline-viewport');
+    
+    if (!timelineContent || !viewport) return;
+    
+    const contentDimensions = this.calculateSVGDimensions();
+    const viewportWidth = viewport.clientWidth;
+    const viewportHeight = viewport.clientHeight;
+    
+    // 計算居中所需的偏移
+    const centerX = (viewportWidth - contentDimensions.width) / 2;
+    const centerY = (viewportHeight - contentDimensions.height) / 2;
+    
+    // 設定初始居中位置 - 直接使用計算出的中心位置
+    const initialTranslateX = centerX;
+    const initialTranslateY = centerY;
+    
+    timelineContent.style.transform = `translateX(${initialTranslateX}px) translateY(${initialTranslateY}px) scale(1)`;
+    
+    // 更新狀態
+    this.state.desktop.translateX = initialTranslateX;
+    this.state.desktop.translateY = initialTranslateY;
+    
+    console.log(`[DEBUG] 設定初始居中位置: X=${initialTranslateX}, Y=${initialTranslateY}`);
+    console.log(`[DEBUG] 視窗尺寸: ${viewportWidth}x${viewportHeight}, 內容尺寸: ${contentDimensions.width}x${contentDimensions.height}`);
+    console.log(`[DEBUG] 中心計算: centerX=${centerX}, centerY=${centerY}`);
+  }
+
+  /**
    * 設定滑鼠滾輪縮放功能
    */
   setupMouseWheelZoom(container) {
     container.addEventListener('wheel', (event) => {
-      // 只在按住 Ctrl 或 Cmd 時縮放
-      if (!event.ctrlKey && !event.metaKey) return;
-      
+      // 改為直接支援滾輪縮放，不需要按修飾鍵
       event.preventDefault();
+      
+      console.log('[DEBUG] 滾輪縮放:', event.deltaY);
       
       const viewport = this.element.querySelector('.timeline-viewport');
       if (!viewport) return;
@@ -3462,6 +3754,8 @@ export class InteractiveTimeline extends BaseComponent {
 
     // 滑鼠按下
     container.addEventListener('mousedown', (event) => {
+      console.log('[DEBUG] 滑鼠按下事件觸發:', event.target, event.target.className);
+      
       // 忽略節點點擊和年份選擇器點擊
       if (event.target.closest('.project-node') || 
           event.target.closest('.timeline-year-filter') ||
@@ -3496,6 +3790,8 @@ export class InteractiveTimeline extends BaseComponent {
       const deltaY = event.clientY - startY;
       const timelineContent = this.element.querySelector('.timeline-content');
       
+      console.log('[DEBUG] 拖曳移動:', { deltaX, deltaY, isDragging });
+      
       if (timelineContent) {
         let newTranslateX = initialTranslateX + deltaX;
         let newTranslateY = initialTranslateY + deltaY;
@@ -3508,19 +3804,54 @@ export class InteractiveTimeline extends BaseComponent {
           const viewportWidth = viewport.clientWidth;
           const viewportHeight = viewport.clientHeight;
           
-          // 水平邊界限制
-          const maxTranslateX = 0;
-          const minTranslateX = Math.min(0, viewportWidth - contentDimensions.width);
+          // 重新設計邊界邏輯：允許內容在較大視窗中自由移動
+          const contentLargerThanViewport = {
+            width: contentDimensions.width > viewportWidth,
+            height: contentDimensions.height > viewportHeight
+          };
           
-          // 垂直邊界限制
-          const maxTranslateY = 0;
-          const minTranslateY = Math.min(0, viewportHeight - contentDimensions.height);
+          let maxTranslateX, minTranslateX, maxTranslateY, minTranslateY;
+          
+          if (contentLargerThanViewport.width) {
+            // 內容比視窗大：限制拖曳範圍
+            maxTranslateX = 0;
+            minTranslateX = viewportWidth - contentDimensions.width;
+          } else {
+            // 內容小於視窗時，允許以中心為基準向四周拖曳
+            const centerX = (viewportWidth - contentDimensions.width) / 2;
+            const dragRangeX = Math.min(300, viewportWidth * 0.3); // 最大300px或視窗寬度30%
+            maxTranslateX = centerX + dragRangeX;
+            minTranslateX = centerX - dragRangeX;
+          }
+          
+          if (contentLargerThanViewport.height) {
+            maxTranslateY = 0;
+            minTranslateY = viewportHeight - contentDimensions.height;
+          } else {
+            // 內容小於視窗時，允許以中心為基準向四周拖曳
+            const centerY = (viewportHeight - contentDimensions.height) / 2;
+            const dragRangeY = Math.min(200, viewportHeight * 0.3); // 最大200px或視窗高度30%
+            maxTranslateY = centerY + dragRangeY;
+            minTranslateY = centerY - dragRangeY;
+          }
+          
+          console.log('[DEBUG] 邊界計算:', { 
+            minTranslateX, maxTranslateX, minTranslateY, maxTranslateY,
+            viewportWidth, viewportHeight,
+            contentWidth: contentDimensions.width, contentHeight: contentDimensions.height,
+            beforeClamp: { newTranslateX, newTranslateY },
+            centerX: contentLargerThanViewport.width ? 'N/A' : (viewportWidth - contentDimensions.width) / 2,
+            centerY: contentLargerThanViewport.height ? 'N/A' : (viewportHeight - contentDimensions.height) / 2
+          });
           
           newTranslateX = Math.max(minTranslateX, Math.min(maxTranslateX, newTranslateX));
           newTranslateY = Math.max(minTranslateY, Math.min(maxTranslateY, newTranslateY));
           
           const zoom = this.state.desktop.zoom || 1;
-          timelineContent.style.transform = `translateX(${newTranslateX}px) translateY(${newTranslateY}px) scale(${zoom})`;
+          const transformString = `translateX(${newTranslateX}px) translateY(${newTranslateY}px) scale(${zoom})`;
+          
+          console.log('[DEBUG] 套用變換:', transformString);
+          timelineContent.style.transform = transformString;
           
           this.state.desktop.translateX = newTranslateX;
           this.state.desktop.translateY = newTranslateY;
@@ -3663,12 +3994,12 @@ export class InteractiveTimeline extends BaseComponent {
       timeline
         .to(path, {
           strokeDashoffset: -pathLength * 0.4,
-          duration: 8,
+          duration: 2, // 加速到 2 秒
           ease: "none"
         })
         .to(path, {
           strokeDashoffset: -pathLength * 0.8,
-          duration: 8,
+          duration: 2, // 加速到 2 秒
           ease: "none"
         });
       
@@ -3688,6 +4019,26 @@ export class InteractiveTimeline extends BaseComponent {
    * 銷毀組件
    */
   destroy() {
+    // Step 2.2.5c: 清理數據管理系統組件
+    if (this.dataAdapter) {
+      this.dataAdapter.destroy();
+      this.dataAdapter = null;
+    }
+    
+    if (this.layoutEngine) {
+      this.layoutEngine.destroy();
+      this.layoutEngine = null;
+    }
+    
+    if (this.importanceScoring) {
+      this.importanceScoring.destroy();
+      this.importanceScoring = null;
+    }
+    
+    // 清理數據引用
+    this.adaptedProjects = [];
+    this.layoutNodes = [];
+    
     // 停止粒子系統
     this.stopParticleSystem();
     

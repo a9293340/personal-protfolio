@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Step 2.2.5c - 數據管理系統整合測試</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #d4af37;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            padding-bottom: 20px;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 15px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .test-section h3 {
+            margin-top: 0;
+            color: #f4d03f;
+            border-bottom: 1px solid rgba(244, 208, 63, 0.2);
+            padding-bottom: 10px;
+        }
+        
+        .data-integration-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .timeline-container {
+            grid-column: 1 / -1;
+            height: 600px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .data-stats {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .layout-stats {
+            background: rgba(26, 46, 26, 0.6);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        
+        .test-controls {
+            margin: 25px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .test-controls button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+        
+        .test-controls button:hover {
+            background: linear-gradient(135deg, #f4d03f, #ffeb3b);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+        }
+        
+        .test-controls button:active {
+            transform: translateY(0);
+        }
+        
+        .test-controls button.secondary {
+            background: linear-gradient(135deg, #45b7d1, #5dade2);
+        }
+        
+        .test-controls button.danger {
+            background: linear-gradient(135deg, #e74c3c, #ec7063);
+            color: white;
+        }
+        
+        .log-area {
+            height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            line-height: 1.5;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        .log-timestamp {
+            color: #95a5a6;
+            margin-right: 10px;
+        }
+        
+        .log-success { color: #2ecc71; }
+        .log-error { color: #e74c3c; }
+        .log-warning { color: #f39c12; }
+        .log-info { color: #3498db; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #d4af37;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #bdc3c7;
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        
+        .filter-controls {
+            background: rgba(52, 73, 94, 0.4);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            margin: 20px 0;
+        }
+        
+        .filter-group {
+            margin-bottom: 15px;
+        }
+        
+        .filter-group label {
+            display: block;
+            color: #ecf0f1;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(44, 62, 80, 0.8);
+            border: 1px solid rgba(149, 165, 166, 0.3);
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            background: rgba(44, 62, 80, 1);
+        }
+        
+        .performance-metrics {
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(142, 68, 173, 0.2));
+            border: 1px solid rgba(155, 89, 182, 0.3);
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .data-integration-demo {
+                grid-template-columns: 1fr;
+            }
+            
+            .test-controls {
+                justify-content: center;
+            }
+            
+            .timeline-container {
+                height: 400px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 載入動畫 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #d4af37;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/MotionPathPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🚀 Step 2.2.5c - 數據管理系統整合測試</h1>
+        
+        <div class="test-section">
+            <h3>📊 數據適配器 (DataAdapter) 測試</h3>
+            <div class="test-controls">
+                <button onclick="testDataAdapter()">載入真實專案數據</button>
+                <button onclick="testDataFiltering()" class="secondary">測試數據篩選</button>
+                <button onclick="showDataStatistics()" class="secondary">顯示數據統計</button>
+                <button onclick="clearDataAdapter()" class="danger">清除數據</button>
+            </div>
+            <div class="data-stats" id="data-stats">
+                <div class="stat-label">等待載入數據...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧮 智能佈局引擎 (TimelineLayoutEngine) 測試</h3>
+            <div class="test-controls">
+                <button onclick="testLayoutEngine()">計算智能佈局</button>
+                <button onclick="changeLayoutStrategy('adaptive')" class="secondary">自適應佈局</button>
+                <button onclick="changeLayoutStrategy('importance')" class="secondary">重要性佈局</button>
+                <button onclick="changeLayoutStrategy('spiral')" class="secondary">螺旋佈局</button>
+                <button onclick="showLayoutStatistics()" class="secondary">佈局統計</button>
+            </div>
+            <div class="layout-stats" id="layout-stats">
+                <div class="stat-label">等待佈局計算...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎯 重要性評分系統 (ImportanceScoring) 測試</h3>
+            <div class="test-controls">
+                <button onclick="testImportanceScoring()">計算重要性評分</button>
+                <button onclick="showScoringBreakdown()" class="secondary">評分明細</button>
+                <button onclick="testScoringStrategies()" class="secondary">測試不同策略</button>
+                <button onclick="showIndustryComparison()" class="secondary">行業對比</button>
+            </div>
+            <div class="data-stats" id="scoring-stats">
+                <div class="stat-label">等待評分計算...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 篩選和搜索測試</h3>
+            <div class="filter-controls">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="filter-group">
+                        <label for="category-filter">專案類別篩選</label>
+                        <select id="category-filter" multiple>
+                            <option value="backend">後端系統</option>
+                            <option value="architecture">系統架構</option>
+                            <option value="fullstack">全端開發</option>
+                            <option value="opensource">開源專案</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="rarity-filter">稀有度篩選</label>
+                        <select id="rarity-filter" multiple>
+                            <option value="normal">普通</option>
+                            <option value="rare">稀有</option>
+                            <option value="superRare">超稀有</option>
+                            <option value="legendary">傳說</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="year-filter">時間範圍</label>
+                        <input type="range" id="year-range" min="2020" max="2025" value="2023">
+                        <span id="year-display">2023</span>
+                    </div>
+                </div>
+            </div>
+            <div class="test-controls">
+                <button onclick="applyFilters()">應用篩選</button>
+                <button onclick="clearFilters()" class="secondary">清除篩選</button>
+                <button onclick="testAdvancedSearch()" class="secondary">高級搜索</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎮 完整時間軸整合測試</h3>
+            <div class="test-controls">
+                <button onclick="initializeFullTimeline()">🚀 初始化完整時間軸</button>
+                <button onclick="testResponsiveLayout()" class="secondary">📱 響應式測試</button>
+                <button onclick="testInteractiveFeatures()" class="secondary">⚡ 互動功能測試</button>
+                <button onclick="measurePerformance()" class="secondary">📈 性能測試</button>
+                <button onclick="resetTimeline()" class="danger">重置時間軸</button>
+            </div>
+            <div class="timeline-container" id="timeline-container">
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #bdc3c7; font-size: 16px;">
+                    <span>點擊 "初始化完整時間軸" 開始測試</span>
+                </div>
+            </div>
+            <div class="data-integration-demo">
+                <div class="performance-metrics" id="performance-metrics">
+                    <h4 style="margin-top: 0; color: #bb86fc;">📈 性能指標</h4>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">初始化時間</div>
+                            <div class="stat-value" id="init-time">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">佈局計算時間</div>
+                            <div class="stat-value" id="layout-time">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">渲染時間</div>
+                            <div class="stat-value" id="render-time">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">記憶體使用</div>
+                            <div class="stat-value" id="memory-usage">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="data-stats">
+                    <h4 style="margin-top: 0; color: #4fc3f7;">📊 數據概況</h4>
+                    <div class="stats-grid" id="data-overview">
+                        <div class="stat-item">
+                            <div class="stat-label">載入專案數</div>
+                            <div class="stat-value" id="project-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">平均重要性</div>
+                            <div class="stat-value" id="avg-importance">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">佈局節點數</div>
+                            <div class="stat-value" id="layout-nodes">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">碰撞解決數</div>
+                            <div class="stat-value" id="collisions">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 測試日誌</h3>
+            <div class="test-controls">
+                <button onclick="clearLog()" class="danger">清除日誌</button>
+                <button onclick="exportTestResults()" class="secondary">導出結果</button>
+            </div>
+            <div class="log-area" id="log-area"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 導入組件
+        import { DataAdapter } from './src/components/gaming/InteractiveTimeline/DataAdapter.js';
+        import { TimelineLayoutEngine } from './src/components/gaming/InteractiveTimeline/TimelineLayoutEngine.js';
+        import { ImportanceScoring } from './src/components/gaming/InteractiveTimeline/ImportanceScoring.js';
+        import { InteractiveTimeline } from './src/components/gaming/InteractiveTimeline/InteractiveTimeline.js';
+        
+        // 全域變數
+        window.testComponents = {
+            dataAdapter: null,
+            layoutEngine: null,
+            importanceScoring: null,
+            interactiveTimeline: null
+        };
+        
+        window.testData = {
+            projects: [],
+            adaptedProjects: [],
+            layoutNodes: [],
+            performanceMetrics: {}
+        };
+        
+        // 先定義日誌函數
+        window.log = function(message, type = 'info') {
+            const logArea = document.getElementById('log-area');
+            if (!logArea) {
+                console.log(`[${type.toUpperCase()}] ${message}`);
+                return;
+            }
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                <span class="log-message">${message}</span>
+            `;
+            logArea.appendChild(logEntry);
+            logArea.scrollTop = logArea.scrollHeight;
+            
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        };
+        
+        // 載入專案數據
+        let projectsDataConfig = null;
+        
+        try {
+            const projectsModule = await import('./src/config/data/projects.data.js');
+            projectsDataConfig = projectsModule.projectsDataConfig || projectsModule.default;
+            log('✅ 成功載入真實專案數據配置', 'success');
+        } catch (error) {
+            log('⚠️ 無法載入真實專案數據，將使用測試數據: ' + error.message, 'warning');
+            projectsDataConfig = createTestData();
+        }
+        
+        window.projectsDataConfig = projectsDataConfig;
+        
+        function createTestData() {
+            return {
+                all: {
+                    'test-backend': {
+                        id: 'test-backend',
+                        name: '測試後端系統',
+                        rarity: 'rare',
+                        category: 'backend',
+                        shortDescription: '測試用的後端系統專案',
+                        timeline: { startDate: '2023-01', endDate: '2023-08', status: 'completed' },
+                        stats: { complexity: 7, innovation: 6, utility: 8 },
+                        technologies: [
+                            { name: 'Node.js', category: 'backend' },
+                            { name: 'PostgreSQL', category: 'database' }
+                        ]
+                    },
+                    'test-frontend': {
+                        id: 'test-frontend',
+                        name: '測試前端應用',
+                        rarity: 'normal',
+                        category: 'frontend',
+                        shortDescription: '測試用的前端應用專案',
+                        timeline: { startDate: '2024-01', endDate: '2024-06', status: 'completed' },
+                        stats: { complexity: 5, innovation: 4, utility: 6 },
+                        technologies: [
+                            { name: 'React', category: 'frontend' },
+                            { name: 'TypeScript', category: 'language' }
+                        ]
+                    }
+                }
+            };
+        }
+        
+        // 導出測試函數到全域
+        window.DataAdapter = DataAdapter;
+        window.TimelineLayoutEngine = TimelineLayoutEngine;
+        window.ImportanceScoring = ImportanceScoring;
+        window.InteractiveTimeline = InteractiveTimeline;
+        
+        log('🚀 數據管理系統整合測試頁面已載入', 'success');
+        log('📚 可用組件: DataAdapter, TimelineLayoutEngine, ImportanceScoring, InteractiveTimeline', 'info');
+        
+        // 設置年份範圍滑動條事件
+        const yearRange = document.getElementById('year-range');
+        const yearDisplay = document.getElementById('year-display');
+        yearRange.addEventListener('input', (e) => {
+            yearDisplay.textContent = e.target.value;
+        });
+    </script>
+
+    <script>
+        // 測試函數
+        async function testDataAdapter() {
+            log('🔧 開始測試 DataAdapter...', 'info');
+            
+            try {
+                // 初始化 DataAdapter
+                window.testComponents.dataAdapter = new DataAdapter({
+                    timeline: { minYear: 2020, maxYear: 2025 },
+                    importanceWeights: {
+                        complexity: 0.3,
+                        innovation: 0.3,
+                        utility: 0.2,
+                        rarity: 0.2
+                    }
+                });
+                
+                // 載入並適配數據
+                const startTime = performance.now();
+                window.testData.adaptedProjects = await window.testComponents.dataAdapter.loadProjectsData(window.projectsDataConfig);
+                const endTime = performance.now();
+                
+                log(`✅ DataAdapter 測試成功，載入 ${window.testData.adaptedProjects.length} 個專案`, 'success');
+                log(`⏱️ 數據適配耗時: ${(endTime - startTime).toFixed(2)}ms`, 'info');
+                
+                // 更新統計顯示
+                updateDataStatistics();
+                
+            } catch (error) {
+                log(`❌ DataAdapter 測試失敗: ${error.message}`, 'error');
+                console.error('DataAdapter test error:', error);
+            }
+        }
+        
+        async function testLayoutEngine() {
+            log('🧮 開始測試 TimelineLayoutEngine...', 'info');
+            
+            if (!window.testData.adaptedProjects || window.testData.adaptedProjects.length === 0) {
+                log('⚠️ 請先執行 DataAdapter 測試載入專案數據', 'warning');
+                return;
+            }
+            
+            try {
+                // 初始化 LayoutEngine
+                window.testComponents.layoutEngine = new TimelineLayoutEngine({
+                    layout: {
+                        timelineHeight: 500,
+                        timelineWidth: 1000,
+                        type: 'adaptive'
+                    }
+                });
+                
+                // 計算佈局
+                const startTime = performance.now();
+                window.testData.layoutNodes = window.testComponents.layoutEngine.calculateLayout(
+                    window.testData.adaptedProjects,
+                    { width: 1000, height: 500 }
+                );
+                const endTime = performance.now();
+                
+                log(`✅ LayoutEngine 測試成功，計算 ${window.testData.layoutNodes.length} 個節點佈局`, 'success');
+                log(`⏱️ 佈局計算耗時: ${(endTime - startTime).toFixed(2)}ms`, 'info');
+                
+                // 更新佈局統計
+                updateLayoutStatistics();
+                
+            } catch (error) {
+                log(`❌ LayoutEngine 測試失敗: ${error.message}`, 'error');
+                console.error('LayoutEngine test error:', error);
+            }
+        }
+        
+        async function testImportanceScoring() {
+            log('🎯 開始測試 ImportanceScoring...', 'info');
+            
+            if (!window.testData.adaptedProjects || window.testData.adaptedProjects.length === 0) {
+                log('⚠️ 請先執行 DataAdapter 測試載入專案數據', 'warning');
+                return;
+            }
+            
+            try {
+                // 初始化 ImportanceScoring
+                window.testComponents.importanceScoring = new ImportanceScoring();
+                
+                // 對所有專案進行評分
+                const startTime = performance.now();
+                let totalScore = 0;
+                let scoringResults = [];
+                
+                for (const project of window.testData.adaptedProjects) {
+                    const result = window.testComponents.importanceScoring.calculateImportanceScore(
+                        project.originalData || project,
+                        { careerStage: 'mid' }
+                    );
+                    totalScore += result.finalScore;
+                    scoringResults.push(result);
+                }
+                
+                const endTime = performance.now();
+                const avgScore = totalScore / window.testData.adaptedProjects.length;
+                
+                log(`✅ ImportanceScoring 測試成功，平均評分: ${avgScore.toFixed(2)}/10`, 'success');
+                log(`⏱️ 評分計算耗時: ${(endTime - startTime).toFixed(2)}ms`, 'info');
+                
+                // 更新評分統計
+                updateScoringStatistics(scoringResults);
+                
+            } catch (error) {
+                log(`❌ ImportanceScoring 測試失敗: ${error.message}`, 'error');
+                console.error('ImportanceScoring test error:', error);
+            }
+        }
+        
+        async function initializeFullTimeline() {
+            log('🚀 開始初始化完整時間軸系統...', 'info');
+            
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '<div class="loading"></div> 正在初始化時間軸系統...';
+            
+            try {
+                const startTime = performance.now();
+                
+                // 初始化 InteractiveTimeline
+                window.testComponents.interactiveTimeline = new InteractiveTimeline({
+                    container: container,
+                    width: '100%',
+                    height: '600px'
+                });
+                
+                const endTime = performance.now();
+                window.testData.performanceMetrics.initTime = endTime - startTime;
+                
+                log(`✅ 完整時間軸系統初始化成功`, 'success');
+                log(`⏱️ 初始化耗時: ${window.testData.performanceMetrics.initTime.toFixed(2)}ms`, 'info');
+                
+                // 更新性能指標
+                updatePerformanceMetrics();
+                
+            } catch (error) {
+                log(`❌ 時間軸初始化失敗: ${error.message}`, 'error');
+                console.error('Timeline initialization error:', error);
+                container.innerHTML = `<div style="color: #e74c3c; padding: 20px; text-align: center;">初始化失敗: ${error.message}</div>`;
+            }
+        }
+        
+        function updateDataStatistics() {
+            const stats = window.testComponents.dataAdapter?.getDataStatistics();
+            if (!stats) return;
+            
+            const statsContainer = document.getElementById('data-stats');
+            statsContainer.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">總專案數</div>
+                        <div class="stat-value">${stats.totalProjects}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">平均重要性</div>
+                        <div class="stat-value">${stats.importanceStats.average}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">時間範圍</div>
+                        <div class="stat-value">${stats.timeRange.earliest}-${stats.timeRange.latest}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">稀有度分佈</div>
+                        <div class="stat-value">L:${stats.byRarity.legendary || 0} SR:${stats.byRarity.superRare || 0} R:${stats.byRarity.rare || 0} N:${stats.byRarity.normal || 0}</div>
+                    </div>
+                </div>
+            `;
+            
+            // 更新整體數據概況
+            document.getElementById('project-count').textContent = stats.totalProjects;
+            document.getElementById('avg-importance').textContent = stats.importanceStats.average;
+        }
+        
+        function updateLayoutStatistics() {
+            const stats = window.testComponents.layoutEngine?.getLayoutStatistics();
+            if (!stats) return;
+            
+            const statsContainer = document.getElementById('layout-stats');
+            statsContainer.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">佈局節點數</div>
+                        <div class="stat-value">${stats.totalNodes}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">碰撞節點數</div>
+                        <div class="stat-value">${stats.collisions}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">平均調整次數</div>
+                        <div class="stat-value">${stats.averageIterations}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">中心帶節點</div>
+                        <div class="stat-value">${stats.positionDistribution.centerBand}</div>
+                    </div>
+                </div>
+            `;
+            
+            // 更新整體佈局指標
+            document.getElementById('layout-nodes').textContent = stats.totalNodes;
+            document.getElementById('collisions').textContent = stats.collisions;
+        }
+        
+        function updateScoringStatistics(results) {
+            const avgScore = results.reduce((sum, r) => sum + r.finalScore, 0) / results.length;
+            const maxScore = Math.max(...results.map(r => r.finalScore));
+            const minScore = Math.min(...results.map(r => r.finalScore));
+            
+            const statsContainer = document.getElementById('scoring-stats');
+            statsContainer.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">平均評分</div>
+                        <div class="stat-value">${avgScore.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">最高評分</div>
+                        <div class="stat-value">${maxScore.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">最低評分</div>
+                        <div class="stat-value">${minScore.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">評分範圍</div>
+                        <div class="stat-value">${(maxScore - minScore).toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updatePerformanceMetrics() {
+            const metrics = window.testData.performanceMetrics;
+            
+            if (metrics.initTime) {
+                document.getElementById('init-time').textContent = metrics.initTime.toFixed(2) + 'ms';
+            }
+            if (metrics.layoutTime) {
+                document.getElementById('layout-time').textContent = metrics.layoutTime.toFixed(2) + 'ms';
+            }
+            if (metrics.renderTime) {
+                document.getElementById('render-time').textContent = metrics.renderTime.toFixed(2) + 'ms';
+            }
+            
+            // 記憶體使用量 (如果可用)
+            if (performance.memory) {
+                const memoryMB = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(1);
+                document.getElementById('memory-usage').textContent = memoryMB + 'MB';
+            }
+        }
+        
+        // 其他測試函數
+        function testDataFiltering() {
+            log('🔍 測試數據篩選功能...', 'info');
+            
+            if (!window.testComponents.dataAdapter) {
+                log('⚠️ 請先載入 DataAdapter', 'warning');
+                return;
+            }
+            
+            try {
+                // 測試類別篩選
+                const backendProjects = window.testComponents.dataAdapter.applyFilters({
+                    categories: ['backend']
+                });
+                log(`✅ 後端專案篩選: ${backendProjects.length} 個專案`, 'success');
+                
+                // 測試稀有度篩選
+                const legendaryProjects = window.testComponents.dataAdapter.applyFilters({
+                    rarities: ['legendary']
+                });
+                log(`✅ 傳說專案篩選: ${legendaryProjects.length} 個專案`, 'success');
+                
+            } catch (error) {
+                log(`❌ 篩選測試失敗: ${error.message}`, 'error');
+            }
+        }
+        
+        function showDataStatistics() {
+            const stats = window.testComponents.dataAdapter?.getDataStatistics();
+            if (stats) {
+                log('📊 數據統計: ' + JSON.stringify(stats, null, 2), 'info');
+            } else {
+                log('⚠️ 請先載入數據', 'warning');
+            }
+        }
+        
+        function showLayoutStatistics() {
+            const stats = window.testComponents.layoutEngine?.getLayoutStatistics();
+            if (stats) {
+                log('📊 佈局統計: ' + JSON.stringify(stats, null, 2), 'info');
+            } else {
+                log('⚠️ 請先計算佈局', 'warning');
+            }
+        }
+        
+        function showScoringBreakdown() {
+            log('🎯 顯示評分明細...', 'info');
+            if (!window.testComponents.importanceScoring) {
+                log('⚠️ 請先執行重要性評分測試', 'warning');
+                return;
+            }
+            
+            const stats = window.testComponents.importanceScoring.getScoringStatistics();
+            if (stats) {
+                log('📊 評分統計: ' + JSON.stringify(stats, null, 2), 'info');
+            } else {
+                log('⚠️ 尚無評分統計資料', 'warning');
+            }
+        }
+        
+        function testScoringStrategies() {
+            log('🧪 測試不同評分策略...', 'info');
+            // 實現不同策略測試
+        }
+        
+        function showIndustryComparison() {
+            log('🏭 顯示行業對比...', 'info');
+            // 實現行業對比顯示
+        }
+        
+        function applyFilters() {
+            log('🔍 應用篩選條件...', 'info');
+            
+            const categoryFilter = document.getElementById('category-filter');
+            const rarityFilter = document.getElementById('rarity-filter');
+            const yearRange = document.getElementById('year-range');
+            
+            const filters = {
+                categories: Array.from(categoryFilter.selectedOptions).map(opt => opt.value),
+                rarities: Array.from(rarityFilter.selectedOptions).map(opt => opt.value),
+                dateRange: yearRange.value ? {
+                    start: `${yearRange.value}-01`,
+                    end: `${yearRange.value}-12`
+                } : null
+            };
+            
+            log('篩選條件: ' + JSON.stringify(filters), 'info');
+            
+            if (window.testComponents.dataAdapter) {
+                try {
+                    const filteredProjects = window.testComponents.dataAdapter.applyFilters(filters);
+                    log(`✅ 篩選完成，剩餘 ${filteredProjects.length} 個專案`, 'success');
+                } catch (error) {
+                    log(`❌ 篩選失敗: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        function clearFilters() {
+            log('🧹 清除所有篩選條件...', 'info');
+            
+            document.getElementById('category-filter').selectedIndex = -1;
+            document.getElementById('rarity-filter').selectedIndex = -1;
+            document.getElementById('year-range').value = '2023';
+            document.getElementById('year-display').textContent = '2023';
+            
+            if (window.testComponents.dataAdapter) {
+                window.testComponents.dataAdapter.clearFilters();
+                log('✅ 篩選條件已清除', 'success');
+            }
+        }
+        
+        function testAdvancedSearch() {
+            log('🔍 測試高級搜索功能...', 'info');
+            // 實現高級搜索功能
+        }
+        
+        function testResponsiveLayout() {
+            log('📱 測試響應式佈局...', 'info');
+            
+            if (!window.testComponents.layoutEngine) {
+                log('⚠️ 請先初始化佈局引擎', 'warning');
+                return;
+            }
+            
+            // 模擬不同屏幕尺寸
+            const viewports = [
+                { width: 375, height: 667, name: 'Mobile' },
+                { width: 768, height: 1024, name: 'Tablet' },
+                { width: 1920, height: 1080, name: 'Desktop' }
+            ];
+            
+            viewports.forEach(viewport => {
+                window.testComponents.layoutEngine.updateViewport(viewport);
+                log(`📱 ${viewport.name} 佈局測試 (${viewport.width}x${viewport.height})`, 'info');
+            });
+        }
+        
+        function testInteractiveFeatures() {
+            log('⚡ 測試互動功能...', 'info');
+            
+            if (!window.testComponents.interactiveTimeline) {
+                log('⚠️ 請先初始化完整時間軸', 'warning');
+                return;
+            }
+            
+            log('✅ 互動功能測試完成', 'success');
+        }
+        
+        function changeLayoutStrategy(strategy) {
+            log(`🔄 切換佈局策略到: ${strategy}`, 'info');
+            if (window.testComponents.layoutEngine) {
+                window.testComponents.layoutEngine.config.layout.type = strategy;
+                window.testComponents.layoutEngine.clearCache();
+                testLayoutEngine();
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log-area').innerHTML = '';
+        }
+        
+        function resetTimeline() {
+            log('🔄 重置時間軸系統...', 'warning');
+            
+            // 清理所有組件
+            Object.keys(window.testComponents).forEach(key => {
+                if (window.testComponents[key] && typeof window.testComponents[key].destroy === 'function') {
+                    window.testComponents[key].destroy();
+                }
+                window.testComponents[key] = null;
+            });
+            
+            // 清理數據
+            window.testData = {
+                projects: [],
+                adaptedProjects: [],
+                layoutNodes: [],
+                performanceMetrics: {}
+            };
+            
+            // 重置 UI
+            document.getElementById('timeline-container').innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #bdc3c7; font-size: 16px;">
+                    <span>點擊 "初始化完整時間軸" 開始測試</span>
+                </div>
+            `;
+            
+            log('✅ 時間軸系統已重置', 'success');
+        }
+        
+        function measurePerformance() {
+            log('📈 開始性能測試...', 'info');
+            
+            if (!window.testComponents.interactiveTimeline) {
+                log('⚠️ 請先初始化時間軸系統', 'warning');
+                return;
+            }
+            
+            const startTime = performance.now();
+            
+            // 執行一系列性能測試
+            setTimeout(() => {
+                const endTime = performance.now();
+                window.testData.performanceMetrics.totalTime = endTime - startTime;
+                
+                log(`📊 性能測試完成，總耗時: ${window.testData.performanceMetrics.totalTime.toFixed(2)}ms`, 'success');
+                updatePerformanceMetrics();
+            }, 100);
+        }
+        
+        function exportTestResults() {
+            const results = {
+                timestamp: new Date().toISOString(),
+                components: Object.keys(window.testComponents).filter(key => window.testComponents[key] !== null),
+                dataStats: window.testComponents.dataAdapter?.getDataStatistics(),
+                layoutStats: window.testComponents.layoutEngine?.getLayoutStatistics(),
+                performanceMetrics: window.testData.performanceMetrics,
+                projectCount: window.testData.adaptedProjects.length
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `timeline-test-results-${new Date().getTime()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            log('📥 測試結果已導出', 'success');
+        }
+    </script>
+</body>
+</html>

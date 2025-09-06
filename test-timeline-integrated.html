@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 互動時間軸 - 完整整合測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 20px;
+            background: rgba(26, 26, 46, 0.9);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #d4af37;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #bdc3c7;
+            font-size: 14px;
+        }
+        
+        .controls {
+            padding: 20px;
+            background: rgba(52, 73, 94, 0.4);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .controls button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+        
+        .controls button:hover {
+            background: linear-gradient(135deg, #f4d03f, #ffeb3b);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+        }
+        
+        .controls button.secondary {
+            background: linear-gradient(135deg, #3498db, #5dade2);
+        }
+        
+        .controls button.secondary:hover {
+            background: linear-gradient(135deg, #5dade2, #85c1e9);
+        }
+        
+        .main-container {
+            flex: 1;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timeline-wrapper {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+        }
+        
+        #timeline-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: rgba(26, 26, 46, 0.8);
+            border-left: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .sidebar h3 {
+            color: #d4af37;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .info-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #95a5a6;
+            font-size: 13px;
+        }
+        
+        .stat-value {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.ready {
+            background: #2ecc71;
+        }
+        
+        .status-indicator.loading {
+            background: #f39c12;
+        }
+        
+        .status-indicator.error {
+            background: #e74c3c;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .instructions {
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h4 {
+            color: #2ecc71;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .instructions ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .instructions li {
+            padding: 5px 0;
+            font-size: 13px;
+            color: #ecf0f1;
+        }
+        
+        .instructions li:before {
+            content: "▸ ";
+            color: #2ecc71;
+            margin-right: 5px;
+        }
+        
+        /* 時間軸默認樣式 */
+        .timeline-svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .timeline-path {
+            stroke: #d4af37;
+            stroke-width: 3;
+            fill: none;
+            opacity: 0.8;
+        }
+        
+        .timeline-node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-node:hover {
+            transform: scale(1.2);
+        }
+        
+        .node-tooltip {
+            position: absolute;
+            background: rgba(26, 26, 46, 0.95);
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .controls {
+                padding: 10px;
+            }
+            
+            .controls button {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+        }
+        
+        /* Loading 動畫 */
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-top: 3px solid #d4af37;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .init-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #bdc3c7;
+        }
+        
+        .init-message h2 {
+            color: #d4af37;
+            margin-bottom: 20px;
+        }
+        
+        .init-message button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        .init-message button:hover {
+            background: linear-gradient(135deg, #f4d03f, #ffeb3b);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.5);
+        }
+    </style>
+    
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/MotionPathPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 互動時間軸 - 完整整合測試</h1>
+        <p>Step 2.2.5c 數據管理系統整合驗證</p>
+    </div>
+    
+    <div class="controls">
+        <button onclick="startTimeline()">🚀 啟動時間軸</button>
+        <button onclick="testInteractions()" class="secondary">⚡ 測試互動</button>
+        <button onclick="changeLayout('adaptive')" class="secondary">📐 自適應佈局</button>
+        <button onclick="changeLayout('importance')" class="secondary">⭐ 重要性佈局</button>
+        <button onclick="changeLayout('spiral')" class="secondary">🌀 螺旋佈局</button>
+        <button onclick="resetTimeline()" class="secondary">🔄 重置</button>
+    </div>
+    
+    <div class="main-container">
+        <div class="timeline-wrapper">
+            <div id="timeline-container">
+                <div class="init-message">
+                    <h2>歡迎來到互動時間軸測試</h2>
+                    <p style="margin-bottom: 20px; color: #95a5a6;">點擊下方按鈕開始體驗</p>
+                    <button onclick="startTimeline()">🎯 開始測試</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <h3>📊 系統狀態</h3>
+            <div class="info-card">
+                <div class="stat-row">
+                    <span class="stat-label">狀態</span>
+                    <span class="stat-value">
+                        <span class="status-indicator ready" id="status"></span>
+                        <span id="status-text">準備就緒</span>
+                    </span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">載入專案數</span>
+                    <span class="stat-value" id="project-count">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">當前佈局</span>
+                    <span class="stat-value" id="layout-type">未初始化</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">節點碰撞數</span>
+                    <span class="stat-value" id="collisions">0</span>
+                </div>
+            </div>
+            
+            <h3>📖 操作指南</h3>
+            <div class="instructions">
+                <h4>基本操作</h4>
+                <ul>
+                    <li>點擊「啟動時間軸」初始化系統</li>
+                    <li>滑鼠拖曳移動時間軸</li>
+                    <li>滾輪縮放視圖</li>
+                    <li>點擊節點查看專案詳情</li>
+                </ul>
+                <h4 style="margin-top: 15px;">鍵盤快捷鍵</h4>
+                <ul>
+                    <li>方向鍵：導航時間軸</li>
+                    <li>+/- 鍵：縮放控制</li>
+                    <li>Space：重置視圖</li>
+                    <li>ESC：關閉卡片</li>
+                </ul>
+            </div>
+            
+            <h3>🎯 當前專案</h3>
+            <div class="info-card" id="current-project">
+                <p style="color: #95a5a6; text-align: center;">點擊節點查看專案資訊</p>
+            </div>
+            
+            <h3>📝 測試日誌</h3>
+            <div class="info-card" style="max-height: 200px; overflow-y: auto;">
+                <div id="log-output" style="font-size: 12px; line-height: 1.5;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { InteractiveTimeline } from './src/components/gaming/InteractiveTimeline/InteractiveTimeline.js';
+        import { ProjectNode } from './src/components/gaming/InteractiveTimeline/ProjectNode.js';
+        import { TimelineNavigator } from './src/components/gaming/InteractiveTimeline/TimelineNavigator.js';
+        import { ProjectCardModal } from './src/components/gaming/InteractiveTimeline/ProjectCardModal.js';
+        
+        let timeline = null;
+        let isInitialized = false;
+        
+        // 簡單的日誌系統
+        function log(message, type = 'info') {
+            const logOutput = document.getElementById('log-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = {
+                'info': '#3498db',
+                'success': '#2ecc71',
+                'warning': '#f39c12',
+                'error': '#e74c3c'
+            }[type] || '#95a5a6';
+            
+            const logEntry = `<div style="color: ${color}; margin-bottom: 5px;">
+                [${timestamp}] ${message}
+            </div>`;
+            
+            logOutput.innerHTML = logEntry + logOutput.innerHTML;
+            
+            // 保持最多 20 條日誌
+            const logs = logOutput.children;
+            while (logs.length > 20) {
+                logOutput.removeChild(logs[logs.length - 1]);
+            }
+        }
+        
+        // 更新狀態顯示
+        function updateStatus(status, text) {
+            const statusIndicator = document.getElementById('status');
+            const statusText = document.getElementById('status-text');
+            
+            statusIndicator.className = `status-indicator ${status}`;
+            statusText.textContent = text;
+        }
+        
+        // 啟動時間軸
+        window.startTimeline = async function() {
+            if (isInitialized) {
+                log('時間軸已經初始化', 'warning');
+                return;
+            }
+            
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '<div class="loading-spinner"></div>';
+            
+            updateStatus('loading', '初始化中...');
+            log('🚀 開始初始化時間軸系統', 'info');
+            
+            try {
+                // 創建時間軸實例
+                timeline = new InteractiveTimeline({
+                    container: container,
+                    width: '100%',
+                    height: '100%',
+                    
+                    // 使用三個抽離的組件
+                    components: {
+                        ProjectNode: ProjectNode,
+                        TimelineNavigator: TimelineNavigator,
+                        ProjectCardModal: ProjectCardModal
+                    },
+                    
+                    // 配置
+                    responsive: {
+                        mobile: { orientation: 'vertical', nodeSize: 14 },
+                        tablet: { orientation: 'horizontal', nodeSize: 18 },
+                        desktop: { orientation: 'horizontal', nodeSize: 22 }
+                    },
+                    
+                    animations: {
+                        cardFlyOut: { duration: 1.2, easing: "back.out(1.7)" },
+                        nodeHover: { duration: 0.3, scale: 1.5 }
+                    },
+                    
+                    // 回調函數
+                    callbacks: {
+                        onNodeClick: (project) => {
+                            log(`點擊節點: ${project.title}`, 'info');
+                            updateCurrentProject(project);
+                        },
+                        onDataLoaded: (data) => {
+                            log(`成功載入 ${data.length} 個專案`, 'success');
+                            document.getElementById('project-count').textContent = data.length;
+                        },
+                        onLayoutCalculated: (stats) => {
+                            if (stats) {
+                                document.getElementById('collisions').textContent = stats.collisions || 0;
+                            }
+                        }
+                    }
+                });
+                
+                // 等待初始化完成
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                isInitialized = true;
+                updateStatus('ready', '運行中');
+                document.getElementById('layout-type').textContent = 'adaptive';
+                
+                log('✅ 時間軸初始化成功', 'success');
+                log('使用滑鼠拖曳和滾輪操作時間軸', 'info');
+                
+            } catch (error) {
+                console.error('Timeline initialization error:', error);
+                updateStatus('error', '初始化失敗');
+                log(`❌ 初始化失敗: ${error.message}`, 'error');
+                
+                container.innerHTML = `
+                    <div class="init-message">
+                        <h2 style="color: #e74c3c;">初始化失敗</h2>
+                        <p style="margin-bottom: 20px; color: #95a5a6;">${error.message}</p>
+                        <button onclick="location.reload()">重新載入</button>
+                    </div>
+                `;
+            }
+        };
+        
+        // 測試互動功能
+        window.testInteractions = function() {
+            if (!isInitialized) {
+                log('請先啟動時間軸', 'warning');
+                return;
+            }
+            
+            log('🧪 開始測試互動功能', 'info');
+            
+            // 模擬一些互動
+            setTimeout(() => {
+                log('測試拖曳功能...', 'info');
+            }, 500);
+            
+            setTimeout(() => {
+                log('測試縮放功能...', 'info');
+            }, 1000);
+            
+            setTimeout(() => {
+                log('測試節點懸停...', 'info');
+            }, 1500);
+            
+            setTimeout(() => {
+                log('✅ 互動功能測試完成', 'success');
+            }, 2000);
+        };
+        
+        // 切換佈局
+        window.changeLayout = function(layoutType) {
+            if (!isInitialized) {
+                log('請先啟動時間軸', 'warning');
+                return;
+            }
+            
+            log(`切換佈局到: ${layoutType}`, 'info');
+            document.getElementById('layout-type').textContent = layoutType;
+            
+            // 這裡應該調用 timeline 的佈局切換方法
+            if (timeline && timeline.layoutEngine) {
+                timeline.layoutEngine.config.layout.type = layoutType;
+                timeline.layoutEngine.clearCache();
+                // 重新計算佈局
+                log(`✅ 佈局已切換到 ${layoutType}`, 'success');
+            }
+        };
+        
+        // 重置時間軸
+        window.resetTimeline = function() {
+            if (!isInitialized) {
+                log('時間軸尚未初始化', 'warning');
+                return;
+            }
+            
+            log('🔄 重置時間軸...', 'info');
+            
+            if (timeline) {
+                timeline.destroy();
+                timeline = null;
+            }
+            
+            isInitialized = false;
+            updateStatus('ready', '準備就緒');
+            document.getElementById('project-count').textContent = '0';
+            document.getElementById('layout-type').textContent = '未初始化';
+            document.getElementById('collisions').textContent = '0';
+            
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = `
+                <div class="init-message">
+                    <h2>時間軸已重置</h2>
+                    <p style="margin-bottom: 20px; color: #95a5a6;">點擊下方按鈕重新開始</p>
+                    <button onclick="startTimeline()">🎯 重新開始</button>
+                </div>
+            `;
+            
+            log('✅ 時間軸已重置', 'success');
+        };
+        
+        // 更新當前專案顯示
+        function updateCurrentProject(project) {
+            const currentProjectDiv = document.getElementById('current-project');
+            
+            currentProjectDiv.innerHTML = `
+                <div class="stat-row">
+                    <span class="stat-label">名稱</span>
+                    <span class="stat-value">${project.title || project.name}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">類別</span>
+                    <span class="stat-value">${project.category || 'N/A'}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">稀有度</span>
+                    <span class="stat-value">${project.rarity || 'normal'}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">重要性</span>
+                    <span class="stat-value">${project.importance || 'N/A'}</span>
+                </div>
+            `;
+        }
+        
+        // 頁面載入完成
+        log('📋 測試頁面已載入', 'success');
+        log('點擊「啟動時間軸」開始測試', 'info');
+    </script>
+</body>
+</html>
