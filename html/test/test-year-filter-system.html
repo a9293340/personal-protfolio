@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Step 2.2.3b - 卡片飛出動畫系統測試</title>
+    <title>Step 2.2.4a - 年份篩選系統測試</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -70,32 +70,64 @@
             font-size: 1.2em;
             opacity: 0.7;
         }
-        
-        /* Step 2.2.3a 測試頁面動畫 */
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+
+        .test-instructions {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
         }
-        
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
+
+        .test-instructions h3 {
+            color: #4a90e2;
+            margin-top: 0;
+        }
+
+        .test-instructions ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .test-instructions li {
+            margin: 8px 0;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
     <div class="test-container">
         <div class="test-header">
-            <h1>🎮 Step 2.2.3b 卡片飛出動畫系統</h1>
-            <p>測試卡片飛出功能：節點點擊 → 卡片創建 → 3D旋轉軌跡 → 詳情展示 → 互動關閉</p>
+            <h1>📅 Step 2.2.4a 年份篩選系統</h1>
+            <p>測試年份篩選功能：動態年份選單 → 專案過濾 → 節點顯示/隱藏動畫 → 狀態統計</p>
         </div>
 
         <div class="controls">
-            <button class="btn btn-primary" onclick="initializeTimelineWithThemes()">🎮 初始化卡片飛出時間軸</button>
+            <button class="btn btn-primary" onclick="initializeTimelineWithYearFilter()">📅 初始化年份篩選時間軸</button>
+        </div>
+
+        <div class="test-instructions">
+            <h3>🧪 測試步驟</h3>
+            <ul>
+                <li><strong>步驟 1:</strong> 點擊上方按鈕初始化時間軸系統</li>
+                <li><strong>步驟 2:</strong> 觀察右上角的年份篩選器 (下拉選單)</li>
+                <li><strong>步驟 3:</strong> 選擇不同年份，觀察節點動畫變化</li>
+                <li><strong>步驟 4:</strong> 注意篩選狀態顯示 (x/y 個專案)</li>
+                <li><strong>步驟 5:</strong> 選擇"顯示所有"恢復完整顯示</li>
+            </ul>
+            
+            <h3>✅ 預期行為</h3>
+            <ul>
+                <li>年份選單應包含：2020, 2021, 2022, 2023, 2024</li>
+                <li>篩選時，不符合的節點會縮小並變透明</li>
+                <li>符合的節點保持正常大小和透明度</li>
+                <li>動畫應該流暢，有錯開效果</li>
+                <li>統計數字即時更新</li>
+            </ul>
         </div>
 
         <div id="loading" class="loading-message">
-            ⏳ 正在載入卡片飛出時間軸系統...
+            ⏳ 正在載入年份篩選時間軸系統...
         </div>
 
         <div id="timelineShowcase" class="timeline-showcase" style="display: none;">
@@ -103,23 +135,21 @@
                 <!-- 互動時間軸將在此顯示 -->
             </div>
         </div>
-
-        <!-- 已移除測試說明卡片，保持測試頁面簡潔 -->
     </div>
 
     <script type="module">
-        import { InteractiveTimeline } from './src/components/gaming/InteractiveTimeline/InteractiveTimeline.js';
+        import { InteractiveTimeline } from '../../src/components/gaming/InteractiveTimeline/InteractiveTimeline.js';
 
         window.InteractiveTimeline = InteractiveTimeline;
         window.timelineInstance = null;
         
-        // 測試用專案數據 - 跨多年份範圍，測試年份標記
-        const themeTestData = [
+        // 測試用專案數據 - 跨多年份範圍，測試年份篩選
+        const yearFilterTestData = [
             {
                 id: 'current-ai-project',
                 title: 'AI驅動專案',
                 date: '2024-11-01',
-                description: '當前最重要的AI專案',
+                description: '當前最重要的AI專案，使用最新機器學習技術',
                 category: 'ai',
                 importance: 5,
                 status: 'current'
@@ -128,16 +158,25 @@
                 id: 'recent-fullstack-2024',
                 title: '全端電商系統',
                 date: '2024-03-15',
-                description: '2024年度專案',
+                description: '2024年度主要專案，整合前後端技術',
                 category: 'fullstack',
                 importance: 4,
+                status: 'recent'
+            },
+            {
+                id: 'spring-project-2024',
+                title: '春季產品發布',
+                date: '2024-01-20',
+                description: '2024年初的重要產品發布',
+                category: 'frontend',
+                importance: 3,
                 status: 'recent'
             },
             {
                 id: 'blockchain-2023',
                 title: '區塊鏈研究',
                 date: '2023-08-10',
-                description: '2023年研究專案',
+                description: '2023年深度研究專案',
                 category: 'blockchain',
                 importance: 3,
                 status: 'past'
@@ -146,25 +185,43 @@
                 id: 'devops-2023',
                 title: 'DevOps自動化',
                 date: '2023-02-15',
-                description: '2023年雲端部署',
+                description: '2023年雲端部署優化',
                 category: 'devops',
                 importance: 4,
                 status: 'recent'
             },
             {
+                id: 'winter-project-2023',
+                title: '冬季系統升級',
+                date: '2023-12-01',
+                description: '2023年底系統大改版',
+                category: 'backend',
+                importance: 3,
+                status: 'past'
+            },
+            {
                 id: 'mobile-2022',
                 title: '移動端APP',
                 date: '2022-09-20',
-                description: '2022年移動專案',
+                description: '2022年移動應用開發',
                 category: 'mobile',
                 importance: 3,
+                status: 'past'
+            },
+            {
+                id: 'summer-project-2022',
+                title: '夏季創新計畫',
+                date: '2022-06-15',
+                description: '2022年創新技術研發',
+                category: 'general',
+                importance: 2,
                 status: 'past'
             },
             {
                 id: 'archive-2021',
                 title: '早期專案',
                 date: '2021-12-01',
-                description: '歷史學習專案',
+                description: '2021年歷史學習專案',
                 category: 'general',
                 importance: 2,
                 status: 'archive'
@@ -173,14 +230,14 @@
                 id: 'legacy-2020',
                 title: '基礎專案',
                 date: '2020-06-15',
-                description: '職涯起點專案',
+                description: '2020年職涯起點專案',
                 category: 'frontend',
                 importance: 2,
                 status: 'archive'
             }
         ];
 
-        window.initializeTimelineWithThemes = async function() {
+        window.initializeTimelineWithYearFilter = async function() {
             try {
                 const loadingEl = document.getElementById('loading');
                 const showcaseEl = document.getElementById('timelineShowcase');
@@ -196,12 +253,19 @@
                 
                 containerEl.innerHTML = '';
                 
-                console.log('🎨 開始創建主題增強時間軸系統');
+                console.log('📅 開始創建年份篩選時間軸系統');
                 
                 window.timelineInstance = new InteractiveTimeline({
                     container: containerEl,
-                    projects: themeTestData,
-                    height: '500px'
+                    projects: yearFilterTestData,
+                    height: '500px',
+                    // 確保年份篩選功能啟用
+                    yearFilter: {
+                        enabled: true,
+                        showAll: true,
+                        position: 'top',
+                        style: 'dropdown'
+                    }
                 });
                 
                 await new Promise(resolve => setTimeout(resolve, 1500));
@@ -214,82 +278,25 @@
                     loadingEl.style.display = 'none';
                     showcaseEl.style.display = 'block';
                     
-                    console.log('✅ 主題增強時間軸系統初始化完成');
+                    console.log('✅ 年份篩選時間軸系統初始化完成');
                 } else {
                     throw new Error('時間軸元素創建失敗');
                 }
                 
             } catch (error) {
-                console.error('❌ 主題時間軸初始化失敗:', error);
+                console.error('❌ 年份篩選時間軸初始化失敗:', error);
                 document.getElementById('loading').innerHTML = 
                     `<div style="color: #e74c3c;">❌ 初始化失敗: ${error.message}</div>`;
             }
         };
 
-        // 監聽節點點擊事件 (Step 2.2.3b 測試)
-        function setupNodeClickListener() {
-            const timelineContainer = document.getElementById('timelineContainer');
-            if (timelineContainer) {
-                timelineContainer.addEventListener('nodeClick', (event) => {
-                    const { project, index, nodeElement } = event.detail;
-                    console.log('🎮 節點點擊事件觸發，卡片即將飛出:', project.title);
-                    
-                    // 顯示卡片飛出提示
-                    showCardFlyoutFeedback(project);
-                });
-            }
-        }
-        
-        // 顯示卡片飛出反饋訊息
-        function showCardFlyoutFeedback(project) {
-            const feedbackDiv = document.createElement('div');
-            feedbackDiv.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: rgba(74, 144, 226, 0.9);
-                color: white;
-                padding: 15px 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                z-index: 1000;
-                font-size: 14px;
-                max-width: 300px;
-                animation: slideIn 0.3s ease-out;
-            `;
-            
-            feedbackDiv.innerHTML = `
-                <strong>🎮 卡片正在飛出</strong><br>
-                📄 專案: ${project.title}<br>
-                📅 日期: ${project.date}<br>
-                📂 分類: ${project.category || 'general'}<br>
-                <small style="opacity: 0.7;">點擊卡片外部或 ✕ 按鈕關閉</small>
-            `;
-            
-            document.body.appendChild(feedbackDiv);
-            
-            // 3秒後自動移除
-            setTimeout(() => {
-                if (feedbackDiv.parentNode) {
-                    feedbackDiv.style.animation = 'slideOut 0.3s ease-in';
-                    setTimeout(() => {
-                        feedbackDiv.remove();
-                    }, 300);
-                }
-            }, 3000);
-        }
-
         // 自動初始化
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎯 節點點擊測試頁面載入完成');
-            
-            // 設定節點點擊監聽器
+            console.log('📅 年份篩選測試頁面載入完成');
             setTimeout(() => {
-                setupNodeClickListener();
-                window.initializeTimelineWithThemes();
+                window.initializeTimelineWithYearFilter();
             }, 1000);
         });
-
     </script>
 </body>
 </html>
