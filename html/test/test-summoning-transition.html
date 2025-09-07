@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 2.3.3 - 召喚到詳情頁無縫轉場測試</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .test-header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #d4af37, #f4d03f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+        }
+
+        .test-header p {
+            font-size: 1.2em;
+            color: #a0a0a0;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-legendary {
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            color: #1a1a2e;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-legendary::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+
+        .btn-legendary:hover::before {
+            animation: shimmer 0.5s ease;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+        }
+
+        .timeline-showcase {
+            margin: 40px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 500px;
+        }
+
+        .test-instructions {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .test-instructions h3 {
+            color: #4a90e2;
+            margin-top: 0;
+        }
+
+        .test-instructions ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .test-instructions li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .device-info {
+            background: rgba(74, 144, 226, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .device-info h4 {
+            margin-top: 0;
+            color: #64b5f6;
+        }
+
+        .device-profile {
+            font-family: monospace;
+            color: #81c784;
+            font-size: 1.2em;
+        }
+
+        .loading-message {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 1.2em;
+            opacity: 0.7;
+        }
+
+        /* 召喚動畫樣式 */
+        .summoning-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.85);
+            pointer-events: auto;
+        }
+
+        .skip-hint {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 14px;
+            z-index: 10001;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .phase-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 14px;
+            z-index: 10001;
+        }
+
+        .phase-name {
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .phase-timer {
+            color: #a0a0a0;
+            margin-left: 10px;
+        }
+    </style>
+    
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎮 Step 2.3.3 召喚轉場測試</h1>
+            <p>遊戲王召喚動畫到詳情頁無縫轉場系統</p>
+        </div>
+
+        <div class="device-info">
+            <h4>⚙️ 設備檢測</h4>
+            <p>當前設備類型: <span class="device-profile" id="deviceProfile">檢測中...</span></p>
+            <p>WebGL 支援: <span id="webglSupport">檢測中...</span></p>
+            <p>預期效能等級: <span id="performanceLevel">檢測中...</span></p>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="initializeTimeline()">
+                🚀 初始化時間軸系統
+            </button>
+            <button class="btn btn-legendary" onclick="testLegendarySummoning()">
+                ⭐ 測試傳說級召喚
+            </button>
+            <button class="btn btn-primary" onclick="testNormalCard()">
+                📋 測試普通卡片
+            </button>
+            <button class="btn btn-primary" onclick="testLowEndDevice()">
+                📱 模擬低端設備
+            </button>
+        </div>
+
+        <div class="test-instructions">
+            <h3>🧪 測試步驟</h3>
+            <ul>
+                <li><strong>初始化時間軸:</strong> 載入互動時間軸，啟用召喚系統</li>
+                <li><strong>點擊傳說級專案:</strong> 觸發完整 8 秒召喚動畫序列</li>
+                <li><strong>點擊普通專案:</strong> 直接顯示詳情模態框（無召喚）</li>
+                <li><strong>按 ESC 鍵:</strong> 跳過召喚動畫，直接顯示模態框</li>
+                <li><strong>點擊背景:</strong> 也可跳過召喚動畫</li>
+            </ul>
+            
+            <h3>📊 動畫時序 (8秒)</h3>
+            <ul>
+                <li><strong>Phase 1 (0-2s):</strong> 魔法陣展開</li>
+                <li><strong>Phase 2 (2-3.5s):</strong> 能量聚集</li>
+                <li><strong>Phase 3 (3.5-4.5s):</strong> 粒子爆發</li>
+                <li><strong>Phase 4 (4.5-6.5s):</strong> 卡牌顯現</li>
+                <li><strong>Phase 5 (6.5-7s):</strong> 轉場準備</li>
+                <li><strong>Phase 6 (7-8s):</strong> 模態框切換</li>
+            </ul>
+
+            <h3>✅ 預期效果</h3>
+            <ul>
+                <li>傳說級專案觸發華麗召喚動畫</li>
+                <li>動畫結束後無縫切換到詳情頁</li>
+                <li>ESC 鍵可隨時跳過動畫</li>
+                <li>低端設備自動降級到簡化版本</li>
+                <li>移動端粒子數量自動減少</li>
+            </ul>
+        </div>
+
+        <div id="loading" class="loading-message" style="display: none;">
+            ⏳ 正在載入召喚轉場系統...
+        </div>
+
+        <div id="timelineShowcase" class="timeline-showcase">
+            <div id="timelineContainer">
+                <!-- 互動時間軸將在此顯示 -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { InteractiveTimeline } from '../../src/components/gaming/InteractiveTimeline/InteractiveTimeline.js';
+        import { SummoningTransition } from '../../src/components/gaming/SummoningSystem/SummoningTransition.js';
+
+        window.InteractiveTimeline = InteractiveTimeline;
+        window.SummoningTransition = SummoningTransition;
+        window.timelineInstance = null;
+        window.summoningInstance = null;
+
+        // 測試用專案數據
+        const testProjects = [
+            {
+                id: 'legendary-project-1',
+                title: '🌟 AI 聊天機器人架構',
+                date: '2024-01',
+                description: '企業級 AI 智能客服系統',
+                category: 'ai',
+                importance: 10,
+                rarity: 'legendary',
+                status: 'current',
+                cardData: {
+                    attack: 3000,
+                    defense: 2500,
+                    level: 10,
+                    attribute: 'LIGHT',
+                    type: 'AI/Effect'
+                }
+            },
+            {
+                id: 'legendary-project-2',
+                title: '⚡ 雲端微服務架構',
+                date: '2023-06',
+                description: '百萬級並發處理系統',
+                category: 'cloud',
+                importance: 9,
+                rarity: 'legendary',
+                status: 'past',
+                cardData: {
+                    attack: 2800,
+                    defense: 2600,
+                    level: 9,
+                    attribute: 'WIND',
+                    type: 'Cloud/Synchro'
+                }
+            },
+            {
+                id: 'rare-project-1',
+                title: 'React 電商平台',
+                date: '2023-03',
+                description: 'B2C 電商網站開發',
+                category: 'frontend',
+                importance: 7,
+                rarity: 'rare',
+                status: 'past'
+            },
+            {
+                id: 'normal-project-1',
+                title: 'API 文檔系統',
+                date: '2022-11',
+                description: 'RESTful API 文檔生成',
+                category: 'backend',
+                importance: 5,
+                rarity: 'normal',
+                status: 'past'
+            },
+            {
+                id: 'normal-project-2',
+                title: '部落格網站',
+                date: '2022-06',
+                description: '個人技術部落格',
+                category: 'fullstack',
+                importance: 4,
+                rarity: 'normal',
+                status: 'past'
+            }
+        ];
+
+        // 設備檢測
+        function detectDevice() {
+            const summoningTransition = new SummoningTransition();
+            const profile = summoningTransition.deviceProfile;
+            const hasWebGL = summoningTransition.checkWebGLSupport();
+            
+            document.getElementById('deviceProfile').textContent = profile;
+            document.getElementById('webglSupport').textContent = hasWebGL ? '✅ 支援' : '❌ 不支援';
+            
+            const performanceMap = {
+                'desktop': '🚀 高效能 (完整特效)',
+                'mobile': '📱 中等 (優化特效)',
+                'lowEnd': '🔋 節能 (簡化特效)'
+            };
+            document.getElementById('performanceLevel').textContent = performanceMap[profile] || '未知';
+            
+            return profile;
+        }
+
+        // 初始化時間軸
+        window.initializeTimeline = async function() {
+            try {
+                const loadingEl = document.getElementById('loading');
+                const containerEl = document.getElementById('timelineContainer');
+                
+                loadingEl.style.display = 'block';
+                
+                if (window.timelineInstance) {
+                    window.timelineInstance.destroy();
+                    window.timelineInstance = null;
+                }
+                
+                containerEl.innerHTML = '';
+                
+                console.log('🎮 開始創建召喚轉場測試時間軸');
+                
+                // 創建時間軸，啟用召喚系統
+                window.timelineInstance = new InteractiveTimeline({
+                    container: containerEl,
+                    projects: testProjects,
+                    height: '450px',
+                    summoning: {
+                        enabled: true  // 啟用召喚系統
+                    }
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const timelineElement = window.timelineInstance.getElement();
+                if (timelineElement) {
+                    containerEl.appendChild(timelineElement);
+                    window.timelineInstance.setupAfterMount();
+                    
+                    loadingEl.style.display = 'none';
+                    
+                    console.log('✅ 召喚轉場時間軸初始化完成');
+                    alert('時間軸已初始化！點擊金色的傳說級專案節點觸發召喚動畫');
+                } else {
+                    throw new Error('時間軸元素創建失敗');
+                }
+                
+            } catch (error) {
+                console.error('❌ 時間軸初始化失敗:', error);
+                document.getElementById('loading').innerHTML = 
+                    `<div style="color: #e74c3c;">❌ 初始化失敗: ${error.message}</div>`;
+            }
+        };
+
+        // 測試傳說級召喚
+        window.testLegendarySummoning = async function() {
+            console.log('⭐ 測試傳說級召喚動畫');
+            
+            const legendaryProject = testProjects[0];
+            const mockElement = document.createElement('div');
+            mockElement.style.cssText = 'position: fixed; left: 50%; top: 50%; width: 50px; height: 50px; background: gold; border-radius: 50%;';
+            document.body.appendChild(mockElement);
+            
+            // 顯示跳過提示
+            const skipHint = document.createElement('div');
+            skipHint.className = 'skip-hint';
+            skipHint.innerHTML = '按 <strong>ESC</strong> 鍵跳過動畫';
+            document.body.appendChild(skipHint);
+            
+            // 顯示階段指示器
+            const phaseIndicator = document.createElement('div');
+            phaseIndicator.className = 'phase-indicator';
+            phaseIndicator.innerHTML = '<span class="phase-name">準備中</span><span class="phase-timer">0.0s</span>';
+            document.body.appendChild(phaseIndicator);
+            
+            try {
+                window.summoningInstance = new SummoningTransition({
+                    animation: {
+                        skipEnabled: true,
+                        skipKey: 'Escape'
+                    }
+                });
+                
+                // 監聽階段變化
+                let startTime = performance.now();
+                const updatePhase = setInterval(() => {
+                    if (window.summoningInstance) {
+                        const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+                        const phase = window.summoningInstance.currentPhase;
+                        const phaseNames = {
+                            'idle': '準備中',
+                            'magicCircle': 'Phase 1: 魔法陣展開',
+                            'energyGather': 'Phase 2: 能量聚集',
+                            'particleBurst': 'Phase 3: 粒子爆發',
+                            'cardReveal': 'Phase 4: 卡牌顯現',
+                            'transition': 'Phase 5: 轉場準備',
+                            'modalSwitch': 'Phase 6: 模態框切換'
+                        };
+                        phaseIndicator.innerHTML = `<span class="phase-name">${phaseNames[phase] || phase}</span><span class="phase-timer">${elapsed}s</span>`;
+                    }
+                }, 100);
+                
+                await window.summoningInstance.startTransition(legendaryProject, mockElement);
+                
+                clearInterval(updatePhase);
+                
+            } finally {
+                mockElement.remove();
+                skipHint.remove();
+                phaseIndicator.remove();
+            }
+        };
+
+        // 測試普通卡片
+        window.testNormalCard = async function() {
+            console.log('📋 測試普通卡片（無召喚）');
+            
+            const normalProject = testProjects[3];
+            const mockElement = document.createElement('div');
+            
+            // 直接顯示模態框
+            const { ProjectCardModal } = await import('../../src/components/gaming/InteractiveTimeline/ProjectCardModal.js');
+            const modal = new ProjectCardModal();
+            await modal.show(normalProject, mockElement);
+        };
+
+        // 模擬低端設備
+        window.testLowEndDevice = async function() {
+            console.log('📱 模擬低端設備');
+            
+            // 臨時覆蓋設備檢測
+            const originalDetect = SummoningTransition.prototype.detectDeviceProfile;
+            SummoningTransition.prototype.detectDeviceProfile = function() {
+                return 'lowEnd';
+            };
+            
+            await testLegendarySummoning();
+            
+            // 恢復原始檢測
+            SummoningTransition.prototype.detectDeviceProfile = originalDetect;
+        };
+
+        // 頁面載入完成後檢測設備
+        document.addEventListener('DOMContentLoaded', () => {
+            detectDevice();
+            console.log('🎮 召喚轉場測試頁面已就緒');
+        });
+    </script>
+</body>
+</html>

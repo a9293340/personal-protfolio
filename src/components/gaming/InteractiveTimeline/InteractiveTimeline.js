@@ -1617,7 +1617,7 @@ export class InteractiveTimeline extends BaseComponent {
   /**
    * 處理節點點擊事件 (Step 2.2.3a)
    */
-  handleNodeClick(nodeElement, project, index, event) {
+  async handleNodeClick(nodeElement, project, index, event) {
     console.log(`[InteractiveTimeline] 節點被點擊: ${project.title}`);
     
     // 防止重複點擊
@@ -1631,9 +1631,9 @@ export class InteractiveTimeline extends BaseComponent {
     // 執行點擊反饋動畫
     this.playNodeClickAnimation(nodeElement);
     
-    // Step 2.2.3b: 卡片飛出動畫
-    setTimeout(() => {
-      this.createAndAnimateProjectCard(nodeElement, project, index);
+    // Step 2.2.3b + Step 2.3.3: 卡片飛出動畫或召喚動畫
+    setTimeout(async () => {
+      await this.createAndAnimateProjectCard(nodeElement, project, index);
     }, 300); // 等待點擊動畫完成
     
     // 觸發自定義事件
@@ -1712,10 +1712,42 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
-   * 創建並動畫化專案卡片 (Step 2.2.3b)
+   * 創建並動畫化專案卡片 (Step 2.2.3b + Step 2.3.3)
    */
-  createAndAnimateProjectCard(nodeElement, project, index) {
+  async createAndAnimateProjectCard(nodeElement, project, index) {
     console.log(`[InteractiveTimeline] 創建專案卡片: ${project.title}`);
+    
+    // Step 2.3.3: 檢查是否啟用召喚動畫
+    const enableSummoning = this.config.summoning?.enabled ?? false;
+    const isLegendaryProject = project.rarity === 'legendary' || project.importance >= 9;
+    
+    // 只對傳說級專案或重要專案啟用召喚動畫
+    if (enableSummoning && isLegendaryProject) {
+      console.log(`🎮 [InteractiveTimeline] 啟動遊戲王召喚序列: ${project.title}`);
+      
+      try {
+        // 動態導入召喚轉場控制器
+        const { SummoningTransition } = await import('../SummoningSystem/SummoningTransition.js');
+        
+        // 創建並啟動召喚轉場
+        const summoningTransition = new SummoningTransition({
+          animation: {
+            skipEnabled: true,
+            skipKey: 'Escape'
+          }
+        });
+        
+        // 執行召喚轉場
+        await summoningTransition.startTransition(project, nodeElement);
+        
+        // 召喚完成，不需要再顯示普通模態框
+        return;
+        
+      } catch (error) {
+        console.error('❌ [InteractiveTimeline] 召喚失敗，降級到普通模態框:', error);
+        // 降級到普通模態框
+      }
+    }
     
     // 防止重複創建卡片
     const existingCard = document.querySelector('.project-flying-card');

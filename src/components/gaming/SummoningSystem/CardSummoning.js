@@ -147,6 +147,14 @@ export class CardSummoning extends BaseComponent {
       // 創建卡牌元素
       this.createCardElements();
       
+      // 將元素添加到容器或頁面
+      if (this.config.container && this.config.container.appendChild) {
+        this.config.container.appendChild(this.element);
+      } else {
+        console.warn('⚠️ [CardSummoning] 無效容器，添加到 body:', this.config.container);
+        document.body.appendChild(this.element);
+      }
+      
       // 初始化動畫系統
       this.initAnimations();
       
@@ -173,14 +181,15 @@ export class CardSummoning extends BaseComponent {
     this.cardContainer.className = 'card-summoning-container';
     this.cardContainer.style.cssText = `
       position: fixed;
-      top: 45%;
+      top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      margin-top: -${finalHeight/2}px;
+      margin-left: -${finalWidth/2}px;
       width: ${finalWidth}px;
       height: ${finalHeight}px;
       transform-style: preserve-3d;
       perspective: 1000px;
-      z-index: 30;
+      z-index: 10003;
       opacity: 0;
       pointer-events: auto;
     `;
@@ -428,101 +437,76 @@ export class CardSummoning extends BaseComponent {
       }
     });
 
-    // Phase 1: 物質化 (0-2s)
+    // Phase 1: 平滑物質化 (0-0.5s) - 確保正確的初始狀態和漸進縮放
     this.masterTimeline
+      .set(this.cardContainer, {
+        rotationY: 0, // 重置旋轉，避免偏移
+        z: 0,         // 重置Z軸位置
+        y: 0          // 重置Y軸位置
+      })
       .to(this.cardContainer, {
         opacity: 1,
         scale: 0.1,
-        duration: 0.5,
+        duration: 0.1,
         ease: this.config.animation.easing.materialize
       })
       .to(this.cardContainer, {
-        scale: 1.2,
-        rotationY: 0,
-        z: 0,
-        duration: 1.0,
+        scale: 1.05,
+        duration: 0.3,
         ease: this.config.animation.easing.materialize
       })
       .to(this.cardContainer, {
         scale: 1,
-        duration: 0.5,
+        duration: 0.1,
         ease: 'back.out(1.7)',
         onComplete: () => {
           this.state.currentPhase = 'materialized';
-          console.log('📦 [CardSummoning] Phase 1 完成：物質化');
+          console.log('📦 [CardSummoning] Phase 1 完成：平滑物質化');
         }
       });
 
-    // Phase 2: 3D 旋轉展示 (2-4s)
+    // Phase 2: 3D 旋轉展示 (0.5-2.5s) - 保持3秒旋轉效果
     this.masterTimeline
       .to(this.cardElement, {
         rotationY: 220, // 先轉到220度 (略過180度最佳翻轉點，增加懸念)
         rotationX: this.config.effects.rotation.x,
         rotationZ: this.config.effects.rotation.z,
-        duration: 1.2, // 前段：旋轉到220度 (稍長一點)
+        duration: 1.2, // 前段：旋轉到220度
         ease: this.config.animation.easing.rotation,
         onStart: () => {
           this.state.currentPhase = 'rotating';
           console.log('🌀 [CardSummoning] Phase 2 開始：旋轉展示');
+          this.startGlowAnimation(); // 旋轉時就開始發光
         },
         onComplete: () => {
-          // 在220度時執行翻轉 (更晚一點的時機)
+          // 在220度時執行翻轉
           this.executeCardFlip();
         }
-      }, '2')
+      }, '0.5')
       .to(this.cardElement, {
-        rotationY: this.config.effects.rotation.y, // 繼續旋轉到360度
-        duration: 0.8, // 後段：完成剩餘旋轉 (稍短一點)
+        rotationY: 360, // 繼續旋轉到360度並回正
+        rotationX: 0,
+        rotationZ: 0,
+        duration: 0.8, // 後段：完成旋轉並穩定
         ease: this.config.animation.easing.rotation
       });
 
-    // Phase 3: 發光強化 (4-6s) 
+    // Phase 3: 快速穩定 (2.5-3s) - 最終穩定狀態
     this.masterTimeline
       .to(this.cardElement, {
-        duration: 2.0,
-        ease: this.config.animation.easing.glow,
-        onStart: () => {
-          this.state.currentPhase = 'glowing';
-          this.startGlowAnimation();
-          console.log('✨ [CardSummoning] Phase 3 開始：發光強化');
-        }
-      }, '4');
-
-    // Phase 4: 穩定懸浮 (6-8s)
-    this.masterTimeline
-      .to(this.cardElement, {
-        rotationY: 360 + 5, // 輕微超轉
-        rotationX: 0,
-        rotationZ: 0,
-        duration: 2.0,
+        rotationY: 360, // 完美回正
+        y: 0,
+        duration: 0.5,
         ease: this.config.animation.easing.stabilize,
         onStart: () => {
           this.state.currentPhase = 'stabilizing';
-          console.log('🎯 [CardSummoning] Phase 4 開始：穩定懸浮');
-        },
-        onComplete: () => {
-          console.log('✨ [CardSummoning] Phase 4 完成：懸浮穩定');
-        }
-      }, '6')
-      
-    // Phase 5: 延長卡面展示 (8-10s) - 增強質感停留 
-    .to(this.cardElement, {
-        y: 0, // 保持位置
-        rotationY: 360, // 完美回正
-        rotationX: 0,
-        rotationZ: 0,
-        duration: 2.0,
-        ease: 'none', // 靜態停留
-        onStart: () => {
-          this.state.currentPhase = 'displaying';
-          console.log('🎨 [CardSummoning] Phase 5 開始：延長展示 - 質感停留');
-          this.startHoverAnimation(); // 開始悬浮動畫
+          console.log('🎯 [CardSummoning] Phase 3 開始：最終穩定');
         },
         onComplete: () => {
           this.state.currentPhase = 'completed';
-          console.log('✅ [CardSummoning] 完整動畫序列結束，準備轉場');
+          console.log('✅ [CardSummoning] 完整動畫序列結束（3秒），準備轉場');
         }
-      }, '8');
+      }, '2.5');
   }
 
   /**
@@ -1202,8 +1186,7 @@ export class CardSummoning extends BaseComponent {
       window.gsap.killTweensOf(this.holographicOverlay);
     }
     
-    // 移除事件監聽器
-    this.removeAllListeners();
+    // 事件監聽器由父類 destroy() 方法處理
     
     // 清理 DOM 元素
     if (this.element && this.element.parentNode) {

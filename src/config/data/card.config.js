@@ -98,6 +98,22 @@ export const cardAttributeConfig = {
     color: "#833471",
     element: "暗",
     description: "DevOps 工程，自動化部署與維運的專業能力"
+  },
+  ai: {
+    name: "人工智能",
+    nameEn: "AI",
+    icon: "🤖",
+    color: "#00d4ff",
+    element: "光",
+    description: "人工智能技術，機器學習與智能系統的前沿探索"
+  },
+  blockchain: {
+    name: "區塊鏈",
+    nameEn: "Blockchain",
+    icon: "⛓️",
+    color: "#f39c12",
+    element: "暗",
+    description: "區塊鏈技術，去中心化金融與加密貨幣的創新應用"
   }
 };
 

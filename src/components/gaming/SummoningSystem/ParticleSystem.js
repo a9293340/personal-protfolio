@@ -115,6 +115,15 @@ export class ParticleSystem extends BaseComponent {
       // 創建粒子系統
       this.createParticleSystems();
       
+      // 創建並添加 DOM 元素
+      this.createElement();
+      if (this.config.container && this.config.container.appendChild) {
+        this.config.container.appendChild(this.element);
+      } else {
+        console.warn('⚠️ [ParticleSystem] 無效容器，添加到 body:', this.config.container);
+        document.body.appendChild(this.element);
+      }
+      
       // 啟動渲染循環
       this.startRenderLoop();
       
@@ -578,7 +587,7 @@ export class ParticleSystem extends BaseComponent {
       width: 100vw;
       height: 100vh;
       pointer-events: none;
-      z-index: 15;
+      z-index: 10002;
       overflow: visible;
     `;
     

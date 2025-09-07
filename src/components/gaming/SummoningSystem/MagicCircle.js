@@ -40,6 +40,23 @@ export class MagicCircle extends BaseComponent {
     this.isExpanded = false;
   }
 
+  /**
+   * 初始化魔法陣組件
+   */
+  async init() {
+    // 創建元素
+    this.createElement();
+    
+    // 將元素添加到容器或頁面
+    if (this.config.container) {
+      this.config.container.appendChild(this.element);
+    } else {
+      document.body.appendChild(this.element);
+    }
+    
+    console.log('✅ [MagicCircle] 魔法陣初始化完成，SVG元素:', !!this.svgElement);
+  }
+
   getDefaultConfig() {
     return {
       // 魔法陣基礎配置
@@ -75,7 +92,7 @@ export class MagicCircle extends BaseComponent {
       position: {
         x: '50%',                     // 水平中心
         y: '50%',                     // 垂直中心
-        zIndex: 10                    // 圖層順序 - 最底層
+        zIndex: 10001                 // 圖層順序 - 在召喚容器之上
       }
     };
   }
@@ -355,6 +372,14 @@ export class MagicCircle extends BaseComponent {
    * 啟動旋轉動畫
    */
   startRotationAnimations() {
+    if (!this.svgElement) {
+      console.error('❌ [MagicCircle] SVG 元素未初始化，無法啟動動畫');
+      return;
+    }
+    
+    // 先展開魔法陣使其可見
+    this.expand();
+    
     const outerRing = this.svgElement.querySelector('.outer-ring');
     const middleRing = this.svgElement.querySelector('.middle-ring');
     const innerRing = this.svgElement.querySelector('.inner-ring');
