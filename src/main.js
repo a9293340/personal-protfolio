@@ -5,6 +5,7 @@
 
 import { Router } from './core/router/Router.js';
 import { routesConfig, validateRoutesConfig, getRouteStats } from './config/routes.config.js';
+import { NavBar } from './components/layout/NavBar.js';
 
 /**
  * 主應用程式類
@@ -12,6 +13,7 @@ import { routesConfig, validateRoutesConfig, getRouteStats } from './config/rout
 class GamingPortfolioApp {
   constructor() {
     this.router = null;
+    this.navbar = null;
     this.initialized = false;
   }
   
@@ -33,6 +35,9 @@ class GamingPortfolioApp {
       
       // 準備 DOM
       this.prepareDOMElements();
+      
+      // 初始化導航系統
+      await this.initializeNavBar();
       
       // 初始化路由系統
       await this.initializeRouter();
@@ -86,6 +91,25 @@ class GamingPortfolioApp {
     document.body.style.minHeight = '100vh';
     
     console.log('✅ DOM elements prepared');
+  }
+  
+  /**
+   * 初始化導航系統
+   */
+  async initializeNavBar() {
+    console.log('🧭 Initializing navbar...');
+    
+    const navContainer = document.getElementById('navigation');
+    if (navContainer) {
+      this.navbar = new NavBar();
+      const navHTML = await this.navbar.render();
+      navContainer.innerHTML = navHTML;
+      await this.navbar.init();
+      
+      console.log('✅ NavBar initialized');
+    } else {
+      console.warn('⚠️ Navigation container not found');
+    }
   }
   
   /**
@@ -151,6 +175,11 @@ class GamingPortfolioApp {
    * 銷毀應用程式
    */
   destroy() {
+    if (this.navbar) {
+      this.navbar.destroy();
+      this.navbar = null;
+    }
+    
     if (this.router) {
       this.router.destroy();
       this.router = null;

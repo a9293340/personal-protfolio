@@ -2,6 +2,9 @@
  * 完全乾淨版本主樣式 - 徹底修復黑屏問題
  */
 
+/* ===== 導入組件樣式 ===== */
+@import './components/navbar.css';
+
 /* ===== 基礎重置 ===== */
 * {
   margin: 0;
@@ -73,25 +76,14 @@ body {
   background: #1a1a2e;
 }
 
-/* ===== 導航樣式 ===== */
+/* ===== 導航容器 ===== */
 .navigation {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  background: rgba(26, 26, 46, 0.9);
-  height: 60px;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  /* 暫時隱藏導航，等實現完整導航組件 */
-  display: none;
+  /* 導航現在由 NavBar 組件處理 */
 }
 
 /* ===== 頁面內容樣式 ===== */
 .page-content {
-  padding-top: 20px; /* 調整為較小值，因為導航暫時隱藏 */
+  padding-top: 90px; /* 為固定導航留空間 */
   min-height: 100vh;
   background: #1a1a2e;
   color: white;
