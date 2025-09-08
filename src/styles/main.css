@@ -4,6 +4,7 @@
 
 /* ===== 導入組件樣式 ===== */
 @import './components/navbar.css';
+@import './components/hero.css';
 
 /* ===== 基礎重置 ===== */
 * {

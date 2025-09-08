@@ -1,0 +1,308 @@
+/**
+ * Hero 區域樣式
+ * Step 3.1.3a: Hero 組件基礎結構
+ */
+
+/* ===== Hero 主容器 ===== */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    #1a1a2e 0%,
+    #16213e 25%,
+    #1a1a2e 50%,
+    #0f1419 75%,
+    #1a1a2e 100%
+  );
+  overflow: hidden;
+  padding: 90px 20px 20px; /* 為導航留空間 */
+}
+
+.hero-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== 主要內容區域 ===== */
+.hero-content {
+  text-align: center;
+  animation: fadeInUp 1s ease-out;
+}
+
+.hero-main {
+  margin-bottom: 40px;
+}
+
+/* ===== 標題樣式 ===== */
+.hero-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  font-family: 'Cinzel', serif;
+}
+
+.title-greeting {
+  display: block;
+  font-size: 1.2rem;
+  color: #d4af37;
+  font-weight: 400;
+  margin-bottom: 10px;
+  animation: slideInLeft 0.8s ease-out;
+}
+
+.title-name {
+  display: block;
+  color: #ffffff;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  animation: scaleIn 1s ease-out 0.3s both;
+}
+
+.title-role {
+  display: block;
+  font-size: 0.7em;
+  color: #d4af37;
+  font-weight: 400;
+  margin-top: 10px;
+  animation: slideInRight 0.8s ease-out 0.6s both;
+}
+
+/* ===== 打字機效果區域 ===== */
+.hero-typing {
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  color: #ffffff;
+  margin-bottom: 40px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.typing-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  opacity: 0.9;
+}
+
+.typing-cursor {
+  color: #d4af37;
+  font-weight: 100;
+  animation: blink 1s infinite;
+}
+
+/* ===== CTA 按鈕組 ===== */
+.hero-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.cta-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  min-width: 160px;
+  justify-content: center;
+}
+
+.cta-button.primary {
+  background: linear-gradient(135deg, #d4af37, #f4d03f);
+  color: #1a1a2e;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.cta-button.primary:hover {
+  background: linear-gradient(135deg, #f4d03f, #d4af37);
+  box-shadow: 0 6px 25px rgba(212, 175, 55, 0.5);
+  transform: translateY(-2px);
+}
+
+.cta-button.secondary {
+  background: rgba(212, 175, 55, 0.1);
+  color: #d4af37;
+  border: 2px solid #d4af37;
+}
+
+.cta-button.secondary:hover {
+  background: rgba(212, 175, 55, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+}
+
+.button-icon {
+  font-size: 1.3rem;
+}
+
+.button-text {
+  font-family: 'Inter', sans-serif;
+}
+
+/* ===== 背景裝飾元素 ===== */
+.hero-decorations {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.decoration-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridMove 20s linear infinite;
+}
+
+.decoration-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 25% 25%, rgba(212, 175, 55, 0.1) 1px, transparent 1px),
+              radial-gradient(circle at 75% 75%, rgba(212, 175, 55, 0.05) 1px, transparent 1px);
+  background-size: 100px 100px;
+  animation: particleFloat 15s ease-in-out infinite;
+}
+
+/* ===== 動畫定義 ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes gridMove {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(50px, 50px);
+  }
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0px);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-20px);
+    opacity: 0.6;
+  }
+}
+
+/* ===== 響應式設計 ===== */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 80px 15px 20px;
+    min-height: 90vh;
+  }
+  
+  .hero-main {
+    margin-bottom: 30px;
+  }
+  
+  .hero-typing {
+    min-height: 50px;
+    margin-bottom: 30px;
+  }
+  
+  .hero-actions {
+    gap: 15px;
+    margin-top: 30px;
+  }
+  
+  .cta-button {
+    padding: 12px 24px;
+    font-size: 1rem;
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .cta-button {
+    width: 100%;
+    max-width: 280px;
+  }
+}
