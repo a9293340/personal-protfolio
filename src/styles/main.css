@@ -1,95 +1,40 @@
 /**
- * 主樣式入口文件
- * 
- * 整合所有設計系統組件，提供統一的樣式載入
+ * 完全乾淨版本主樣式 - 徹底修復黑屏問題
  */
 
-/* ===== 設計系統核心 ===== */
-
-/* 1. CSS 變數系統 - 必須最先載入 */
-@import './design-system/variables.css';
-
-/* 2. CSS Reset - 重置瀏覽器默認樣式 */
-@import './design-system/reset.css';
-
-/* 3. 全域樣式 - 基礎元素樣式 */
-@import './design-system/global.css';
-
-/* 4. 工具類別 - 原子化工具類別 */
-@import './design-system/utilities.css';
-
-/* 5. 響應式系統 - 斷點和媒體查詢 */
-@import './design-system/responsive.css';
-
-/* ===== 字體載入 ===== */
-
-/* Google Fonts - 遊戲化字體 */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@300;400;500;600&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
-
-/* 中文字體支援 */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;500;600;700&display=swap');
-
-/* ===== 全域初始化 ===== */
-
-/* 確保所有元素使用正確的字體 */
+/* ===== 基礎重置 ===== */
 * {
-  font-family: var(--font-body);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-h1, h2, h3, h4, h5, h6,
-.font-heading {
-  font-family: var(--font-heading);
+/* ===== 基本設置 ===== */
+html {
+  font-size: 16px;
+  line-height: 1.6;
 }
 
-code, pre,
-.font-code {
-  font-family: var(--font-code);
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #1a1a2e;
+  color: white;
+  min-height: 100vh;
 }
 
-.font-gaming {
-  font-family: var(--font-gaming);
+/* ===== 隱藏類別 ===== */
+.hidden {
+  display: none !important;
 }
 
-/* ===== 主題初始化 ===== */
-
-/* 初始化主題模式 */
-:root {
-  color-scheme: dark; /* 告訴瀏覽器我們使用暗色主題 */
-}
-
-[data-theme="light"] {
-  color-scheme: light;
-}
-
-[data-theme="neon"] {
-  color-scheme: dark;
-}
-
-/* 主題切換動畫 */
-* {
-  transition: 
-    background-color var(--animation-normal) var(--easing-smooth),
-    color var(--animation-normal) var(--easing-smooth),
-    border-color var(--animation-normal) var(--easing-smooth);
-}
-
-/* 在減少動畫模式下禁用主題切換動畫 */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none;
-  }
-}
-
-/* ===== 應用專用樣式 ===== */
-
-/* 載入畫面樣式 */
+/* ===== 載入畫面樣式 ===== */
 .loading-screen {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: var(--gradient-primary);
+  background: #1a1a2e;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,18 +48,17 @@ code, pre,
 .spinner {
   width: 60px;
   height: 60px;
-  border: 3px solid var(--opacity-gold-20);
-  border-top: 3px solid var(--color-primary-gold);
+  border: 3px solid rgba(212, 175, 55, 0.3);
+  border-top: 3px solid #d4af37;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto var(--space-4);
+  margin: 0 auto 20px;
 }
 
 .loading-text {
-  font-family: var(--font-heading);
-  font-size: var(--font-size-xl);
-  color: var(--color-primary-gold);
-  letter-spacing: var(--letter-spacing-gaming);
+  font-size: 1.2rem;
+  color: #d4af37;
+  font-weight: 500;
 }
 
 @keyframes spin {
@@ -122,214 +66,33 @@ code, pre,
   100% { transform: rotate(360deg); }
 }
 
-/* 主容器樣式 */
+/* ===== 主容器樣式 ===== */
 .main-container {
   min-height: 100vh;
   position: relative;
+  background: #1a1a2e;
 }
 
-/* 導航樣式 (基礎) */
+/* ===== 導航樣式 ===== */
 .navigation {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: var(--z-navbar);
-  background: var(--opacity-bg-medium);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--theme-accent);
-}
-
-/* 頁面內容樣式 */
-.page-content {
-  padding-top: 80px; /* 為固定導航留空間 */
-  min-height: 100vh;
-}
-
-/* 歡迎頁面樣式 (臨時) */
-.welcome-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: var(--space-8);
-  text-align: center;
-}
-
-.welcome-title {
-  font-family: var(--font-heading);
-  font-size: var(--font-size-5xl);
-  color: var(--theme-accent);
-  margin-bottom: var(--space-4);
-  text-shadow: var(--shadow-glow-gold);
-}
-
-.welcome-subtitle {
-  font-size: var(--font-size-xl);
-  color: var(--theme-text-secondary);
-  margin-bottom: var(--space-8);
-  font-weight: var(--font-weight-light);
-}
-
-.status-info {
-  background: var(--opacity-bg-light);
-  border: 1px solid var(--theme-accent);
-  border-radius: 8px;
-  padding: var(--space-6);
-  margin-bottom: var(--space-8);
-  text-align: left;
-}
-
-.status-info p {
-  margin-bottom: var(--space-2);
-}
-
-.status-info strong {
-  color: var(--theme-accent);
-}
-
-.directory-structure {
-  text-align: left;
-  background: var(--color-gray-900);
-  border: 1px solid var(--color-primary-blue);
-  border-radius: 8px;
-  padding: var(--space-6);
-}
-
-.directory-structure h3 {
-  color: var(--color-primary-blue);
-  margin-bottom: var(--space-4);
-}
-
-.directory-structure pre {
-  font-family: var(--font-code);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-code);
-  color: var(--theme-text-primary);
-  overflow-x: auto;
-}
-
-/* 錯誤樣式 */
-.error-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: var(--opacity-overlay-strong);
+  z-index: 1000;
+  background: rgba(26, 26, 46, 0.9);
+  height: 60px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: var(--z-modal);
+  padding: 0 20px;
+  /* 暫時隱藏導航，等實現完整導航組件 */
+  display: none;
 }
 
-.error-content {
-  background: var(--theme-secondary);
-  border: 2px solid var(--color-status-error);
-  border-radius: 8px;
-  padding: var(--space-8);
-  text-align: center;
-  max-width: 500px;
-  box-shadow: var(--shadow-large);
-}
-
-.error-content h2 {
-  color: var(--color-status-error);
-  margin-bottom: var(--space-4);
-}
-
-.retry-button {
-  background: var(--theme-accent);
-  color: var(--theme-background);
-  border: none;
-  padding: var(--space-2-5) var(--space-6);
-  border-radius: 4px;
-  font-weight: var(--font-weight-semi-bold);
-  cursor: pointer;
-  margin-top: var(--space-4);
-  transition: all var(--animation-fast) var(--easing-smooth);
-  font-family: inherit;
-}
-
-.retry-button:hover {
-  background: var(--color-gold-bright);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow-gold);
-}
-
-/* 滾動進度指示器 */
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--gradient-gold);
-  transform-origin: left;
-  transform: scaleX(0);
-  z-index: var(--z-navbar);
-  transition: transform var(--animation-fast) var(--easing-smooth);
-}
-
-/* 全頁面魔法光暈背景 */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 20% 80%, var(--opacity-gold-10) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, var(--opacity-blue-10) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: -1;
-  animation: magical-background 20s ease-in-out infinite;
-}
-
-@keyframes magical-background {
-  0%, 100% {
-    background: 
-      radial-gradient(circle at 20% 80%, var(--opacity-gold-10) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, var(--opacity-blue-10) 0%, transparent 50%);
-  }
-  50% {
-    background: 
-      radial-gradient(circle at 80% 20%, var(--opacity-gold-10) 0%, transparent 50%),
-      radial-gradient(circle at 20% 80%, var(--opacity-blue-10) 0%, transparent 50%);
-  }
-}
-
-/* 響應式設計 */
-@media (max-width: 768px) {
-  .welcome-title {
-    font-size: var(--font-size-3xl);
-  }
-  
-  .welcome-container {
-    padding: var(--space-4);
-  }
-  
-  .directory-structure pre {
-    font-size: var(--font-size-xs);
-  }
-  
-  /* 在移動端簡化背景動畫 */
-  body::after {
-    animation: none;
-    background: 
-      radial-gradient(circle at 50% 50%, var(--opacity-gold-10) 0%, transparent 70%);
-  }
-}
-
-/* 設計系統載入完成標記 */
-html {
-  --design-system-loaded: true;
-}
-
-html[data-design-system="loaded"] {
-  opacity: 1;
-  transition: opacity var(--animation-slow) var(--easing-smooth);
-}
-
-html:not([data-design-system="loaded"]) {
-  opacity: 0;
+/* ===== 頁面內容樣式 ===== */
+.page-content {
+  padding-top: 20px; /* 調整為較小值，因為導航暫時隱藏 */
+  min-height: 100vh;
+  background: #1a1a2e;
+  color: white;
 }

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>路由測試頁面</title>
+  <style>
+    body {
+      background: #1a1a2e;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+    
+    .test-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .nav-buttons {
+      background: rgba(212, 175, 55, 0.1);
+      border: 2px solid #d4af37;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .nav-button {
+      display: inline-block;
+      background: rgba(212, 175, 55, 0.2);
+      border: 2px solid #d4af37;
+      color: #d4af37;
+      padding: 12px 24px;
+      margin: 5px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .nav-button:hover {
+      background: rgba(212, 175, 55, 0.4);
+    }
+    
+    #status {
+      background: rgba(52, 152, 219, 0.1);
+      border: 2px solid #3498db;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    
+    #log {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #666;
+      padding: 15px;
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    
+    .log-entry {
+      margin-bottom: 8px;
+      padding: 5px;
+      border-left: 3px solid #666;
+      padding-left: 10px;
+    }
+    
+    .log-success {
+      border-left-color: #2ecc71;
+      color: #2ecc71;
+    }
+    
+    .log-warning {
+      border-left-color: #f39c12;
+      color: #f39c12;
+    }
+    
+    .log-error {
+      border-left-color: #e74c3c;
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1 style="color: #d4af37; text-align: center; margin-bottom: 30px;">
+      🧪 路由系統測試頁面
+    </h1>
+    
+    <div class="nav-buttons">
+      <h2 style="color: #d4af37; margin-bottom: 20px;">📍 導航測試</h2>
+      <a href="#/" class="nav-button">🏠 首頁</a>
+      <a href="#/about" class="nav-button">📋 關於</a>
+      <a href="#/skills" class="nav-button">🌟 技能</a>
+      <a href="#/projects" class="nav-button">🚀 專案</a>
+      <a href="#/contact" class="nav-button">📬 聯絡</a>
+      <a href="#/not-exist" class="nav-button" style="border-color: #e74c3c; color: #e74c3c;">❌ 不存在的頁面</a>
+    </div>
+    
+    <div id="status">
+      <h3 style="color: #3498db; margin-bottom: 15px;">📊 當前狀態</h3>
+      <p>當前路徑: <span id="current-path" style="color: #f39c12; font-weight: bold;">-</span></p>
+      <p>當前頁面: <span id="current-page" style="color: #f39c12; font-weight: bold;">-</span></p>
+      <p>時間戳: <span id="timestamp" style="color: #f39c12; font-weight: bold;">-</span></p>
+    </div>
+    
+    <div>
+      <h3 style="color: #95a5a6; margin-bottom: 15px;">📝 事件日誌</h3>
+      <div id="log"></div>
+    </div>
+  </div>
+  
+  <script>
+    // 日誌系統
+    const log = (message, type = 'info') => {
+      const logEl = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logEl.insertBefore(entry, logEl.firstChild);
+      
+      // 限制日誌條目數量
+      while (logEl.children.length > 20) {
+        logEl.removeChild(logEl.lastChild);
+      }
+    };
+    
+    // 更新狀態顯示
+    const updateStatus = () => {
+      const hash = window.location.hash || '#/';
+      const path = hash.substring(1) || '/';
+      
+      document.getElementById('current-path').textContent = hash;
+      document.getElementById('current-page').textContent = getPageName(path);
+      document.getElementById('timestamp').textContent = new Date().toLocaleString();
+    };
+    
+    // 獲取頁面名稱
+    const getPageName = (path) => {
+      const pages = {
+        '/': '首頁',
+        '/about': '關於頁面',
+        '/skills': '技能樹頁面',
+        '/projects': '專案展示頁面',
+        '/contact': '聯絡頁面'
+      };
+      return pages[path] || '未知頁面';
+    };
+    
+    // 監聽路由變化
+    window.addEventListener('hashchange', (e) => {
+      const oldURL = new URL(e.oldURL);
+      const newURL = new URL(e.newURL);
+      const oldHash = oldURL.hash || '#/';
+      const newHash = newURL.hash || '#/';
+      
+      log(`路由變化: ${oldHash} → ${newHash}`, 'success');
+      updateStatus();
+    });
+    
+    // 監聽頁面載入
+    window.addEventListener('load', () => {
+      log('頁面載入完成', 'success');
+      updateStatus();
+      
+      // 檢查路由系統是否存在
+      if (window.gamingPortfolioApp) {
+        log('✅ 找到 gamingPortfolioApp 實例', 'success');
+        
+        // 獲取路由器
+        const router = window.gamingPortfolioApp.getRouter();
+        if (router) {
+          log('✅ 路由器已初始化', 'success');
+          
+          // 列出註冊的路由
+          if (router.routes && router.routes.size > 0) {
+            log(`已註冊 ${router.routes.size} 個路由:`, 'success');
+            router.routes.forEach((value, key) => {
+              log(`  • ${key}`, 'info');
+            });
+          } else {
+            log('⚠️ 沒有找到註冊的路由', 'warning');
+          }
+        } else {
+          log('⚠️ 路由器未初始化', 'warning');
+        }
+      } else {
+        log('❌ 找不到 gamingPortfolioApp 實例', 'error');
+      }
+    });
+    
+    // 監聽點擊事件
+    document.querySelectorAll('.nav-button').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const href = e.target.getAttribute('href');
+        log(`點擊導航: ${href}`, 'info');
+      });
+    });
+    
+    // 初始狀態
+    log('測試頁面初始化', 'success');
+  </script>
+</body>
+</html>

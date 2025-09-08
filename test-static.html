@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>靜態測試頁面</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: #1a1a2e !important;
+      color: white !important;
+      font-family: Arial, sans-serif !important;
+      padding: 20px !important;
+      min-height: 100vh !important;
+    }
+    
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #2d2d5f;
+      padding: 30px;
+      border-radius: 10px;
+      border: 3px solid #d4af37;
+    }
+    
+    .test-title {
+      color: #d4af37 !important;
+      font-size: 2.5rem !important;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .test-box {
+      background: rgba(212, 175, 55, 0.2);
+      border: 2px solid #d4af37;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    
+    .red-box {
+      background: rgba(255, 0, 0, 0.2) !important;
+      border: 3px solid red !important;
+      padding: 20px !important;
+      margin: 20px 0 !important;
+      border-radius: 8px !important;
+    }
+    
+    .blue-box {
+      background: rgba(0, 100, 255, 0.2) !important;
+      border: 3px solid #0064ff !important;
+      padding: 20px !important;
+      margin: 20px 0 !important;
+      border-radius: 8px !important;
+    }
+    
+    .test-button {
+      background: #d4af37 !important;
+      color: black !important;
+      border: none !important;
+      padding: 15px 30px !important;
+      font-size: 1.2rem !important;
+      font-weight: bold !important;
+      border-radius: 5px !important;
+      cursor: pointer !important;
+      margin: 10px 5px !important;
+    }
+    
+    .test-button:hover {
+      background: #f4d03f !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1 class="test-title">🎮 靜態測試頁面</h1>
+    
+    <div class="test-box">
+      <h2 style="color: #d4af37; margin-bottom: 15px;">✅ 基本顯示測試</h2>
+      <p style="color: white; font-size: 1.1rem;">如果你能看到這個金色框框，說明基本 CSS 正常工作</p>
+      <p style="color: #2ecc71; font-weight: bold;">狀態: 靜態 HTML 載入成功</p>
+    </div>
+    
+    <div class="red-box">
+      <h2 style="color: red; margin-bottom: 15px;">🔴 紅色測試框</h2>
+      <p style="color: white; font-size: 1.2rem; font-weight: bold;">這是一個明顯的紅色框框，應該很容易看到</p>
+      <button class="test-button" onclick="alert('按鈕點擊成功！JavaScript 正常工作')">
+        點擊測試按鈕
+      </button>
+    </div>
+    
+    <div class="blue-box">
+      <h2 style="color: #0064ff; margin-bottom: 15px;">🔵 藍色測試框</h2>
+      <p style="color: white;">這是藍色框框，用來測試不同顏色的顯示</p>
+      <ul style="color: white; list-style: none; padding: 10px 0;">
+        <li>✓ HTML 結構正常</li>
+        <li>✓ CSS 樣式正常</li>
+        <li>✓ 顏色顯示正常</li>
+      </ul>
+    </div>
+    
+    <div style="background: lime; color: black; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+      <h2>🟢 螢光綠測試區域</h2>
+      <p style="font-size: 1.3rem; font-weight: bold;">這個區域是螢光綠色，絕對不會看不到！</p>
+      <p>時間: <span id="current-time"></span></p>
+    </div>
+    
+    <div style="background: magenta; color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+      <h2>🟣 洋紅色測試區域</h2>
+      <p style="font-size: 1.3rem; font-weight: bold;">這個區域是洋紅色，非常醒目！</p>
+      <button class="test-button" onclick="document.body.style.background='red'">
+        變成紅色背景
+      </button>
+      <button class="test-button" onclick="document.body.style.background='#1a1a2e'">
+        恢復原背景
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    // 顯示當前時間
+    document.getElementById('current-time').textContent = new Date().toLocaleString();
+    
+    // 每秒更新時間
+    setInterval(() => {
+      document.getElementById('current-time').textContent = new Date().toLocaleString();
+    }, 1000);
+    
+    console.log('🧪 靜態測試頁面載入成功');
+    console.log('📅 當前時間:', new Date().toLocaleString());
+  </script>
+</body>
+</html>

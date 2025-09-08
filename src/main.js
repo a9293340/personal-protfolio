@@ -1,154 +1,178 @@
 /**
- * 主應用程式入口點
- * Gaming Portfolio - Config-Driven Architecture
+ * Gaming Portfolio 主應用程式
+ * Step 3.1.1: 整合路由系統完成版
  */
 
-// 核心系統導入 (後續會實現)
-// import { ConfigManager } from '@core/config/ConfigManager.js';
-// import { Router } from '@core/router/Router.js';
-// import { StateManager } from '@core/state/StateManager.js';
-// import { EventManager } from '@core/events/EventManager.js';
-
-// 系統管理器導入 (後續會實現)  
-// import { AudioManager } from '@systems/AudioManager.js';
-// import { AnimationManager } from '@systems/AnimationManager.js';
-// import { PreloadManager } from '@systems/PreloadManager.js';
+import { Router } from './core/router/Router.js';
+import { routesConfig, validateRoutesConfig, getRouteStats } from './config/routes.config.js';
 
 /**
- * 應用程式類
+ * 主應用程式類
  */
-class App {
+class GamingPortfolioApp {
   constructor() {
+    this.router = null;
     this.initialized = false;
-    this.managers = {};
   }
-
+  
   /**
    * 初始化應用程式
    */
   async init() {
     try {
-      console.log('🎮 Gaming Portfolio - Initializing...');
+      console.log('🎮 Gaming Portfolio - Starting...');
       
-      // 顯示載入畫面
-      this.showLoadingScreen();
+      // 驗證路由配置
+      if (!validateRoutesConfig()) {
+        throw new Error('Invalid routes configuration');
+      }
       
-      // 初始化核心系統 (暫時註解，等實現後啟用)
-      // await this.initializeCore();
+      // 顯示路由統計
+      const stats = getRouteStats();
+      console.log('📊 Routes Stats:', stats);
       
-      // 初始化功能系統 (暫時註解，等實現後啟用)
-      // await this.initializeSystems();
+      // 準備 DOM
+      this.prepareDOMElements();
       
-      // 載入配置 (暫時註解，等實現後啟用)
-      // await this.loadConfigurations();
-      
-      // 初始化路由 (暫時註解，等實現後啟用)
-      // await this.initializeRouter();
-      
-      // 臨時測試內容
-      await this.initializeTemporaryContent();
+      // 初始化路由系統
+      await this.initializeRouter();
       
       // 隱藏載入畫面
       this.hideLoadingScreen();
+      
+      // 啟動路由
+      this.router.start();
       
       this.initialized = true;
       console.log('✅ Gaming Portfolio - Initialized successfully!');
       
     } catch (error) {
       console.error('❌ Application initialization failed:', error);
-      this.showError('Application failed to initialize. Please refresh the page.');
+      this.showError(`Application failed to initialize: ${error.message}`);
     }
   }
-
+  
   /**
-   * 顯示載入畫面
+   * 準備 DOM 元素
    */
-  showLoadingScreen() {
+  prepareDOMElements() {
+    console.log('📄 Preparing DOM elements...');
+    
     const loadingScreen = document.getElementById('loading-screen');
     const mainContainer = document.getElementById('main-container');
+    const pageContent = document.getElementById('page-content');
     
-    if (loadingScreen) {
-      loadingScreen.classList.remove('hidden');
-    }
+    // 確保主容器顯示
     if (mainContainer) {
-      mainContainer.classList.add('hidden');
+      mainContainer.classList.remove('hidden');
+      mainContainer.style.display = 'block';
+      mainContainer.style.visibility = 'visible';
+      mainContainer.style.opacity = '1';
+      mainContainer.style.background = '#1a1a2e';
+      mainContainer.style.minHeight = '100vh';
     }
+    
+    // 設置頁面內容樣式
+    if (pageContent) {
+      pageContent.style.background = '#1a1a2e';
+      pageContent.style.color = 'white';
+      pageContent.style.minHeight = '100vh';
+    }
+    
+    // 設置 body 樣式
+    document.body.style.background = '#1a1a2e';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.minHeight = '100vh';
+    
+    console.log('✅ DOM elements prepared');
   }
-
+  
+  /**
+   * 初始化路由系統
+   */
+  async initializeRouter() {
+    console.log('🛣️ Initializing router...');
+    
+    this.router = new Router();
+    
+    // 註冊所有路由
+    routesConfig.forEach(route => {
+      this.router.register(route.path, route.component, {
+        title: route.title,
+        meta: route.meta
+      });
+    });
+    
+    console.log('✅ Router initialized with', routesConfig.length, 'routes');
+  }
+  
   /**
    * 隱藏載入畫面
    */
   hideLoadingScreen() {
     const loadingScreen = document.getElementById('loading-screen');
-    const mainContainer = document.getElementById('main-container');
     
-    setTimeout(() => {
-      if (loadingScreen) {
-        loadingScreen.classList.add('hidden');
-      }
-      if (mainContainer) {
-        mainContainer.classList.remove('hidden');
-      }
-    }, 1500); // 讓載入動畫播放一段時間
+    if (loadingScreen) {
+      loadingScreen.style.display = 'none';
+      console.log('✅ Loading screen hidden');
+    }
   }
-
+  
   /**
-   * 臨時測試內容 (開發階段使用)
+   * 顯示錯誤頁面
    */
-  async initializeTemporaryContent() {
+  showError(message) {
     const pageContent = document.getElementById('page-content');
+    
     if (pageContent) {
       pageContent.innerHTML = `
-        <div class="welcome-container">
-          <h1 class="welcome-title">🎮 Gaming Portfolio</h1>
-          <p class="welcome-subtitle">Config-Driven Architecture</p>
-          <div class="status-info">
-            <p><strong>狀態:</strong> 基礎架構已建立</p>
-            <p><strong>下一步:</strong> 實現核心系統</p>
-            <p><strong>架構:</strong> Config-Driven + Component-Based</p>
-          </div>
-          <div class="directory-structure">
-            <h3>📁 已建立的目錄結構:</h3>
-            <pre>
-src/
-├── config/     # 配置驅動核心
-├── core/       # 系統核心
-├── components/ # 組件系統  
-├── pages/      # 頁面組件
-├── systems/    # 功能系統
-├── utils/      # 工具函數
-└── styles/     # 樣式系統
-            </pre>
-          </div>
+        <div style="text-align: center; padding: 50px; color: #ff4757;">
+          <div style="font-size: 4rem; margin-bottom: 20px;">💥</div>
+          <h2 style="color: #e74c3c; margin-bottom: 20px;">應用程式初始化失敗</h2>
+          <p style="color: white; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">${message}</p>
+          <button onclick="location.reload()" 
+                  style="background: #d4af37; color: black; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1rem;">
+            🔄 重新載入
+          </button>
         </div>
       `;
     }
   }
-
+  
   /**
-   * 顯示錯誤訊息
-   * @param {string} message - 錯誤訊息
+   * 獲取路由器實例
    */
-  showError(message) {
-    const errorContainer = document.createElement('div');
-    errorContainer.className = 'error-container';
-    errorContainer.innerHTML = `
-      <div class="error-content">
-        <h2>❌ 錯誤</h2>
-        <p>${message}</p>
-        <button onclick="location.reload()" class="retry-button">重新載入</button>
-      </div>
-    `;
-    document.body.appendChild(errorContainer);
+  getRouter() {
+    return this.router;
+  }
+  
+  /**
+   * 銷毀應用程式
+   */
+  destroy() {
+    if (this.router) {
+      this.router.destroy();
+      this.router = null;
+    }
+    
+    this.initialized = false;
+    console.log('🔥 Gaming Portfolio - Destroyed');
   }
 }
+
+// 創建全域應用程式實例
+let app = null;
 
 /**
  * 應用程式啟動
  */
 document.addEventListener('DOMContentLoaded', async () => {
-  const app = new App();
+  app = new GamingPortfolioApp();
   await app.init();
+  
+  // 將應用實例掛載到全域
+  window.gamingPortfolioApp = app;
 });
 
 // 全域錯誤處理
@@ -159,3 +183,6 @@ window.addEventListener('error', (event) => {
 window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
 });
+
+// 導出應用程式類（供其他模組使用）
+export { GamingPortfolioApp };

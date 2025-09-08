@@ -1,0 +1,194 @@
+/**
+ * 簡單 SPA 路由系統
+ * Step 3.1.1b: 基礎路由實現
+ */
+
+export class Router {
+  constructor() {
+    this.routes = new Map();
+    this.currentRoute = null;
+    this.currentComponent = null;
+    
+    // 綁定 this 上下文
+    this.handlePopState = this.handlePopState.bind(this);
+    this.handleHashChange = this.handleHashChange.bind(this);
+    
+    // 監聽瀏覽器前進後退
+    window.addEventListener('popstate', this.handlePopState);
+    
+    // 監聽 hash 變化（點擊連結時觸發）
+    window.addEventListener('hashchange', this.handleHashChange);
+    
+    console.log('🛣️ Router initialized');
+  }
+  
+  /**
+   * 註冊路由
+   * @param {string} path - 路由路徑
+   * @param {Function} component - 組件函數
+   * @param {Object} options - 選項
+   */
+  register(path, component, options = {}) {
+    this.routes.set(path, {
+      component,
+      title: options.title || 'Gaming Portfolio',
+      meta: options.meta || {}
+    });
+    
+    console.log(`📝 Route registered: ${path}`);
+  }
+  
+  /**
+   * 導航到指定路由
+   * @param {string} path - 目標路徑
+   * @param {boolean} pushState - 是否推送歷史記錄
+   */
+  async navigate(path, pushState = true) {
+    try {
+      console.log(`🧭 Navigating to: ${path}`);
+      
+      // 檢查路由是否存在
+      let route = this.routes.get(path);
+      if (!route) {
+        console.warn(`⚠️ Route not found: ${path}`);
+        // 導航到 404 或首頁
+        path = '/';
+        route = this.routes.get('/');
+        if (!route) {
+          throw new Error('No fallback route defined');
+        }
+      }
+      
+      // 推送歷史記錄
+      if (pushState && path !== this.currentRoute) {
+        window.history.pushState({ path }, '', `#${path}`);
+      }
+      
+      // 更新頁面標題
+      document.title = route.title;
+      
+      // 渲染組件
+      await this.renderComponent(route.component, path);
+      
+      // 更新當前路由
+      this.currentRoute = path;
+      
+      console.log(`✅ Navigation complete: ${path}`);
+      
+    } catch (error) {
+      console.error('❌ Navigation failed:', error);
+      this.showError(`Navigation failed: ${error.message}`);
+    }
+  }
+  
+  /**
+   * 渲染組件到頁面
+   * @param {Function} ComponentClass - 組件類別
+   * @param {string} path - 當前路徑
+   */
+  async renderComponent(ComponentClass, path) {
+    console.log(`🎨 Rendering component for path: ${path}`);
+    console.log(`📦 Component class:`, ComponentClass.name);
+    
+    const container = document.getElementById('page-content');
+    if (!container) {
+      throw new Error('Page content container not found');
+    }
+    
+    // 清理舊組件
+    if (this.currentComponent && typeof this.currentComponent.destroy === 'function') {
+      console.log(`🧹 Destroying old component: ${this.currentComponent.constructor.name}`);
+      this.currentComponent.destroy();
+    }
+    
+    // 清空容器
+    container.innerHTML = '';
+    console.log(`🗑️ Container cleared`);
+    
+    // 創建新組件
+    this.currentComponent = new ComponentClass();
+    console.log(`🏗️ New component created: ${this.currentComponent.constructor.name}`);
+    
+    // 渲染組件
+    if (typeof this.currentComponent.render === 'function') {
+      const html = await this.currentComponent.render();
+      container.innerHTML = html;
+      console.log(`✏️ Component HTML rendered, length: ${html.length} chars`);
+      
+      // 執行組件初始化
+      if (typeof this.currentComponent.init === 'function') {
+        await this.currentComponent.init();
+        console.log(`🚀 Component initialized`);
+      }
+    } else {
+      throw new Error('Component must have render method');
+    }
+  }
+  
+  /**
+   * 處理瀏覽器前進後退
+   */
+  handlePopState(event) {
+    const path = event.state?.path || '/';
+    console.log(`⬅️ Pop state: ${path}`);
+    this.navigate(path, false);
+  }
+  
+  /**
+   * 處理 hash 變化（點擊連結時）
+   */
+  handleHashChange(event) {
+    const hash = window.location.hash.slice(1) || '/';
+    console.log(`#️⃣ Hash changed to: ${hash}`);
+    
+    // 避免重複導航到相同路徑
+    if (hash !== this.currentRoute) {
+      this.navigate(hash, false);
+    }
+  }
+  
+  /**
+   * 啟動路由系統
+   */
+  start() {
+    // 獲取當前 hash 路徑
+    const hash = window.location.hash.slice(1) || '/';
+    console.log(`🚀 Starting router with path: ${hash}`);
+    
+    // 導航到當前路徑
+    this.navigate(hash, false);
+  }
+  
+  /**
+   * 顯示錯誤頁面
+   */
+  showError(message) {
+    const container = document.getElementById('page-content');
+    if (container) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 50px; color: #ff4757;">
+          <h2>⚠️ 路由錯誤</h2>
+          <p>${message}</p>
+          <button onclick="window.location.hash = '#/'" 
+                  style="background: #d4af37; color: black; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 20px;">
+            返回首頁
+          </button>
+        </div>
+      `;
+    }
+  }
+  
+  /**
+   * 銷毀路由器
+   */
+  destroy() {
+    window.removeEventListener('popstate', this.handlePopState);
+    window.removeEventListener('hashchange', this.handleHashChange);
+    
+    if (this.currentComponent && typeof this.currentComponent.destroy === 'function') {
+      this.currentComponent.destroy();
+    }
+    
+    console.log('🔥 Router destroyed');
+  }
+}
