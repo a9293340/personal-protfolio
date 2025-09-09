@@ -5,6 +5,7 @@
 
 import { BaseComponent } from '../core/components/BaseComponent.js';
 import { Hero } from '../components/layout/Hero.js';
+import { PreviewSection } from '../components/layout/PreviewSection.js';
 
 export class HomePage extends BaseComponent {
   constructor(options = {}) {
@@ -12,6 +13,7 @@ export class HomePage extends BaseComponent {
     
     // 子組件
     this.heroComponent = null;
+    this.previewSection = null;
   }
   
   /**
@@ -19,20 +21,17 @@ export class HomePage extends BaseComponent {
    * @returns {Promise<string>} HTML 字串
    */
   async render() {
-    // 初始化 Hero 組件
+    // 初始化組件
     this.heroComponent = new Hero();
+    this.previewSection = new PreviewSection();
+    
     const heroHTML = await this.heroComponent.render();
+    const previewHTML = await this.previewSection.render();
     
     return `
       <div class="home-page">
         ${heroHTML}
-        
-        <!-- 預覽區塊將在後續步驟中添加 -->
-        <div class="preview-sections" style="display: none;">
-          <!-- 技能樹預覽 -->
-          <!-- 時間軸預覽 -->
-          <!-- 專案卡牌預覽 -->
-        </div>
+        ${previewHTML}
       </div>
     `;
   }
@@ -43,22 +42,31 @@ export class HomePage extends BaseComponent {
   async init() {
     await super.init();
     
-    // 初始化 Hero 組件
+    // 初始化組件
     if (this.heroComponent) {
       await this.heroComponent.init();
     }
     
-    console.log('🏠 HomePage initialized with Hero component');
+    if (this.previewSection) {
+      await this.previewSection.init();
+    }
+    
+    console.log('🏠 HomePage initialized with Hero and PreviewSection components');
   }
   
   /**
    * 銷毀組件
    */
   destroy() {
-    // 銷毀 Hero 組件
+    // 銷毀組件
     if (this.heroComponent) {
       this.heroComponent.destroy();
       this.heroComponent = null;
+    }
+    
+    if (this.previewSection) {
+      this.previewSection.destroy();
+      this.previewSection = null;
     }
     
     super.destroy();

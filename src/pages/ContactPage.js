@@ -141,7 +141,7 @@ export class ContactPage extends BaseComponent {
     e.preventDefault();
     
     // 這裡是示例，實際應用中需要真正的表單提交邏輯
-    alert('📧 謝謝您的訊息！這是一個示例表單，實際版本會真正發送郵件。');
+    window.alert('📧 謝謝您的訊息！這是一個示例表單，實際版本會真正發送郵件。');
     
     // 清空表單
     const form = document.querySelector('.contact-form');

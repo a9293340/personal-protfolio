@@ -5,6 +5,30 @@
 /* ===== 導入組件樣式 ===== */
 @import './components/navbar.css';
 @import './components/hero.css';
+@import './components/PreviewSection.css';
+
+/* ===== CSS 變數定義 ===== */
+:root {
+  /* 主色調 */
+  --primary-dark: #0a0a0a;
+  --secondary-dark: #1a1a2e;
+  --primary-gold: #d4af37;
+  --bright-gold: #f4d03f;
+  --primary-blue: #2980b9;
+  --primary-red: #8b0000;
+
+  /* 字體系統 */
+  --font-heading: 'Cinzel', 'Noto Serif TC', serif;
+  --font-body: 'Inter', 'Noto Sans TC', sans-serif;
+  --font-code: 'Fira Code', 'JetBrains Mono', monospace;
+
+  /* 間距系統 */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+}
 
 /* ===== 基礎重置 ===== */
 * {
