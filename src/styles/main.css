@@ -8,6 +8,7 @@
 @import './components/PreviewSection.css';
 @import './components/AboutPage.css';
 @import './components/CharacterPanel.css';
+@import './components/ConceptTimeline.css';
 
 /* ===== CSS 變數定義 ===== */
 :root {

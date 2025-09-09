@@ -4,7 +4,7 @@
  */
 
 import { BaseComponent } from '../../core/components/BaseComponent.js';
-import characterConfig from '../../config/data/character.data.js';
+import characterConfig from '../../config/data/about/character.data.js';
 
 export class CharacterPanel extends BaseComponent {
   constructor(options = {}) {
@@ -17,79 +17,21 @@ export class CharacterPanel extends BaseComponent {
    * 獲取默認配置（將通過 config 文件覆蓋）
    */
   getDefaultConfig() {
-    return {
-      // 導入實際配置數據
-      // 這些數據會被 character.data.js 覆蓋
-      careerProgression: {
-        title: '職業發展歷程',
-        stages: [
-          {
-            job: '前端工程師',
-            icon: '🎨',
-            level: 5,
-            period: '2019-2020',
-            status: 'completed'
-          },
-          {
-            job: '全端工程師', 
-            icon: '🔧',
-            level: 6,
-            period: '2020-2022',
-            status: 'completed'
-          },
-          {
-            job: '後端工程師',
-            icon: '👨‍💻', 
-            level: 8,
-            period: '2022-2024',
-            status: 'current'
-          },
-          {
-            job: '系統架構師',
-            icon: '🏗️',
-            level: 1,
-            period: '2024-未來',
-            status: 'target'
-          }
-        ]
-      },
-      skillDomains: {
-        domains: {
-          backend: { name: '後端工程領域', icon: '⚡', currentLevel: 6, maxLevel: 10, experience: 7500, maxExperience: 10000 },
-          architecture: { name: '系統架構設計領域', icon: '🏗️', currentLevel: 3, maxLevel: 10, experience: 2800, maxExperience: 5000 },
-          database: { name: '資料庫工程領域', icon: '🗄️', currentLevel: 5, maxLevel: 10, experience: 4200, maxExperience: 7500 },
-          devops: { name: '雲端服務與 DevOps', icon: '⚙️', currentLevel: 4, maxLevel: 10, experience: 3600, maxExperience: 6000 },
-          ai: { name: 'AI 工程應用領域', icon: '🤖', currentLevel: 4, maxLevel: 10, experience: 3200, maxExperience: 6000 },
-          frontend: { name: '前端開發領域', icon: '🎨', currentLevel: 4, maxLevel: 10, experience: 3000, maxExperience: 6000 }
-        }
-      },
-      attributes: {
-        attack: 85,      // ⚔️ 攻擊力 (代碼能力)
-        defense: 90,     // 🛡️ 防禦力 (系統穩定性)  
-        agility: 88,     // ⚡ 敏捷度 (學習能力)
-        intelligence: 92, // 🧠 智力 (架構思維)
-        charisma: 85,    // 🤝 魅力 (團隊協作)
-        luck: 90         // 🎯 幸運 (問題解決)
-      },
-      visual: {
-        borderColor: '#d4af37',
-        backgroundColor: 'rgba(212, 175, 55, 0.1)',
-        expBarColor: '#00ff88',
-        radarColor: '#d4af37',
-        glowIntensity: 0.8
-      }
-    };
+    return characterConfig.character;
   }
 
   /**
    * 渲染 RPG 角色面板
    */
   async render() {
-    const config = { ...characterConfig.character, ...this.getDefaultConfig(), ...this.options };
-    const { careerProgression, skillDomains, attributes } = config;
+    const config = this.mergeConfig();
+    const { careerProgression, skillDomains } = config;
+    
+    // 獲取屬性數據 (從配置的正確位置)
+    const attributesConfig = characterConfig.attributes?.attributes || {};
 
-    // 計算屬性總值
-    const totalStats = Object.values(attributes).reduce((sum, val) => sum + val, 0);
+    // 計算屬性總值 (使用 .value 屬性)
+    const totalStats = Object.values(attributesConfig).reduce((sum, attr) => sum + (attr.value || 0), 0);
     const averageStats = Math.round(totalStats / 6);
 
     return `
@@ -118,7 +60,7 @@ export class CharacterPanel extends BaseComponent {
           
           <!-- 屬性列表 -->
           <div class="attributes-list">
-            ${this.renderAttributesList(attributes)}
+            ${this.renderAttributesList(attributesConfig)}
           </div>
           
           <!-- 六角形雷達圖 -->
@@ -203,8 +145,9 @@ export class CharacterPanel extends BaseComponent {
       luck: { icon: '🎯', name: '幸運', description: '問題解決' }
     };
 
-    return Object.entries(attributes).map(([key, value]) => {
+    return Object.entries(attributes).map(([key, attrObj]) => {
       const info = attributeInfo[key];
+      const value = attrObj.value || 0;
       return `
         <div class="attribute-item" data-attribute="${key}">
           <div class="attribute-header">
@@ -256,12 +199,19 @@ export class CharacterPanel extends BaseComponent {
     this.radarCanvas = canvas;
     const ctx = canvas.getContext('2d');
     
-    // 設置畫布分辨率
+    // 設置畫布分辨率 - 在手機版限制canvas實際尺寸
+    const isMobile = window.innerWidth <= 768;
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+    
+    // 手機版限制最大canvas尺寸，避免DPR造成過大canvas
+    const maxSize = isMobile ? 280 : rect.width;
+    const actualWidth = Math.min(rect.width, maxSize);
+    const actualHeight = Math.min(rect.height, maxSize);
+    
+    canvas.width = actualWidth * (isMobile ? 1 : dpr);
+    canvas.height = actualHeight * (isMobile ? 1 : dpr);
+    ctx.scale(isMobile ? 1 : dpr, isMobile ? 1 : dpr);
     
     // 開始雷達圖渲染動畫
     this.renderRadarChart();
@@ -275,13 +225,14 @@ export class CharacterPanel extends BaseComponent {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const config = this.mergeConfig();
-    const { attributes } = config;
+    
+    // 獲取屬性數據 (從配置的正確位置)
+    const attributesConfig = characterConfig.attributes?.attributes || {};
     
     const centerX = 140;
     const centerY = 140;
-    const maxRadius = 100;
-    const attributeValues = Object.values(attributes);
+    const maxRadius = 80;
+    const attributeValues = Object.values(attributesConfig).map(attr => attr.value || 0);
     const attributeNames = ['攻擊', '防禦', '敏捷', '智力', '魅力', '幸運'];
     
     // 清除畫布
@@ -294,7 +245,7 @@ export class CharacterPanel extends BaseComponent {
     this.drawRadarData(ctx, centerX, centerY, maxRadius, attributeValues);
     
     // 繪制屬性標籤
-    this.drawRadarLabels(ctx, centerX, centerY, maxRadius + 25, attributeNames);
+    this.drawRadarLabels(ctx, centerX, centerY, maxRadius + 20, attributeNames);
   }
 
   /**

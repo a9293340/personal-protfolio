@@ -4,13 +4,15 @@
  */
 
 import { BaseComponent } from '../core/components/BaseComponent.js';
-import aboutConfig from '../config/data/about.data.js';
+import aboutConfig from '../config/data/about/about.data.js';
 import { CharacterPanel } from '../components/gaming/CharacterPanel.js';
+import { ConceptTimeline } from '../components/gaming/ConceptTimeline.js';
 
 export class AboutPage extends BaseComponent {
   constructor(options = {}) {
     super(options);
     this.characterPanel = null;
+    this.conceptTimeline = null;
   }
   
   /**
@@ -140,6 +142,11 @@ export class AboutPage extends BaseComponent {
             <div id="character-panel-container"></div>
           </section>
           
+          <!-- 概念型時間軸 - 職涯發展概覽 -->
+          <section class="concept-timeline-section">
+            <div id="concept-timeline-container"></div>
+          </section>
+          
           ${this.renderCareerGoal(config.careerGoal)}
           ${this.renderTechnicalSkills(config.technicalSkills)}
           
@@ -166,7 +173,10 @@ export class AboutPage extends BaseComponent {
     // 初始化 RPG 角色面板
     await this.initCharacterPanel();
     
-    console.log('📋 AboutPage initialized with Config-Driven architecture + RPG Character Panel');
+    // 初始化概念型時間軸
+    await this.initConceptTimeline();
+    
+    console.log('📋 AboutPage initialized with Config-Driven architecture + RPG Character Panel + Concept Timeline');
   }
 
   /**
@@ -203,12 +213,37 @@ export class AboutPage extends BaseComponent {
   }
 
   /**
+   * 初始化概念型時間軸
+   */
+  async initConceptTimeline() {
+    const container = document.getElementById('concept-timeline-container');
+    if (container) {
+      this.conceptTimeline = new ConceptTimeline({
+        container: container
+      });
+      
+      // 渲染組件 HTML 並插入容器
+      const html = await this.conceptTimeline.render();
+      container.innerHTML = html;
+      
+      // 初始化組件功能
+      await this.conceptTimeline.init();
+      console.log('⏰ ConceptTimeline integrated into AboutPage');
+    }
+  }
+
+  /**
    * 銷毀組件
    */
   destroy() {
     if (this.characterPanel) {
       this.characterPanel.destroy();
       this.characterPanel = null;
+    }
+    
+    if (this.conceptTimeline) {
+      this.conceptTimeline.destroy();
+      this.conceptTimeline = null;
     }
     
     super.destroy();

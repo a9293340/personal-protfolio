@@ -5,7 +5,7 @@
  */
 
 import { BaseComponent } from '../../core/components/BaseComponent.js';
-import { getHeroConfig } from '../../config/data/hero.data.js';
+import { getHeroConfig } from '../../config/data/home/hero.data.js';
 
 export class Hero extends BaseComponent {
   constructor(options = {}) {

@@ -9,7 +9,7 @@ import previewConfig, {
   timelinePreviewConfig, 
   projectsPreviewConfig,
   previewLimits 
-} from '../../config/data/preview.data.js';
+} from '../../config/data/home/preview.data.js';
 
 export class PreviewSection extends BaseComponent {
   constructor(options = {}) {
