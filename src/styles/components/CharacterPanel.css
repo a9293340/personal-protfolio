@@ -1,0 +1,684 @@
+/**
+ * RPG 角色面板樣式
+ * Step 3.2.2: RPG Character Panel Styles
+ */
+
+/* 角色面板主容器 */
+.character-panel {
+  background: linear-gradient(135deg, 
+    rgba(26, 26, 46, 0.95) 0%,
+    rgba(212, 175, 55, 0.05) 50%,
+    rgba(26, 26, 46, 0.95) 100%);
+  border: 2px solid var(--primary-gold);
+  border-radius: 1rem;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 3rem;
+  box-shadow: 
+    0 0 20px rgba(212, 175, 55, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.character-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  animation: panelGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes panelGlow {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.6; }
+}
+
+/* 職業發展歷程頭部 */
+.character-header {
+  margin-bottom: 2rem;
+}
+
+.career-title {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  color: var(--primary-gold);
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.career-progression {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  overflow-x: auto;
+}
+
+.career-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.completed-stage {
+  background: rgba(46, 204, 113, 0.15);
+  border: 2px solid rgba(46, 204, 113, 0.4);
+  opacity: 0.8;
+}
+
+.current-stage {
+  background: linear-gradient(135deg, 
+    rgba(212, 175, 55, 0.2) 0%,
+    rgba(212, 175, 55, 0.1) 100%);
+  border: 2px solid var(--primary-gold);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  animation: currentStagePulse 3s ease-in-out infinite;
+}
+
+.target-stage {
+  background: rgba(52, 152, 219, 0.1);
+  border: 2px dashed rgba(52, 152, 219, 0.5);
+  opacity: 0.7;
+}
+
+.stage-arrow {
+  font-size: 1.5rem;
+  color: var(--primary-gold);
+  font-weight: bold;
+  animation: arrowPulse 2s ease-in-out infinite;
+}
+
+@keyframes currentStagePulse {
+  0%, 100% { 
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+    transform: scale(1.02);
+  }
+}
+
+.previous-job,
+.current-job {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.previous-job {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  opacity: 0.7;
+}
+
+.current-job {
+  background: linear-gradient(135deg, 
+    rgba(212, 175, 55, 0.2) 0%,
+    rgba(212, 175, 55, 0.1) 100%);
+  border: 2px solid var(--primary-gold);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  animation: currentJobPulse 3s ease-in-out infinite;
+}
+
+@keyframes currentJobPulse {
+  0%, 100% { 
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+    transform: scale(1.02);
+  }
+}
+
+.job-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.job-name {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--primary-gold);
+  font-weight: 600;
+  text-align: center;
+}
+
+.job-level {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.transition-arrow {
+  font-size: 2rem;
+  color: var(--primary-gold);
+  font-weight: bold;
+  animation: arrowPulse 2s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* 經驗值系統 */
+.experience-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 0.75rem;
+}
+
+.exp-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #00ff88;
+}
+
+.exp-numbers {
+  font-family: var(--font-code);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.exp-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.exp-bar {
+  flex: 1;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.exp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    #00ff88 0%, 
+    #00cc66 50%, 
+    #00ff88 100%);
+  border-radius: 5px;
+  position: relative;
+  transition: width 2s ease-out;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.exp-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%);
+  animation: expShimmer 3s infinite;
+}
+
+@keyframes expShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.exp-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, 
+    rgba(0, 255, 136, 0.3) 0%, 
+    transparent 70%);
+  animation: expGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes expGlow {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.8; }
+}
+
+.exp-percentage {
+  font-family: var(--font-code);
+  font-weight: 700;
+  color: #00ff88;
+  min-width: 45px;
+  text-align: right;
+}
+
+/* 六大技能領域系統 */
+.skill-domains-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(212, 175, 55, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 0.75rem;
+}
+
+.skill-domains-info {
+  margin-bottom: 1.5rem;
+}
+
+.skill-domains-label {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--primary-gold);
+  font-size: 1.2rem;
+  display: block;
+  text-align: center;
+}
+
+.skill-domains-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.skill-domain {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.skill-domain:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(212, 175, 55, 0.3);
+  transform: translateY(-2px);
+}
+
+.domain-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.domain-icon {
+  font-size: 1.5rem;
+  width: 2rem;
+  text-align: center;
+}
+
+.domain-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.domain-name {
+  font-weight: 600;
+  color: var(--primary-gold);
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.domain-level {
+  font-family: var(--font-code);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 700;
+}
+
+.domain-description {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.skill-domain .exp-bar-container {
+  position: relative;
+}
+
+.skill-domain .exp-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 0.5rem;
+}
+
+.skill-domain .exp-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1.5s ease-out;
+  position: relative;
+  width: 0%; /* 初始為 0，通過 JS 動畫 */
+}
+
+.exp-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+}
+
+.exp-current {
+  color: #00ff88;
+  font-weight: 700;
+}
+
+.exp-separator {
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0.25rem;
+}
+
+.exp-max {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 角色統計佈局 - 左右各50% */
+.character-stats-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+/* 屬性列表 */
+.attributes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.attribute-item {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.attribute-item:hover {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(212, 175, 55, 0.3);
+  transform: translateX(5px);
+}
+
+.attribute-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.attribute-icon {
+  font-size: 1.5rem;
+  width: 2rem;
+  text-align: center;
+}
+
+.attribute-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.attribute-name {
+  font-weight: 600;
+  color: var(--primary-gold);
+  font-size: 1rem;
+}
+
+.attribute-description {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.attribute-value {
+  font-family: var(--font-code);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #ffffff;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.attribute-bar-container {
+  position: relative;
+}
+
+.attribute-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.attribute-fill {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    var(--primary-gold) 0%,
+    var(--bright-gold) 100%);
+  border-radius: 2px;
+  transition: width 1.5s ease-out;
+  position: relative;
+  width: 0%; /* 初始為 0，通過 JS 動畫 */
+}
+
+.attribute-fill.glow-effect {
+  box-shadow: 0 0 8px var(--primary-gold);
+  animation: attributeGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes attributeGlow {
+  0% { box-shadow: 0 0 5px var(--primary-gold); }
+  100% { box-shadow: 0 0 12px var(--bright-gold); }
+}
+
+/* 雷達圖容器 */
+.radar-chart-container {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.radar-chart {
+  border-radius: 50%;
+  background: radial-gradient(circle at center,
+    rgba(212, 175, 55, 0.05) 0%,
+    transparent 70%);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.radar-center-info {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.total-stats {
+  font-family: var(--font-code);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-gold);
+  text-shadow: 0 0 8px var(--primary-gold);
+}
+
+.avg-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.25rem;
+}
+
+/* 轉職特效 */
+.job-transition-effects {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.level-up-effect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  transition: all 0.5s ease;
+}
+
+.level-up-effect.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.level-up-text {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--bright-gold);
+  text-shadow: 
+    0 0 10px var(--primary-gold),
+    0 0 20px var(--bright-gold);
+  animation: levelUpText 3s ease-out;
+}
+
+@keyframes levelUpText {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(50px);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.2) translateY(-10px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1) translateY(-50px);
+  }
+}
+
+.sparkle-effects {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* 響應式設計 */
+@media (max-width: 1024px) {
+  .character-stats-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .radar-chart-container {
+    justify-self: center;
+    order: -1;
+    width: 240px;
+    height: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .character-panel {
+    padding: 1.5rem;
+  }
+  
+  .job-transition {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .transition-arrow {
+    transform: rotate(90deg);
+  }
+  
+  .experience-section,
+  .skill-points-section {
+    padding: 1rem;
+  }
+  
+  .character-stats-layout {
+    gap: 1.5rem;
+  }
+  
+  .attribute-item {
+    padding: 0.75rem;
+  }
+  
+  .radar-chart-container {
+    width: 220px;
+    height: 220px;
+  }
+}
+
+@media (max-width: 480px) {
+  .character-panel {
+    padding: 1rem;
+  }
+  
+  .job-name {
+    font-size: 1rem;
+  }
+  
+  .attribute-header {
+    gap: 0.75rem;
+  }
+  
+  .attribute-icon {
+    font-size: 1.25rem;
+    width: 1.5rem;
+  }
+  
+  .skill-points-dots {
+    gap: 0.25rem;
+  }
+  
+  .skill-dot {
+    font-size: 1rem;
+  }
+}

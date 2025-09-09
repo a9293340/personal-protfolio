@@ -5,8 +5,13 @@
 
 import { BaseComponent } from '../core/components/BaseComponent.js';
 import aboutConfig from '../config/data/about.data.js';
+import { CharacterPanel } from '../components/gaming/CharacterPanel.js';
 
 export class AboutPage extends BaseComponent {
+  constructor(options = {}) {
+    super(options);
+    this.characterPanel = null;
+  }
   
   /**
    * 獲取默認配置
@@ -126,9 +131,17 @@ export class AboutPage extends BaseComponent {
         <div class="about-container" style="max-width: ${config.layout.maxWidth}; padding: ${config.layout.padding};">
           
           ${this.renderHeader(config.header)}
+          
+          <!-- RPG 角色面板 - 置於最顯眼位置 -->
+          <section class="character-panel-section">
+            <h2 class="section-title" style="color: var(--primary-gold); text-align: center; margin-bottom: 2rem;">
+              🎮 角色狀態
+            </h2>
+            <div id="character-panel-container"></div>
+          </section>
+          
           ${this.renderCareerGoal(config.careerGoal)}
           ${this.renderTechnicalSkills(config.technicalSkills)}
-          ${this.renderPersonalTraits(config.personalTraits)}
           
           <div class="about-navigation">
             <a href="#/" class="back-button">
@@ -150,7 +163,10 @@ export class AboutPage extends BaseComponent {
     // 添加進度條動畫
     this.initProgressAnimations();
     
-    console.log('📋 AboutPage initialized with Config-Driven architecture');
+    // 初始化 RPG 角色面板
+    await this.initCharacterPanel();
+    
+    console.log('📋 AboutPage initialized with Config-Driven architecture + RPG Character Panel');
   }
 
   /**
@@ -167,9 +183,34 @@ export class AboutPage extends BaseComponent {
   }
 
   /**
+   * 初始化 RPG 角色面板
+   */
+  async initCharacterPanel() {
+    const container = document.getElementById('character-panel-container');
+    if (container) {
+      this.characterPanel = new CharacterPanel({
+        container: container
+      });
+      
+      // 渲染組件 HTML 並插入容器
+      const html = await this.characterPanel.render();
+      container.innerHTML = html;
+      
+      // 初始化組件功能
+      await this.characterPanel.init();
+      console.log('🎮 CharacterPanel integrated into AboutPage');
+    }
+  }
+
+  /**
    * 銷毀組件
    */
   destroy() {
+    if (this.characterPanel) {
+      this.characterPanel.destroy();
+      this.characterPanel = null;
+    }
+    
     super.destroy();
     console.log('📋 AboutPage destroyed');
   }
