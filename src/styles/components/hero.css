@@ -92,6 +92,39 @@
   opacity: 0.9;
 }
 
+/* 重點字高亮樣式 */
+.typing-text .highlight-text {
+  color: #d4af37;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 208, 63, 0.1));
+  padding: 2px 4px;
+  border-radius: 3px;
+  position: relative;
+}
+
+.typing-text .highlight-text::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), transparent);
+  border-radius: 3px;
+  z-index: -1;
+  animation: highlightGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes highlightGlow {
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 0.6;
+  }
+}
+
 .typing-cursor {
   color: #d4af37;
   font-weight: 100;
