@@ -6,6 +6,7 @@
 @import './components/navbar.css';
 @import './components/hero.css';
 @import './components/PreviewSection.css';
+@import './components/AboutPage.css';
 
 /* ===== CSS 變數定義 ===== */
 :root {

@@ -1,59 +1,137 @@
 /**
  * 關於頁面組件
- * Step 3.1.1c: 關於我頁面
+ * Step 3.2.1: Config-Driven About Page
  */
 
 import { BaseComponent } from '../core/components/BaseComponent.js';
+import aboutConfig from '../config/data/about.data.js';
 
 export class AboutPage extends BaseComponent {
+  
+  /**
+   * 獲取默認配置
+   */
+  getDefaultConfig() {
+    return aboutConfig;
+  }
+
+  /**
+   * 渲染頁面標題區塊
+   */
+  renderHeader(headerConfig) {
+    return `
+      <header class="about-header">
+        <h1 class="about-title">
+          <span class="title-icon">${headerConfig.title.icon}</span>
+          <span class="title-text">${headerConfig.title.text}</span>
+        </h1>
+        <p class="about-subtitle">${headerConfig.title.subtitle}</p>
+        <p class="about-description">${headerConfig.description}</p>
+      </header>
+    `;
+  }
+
+  /**
+   * 渲染職涯目標區塊
+   */
+  renderCareerGoal(goalConfig) {
+    const goalsHtml = goalConfig.goals.map(goal => `
+      <div class="goal-item">
+        <h4 class="goal-primary">${goal.primary}</h4>
+        <p class="goal-description">${goal.description}</p>
+      </div>
+    `).join('');
+
+    return `
+      <section class="career-goal-section" 
+               style="background: ${goalConfig.theme.bgColor}; border: 2px solid ${goalConfig.theme.borderColor};">
+        <h2 class="section-title" style="color: ${goalConfig.theme.titleColor};">
+          ${goalConfig.title}
+        </h2>
+        <div class="goals-container">
+          ${goalsHtml}
+        </div>
+      </section>
+    `;
+  }
+
+  /**
+   * 渲染技術專長區塊
+   */
+  renderTechnicalSkills(skillsConfig) {
+    const categoriesHtml = skillsConfig.categories.map(category => `
+      <div class="skill-category">
+        <h3 class="category-title" style="color: ${category.color};">
+          <span class="category-icon">${category.icon}</span>
+          ${category.name}
+        </h3>
+        <ul class="skill-list">
+          ${category.skills.map(skill => `<li class="skill-item">${skill}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('');
+
+    return `
+      <section class="technical-skills-section" 
+               style="background: ${skillsConfig.theme.bgColor}; border: 2px solid ${skillsConfig.theme.borderColor};">
+        <h2 class="section-title" style="color: ${skillsConfig.theme.titleColor};">
+          ${skillsConfig.title}
+        </h2>
+        <div class="skills-grid">
+          ${categoriesHtml}
+        </div>
+      </section>
+    `;
+  }
+
+  /**
+   * 渲染個人特質區塊
+   */
+  renderPersonalTraits(traitsConfig) {
+    const traitsHtml = traitsConfig.traits.map(trait => `
+      <div class="trait-item">
+        <div class="trait-header">
+          <span class="trait-icon">${trait.icon}</span>
+          <h4 class="trait-name">${trait.trait}</h4>
+          <span class="trait-level">${trait.level}%</span>
+        </div>
+        <p class="trait-description">${trait.description}</p>
+        <div class="trait-progress">
+          <div class="progress-bar" style="width: ${trait.level}%"></div>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <section class="personal-traits-section" 
+               style="background: ${traitsConfig.theme.bgColor}; border: 2px solid ${traitsConfig.theme.borderColor};">
+        <h2 class="section-title" style="color: ${traitsConfig.theme.titleColor};">
+          ${traitsConfig.title}
+        </h2>
+        <div class="traits-grid">
+          ${traitsHtml}
+        </div>
+      </section>
+    `;
+  }
+
+  /**
+   * 渲染頁面 HTML (Config-Driven)
+   */
   async render() {
+    const config = this.mergeConfig();
+    
     return `
       <div class="about-page">
-        <div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+        <div class="about-container" style="max-width: ${config.layout.maxWidth}; padding: ${config.layout.padding};">
           
-          <header style="text-align: center; margin-bottom: 40px;">
-            <h1 style="color: #d4af37; font-size: 2.5rem; margin-bottom: 20px;">
-              📋 關於我
-            </h1>
-            <p style="color: #ffffff; font-size: 1.2rem; opacity: 0.9;">
-              後端工程師的成長軌跡
-            </p>
-          </header>
+          ${this.renderHeader(config.header)}
+          ${this.renderCareerGoal(config.careerGoal)}
+          ${this.renderTechnicalSkills(config.technicalSkills)}
+          ${this.renderPersonalTraits(config.personalTraits)}
           
-          <div style="background: rgba(212, 175, 55, 0.1); border: 2px solid #d4af37; padding: 30px; border-radius: 12px; margin-bottom: 30px;">
-            <h2 style="color: #d4af37; margin-bottom: 20px;">🎯 職涯目標</h2>
-            <p style="color: white; line-height: 1.6; margin-bottom: 15px;">
-              從後端工程師向系統架構師發展，專注於大型分散式系統設計與實現。
-            </p>
-            <p style="color: white; line-height: 1.6;">
-              結合遊戲化思維，將複雜的技術概念以直覺的方式呈現。
-            </p>
-          </div>
-          
-          <div style="background: rgba(52, 152, 219, 0.1); border: 2px solid #3498db; padding: 30px; border-radius: 12px;">
-            <h2 style="color: #3498db; margin-bottom: 20px;">🛠️ 技術專長</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-              <div>
-                <h3 style="color: #2ecc71; margin-bottom: 10px;">後端開發</h3>
-                <ul style="color: white; margin: 0; padding-left: 20px;">
-                  <li>Node.js / Express</li>
-                  <li>Python / Django</li>
-                  <li>RESTful API 設計</li>
-                </ul>
-              </div>
-              <div>
-                <h3 style="color: #e67e22; margin-bottom: 10px;">資料庫</h3>
-                <ul style="color: white; margin: 0; padding-left: 20px;">
-                  <li>MySQL / PostgreSQL</li>
-                  <li>MongoDB / Redis</li>
-                  <li>資料庫優化</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          
-          <div style="text-align: center; margin-top: 40px;">
-            <a href="#/" style="background: #d4af37; color: black; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+          <div class="about-navigation">
+            <a href="#/" class="back-button">
               ← 返回首頁
             </a>
           </div>
@@ -61,5 +139,38 @@ export class AboutPage extends BaseComponent {
         </div>
       </div>
     `;
+  }
+
+  /**
+   * 初始化頁面
+   */
+  async init() {
+    await super.init();
+    
+    // 添加進度條動畫
+    this.initProgressAnimations();
+    
+    console.log('📋 AboutPage initialized with Config-Driven architecture');
+  }
+
+  /**
+   * 初始化進度條動畫
+   */
+  initProgressAnimations() {
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach((bar, index) => {
+      setTimeout(() => {
+        bar.style.transition = 'width 1.5s ease-out';
+        bar.style.width = bar.style.width; // 觸發動畫
+      }, index * 200);
+    });
+  }
+
+  /**
+   * 銷毀組件
+   */
+  destroy() {
+    super.destroy();
+    console.log('📋 AboutPage destroyed');
   }
 }
