@@ -9,6 +9,8 @@
 @import './components/AboutPage.css';
 @import './components/CharacterPanel.css';
 @import './components/ConceptTimeline.css';
+@import './components/AchievementBadges.css';
+@import './components/SkillsTagCloud.css';
 
 /* ===== CSS 變數定義 ===== */
 :root {

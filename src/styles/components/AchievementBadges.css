@@ -1,0 +1,362 @@
+/**
+ * 成就徽章系統樣式
+ * Step 3.2.4: Achievement Badges System Styles
+ */
+
+/* 主容器 */
+.achievement-badges-container {
+  padding: 2rem;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  position: relative;
+  background: rgba(155, 89, 182, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+/* 標題區域 */
+.achievement-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.achievement-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.achievement-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.total-achievements,
+.completion-rate {
+  padding: 0.25rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  font-weight: 500;
+}
+
+/* 成就網格 */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* 個別成就徽章 */
+.achievement-badge {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.achievement-badge:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* 徽章圖標容器 */
+.badge-icon-container {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1rem;
+}
+
+.badge-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.completion-glow {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.3), transparent 70%);
+  animation: glow 2s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+@keyframes glow {
+  0% { 
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* 徽章內容 */
+.badge-content {
+  text-align: center;
+}
+
+.badge-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.badge-description {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+/* 進度條 */
+.badge-progress-container {
+  margin-bottom: 1rem;
+}
+
+.progress-bar-bg {
+  background: rgba(255, 255, 255, 0.2);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1.5s ease-out;
+  position: relative;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.1), 
+    rgba(255, 255, 255, 0.3) 50%, 
+    rgba(255, 255, 255, 0.1));
+}
+
+.progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.6), 
+    transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.progress-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 徽章元數據 */
+.badge-metadata {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.badge-date {
+  font-family: var(--font-code);
+}
+
+.badge-category {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+}
+
+/* 獲得條件 */
+.badge-criteria {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  text-align: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 稀有度樣式 */
+.achievement-badge.legendary {
+  background: radial-gradient(circle at center, rgba(243, 156, 18, 0.2), rgba(0, 0, 0, 0.3));
+}
+
+.achievement-badge.epic {
+  background: radial-gradient(circle at center, rgba(155, 89, 182, 0.2), rgba(0, 0, 0, 0.3));
+}
+
+.achievement-badge.rare {
+  background: radial-gradient(circle at center, rgba(52, 152, 219, 0.2), rgba(0, 0, 0, 0.3));
+}
+
+.achievement-badge.common {
+  background: radial-gradient(circle at center, rgba(149, 165, 166, 0.2), rgba(0, 0, 0, 0.3));
+}
+
+/* 傳說級特殊效果 */
+.legendary-sparkles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, rgba(255, 215, 0, 0.8), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255, 215, 0, 0.6), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(255, 215, 0, 0.4), transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255, 215, 0, 0.7), transparent),
+    radial-gradient(2px 2px at 160px 30px, rgba(255, 215, 0, 0.5), transparent);
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: sparkle 3s linear infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* 稀有度圖例 */
+.achievement-legend {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
+}
+
+.rarity-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.rarity-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.rarity-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* 動畫定義 */
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1);
+  }
+  50% { 
+    transform: scale(1.1);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% { 
+    transform: scale(1) translateY(0);
+  }
+  25% { 
+    transform: scale(0.95) translateY(-5px);
+  }
+  50% { 
+    transform: scale(1.05) translateY(-3px);
+  }
+  75% { 
+    transform: scale(0.98) translateY(-1px);
+  }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .achievement-badges-container {
+    padding: 1.5rem;
+  }
+  
+  .achievements-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .achievement-badge {
+    padding: 1rem;
+  }
+  
+  .badge-icon-container {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .badge-icon {
+    font-size: 1.5rem;
+  }
+  
+  .badge-name {
+    font-size: 1rem;
+  }
+  
+  .achievement-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .rarity-indicators {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .achievements-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .achievement-badge {
+    padding: 1rem;
+  }
+  
+  .badge-metadata {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
