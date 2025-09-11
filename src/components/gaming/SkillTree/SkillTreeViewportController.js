@@ -743,12 +743,43 @@ export class SkillTreeViewportController extends EventManager {
    */
   centerViewport() {
     // 技能樹居中到網格中心 (1000, 1000)
-    // 視窗坐標系統中，(0, 0) 應該顯示網格中心
-    this.viewport.x = 0;
-    this.viewport.y = 0;
+    // 計算需要的偏移量來讓技能樹中心顯示在畫面中心
+    const containerWidth = this.container.clientWidth;
+    const containerHeight = this.container.clientHeight;
+    
+    // 將技能樹中心 (1000, 1000) 移到視窗中心
+    this.viewport.x = containerWidth / 2 - 1000 * this.viewport.scale;
+    this.viewport.y = containerHeight / 2 - 1000 * this.viewport.scale;
+    
     this.updateTransform();
     
     console.log('SkillTreeViewportController: 視窗已居中', {
+      viewport: { x: this.viewport.x, y: this.viewport.y, scale: this.viewport.scale },
+      containerSize: { width: containerWidth, height: containerHeight }
+    });
+  }
+  
+  /**
+   * 設置初始縮放比例（手機端專用）
+   */
+  setInitialScale(scale, centerOnStart = true) {
+    console.log('SkillTreeViewportController: 設置初始縮放', {
+      scale,
+      centerOnStart,
+      currentScale: this.viewport.scale
+    });
+    
+    // 設置縮放比例
+    this.viewport.scale = Math.max(this.config.zoom.min, Math.min(scale, this.config.zoom.max));
+    
+    // 如果需要居中（先設置縮放再居中，確保居中邏輯使用正確的縮放比例）
+    if (centerOnStart) {
+      this.centerViewport();
+    } else {
+      this.updateTransform();
+    }
+    
+    console.log('SkillTreeViewportController: 初始縮放設置完成', {
       viewport: { x: this.viewport.x, y: this.viewport.y, scale: this.viewport.scale }
     });
   }

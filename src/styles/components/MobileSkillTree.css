@@ -1,0 +1,425 @@
+/**
+ * 手機端簡化版技能樹樣式
+ * Gaming Portfolio - Mobile Skill Tree Component
+ */
+
+.mobile-skill-tree {
+  width: 100%;
+  max-width: 100vw;
+  padding: var(--space-6);
+  background: var(--primary-dark);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* === 標題區域 === */
+.skill-tree-header {
+  margin-bottom: var(--space-6);
+  text-align: center;
+}
+
+.skill-tree-title {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--primary-gold);
+  margin-bottom: var(--space-4);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* === 統計資訊 === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--border-radius);
+  padding: var(--space-5) var(--space-3);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-item.mastered {
+  border-left: 3px solid var(--primary-gold);
+}
+
+.stat-item.learning {
+  border-left: 3px solid var(--primary-blue);
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-gold);
+  line-height: 1;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* === 中心技能節點 === */
+.center-skill {
+  margin-bottom: var(--space-10);
+}
+
+.center-skill-node {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--primary-gold);
+  border-radius: var(--border-radius);
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.skill-icon {
+  margin-bottom: var(--space-4);
+}
+
+.skill-level-ring {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  background: var(--primary-gold);
+  color: var(--primary-dark);
+}
+
+.skill-emoji {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.skill-info h3 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--primary-gold);
+  margin-bottom: var(--space-2);
+}
+
+.skill-description {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-4);
+}
+
+.skill-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.status-text {
+  background: var(--primary-gold);
+  color: var(--primary-dark);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.level-indicator {
+  color: var(--primary-gold);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.skill-achievements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+.achievement-badge {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* === 技能分支 === */
+.skill-branch {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--space-6);
+  overflow: hidden;
+}
+
+.branch-header {
+  display: flex;
+  align-items: center;
+  padding: var(--space-6);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.branch-header:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.branch-header:active {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.branch-icon {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-right: var(--space-4);
+}
+
+.category-emoji {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+}
+
+.expand-indicator {
+  transition: transform 0.3s ease;
+  color: var(--text-secondary);
+}
+
+.expand-indicator.expanded {
+  transform: rotate(180deg);
+}
+
+.branch-info {
+  flex: 1;
+}
+
+.branch-name {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: var(--space-3);
+  line-height: 1.4;
+}
+
+.branch-description {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+  margin-bottom: var(--space-4);
+}
+
+.branch-stats {
+  display: flex;
+  gap: var(--space-5);
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.skills-count {
+  color: var(--text-secondary);
+}
+
+.mastered-count {
+  color: var(--primary-gold);
+  font-weight: 600;
+}
+
+/* === 分支內容區域 === */
+.branch-content {
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.branch-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.branch-content.expanded {
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.skills-list {
+  padding: var(--space-6);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* === 技能項目 === */
+.skill-item {
+  display: flex;
+  align-items: center;
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: var(--border-radius);
+}
+
+.skill-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.skill-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: var(--space-4);
+  flex-shrink: 0;
+}
+
+.skill-indicator.status-mastered {
+  background: var(--primary-gold);
+}
+
+.skill-indicator.status-available {
+  background: var(--primary-blue);
+}
+
+.skill-indicator.status-learning {
+  background: var(--success-color);
+}
+
+.skill-indicator.status-locked {
+  background: var(--text-disabled);
+}
+
+.skill-content {
+  flex: 1;
+}
+
+.skill-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+  line-height: 1.3;
+}
+
+.skill-meta {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.skill-status {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.skill-level {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.skill-arrow {
+  margin-left: var(--space-2);
+  color: var(--text-secondary);
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.skill-item:hover .skill-arrow {
+  opacity: 0.8;
+}
+
+
+/* === 動畫效果 === */
+@keyframes pulseGold {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+  }
+}
+
+/* === 響應式調整 === */
+@media (max-width: 480px) {
+  .mobile-skill-tree {
+    padding: var(--space-3);
+  }
+  
+  .skill-tree-title {
+    font-size: 1.5rem;
+  }
+  
+  .stats-grid {
+    gap: var(--space-1);
+  }
+  
+  .stat-item {
+    padding: var(--space-2);
+  }
+  
+  .center-skill-node {
+    padding: var(--space-4);
+  }
+  
+  .skill-level-ring {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .skill-emoji {
+    font-size: 1.5rem;
+  }
+  
+  .branch-header {
+    padding: var(--space-3);
+  }
+  
+  .category-emoji {
+    font-size: 1.2rem;
+    width: 35px;
+    height: 35px;
+  }
+  
+  .skills-list {
+    padding: 0 var(--space-3) var(--space-3);
+  }
+}
+
+/* === 深色模式支援 === */
+@media (prefers-color-scheme: dark) {
+  .mobile-skill-tree {
+    /* 預設已是深色風格 */
+  }
+}
+
+/* === 高對比度模式 === */
+@media (prefers-contrast: high) {
+  .skill-branch,
+  .skill-node {
+    border-color: var(--text-primary);
+    border-width: 2px;
+  }
+  
+  .branch-header:hover,
+  .skill-main:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}

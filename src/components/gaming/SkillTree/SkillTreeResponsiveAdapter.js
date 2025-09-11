@@ -48,14 +48,17 @@ export const ResponsiveConfig = {
       enableDrag: true
     },
     mobile: {
-      mode: 'vertical-scroll',
-      skillSize: 45,
-      spacing: 80,
-      maxColumns: 6,
-      showConnections: false,
-      enableZoom: false,
-      enableDrag: false,
-      enableCollapse: true
+      mode: 'constrained-drag',
+      skillSize: 50,
+      spacing: 100, 
+      maxColumns: 0, // 不限制
+      showConnections: true,
+      enableZoom: true,
+      enableDrag: true,
+      enableCollapse: false,
+      // 手機端特殊設置
+      initialScale: 0.6, // 初始縮放比例，讓畫面顯示更多內容
+      centerOnStart: true // 啟動時自動居中
     }
   },
   
@@ -346,14 +349,25 @@ export class SkillTreeResponsiveAdapter extends EventManager {
   }
   
   /**
-   * 應用限制拖曳佈局（平板）
+   * 應用限制拖曳佈局（平板/手機）
    */
   applyConstrainedDragLayout(config, animate) {
     this.container.classList.remove('layout-vertical', 'layout-free-drag');
     this.container.classList.add('layout-constrained');
     
+    // 確保技能樹容器移除垂直佈局類
+    const skillTreeContainer = this.container.closest('.skill-tree-container');
+    if (skillTreeContainer) {
+      skillTreeContainer.classList.remove('layout-vertical');
+    }
+    
     // 顯示連接線但簡化
     this.toggleConnections(true, true);
+    
+    // 手機端特殊處理：設置初始縮放和居中
+    if (this.state.currentDevice === 'mobile' && config.initialScale) {
+      this.applyMobileInitialView(config);
+    }
     
     // 應用網格限制
     this.applyGridConstraints(config, animate);
@@ -366,14 +380,20 @@ export class SkillTreeResponsiveAdapter extends EventManager {
     this.container.classList.remove('layout-free-drag', 'layout-constrained');
     this.container.classList.add('layout-vertical');
     
+    // 確保技能樹容器也有正確的類
+    const skillTreeContainer = this.container.closest('.skill-tree-container');
+    if (skillTreeContainer) {
+      skillTreeContainer.classList.add('layout-vertical');
+    }
+    
     // 隱藏連接線
     this.toggleConnections(false);
     
-    // 創建垂直分支佈局
-    this.createVerticalBranchLayout(config, animate);
-    
     // 設置滾動容器
     this.setupScrollContainer();
+    
+    // 創建垂直分支佈局
+    this.createVerticalBranchLayout(config, animate);
   }
   
   /**
@@ -381,9 +401,18 @@ export class SkillTreeResponsiveAdapter extends EventManager {
    */
   createVerticalBranchLayout(config, animate) {
     const skillElements = this.getAllSkillElements();
-    const branches = this.groupSkillsByBranch(skillElements);
     
+    if (skillElements.length === 0) {
+      console.warn('SkillTreeResponsiveAdapter: 沒有找到技能元素，無法創建垂直佈局');
+      return;
+    }
+    
+    const branches = this.groupSkillsByBranch(skillElements);
     let yOffset = 20;
+    
+    // 確保容器寬度正確
+    this.updateContainerInfo();
+    const containerWidth = Math.max(this.layoutInfo.containerWidth, 320); // 最小寬度
     
     branches.forEach((skills, branchName) => {
       // 創建分支頭部
@@ -396,9 +425,15 @@ export class SkillTreeResponsiveAdapter extends EventManager {
       const isCollapsed = this.collapseState.collapsedBranches.has(branchName);
       
       if (!isCollapsed) {
-        // 排列分支中的技能
-        const skillsPerRow = Math.floor((this.layoutInfo.containerWidth - 40) / 
-                                       (config.skillSize + 10));
+        // 計算每行技能數量，確保至少1個
+        const skillsPerRow = Math.max(1, Math.floor((containerWidth - 40) / (config.skillSize + 10)));
+        
+        console.log(`SkillTreeResponsiveAdapter: 佈局分支 "${branchName}"`, {
+          skillCount: skills.length,
+          containerWidth,
+          skillSize: config.skillSize,
+          skillsPerRow
+        });
         
         skills.forEach((skill, index) => {
           const col = index % skillsPerRow;
@@ -408,9 +443,15 @@ export class SkillTreeResponsiveAdapter extends EventManager {
           const y = yOffset + row * (config.skillSize + 15);
           
           this.positionSkillElement(skill, x, y, animate);
+          
+          // 確保技能元素可見
+          skill.style.display = 'flex';
+          skill.style.opacity = '1';
+          skill.style.zIndex = '10';
         });
         
-        yOffset += Math.ceil(skills.length / skillsPerRow) * (config.skillSize + 15) + 20;
+        const rows = Math.ceil(skills.length / skillsPerRow);
+        yOffset += rows * (config.skillSize + 15) + 20;
       }
       
       yOffset += 10; // 分支間距
@@ -418,6 +459,12 @@ export class SkillTreeResponsiveAdapter extends EventManager {
     
     // 更新容器高度
     this.updateContainerHeight(yOffset + 20);
+    
+    console.log('SkillTreeResponsiveAdapter: 垂直佈局創建完成', {
+      totalHeight: yOffset + 20,
+      branches: branches.size,
+      totalSkills: skillElements.length
+    });
   }
   
   /**
@@ -622,13 +669,22 @@ export class SkillTreeResponsiveAdapter extends EventManager {
    */
   scanSkillElements() {
     const skillElements = this.container.querySelectorAll('[data-skill-id]');
+    this.state.skillElements.clear();
     
     skillElements.forEach(element => {
       const skillId = element.dataset.skillId;
       this.state.skillElements.set(skillId, element);
     });
     
-    console.log(`SkillTreeResponsiveAdapter: 掃描到 ${skillElements.length} 個技能元素`);
+    console.log(`SkillTreeResponsiveAdapter: 掃描到 ${skillElements.length} 個技能元素`, {
+      elements: Array.from(skillElements).map(el => ({
+        id: el.dataset.skillId,
+        branch: el.dataset.branch || el.dataset.category,
+        className: el.className
+      }))
+    });
+    
+    return skillElements.length;
   }
   
   /**
@@ -645,13 +701,21 @@ export class SkillTreeResponsiveAdapter extends EventManager {
     const branches = new Map();
     
     skillElements.forEach(element => {
-      const branch = element.dataset.branch || 'misc';
+      const branch = element.dataset.branch || element.dataset.category || 'misc';
       
       if (!branches.has(branch)) {
         branches.set(branch, []);
       }
       
       branches.get(branch).push(element);
+    });
+    
+    console.log('SkillTreeResponsiveAdapter: 技能分支分組', {
+      totalElements: skillElements.length,
+      branches: Array.from(branches.entries()).map(([name, skills]) => ({
+        name,
+        count: skills.length
+      }))
     });
     
     return branches;
@@ -720,7 +784,22 @@ export class SkillTreeResponsiveAdapter extends EventManager {
   positionSkillElement(element, x, y, animate = true) {
     // 保存原始變換用於折疊動畫
     element.dataset.originalTransform = `translate(${x}px, ${y}px)`;
-    this.positionElement(element, x, y, animate);
+    
+    // 在垂直佈局模式下使用絕對定位
+    if (this.state.currentLayout === LayoutMode.VERTICAL_SCROLL) {
+      element.style.position = 'absolute';
+      element.style.left = `${x}px`;
+      element.style.top = `${y}px`;
+      
+      if (animate) {
+        element.style.transition = `all ${this.config.animations.layoutTransition}ms ease-out`;
+        setTimeout(() => {
+          element.style.transition = '';
+        }, this.config.animations.layoutTransition);
+      }
+    } else {
+      this.positionElement(element, x, y, animate);
+    }
   }
   
   /**
@@ -805,6 +884,22 @@ export class SkillTreeResponsiveAdapter extends EventManager {
   }
   
   /**
+   * 應用手機端初始視圖
+   */
+  applyMobileInitialView(config) {
+    // 通知視窗控制器設置初始縮放
+    this.emit('set-initial-scale', {
+      scale: config.initialScale,
+      centerOnStart: config.centerOnStart
+    });
+    
+    console.log('SkillTreeResponsiveAdapter: 應用手機端初始視圖', {
+      initialScale: config.initialScale,
+      centerOnStart: config.centerOnStart
+    });
+  }
+
+  /**
    * 設置滾動容器
    */
   setupScrollContainer() {
@@ -841,7 +936,15 @@ export class SkillTreeResponsiveAdapter extends EventManager {
    */
   updateContainerHeight(height) {
     if (this.state.currentLayout === LayoutMode.VERTICAL_SCROLL) {
-      this.container.style.height = `${Math.max(height, this.layoutInfo.containerHeight)}px`;
+      const contentContainer = this.container.querySelector('.skill-tree-content');
+      if (contentContainer) {
+        contentContainer.style.height = `${height}px`;
+        console.log(`SkillTreeResponsiveAdapter: 設置內容容器高度為 ${height}px`);
+      }
+      
+      // 確保主容器可以滾動
+      this.container.style.height = '100%';
+      this.container.style.overflowY = 'auto';
     }
   }
   

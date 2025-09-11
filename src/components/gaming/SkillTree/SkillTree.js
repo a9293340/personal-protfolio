@@ -106,7 +106,37 @@ export class SkillTree extends EventManager {
       // 5. 綁定事件
       this.bindEvents();
       
-      // 6. 標記初始化完成
+      // 6. 響應式適配器重新掃描元素並應用佈局
+      if (this.responsiveAdapter) {
+        const elementCount = this.responsiveAdapter.scanSkillElements();
+        console.log(`SkillTree: 響應式適配器重新掃描完成，找到 ${elementCount} 個技能元素`);
+        
+        // 強制檢測當前設備類型並應用對應佈局
+        const screenWidth = window.innerWidth;
+        let deviceType = 'desktop';
+        if (screenWidth < 768) deviceType = 'mobile';
+        else if (screenWidth < 1200) deviceType = 'tablet';
+        
+        console.log(`SkillTree: 強制檢測設備類型`, {
+          screenWidth,
+          deviceType,
+          currentDevice: this.responsiveAdapter.state?.currentDevice
+        });
+        
+        // 更新適配器的設備狀態
+        this.responsiveAdapter.state.currentDevice = deviceType;
+        
+        // 根據設備類型應用佈局
+        const layoutConfig = this.responsiveAdapter.config?.layouts[deviceType];
+        if (layoutConfig) {
+          setTimeout(() => {
+            console.log(`SkillTree: 應用 ${deviceType} 佈局配置`, layoutConfig);
+            this.responsiveAdapter.applyLayout(layoutConfig, false);
+          }, 200);
+        }
+      }
+      
+      // 7. 標記初始化完成
       this.isInitialized = true;
       
       console.log('SkillTree: 技能樹系統初始化完成');
@@ -182,7 +212,14 @@ export class SkillTree extends EventManager {
     try {
       console.log('SkillTree: 載入技能數據');
       
-      // 動態導入技能數據配置
+      // 優先使用構造函數傳入的技能數據
+      if (this.config.skillData && Array.isArray(this.config.skillData)) {
+        this.skillData = this.config.skillData;
+        console.log('SkillTree: 使用傳入的技能數據', this.skillData.length, '個技能');
+        return;
+      }
+      
+      // 如果沒有傳入數據，則動態載入默認配置
       const skillsDataModule = await import('../../../config/data/skills.data.js');
       const skillsConfig = skillsDataModule.skillsDataConfig || skillsDataModule.default;
       
@@ -475,50 +512,267 @@ export class SkillTree extends EventManager {
   }
   
   /**
-   * 渲染技能節點
+   * 渲染技能節點 - 流亡黯道風格放射狀佈局
    */
   renderSkillNodes() {
     const centerX = this.config.rendering.centerOffset.x;
     const centerY = this.config.rendering.centerOffset.y;
     
+    // 重新組織技能數據為分支結構
+    const skillBranches = this.organizePoeStyleBranches();
+    
+    console.log('🌳 PoE風格技能樹分支:', skillBranches);
+    
+    // 渲染中心節點
+    this.renderCenterNode(centerX, centerY);
+    
+    // 渲染六個主要分支
+    skillBranches.forEach((branch, branchIndex) => {
+      this.renderSkillBranch(branch, branchIndex, centerX, centerY);
+    });
+  }
+
+  /**
+   * 組織技能為PoE風格分支結構
+   */
+  organizePoeStyleBranches() {
+    const branches = {
+      frontend: { name: '前端開發', angle: 0, skills: [], color: '#e74c3c' },
+      architecture: { name: '系統架構', angle: 60, skills: [], color: '#34495e' },
+      ai: { name: 'AI工程', angle: 120, skills: [], color: '#f39c12' },
+      devops: { name: 'DevOps', angle: 180, skills: [], color: '#9b59b6' },
+      database: { name: '資料庫', angle: 240, skills: [], color: '#2ecc71' },
+      backend: { name: '後端開發', angle: 300, skills: [], color: '#3498db' }
+    };
+    
+    // 將技能分配到對應分支
     this.skillData.forEach(skill => {
-      const skillElement = this.createSkillElement(skill);
-      
-      // 計算位置 - 支援六角形座標和笛卡爾座標
-      let x, y;
-      if (skill.coordinates) {
-        // 六角形座標轉換為笛卡爾座標
-        const { q, r } = skill.coordinates;
-        x = centerX + (q * this.config.hexGrid.spacing * 0.866); // sqrt(3)/2 ≈ 0.866
-        y = centerY + (r * this.config.hexGrid.spacing + q * this.config.hexGrid.spacing * 0.5);
-      } else if (skill.position) {
-        // 直接使用笛卡爾座標
-        x = centerX + skill.position.x;
-        y = centerY + skill.position.y;
-      } else {
-        // 默認位置
-        x = centerX;
-        y = centerY;
+      if (skill.id === 'backend-engineer-core') {
+        // 跳過中心節點
+        return;
       }
       
-      skillElement.style.left = `${x - this.config.rendering.skillSize / 2}px`;
-      skillElement.style.top = `${y - this.config.rendering.skillSize / 2}px`;
+      const category = skill.category || 'backend';
+      if (branches[category]) {
+        branches[category].skills.push(skill);
+      } else {
+        // 如果沒有對應分類，放入後端分支
+        branches.backend.skills.push(skill);
+      }
+    });
+    
+    return Object.values(branches);
+  }
+
+  /**
+   * 渲染中心節點
+   */
+  renderCenterNode(centerX, centerY) {
+    const centerSkill = this.skillData.find(skill => skill.id === 'backend-engineer-core');
+    if (!centerSkill) return;
+    
+    const centerElement = this.createMainSkillElement(centerSkill);
+    
+    // 中心節點稍大一些
+    const centerSize = this.config.rendering.skillSize * 1.5;
+    centerElement.style.width = `${centerSize}px`;
+    centerElement.style.height = `${centerSize}px`;
+    centerElement.style.left = `${centerX - centerSize / 2}px`;
+    centerElement.style.top = `${centerY - centerSize / 2}px`;
+    centerElement.style.zIndex = '20';
+    
+    // 特殊的中心樣式
+    centerElement.style.border = '4px solid #d4af37';
+    centerElement.style.boxShadow = '0 0 30px rgba(212, 175, 55, 0.8), inset 0 0 15px rgba(212, 175, 55, 0.3)';
+    
+    this.skillLayer.appendChild(centerElement);
+    this.skillElements.set(centerSkill.id, centerElement);
+    
+    // 渲染中心節點的子技能
+    if (centerSkill.skills && centerSkill.skills.length > 0) {
+      this.renderCenterSubSkills(centerSkill, centerX, centerY);
+    }
+  }
+
+  /**
+   * 渲染技能分支
+   */
+  renderSkillBranch(branch, _branchIndex, centerX, centerY) {
+    if (!branch.skills.length) return;
+    
+    const angle = branch.angle * (Math.PI / 180); // 轉為弧度
+    const baseDistance = 150; // 基礎距離
+    
+    branch.skills.forEach((skill, skillIndex) => {
+      // 計算分支中的位置
+      const distance = baseDistance + (skillIndex * 120); // 沿分支延伸
+      const branchVariation = (skillIndex % 2 === 0 ? 0 : 30) * (Math.PI / 180); // 交替偏移
+      const actualAngle = angle + branchVariation;
       
-      // 添加到技能層
+      const x = centerX + Math.cos(actualAngle) * distance;
+      const y = centerY + Math.sin(actualAngle) * distance;
+      
+      // 創建主技能節點
+      const skillElement = this.createMainSkillElement(skill);
+      const mainSkillSize = this.config.rendering.skillSize * 1.2;
+      
+      skillElement.style.left = `${x - mainSkillSize / 2}px`;
+      skillElement.style.top = `${y - mainSkillSize / 2}px`;
+      
       this.skillLayer.appendChild(skillElement);
       this.skillElements.set(skill.id, skillElement);
+      
+      // 創建到前一個節點的連接
+      if (skillIndex === 0) {
+        // 第一個技能連接到中心
+        this.createPoeStyleConnection('backend-engineer-core', skill.id, centerX, centerY, x, y);
+      } else {
+        // 連接到分支中的前一個技能
+        const prevSkill = branch.skills[skillIndex - 1];
+        const prevDistance = baseDistance + ((skillIndex - 1) * 120);
+        const prevBranchVariation = ((skillIndex - 1) % 2 === 0 ? 0 : 30) * (Math.PI / 180);
+        const prevAngle = angle + prevBranchVariation;
+        const prevX = centerX + Math.cos(prevAngle) * prevDistance;
+        const prevY = centerY + Math.sin(prevAngle) * prevDistance;
+        
+        this.createPoeStyleConnection(prevSkill.id, skill.id, prevX, prevY, x, y);
+      }
+      
+      // 渲染子技能
+      if (skill.skills && skill.skills.length > 0) {
+        this.renderBranchSubSkills(skill, x, y, actualAngle, branch.color);
+      }
+    });
+  }
+
+  /**
+   * 渲染中心節點的子技能
+   */
+  renderCenterSubSkills(centerSkill, centerX, centerY) {
+    const subSkills = centerSkill.skills;
+    const radius = 50;
+    
+    subSkills.forEach((subSkill, index) => {
+      const angle = (2 * Math.PI * index) / subSkills.length;
+      const x = centerX + Math.cos(angle) * radius;
+      const y = centerY + Math.sin(angle) * radius;
+      
+      const subElement = this.createSubSkillElement(subSkill, centerSkill, index);
+      subElement.style.left = `${x - 16}px`;  // 32px / 2 = 16px
+      subElement.style.top = `${y - 16}px`;
+      
+      this.skillLayer.appendChild(subElement);
+      this.createPoeStyleConnection(centerSkill.id, `${centerSkill.id}-sub-${index}`, centerX, centerY, x, y);
+      
+      const subSkillId = `${centerSkill.id}-sub-${index}`;
+      this.skillElements.set(subSkillId, subElement);
+    });
+  }
+
+  /**
+   * 渲染分支子技能
+   */
+  renderBranchSubSkills(parentSkill, parentX, parentY, parentAngle, branchColor) {
+    const subSkills = parentSkill.skills;
+    const baseRadius = 40;
+    
+    subSkills.forEach((subSkill, index) => {
+      // 子技能圍繞主技能，但偏向分支方向
+      const subAngle = parentAngle + (index - subSkills.length / 2) * 0.8;
+      const radius = baseRadius + (Math.abs(index - subSkills.length / 2) * 10);
+      
+      const x = parentX + Math.cos(subAngle) * radius;
+      const y = parentY + Math.sin(subAngle) * radius;
+      
+      const subElement = this.createSubSkillElement(subSkill, parentSkill, index);
+      subElement.style.left = `${x - 16}px`;  // 32px / 2 = 16px
+      subElement.style.top = `${y - 16}px`;
+      
+      // 使用分支顏色
+      subElement.style.borderColor = branchColor;
+      subElement.style.background = `radial-gradient(circle, ${branchColor}60, ${branchColor}30)`;
+      
+      this.skillLayer.appendChild(subElement);
+      this.createPoeStyleConnection(parentSkill.id, `${parentSkill.id}-sub-${index}`, parentX, parentY, x, y);
+      
+      const subSkillId = `${parentSkill.id}-sub-${index}`;
+      this.skillElements.set(subSkillId, subElement);
+    });
+  }
+
+  /**
+   * 創建PoE風格連接線
+   */
+  createPoeStyleConnection(fromId, toId, x1, y1, x2, y2) {
+    const connection = document.createElement('div');
+    connection.className = 'poe-skill-connection';
+    connection.dataset.from = fromId;
+    connection.dataset.to = toId;
+    
+    const deltaX = x2 - x1;
+    const deltaY = y2 - y1;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+    
+    connection.style.position = 'absolute';
+    connection.style.left = `${x1}px`;
+    connection.style.top = `${y1}px`;
+    connection.style.width = `${distance}px`;
+    connection.style.height = '2px';
+    connection.style.background = 'linear-gradient(90deg, rgba(52, 152, 219, 0.8) 0%, rgba(52, 152, 219, 0.4) 50%, rgba(52, 152, 219, 0.8) 100%)';
+    connection.style.transformOrigin = '0 50%';
+    connection.style.transform = `rotate(${angle}deg)`;
+    connection.style.pointerEvents = 'none';
+    connection.style.zIndex = '1';
+    connection.style.boxShadow = '0 0 3px rgba(52, 152, 219, 0.5)';
+    
+    this.connectionLayer.appendChild(connection);
+    this.connectionElements.set(`${fromId}-${toId}`, connection);
+  }
+
+  /**
+   * 渲染子技能圓圈
+   */
+  renderSubSkills(parentSkill, parentX, parentY) {
+    const subSkills = parentSkill.skills;
+    const subSkillRadius = 45; // 子技能圍繞主技能的半徑
+    const subSkillSize = 24; // 子技能圓圈大小
+    
+    subSkills.forEach((subSkill, index) => {
+      // 計算子技能位置（圍繞主技能分佈）
+      const angle = (2 * Math.PI * index) / subSkills.length;
+      const subX = parentX + Math.cos(angle) * subSkillRadius;
+      const subY = parentY + Math.sin(angle) * subSkillRadius;
+      
+      // 創建子技能元素
+      const subSkillElement = this.createSubSkillElement(subSkill, parentSkill, index);
+      
+      // 設置子技能位置
+      subSkillElement.style.left = `${subX - subSkillSize / 2}px`;
+      subSkillElement.style.top = `${subY - subSkillSize / 2}px`;
+      
+      // 添加到技能層
+      this.skillLayer.appendChild(subSkillElement);
+      
+      // 創建連接線（主技能到子技能）
+      this.createSubSkillConnection(parentSkill.id, parentX, parentY, subX, subY, index);
+      
+      // 存儲子技能元素引用
+      const subSkillId = `${parentSkill.id}-sub-${index}`;
+      this.skillElements.set(subSkillId, subSkillElement);
     });
   }
   
   /**
-   * 創建技能元素
+   * 創建主技能元素
    */
-  createSkillElement(skill) {
+  createMainSkillElement(skill) {
     const element = document.createElement('div');
     element.className = 'skill-node';
     element.id = skill.id;
     element.dataset.skillId = skill.id;
     element.dataset.category = skill.category || 'unknown';
+    element.dataset.branch = skill.category || 'unknown'; // 為響應式適配器設置分支屬性
     
     // 根據座標判斷是哪個ring
     let ring = 'center';
@@ -531,14 +785,34 @@ export class SkillTree extends EventManager {
     }
     element.dataset.ring = ring;
     
+    // 分類顏色對應
+    const categoryColors = {
+      'frontend': '#e74c3c',
+      'backend': '#3498db', 
+      'database': '#2ecc71',
+      'devops': '#9b59b6',
+      'ai': '#f39c12',
+      'architecture': '#34495e',
+      'unknown': '#555555'
+    };
+    
+    const categoryColor = categoryColors[skill.category] || categoryColors.unknown;
+    
+    // 存儲分類顏色到 dataset 供後續使用
+    element.dataset.categoryColor = categoryColor;
+    
+    // 增大主技能圓圈尺寸，確保文字清晰顯示
+    const mainSkillSize = this.config.rendering.skillSize * 1.3; // 增大30%
+    
     // 設置基礎樣式
     element.style.position = 'absolute';
-    element.style.width = `${this.config.rendering.skillSize}px`;
-    element.style.height = `${this.config.rendering.skillSize}px`;
+    element.style.width = `${mainSkillSize}px`;
+    element.style.height = `${mainSkillSize}px`;
     element.style.borderRadius = '50%';
-    element.style.border = '3px solid #555';
-    element.style.background = 'radial-gradient(circle, rgba(255,255,255,0.1), rgba(0,0,0,0.3))';
+    element.style.border = `3px solid ${categoryColor}`;
+    element.style.background = `radial-gradient(circle, ${categoryColor}40, ${categoryColor}20)`;
     element.style.display = 'flex';
+    element.style.flexDirection = 'column';
     element.style.alignItems = 'center';
     element.style.justifyContent = 'center';
     element.style.fontSize = '12px';
@@ -549,14 +823,35 @@ export class SkillTree extends EventManager {
     element.style.transition = 'all 0.3s ease';
     element.style.userSelect = 'none';
     element.style.zIndex = '10';
+    element.style.boxShadow = `0 0 15px ${categoryColor}80, inset 0 0 10px ${categoryColor}30`;
     
-    // 設置技能名稱
-    const nameElement = document.createElement('span');
+    // 提高渲染清晰度
+    element.style.imageRendering = 'crisp-edges';
+    element.style.backfaceVisibility = 'hidden';
+    element.style.perspective = '1000px';
+    
+    // 設置技能名稱 - 主要標題
+    const nameElement = document.createElement('div');
     nameElement.textContent = skill.name;
-    nameElement.style.fontSize = '10px';
-    nameElement.style.lineHeight = '1.2';
-    nameElement.style.padding = '4px';
+    nameElement.style.fontSize = '11px';
+    nameElement.style.lineHeight = '1.1';
+    nameElement.style.fontWeight = 'bold';
+    nameElement.style.marginBottom = '2px';
+    nameElement.style.color = 'white';
+    nameElement.style.textShadow = `0 0 3px ${categoryColor}`;
     element.appendChild(nameElement);
+    
+    // 顯示技能等級或描述
+    if (skill.level) {
+      const levelInfo = document.createElement('div');
+      levelInfo.textContent = `Lv.${skill.level}`;
+      levelInfo.style.fontSize = '8px';
+      levelInfo.style.opacity = '0.8';
+      levelInfo.style.color = '#ffffff';
+      levelInfo.style.textAlign = 'center';
+      levelInfo.style.marginTop = '2px';
+      element.appendChild(levelInfo);
+    }
     
     // 獲取並應用初始狀態
     if (this.stateManager) {
@@ -566,9 +861,193 @@ export class SkillTree extends EventManager {
     
     return element;
   }
+
+  /**
+   * 創建子技能元素
+   */
+  createSubSkillElement(subSkill, parentSkill, index) {
+    const element = document.createElement('div');
+    element.className = 'sub-skill-node';
+    element.id = `${parentSkill.id}-sub-${index}`;
+    element.dataset.skillId = `${parentSkill.id}-sub-${index}`;
+    element.dataset.parentId = parentSkill.id;
+    element.dataset.subSkillIndex = index;
+    element.dataset.category = parentSkill.category || 'unknown';
+    element.dataset.branch = parentSkill.category || 'unknown'; // 為響應式適配器設置分支屬性
+    
+    // 分類顏色對應
+    const categoryColors = {
+      'frontend': '#e74c3c',
+      'backend': '#3498db', 
+      'database': '#2ecc71',
+      'devops': '#9b59b6',
+      'ai': '#f39c12',
+      'architecture': '#34495e',
+      'unknown': '#555555'
+    };
+    
+    const categoryColor = categoryColors[parentSkill.category] || categoryColors.unknown;
+    element.dataset.categoryColor = categoryColor;
+    
+    // 設置子技能樣式 - 增大尺寸確保文字清晰
+    element.style.position = 'absolute';
+    element.style.width = '32px';  // 增大到32px
+    element.style.height = '32px';
+    element.style.borderRadius = '50%';
+    element.style.border = `2px solid ${categoryColor}`;
+    element.style.background = `radial-gradient(circle, ${categoryColor}60, ${categoryColor}30)`;
+    element.style.display = 'flex';
+    element.style.alignItems = 'center';
+    element.style.justifyContent = 'center';
+    element.style.fontSize = '10px';  // 增大字體
+    element.style.fontWeight = 'bold';
+    element.style.color = 'white';
+    element.style.cursor = 'pointer';
+    element.style.transition = 'all 0.2s ease';
+    element.style.userSelect = 'none';
+    element.style.zIndex = '12';
+    element.style.boxShadow = `0 0 8px ${categoryColor}60, inset 0 0 5px ${categoryColor}20`;
+    
+    // 提高渲染清晰度
+    element.style.imageRendering = 'crisp-edges';
+    element.style.backfaceVisibility = 'hidden';
+    element.style.webkitFontSmoothing = 'antialiased';
+    
+    // 添加子技能縮寫或圖標
+    const skillText = document.createElement('span');
+    skillText.textContent = this.getSkillAbbreviation(subSkill.name);
+    skillText.style.textShadow = `0 0 2px ${categoryColor}`;
+    element.appendChild(skillText);
+    
+    // 添加懸停效果
+    element.addEventListener('mouseenter', () => {
+      element.style.transform = 'scale(1.2)';
+      element.style.boxShadow = `0 0 15px ${categoryColor}90, inset 0 0 8px ${categoryColor}40`;
+      element.style.zIndex = '15';
+      
+      // 顯示技能名稱提示
+      this.showSubSkillTooltip(element, subSkill, parentSkill);
+    });
+    
+    element.addEventListener('mouseleave', () => {
+      element.style.transform = 'scale(1)';
+      element.style.boxShadow = `0 0 8px ${categoryColor}60, inset 0 0 5px ${categoryColor}20`;
+      element.style.zIndex = '12';
+      
+      // 隱藏提示
+      this.hideSubSkillTooltip();
+    });
+    
+    return element;
+  }
+
+  /**
+   * 創建子技能連接線
+   */
+  createSubSkillConnection(parentId, parentX, parentY, subX, subY, index) {
+    const connection = document.createElement('div');
+    connection.className = 'sub-skill-connection';
+    connection.dataset.from = parentId;
+    connection.dataset.to = `${parentId}-sub-${index}`;
+    
+    // 計算連接線
+    const deltaX = subX - parentX;
+    const deltaY = subY - parentY;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+    
+    // 設置連接線樣式
+    connection.style.position = 'absolute';
+    connection.style.left = `${parentX}px`;
+    connection.style.top = `${parentY}px`;
+    connection.style.width = `${distance}px`;
+    connection.style.height = '1px';
+    connection.style.background = 'rgba(52, 152, 219, 0.4)';
+    connection.style.transformOrigin = '0 50%';
+    connection.style.transform = `rotate(${angle}deg)`;
+    connection.style.pointerEvents = 'none';
+    connection.style.zIndex = '1';
+    connection.style.opacity = '0.6';
+    
+    this.connectionLayer.appendChild(connection);
+    this.connectionElements.set(`${parentId}-sub-${index}`, connection);
+  }
+
+  /**
+   * 獲取技能縮寫
+   */
+  getSkillAbbreviation(skillName) {
+    // 提取技能名稱的縮寫
+    if (skillName.length <= 3) {
+      return skillName;
+    }
+    
+    // 處理英文技能名稱：優先提取大寫字母
+    const upperCase = skillName.match(/[A-Z]/g);
+    if (upperCase && upperCase.length >= 2) {
+      return upperCase.slice(0, 2).join('');
+    }
+    
+    // 處理中文或混合名稱：提取關鍵字符
+    if (/[\u4e00-\u9fa5]/.test(skillName)) {
+      // 中文技能：取前兩個字符
+      return skillName.substring(0, 2);
+    }
+    
+    // 英文技能：提取前兩個字符
+    return skillName.substring(0, 2).toUpperCase();
+  }
+
+  /**
+   * 顯示子技能提示
+   */
+  showSubSkillTooltip(element, subSkill, parentSkill) {
+    // 移除現有提示
+    this.hideSubSkillTooltip();
+    
+    const tooltip = document.createElement('div');
+    tooltip.className = 'sub-skill-tooltip';
+    tooltip.innerHTML = `
+      <div class="tooltip-title">${subSkill.name}</div>
+      <div class="tooltip-proficiency">熟練度: ${subSkill.proficiency || 0}%</div>
+      <div class="tooltip-parent">屬於: ${parentSkill.name}</div>
+    `;
+    
+    // 樣式
+    tooltip.style.position = 'absolute';
+    tooltip.style.background = 'rgba(0, 0, 0, 0.9)';
+    tooltip.style.color = 'white';
+    tooltip.style.padding = '8px';
+    tooltip.style.borderRadius = '4px';
+    tooltip.style.fontSize = '12px';
+    tooltip.style.zIndex = '1000';
+    tooltip.style.pointerEvents = 'none';
+    tooltip.style.whiteSpace = 'nowrap';
+    tooltip.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+    tooltip.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
+    
+    // 位置
+    const rect = element.getBoundingClientRect();
+    const containerRect = this.container.getBoundingClientRect();
+    tooltip.style.left = `${rect.left - containerRect.left + 30}px`;
+    tooltip.style.top = `${rect.top - containerRect.top - 10}px`;
+    
+    this.container.appendChild(tooltip);
+    this.currentTooltip = tooltip;
+  }
+
+  /**
+   * 隱藏子技能提示
+   */
+  hideSubSkillTooltip() {
+    if (this.currentTooltip) {
+      this.currentTooltip.remove();
+      this.currentTooltip = null;
+    }
+  }
   
   /**
-   * 應用技能狀態樣式
+   * 應用技能狀態樣式 - 保持分類顏色的同時添加狀態效果
    */
   applySkillStatus(element, status) {
     // 移除舊狀態類
@@ -577,28 +1056,39 @@ export class SkillTree extends EventManager {
     // 添加新狀態類
     element.classList.add(`skill-status-${status}`);
     
-    // 應用狀態樣式
+    // 獲取分類顏色
+    const categoryColor = element.dataset.categoryColor || '#555555';
+    
+    // 應用狀態樣式，保持分類顏色作為基調
     switch (status) {
       case 'mastered':
-        element.style.borderColor = '#f4d03f';
+        // 已掌握：金色光環 + 分類顏色邊框
+        element.style.borderColor = categoryColor;
         element.style.opacity = '1.0';
-        element.style.boxShadow = '0 0 20px rgba(244, 208, 63, 0.6)';
+        element.style.boxShadow = `0 0 20px ${categoryColor}80, 0 0 30px rgba(244, 208, 63, 0.6)`;
+        element.style.filter = 'brightness(1.2)';
         break;
       case 'available':
-        element.style.borderColor = '#3498db';
-        element.style.opacity = '0.8';
-        element.style.boxShadow = '0 0 15px rgba(52, 152, 219, 0.4)';
+        // 可學習：藍色光環 + 分類顏色邊框
+        element.style.borderColor = categoryColor;
+        element.style.opacity = '0.9';
+        element.style.boxShadow = `0 0 15px ${categoryColor}60, 0 0 25px rgba(52, 152, 219, 0.4)`;
+        element.style.filter = 'brightness(1.1)';
         break;
       case 'learning':
-        element.style.borderColor = '#2ecc71';
-        element.style.opacity = '0.7';
-        element.style.boxShadow = '0 0 15px rgba(46, 204, 113, 0.4)';
+        // 學習中：綠色光環 + 分類顏色邊框
+        element.style.borderColor = categoryColor;
+        element.style.opacity = '0.8';
+        element.style.boxShadow = `0 0 15px ${categoryColor}60, 0 0 25px rgba(46, 204, 113, 0.4)`;
+        element.style.filter = 'brightness(1.05)';
         break;
       case 'locked':
       default:
-        element.style.borderColor = '#555';
-        element.style.opacity = '0.4';
-        element.style.boxShadow = 'none';
+        // 鎖定：暗淡化但保持分類顏色
+        element.style.borderColor = categoryColor;
+        element.style.opacity = '0.5';
+        element.style.boxShadow = `0 0 5px ${categoryColor}30`;
+        element.style.filter = 'brightness(0.7) grayscale(0.3)';
         break;
     }
   }
@@ -771,6 +1261,14 @@ export class SkillTree extends EventManager {
       
       this.responsiveAdapter.on('skill-tap', (event) => {
         this.handleSkillClick(event.data.skillId, event);
+      });
+      
+      // 監聽初始縮放設置事件
+      this.responsiveAdapter.on('set-initial-scale', (event) => {
+        if (this.viewportController && this.viewportController.setInitialScale) {
+          console.log('SkillTree: 設置初始縮放', event.data);
+          this.viewportController.setInitialScale(event.data.scale, event.data.centerOnStart);
+        }
       });
     }
   }
