@@ -159,6 +159,9 @@ export class SkillsPage extends BaseComponent {
     await super.init();
     
     try {
+      // 設置全局實例供按鈕事件使用
+      window.skillsPageInstance = this;
+      
       // 檢測設備類型
       this.detectDevice();
       
@@ -460,6 +463,254 @@ export class SkillsPage extends BaseComponent {
   }
 
   /**
+   * 查找相關技能
+   */
+  findRelatedSkills(currentSkill) {
+    if (!currentSkill || !skillsDataConfig.tree) {
+      return [];
+    }
+
+    const allSkills = [
+      skillsDataConfig.tree.center,
+      ...(skillsDataConfig.tree.ring1 ? Object.values(skillsDataConfig.tree.ring1) : []),
+      ...(skillsDataConfig.tree.ring2 ? Object.values(skillsDataConfig.tree.ring2) : []),
+      ...(skillsDataConfig.tree.ring3 ? Object.values(skillsDataConfig.tree.ring3) : [])
+    ].filter(Boolean);
+
+    const relatedSkills = [];
+
+    for (const skill of allSkills) {
+      if (skill.id === currentSkill.id) continue; // 跳過自己
+
+      // 相關性評分
+      let relationScore = 0;
+
+      // 1. 同類別技能 (權重: 30)
+      if (skill.category === currentSkill.category) {
+        relationScore += 30;
+      }
+
+      // 2. 前置技能關係 (權重: 40)
+      if (currentSkill.prerequisites && currentSkill.prerequisites.includes(skill.id)) {
+        relationScore += 40; // 當前技能的前置技能
+      }
+      if (skill.prerequisites && skill.prerequisites.includes(currentSkill.id)) {
+        relationScore += 35; // 以當前技能為前置的技能
+      }
+
+      // 3. 技能名稱關鍵字相似度 (權重: 20)
+      const currentSkillKeywords = this.extractKeywords(currentSkill.name);
+      const skillKeywords = this.extractKeywords(skill.name);
+      const keywordSimilarity = this.calculateKeywordSimilarity(currentSkillKeywords, skillKeywords);
+      relationScore += keywordSimilarity * 20;
+
+      // 4. 子技能相似度 (權重: 10)
+      if (currentSkill.skills && skill.skills) {
+        const subSkillSimilarity = this.calculateSubSkillSimilarity(currentSkill.skills, skill.skills);
+        relationScore += subSkillSimilarity * 10;
+      }
+
+      // 如果有一定相關性，加入結果
+      if (relationScore > 10) {
+        relatedSkills.push({
+          skill,
+          relationScore,
+          relationReasons: this.getRelationReasons(currentSkill, skill, relationScore)
+        });
+      }
+    }
+
+    // 按相關性評分排序，取前6個
+    return relatedSkills
+      .sort((a, b) => b.relationScore - a.relationScore)
+      .slice(0, 6);
+  }
+
+  /**
+   * 提取關鍵字
+   */
+  extractKeywords(name) {
+    return name.toLowerCase()
+      .replace(/[\/\-\.]/g, ' ')
+      .split(' ')
+      .filter(word => word.length > 1);
+  }
+
+  /**
+   * 計算關鍵字相似度
+   */
+  calculateKeywordSimilarity(keywords1, keywords2) {
+    const commonKeywords = keywords1.filter(word => keywords2.includes(word));
+    const totalKeywords = [...new Set([...keywords1, ...keywords2])].length;
+    return totalKeywords > 0 ? commonKeywords.length / totalKeywords : 0;
+  }
+
+  /**
+   * 計算子技能相似度
+   */
+  calculateSubSkillSimilarity(subSkills1, subSkills2) {
+    if (!subSkills1 || !subSkills2) return 0;
+    
+    const names1 = subSkills1.map(s => s.name?.toLowerCase() || '');
+    const names2 = subSkills2.map(s => s.name?.toLowerCase() || '');
+    
+    const commonSubSkills = names1.filter(name => 
+      names2.some(name2 => name2.includes(name) || name.includes(name2))
+    );
+    
+    return commonSubSkills.length / Math.max(names1.length, names2.length);
+  }
+
+  /**
+   * 獲取關係原因
+   */
+  getRelationReasons(currentSkill, relatedSkill, score) {
+    const reasons = [];
+    
+    if (relatedSkill.category === currentSkill.category) {
+      reasons.push(`同屬 ${skillsDataConfig.categories[currentSkill.category]?.name || currentSkill.category} 領域`);
+    }
+    
+    if (currentSkill.prerequisites && currentSkill.prerequisites.includes(relatedSkill.id)) {
+      reasons.push('前置技能');
+    }
+    
+    if (relatedSkill.prerequisites && relatedSkill.prerequisites.includes(currentSkill.id)) {
+      reasons.push('進階技能');
+    }
+    
+    if (score > 50) {
+      reasons.push('高度相關');
+    } else if (score > 30) {
+      reasons.push('中度相關');
+    }
+    
+    return reasons;
+  }
+
+  /**
+   * 生成學習路徑建議
+   */
+  generateLearningPath(skill) {
+    if (!skill) return null;
+
+    const learningPath = {
+      currentSkill: skill,
+      prerequisites: [],
+      nextSteps: [],
+      recommendedResources: [],
+      estimatedTime: '根據個人基礎而定',
+      difficulty: this.calculateSkillDifficulty(skill)
+    };
+
+    // 查找前置技能
+    if (skill.prerequisites && skill.prerequisites.length > 0) {
+      learningPath.prerequisites = skill.prerequisites.map(prereqId => {
+        const prereqSkill = this.findSkillByIdInData(prereqId);
+        return prereqSkill || { id: prereqId, name: prereqId };
+      });
+    }
+
+    // 查找後續技能
+    const allSkills = [
+      skillsDataConfig.tree.center,
+      ...(skillsDataConfig.tree.ring1 ? Object.values(skillsDataConfig.tree.ring1) : []),
+      ...(skillsDataConfig.tree.ring2 ? Object.values(skillsDataConfig.tree.ring2) : []),
+      ...(skillsDataConfig.tree.ring3 ? Object.values(skillsDataConfig.tree.ring3) : [])
+    ].filter(Boolean);
+
+    learningPath.nextSteps = allSkills.filter(s => 
+      s.prerequisites && s.prerequisites.includes(skill.id)
+    ).slice(0, 4);
+
+    // 根據技能類型生成學習資源建議
+    learningPath.recommendedResources = this.generateLearningResources(skill);
+
+    // 根據技能複雜度估算學習時間
+    learningPath.estimatedTime = this.estimateLearningTime(skill);
+
+    return learningPath;
+  }
+
+  /**
+   * 計算技能難度
+   */
+  calculateSkillDifficulty(skill) {
+    const level = skill.level || 1;
+    const subSkillCount = skill.skills ? skill.skills.length : 0;
+    const avgProficiency = skill.skills ? 
+      skill.skills.reduce((sum, s) => sum + (s.proficiency || 0), 0) / skill.skills.length : 0;
+
+    if (level >= 5 || avgProficiency >= 90) return '高級';
+    if (level >= 4 || avgProficiency >= 75) return '中高級';
+    if (level >= 3 || avgProficiency >= 60) return '中級';
+    if (level >= 2 || avgProficiency >= 40) return '初中級';
+    return '初級';
+  }
+
+  /**
+   * 生成學習資源建議
+   */
+  generateLearningResources(skill) {
+    const resources = [];
+    const category = skill.category;
+
+    // 根據技能類別提供不同的學習建議
+    switch (category) {
+      case 'frontend':
+        resources.push(
+          { type: '文檔', name: 'MDN Web Docs', url: 'https://developer.mozilla.org' },
+          { type: '教程', name: 'Frontend Mentor', url: 'https://www.frontendmentor.io' },
+          { type: '實踐', name: '創建響應式項目', url: '#' }
+        );
+        break;
+      
+      case 'backend':
+        resources.push(
+          { type: '文檔', name: '官方文檔', url: '#' },
+          { type: '書籍', name: '系統設計相關書籍', url: '#' },
+          { type: '實踐', name: 'API 設計練習', url: '#' }
+        );
+        break;
+      
+      case 'database':
+        resources.push(
+          { type: '教程', name: 'SQL 實戰練習', url: '#' },
+          { type: '文檔', name: '數據庫官方文檔', url: '#' },
+          { type: '實踐', name: '設計數據庫架構', url: '#' }
+        );
+        break;
+
+      default:
+        resources.push(
+          { type: '搜尋', name: '在線教程', url: '#' },
+          { type: '實踐', name: '動手練習', url: '#' },
+          { type: '社群', name: '技術社群討論', url: '#' }
+        );
+    }
+
+    return resources;
+  }
+
+  /**
+   * 估算學習時間
+   */
+  estimateLearningTime(skill) {
+    const level = skill.level || 1;
+    const subSkillCount = skill.skills ? skill.skills.length : 0;
+    
+    const baseTime = level * 2; // 基礎時間
+    const complexityTime = subSkillCount * 0.5; // 複雜度時間
+    const totalWeeks = Math.ceil(baseTime + complexityTime);
+    
+    if (totalWeeks <= 2) return '1-2 週';
+    if (totalWeeks <= 4) return '2-4 週';
+    if (totalWeeks <= 8) return '1-2 個月';
+    if (totalWeeks <= 12) return '2-3 個月';
+    return '3+ 個月';
+  }
+
+  /**
    * 設置桌面端技能樹事件監聽
    */
   setupDesktopSkillTreeEvents() {
@@ -718,10 +969,10 @@ export class SkillsPage extends BaseComponent {
           ` : ''}
 
           <div class="skill-actions">
-            <button class="action-button primary" onclick="console.log('查看相關技能: ${skill.id}')">
+            <button class="action-button primary" onclick="window.skillsPageInstance.showRelatedSkills('${skill.id}')">
               🔗 查看相關技能
             </button>
-            <button class="action-button secondary" onclick="console.log('學習路徑: ${skill.id}')">
+            <button class="action-button secondary" onclick="window.skillsPageInstance.showLearningPath('${skill.id}')">
               🎯 學習路徑
             </button>
           </div>
@@ -763,6 +1014,208 @@ export class SkillsPage extends BaseComponent {
     
     // 可以在未來添加更多預覽功能
     // 例如：顯示簡短的技能提示
+  }
+
+  /**
+   * 顯示相關技能
+   */
+  showRelatedSkills(skillId) {
+    console.log('🔗 查看相關技能:', skillId);
+    
+    const skill = this.findSkillByIdInData(skillId);
+    if (!skill) {
+      console.warn('⚠️ 找不到技能:', skillId);
+      return;
+    }
+
+    const relatedSkills = this.findRelatedSkills(skill);
+    console.log('🔍 找到相關技能:', relatedSkills);
+
+    // 更新技能詳情面板內容
+    const detailsContent = document.getElementById('skill-details-content');
+    if (!detailsContent) return;
+
+    detailsContent.innerHTML = `
+      <div class="related-skills-view">
+        <header class="related-skills-header">
+          <div class="back-button-row">
+            <button class="back-button" onclick="window.skillsPageInstance.showSkillDetails(window.skillsPageInstance.findSkillByIdInData('${skillId}'))">
+              ← 回到技能詳情
+            </button>
+          </div>
+          <h3 class="related-skills-title">「${skill.name}」相關技能</h3>
+        </header>
+        
+        <div class="related-skills-content">
+          ${relatedSkills.length > 0 ? `
+            <div class="related-skills-list">
+              ${relatedSkills.map((relatedItem, index) => `
+                <div class="related-skill-item" onclick="window.skillsPageInstance.showSkillDetails(window.skillsPageInstance.findSkillByIdInData('${relatedItem.skill.id}'))">
+                  <div class="related-skill-header">
+                    <h4 class="related-skill-name">${relatedItem.skill.name}</h4>
+                    <div class="relation-score">${Math.round(relatedItem.relationScore)}%</div>
+                  </div>
+                  <div class="related-skill-meta">
+                    <span class="skill-category">${skillsDataConfig.categories[relatedItem.skill.category]?.name || relatedItem.skill.category}</span>
+                    <span class="skill-level">Level ${relatedItem.skill.level || 1}</span>
+                  </div>
+                  <div class="relation-reasons">
+                    ${relatedItem.relationReasons.map(reason => `<span class="reason-tag">${reason}</span>`).join('')}
+                  </div>
+                  <p class="related-skill-desc">${relatedItem.skill.description || '暫無描述'}</p>
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="no-related-skills">
+              <div class="no-results-icon">🔍</div>
+              <p class="no-results-text">暫無找到高度相關的技能</p>
+              <p class="no-results-hint">此技能可能是獨立技能或核心基礎技能</p>
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+
+    // 顯示側邊欄
+    const panel = document.getElementById('skill-details-panel');
+    if (panel) {
+      panel.classList.add('show');
+    }
+  }
+
+  /**
+   * 顯示學習路徑
+   */
+  showLearningPath(skillId) {
+    console.log('🎯 查看學習路徑:', skillId);
+    
+    const skill = this.findSkillByIdInData(skillId);
+    if (!skill) {
+      console.warn('⚠️ 找不到技能:', skillId);
+      return;
+    }
+
+    const learningPath = this.generateLearningPath(skill);
+    console.log('📚 生成學習路徑:', learningPath);
+
+    // 更新技能詳情面板內容
+    const detailsContent = document.getElementById('skill-details-content');
+    if (!detailsContent) return;
+
+    detailsContent.innerHTML = `
+      <div class="learning-path-view">
+        <header class="learning-path-header">
+          <div class="back-button-row">
+            <button class="back-button" onclick="window.skillsPageInstance.showSkillDetails(window.skillsPageInstance.findSkillByIdInData('${skillId}'))">
+              ← 回到技能詳情
+            </button>
+          </div>
+          <h3 class="learning-path-title">「${skill.name}」學習路徑</h3>
+        </header>
+        
+        <div class="learning-path-content">
+          <!-- 技能概覽 -->
+          <div class="skill-overview-section">
+            <div class="skill-stats">
+              <div class="stat-item">
+                <span class="stat-label">難度等級</span>
+                <span class="stat-value">${learningPath.difficulty}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">預估時間</span>
+                <span class="stat-value">${learningPath.estimatedTime}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">技能等級</span>
+                <span class="stat-value">Level ${skill.level || 1}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 前置技能 -->
+          ${learningPath.prerequisites.length > 0 ? `
+            <div class="prerequisites-section">
+              <h4 class="section-title">📋 前置技能要求</h4>
+              <div class="prerequisites-list">
+                ${learningPath.prerequisites.map(prereq => `
+                  <div class="prerequisite-item" onclick="window.skillsPageInstance.showSkillDetails(window.skillsPageInstance.findSkillByIdInData('${prereq.id}'))">
+                    <div class="prereq-name">${prereq.name}</div>
+                    <div class="prereq-hint">點擊查看詳情</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : `
+            <div class="prerequisites-section">
+              <h4 class="section-title">📋 前置技能要求</h4>
+              <p class="no-prerequisites">此技能無特殊前置要求，可直接學習</p>
+            </div>
+          `}
+
+          <!-- 學習資源 -->
+          <div class="resources-section">
+            <h4 class="section-title">📚 推薦學習資源</h4>
+            <div class="resources-list">
+              ${learningPath.recommendedResources.map(resource => `
+                <div class="resource-item">
+                  <div class="resource-header">
+                    <span class="resource-type">${resource.type}</span>
+                    <span class="resource-name">${resource.name}</span>
+                  </div>
+                  ${resource.url !== '#' ? `
+                    <a href="${resource.url}" target="_blank" class="resource-link">前往學習</a>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- 後續發展 -->
+          ${learningPath.nextSteps.length > 0 ? `
+            <div class="next-steps-section">
+              <h4 class="section-title">🚀 後續發展方向</h4>
+              <div class="next-steps-list">
+                ${learningPath.nextSteps.map(nextSkill => `
+                  <div class="next-step-item" onclick="window.skillsPageInstance.showSkillDetails(window.skillsPageInstance.findSkillByIdInData('${nextSkill.id}'))">
+                    <div class="next-step-name">${nextSkill.name}</div>
+                    <div class="next-step-category">${skillsDataConfig.categories[nextSkill.category]?.name || nextSkill.category}</div>
+                    <div class="next-step-hint">點擊查看學習路徑</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : `
+            <div class="next-steps-section">
+              <h4 class="section-title">🚀 後續發展方向</h4>
+              <p class="no-next-steps">此技能已達到當前學習路徑終點，可考慮深入專精或跨領域發展</p>
+            </div>
+          `}
+
+          <!-- 學習建議 -->
+          <div class="learning-tips-section">
+            <h4 class="section-title">💡 學習建議</h4>
+            <div class="learning-tips">
+              <div class="tip-item">
+                <strong>實踐導向：</strong>通過實際專案來鞏固所學知識
+              </div>
+              <div class="tip-item">
+                <strong>持續學習：</strong>技術發展迅速，需要持續跟進新發展
+              </div>
+              <div class="tip-item">
+                <strong>社群參與：</strong>參與相關技術社群，與同行交流經驗
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 顯示側邊欄
+    const panel = document.getElementById('skill-details-panel');
+    if (panel) {
+      panel.classList.add('show');
+    }
   }
 
   // 移除全螢幕功能，統一介面設計
@@ -824,6 +1277,11 @@ export class SkillsPage extends BaseComponent {
    */
   destroy() {
     try {
+      // 清理全局實例
+      if (window.skillsPageInstance === this) {
+        window.skillsPageInstance = null;
+      }
+
       // 銷毀技能樹組件
       if (this.skillTree) {
         this.skillTree.destroy();

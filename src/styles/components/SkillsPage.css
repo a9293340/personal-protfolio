@@ -1228,3 +1228,364 @@ body.modal-open {
     border-color: #3498db;
   }
 }
+
+/* ===== 相關技能和學習路徑界面樣式 ===== */
+
+/* 返回按鈕 */
+.back-button {
+  background: rgba(52, 152, 219, 0.2);
+  border: 1px solid rgba(52, 152, 219, 0.4);
+  color: #3498db;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-button:hover {
+  background: rgba(52, 152, 219, 0.3);
+  border-color: rgba(52, 152, 219, 0.6);
+  transform: translateX(-2px);
+}
+
+/* 相關技能視圖 */
+.related-skills-view,
+.learning-path-view {
+  padding: 1rem;
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+}
+
+.related-skills-title,
+.learning-path-title {
+  color: var(--primary-gold);
+  font-size: 1.1rem;
+  margin: 0 0 1.5rem 0;
+  font-weight: 600;
+}
+
+/* 相關技能列表 */
+.related-skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.related-skill-item {
+  background: rgba(26, 26, 46, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.related-skill-item:hover {
+  background: rgba(26, 26, 46, 0.9);
+  border-color: rgba(52, 152, 219, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+}
+
+.related-skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.related-skill-name {
+  color: var(--primary-gold);
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.relation-score {
+  background: linear-gradient(135deg, var(--primary-gold), var(--bright-gold));
+  color: var(--primary-dark);
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.related-skill-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.skill-category {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.skill-level {
+  padding: 0.125rem 0.5rem;
+  background: rgba(46, 204, 113, 0.2);
+  border: 1px solid rgba(46, 204, 113, 0.4);
+  color: #2ecc71;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.relation-reasons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.reason-tag {
+  background: rgba(155, 89, 182, 0.2);
+  border: 1px solid rgba(155, 89, 182, 0.4);
+  color: #9b59b6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.related-skill-desc {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* 無相關技能狀態 */
+.no-related-skills {
+  text-align: center;
+  padding: 2rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.no-results-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-results-text {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.no-results-hint {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* 學習路徑視圖 */
+.learning-path-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.skill-overview-section,
+.prerequisites-section,
+.resources-section,
+.next-steps-section,
+.learning-tips-section {
+  background: rgba(26, 26, 46, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+}
+
+.section-title {
+  color: var(--primary-gold);
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 技能統計 */
+.skill-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 0.75rem;
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  border-radius: 0.5rem;
+}
+
+.stat-label {
+  display: block;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  color: var(--primary-gold);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* 前置技能列表 */
+.prerequisites-list,
+.next-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prerequisite-item,
+.next-step-item {
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.prerequisite-item:hover,
+.next-step-item:hover {
+  background: rgba(52, 152, 219, 0.2);
+  border-color: rgba(52, 152, 219, 0.4);
+  transform: translateX(4px);
+}
+
+.prereq-name,
+.next-step-name {
+  color: var(--primary-gold);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.prereq-hint,
+.next-step-hint {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+}
+
+.next-step-category {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.no-prerequisites,
+.no-next-steps {
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  margin: 0;
+}
+
+/* 學習資源列表 */
+.resources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.resource-item {
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resource-header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.resource-type {
+  background: rgba(46, 204, 113, 0.3);
+  color: #2ecc71;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.resource-name {
+  color: var(--primary-gold);
+  font-weight: 500;
+}
+
+.resource-link {
+  background: rgba(52, 152, 219, 0.2);
+  border: 1px solid rgba(52, 152, 219, 0.4);
+  color: #3498db;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.resource-link:hover {
+  background: rgba(52, 152, 219, 0.3);
+  border-color: rgba(52, 152, 219, 0.6);
+  transform: translateY(-1px);
+}
+
+/* 學習建議 */
+.learning-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tip-item {
+  padding: 0.75rem;
+  background: rgba(155, 89, 182, 0.1);
+  border: 1px solid rgba(155, 89, 182, 0.2);
+  border-radius: 0.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+}
+
+.tip-item strong {
+  color: var(--primary-gold);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .skill-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .related-skill-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .related-skill-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .resource-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
