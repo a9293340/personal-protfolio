@@ -6,8 +6,7 @@
 import { BaseComponent } from '../core/components/BaseComponent.js';
 import { PoeStyleSkillTree } from '../components/gaming/SkillTree/PoeStyleSkillTree.js';
 import { MobileSkillTree } from '../components/gaming/SkillTree/MobileSkillTree.js';
-import { skillsPageConfig } from '../config/pages/skills.config.js';
-import skillsDataConfig from '../config/data/skills.data.js';
+import { skillsDataConfig } from '../config/data/skills.data.js';
 
 export class SkillsPage extends BaseComponent {
   constructor(options = {}) {
@@ -390,9 +389,9 @@ export class SkillsPage extends BaseComponent {
 
     const allSkills = [
       skillsDataConfig.tree.center,
-      ...(skillsDataConfig.tree.ring1 || []),
-      ...(skillsDataConfig.tree.ring2 || []),
-      ...(skillsDataConfig.tree.ring3 || [])
+      ...(skillsDataConfig.tree.ring1 ? Object.values(skillsDataConfig.tree.ring1) : []),
+      ...(skillsDataConfig.tree.ring2 ? Object.values(skillsDataConfig.tree.ring2) : []),
+      ...(skillsDataConfig.tree.ring3 ? Object.values(skillsDataConfig.tree.ring3) : [])
     ].filter(Boolean);
     
     const skill = allSkills.find(s => s.id === skillId);
@@ -405,15 +404,102 @@ export class SkillsPage extends BaseComponent {
   }
 
   /**
+   * 根據子技能ID找到對應的父技能
+   */
+  findParentSkillBySubSkillId(subSkillId) {
+    if (!subSkillId || !skillsDataConfig.tree) {
+      console.warn('⚠️ 無效的子技能 ID 或技能數據:', subSkillId);
+      return null;
+    }
+
+    console.log('🔍 查找子技能的父技能:', subSkillId);
+
+    // 解析子技能ID格式：{parentSkillId}-sub-{index}
+    const subSkillIdPattern = /^(.+)-sub-(\d+)$/;
+    const match = subSkillId.match(subSkillIdPattern);
+    
+    if (match) {
+      const parentSkillId = match[1];
+      const subSkillIndex = parseInt(match[2], 10);
+      
+      console.log('🔍 解析結果 - 父技能ID:', parentSkillId, ', 子技能索引:', subSkillIndex);
+      
+      // 直接查找父技能
+      const parentSkill = this.findSkillByIdInData(parentSkillId);
+      if (parentSkill) {
+        console.log('🔍 找到子技能', subSkillId, '的父技能:', parentSkill.name);
+        return parentSkill;
+      }
+    }
+
+    // 如果格式不匹配，fallback 到原來的查找方式
+    const allSkills = [
+      skillsDataConfig.tree.center,
+      ...(skillsDataConfig.tree.ring1 ? Object.values(skillsDataConfig.tree.ring1) : []),
+      ...(skillsDataConfig.tree.ring2 ? Object.values(skillsDataConfig.tree.ring2) : []),
+      ...(skillsDataConfig.tree.ring3 ? Object.values(skillsDataConfig.tree.ring3) : [])
+    ].filter(Boolean);
+    
+    // 在每個主技能的 skills 數組中查找子技能
+    for (const mainSkill of allSkills) {
+      if (mainSkill.skills && Array.isArray(mainSkill.skills)) {
+        const subSkill = mainSkill.skills.find(sub => 
+          sub.id === subSkillId || 
+          sub.name === subSkillId ||
+          (typeof sub === 'string' && sub === subSkillId)
+        );
+        if (subSkill) {
+          console.log('🔍 (fallback) 找到子技能', subSkillId, '的父技能:', mainSkill.name);
+          return mainSkill;
+        }
+      }
+    }
+    
+    console.warn('⚠️ 找不到子技能對應的父技能:', subSkillId);
+    return null;
+  }
+
+  /**
    * 設置桌面端技能樹事件監聽
    */
   setupDesktopSkillTreeEvents() {
     if (!this.skillTree) return;
 
-    // 技能選擇事件
+    // 主技能點擊事件 (修復事件名稱)
+    this.skillTree.on('skill-click', (data) => {
+      console.log('🖥️ 桌面端 - 主技能點擊事件:', data);
+      const skill = this.findSkillByIdInData(data.skillId);
+      this.showSkillDetails(skill);
+    });
+
+    // 子技能點擊事件 (新增)
+    this.skillTree.on('sub-skill-click', (eventData) => {
+      console.log('🖥️ 桌面端 - 子技能點擊事件:', eventData);
+      
+      // 安全地檢查事件數據結構
+      const data = eventData.data || eventData;
+      console.log('🔍 實際數據:', data);
+      console.log('🔍 data.subSkillId:', data.subSkillId);
+      console.log('🔍 data 的屬性:', Object.keys(data));
+      
+      // 子技能點擊時，需要找到對應的主技能然後顯示詳情
+      const subSkillId = data.subSkillId;
+      if (subSkillId) {
+        const parentSkill = this.findParentSkillBySubSkillId(subSkillId);
+        if (parentSkill) {
+          this.showSkillDetails(parentSkill);
+        } else {
+          console.warn('⚠️ 找不到子技能對應的父技能:', subSkillId);
+        }
+      } else {
+        console.warn('⚠️ 子技能點擊事件中沒有 subSkillId:', data);
+      }
+    });
+
+    // 舊的事件監聽 (保留作為備用)
     this.skillTree.on('skill-selected', (data) => {
-      console.log('🖥️ 桌面端 - 技能選擇事件:', data);
-      const skill = this.findSkillById(data.skillId);
+      console.log('🖥️ 桌面端 - 技能選擇事件 (舊):', data);
+      const skill = this.findSkillByIdInData(data.skillId);
       this.showSkillDetails(skill);
     });
 
@@ -421,7 +507,7 @@ export class SkillsPage extends BaseComponent {
     this.skillTree.on('skill-hover', (data) => {
       console.log('🖥️ 桌面端 - 技能懸停事件:', data);
       if (data.isEnter) {
-        const skill = this.findSkillById(data.skillId);
+        const skill = this.findSkillByIdInData(data.skillId);
         this.previewSkill(skill);
       }
     });
@@ -436,6 +522,9 @@ export class SkillsPage extends BaseComponent {
       console.error('🚨 桌面端技能樹錯誤:', data.error);
       this.showError('技能樹運行錯誤: ' + data.error.message);
     });
+
+    // 添加通用事件監聽器 (debug 用)
+    console.log('🔧 設置桌面端技能樹事件監聽完成');
   }
 
   /**
@@ -525,46 +614,117 @@ export class SkillsPage extends BaseComponent {
     const skillDescription = skill.description || '暫無描述';
     const skillRequirements = skill.requirements || skill.prerequisites || [];
     const skillProjects = skill.relatedProjects || [];
+    const skillLevel = skill.level || 1;
+
+    // 狀態映射和顏色
+    const statusInfo = {
+      'mastered': { text: '已熟練', color: '#d4af37', icon: '🏆' },
+      'learning': { text: '學習中', color: '#27ae60', icon: '📚' },
+      'available': { text: '略懂', color: '#2980b9', icon: '💡' },
+      'locked': { text: '待學習', color: '#666666', icon: '🔒' }
+    };
+
+    const status = statusInfo[skillStatus] || statusInfo['available'];
 
     detailsContent.innerHTML = `
       <div class="skill-detail">
         <header class="skill-detail-header">
           <div class="skill-detail-title-row">
-            <h4 class="skill-name">${skillName}</h4>
+            <h3 class="skill-name">${skillName}</h3>
             <button class="skill-detail-close" onclick="this.closest('.skill-details-panel').classList.remove('show')">✕</button>
           </div>
-          <span class="skill-level">${skillStatus}</span>
+          <div class="skill-status-info">
+            <span class="skill-status-badge" style="background-color: ${status.color}">
+              ${status.icon} ${status.text}
+            </span>
+            <span class="skill-level-badge">Level ${skillLevel}</span>
+          </div>
         </header>
         
         <div class="skill-detail-body">
-          <p class="skill-description">${skillDescription}</p>
+          <div class="skill-description-section">
+            <p class="skill-description">${skillDescription}</p>
+          </div>
+
+          ${skill.skills && skill.skills.length > 0 ? `
+            <div class="sub-skills-section">
+              <h5 class="section-title">🔧 子技能列表</h5>
+              <div class="sub-skills-list">
+                ${skill.skills.map(subSkill => `
+                  <div class="sub-skill-item">
+                    <div class="sub-skill-info">
+                      <span class="sub-skill-name">${subSkill.name}</span>
+                      <span class="sub-skill-percentage">${subSkill.proficiency}%</span>
+                    </div>
+                    <div class="proficiency-bar-container">
+                      <div class="proficiency-bar">
+                        <div class="proficiency-fill" 
+                             style="width: ${subSkill.proficiency}%; background-color: ${this.getProficiencyColor(subSkill.proficiency)};">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
           
           ${skillRequirements.length > 0 ? `
-            <div class="skill-requirements">
-              <h5>前置需求</h5>
-              <ul>
-                ${skillRequirements.map(req => `<li>${req}</li>`).join('')}
+            <div class="skill-requirements-section">
+              <h5 class="section-title">📋 前置需求</h5>
+              <ul class="requirements-list">
+                ${skillRequirements.map(req => `<li class="requirement-item">${req}</li>`).join('')}
               </ul>
             </div>
           ` : ''}
           
           ${skillProjects.length > 0 ? `
-            <div class="skill-projects">
-              <h5>相關專案</h5>
-              <ul>
-                ${skillProjects.map(project => `<li>${project}</li>`).join('')}
-              </ul>
+            <div class="skill-projects-section">
+              <h5 class="section-title">🚀 相關專案</h5>
+              <div class="projects-grid">
+                ${skillProjects.map(project => `
+                  <div class="project-card">
+                    <div class="project-name">${project.name || project}</div>
+                    ${project.description ? `<div class="project-description">${project.description}</div>` : ''}
+                    ${project.technologies ? `
+                      <div class="project-tech-tags">
+                        ${project.technologies.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
+                      </div>
+                    ` : ''}
+                  </div>
+                `).join('')}
+              </div>
             </div>
           ` : ''}
 
-          ${skill.skills && skill.skills.length > 0 ? `
-            <div class="skill-details-list">
-              <h5>技能詳情</h5>
-              <ul>
-                ${skill.skills.map(s => `<li>${s.name} - 熟練度: ${s.proficiency}%</li>`).join('')}
-              </ul>
+          ${skill.experience ? `
+            <div class="experience-section">
+              <h5 class="section-title">💼 實務經驗</h5>
+              <div class="experience-content">
+                <div class="experience-years">
+                  <span class="experience-label">經驗年資:</span>
+                  <span class="experience-value">${skill.experience.years || '待更新'}</span>
+                </div>
+                ${skill.experience.highlights ? `
+                  <div class="experience-highlights">
+                    <span class="experience-label">重點成就:</span>
+                    <ul class="highlights-list">
+                      ${skill.experience.highlights.map(highlight => `<li>${highlight}</li>`).join('')}
+                    </ul>
+                  </div>
+                ` : ''}
+              </div>
             </div>
           ` : ''}
+
+          <div class="skill-actions">
+            <button class="action-button primary" onclick="console.log('查看相關技能: ${skill.id}')">
+              🔗 查看相關技能
+            </button>
+            <button class="action-button secondary" onclick="console.log('學習路徑: ${skill.id}')">
+              🎯 學習路徑
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -574,6 +734,17 @@ export class SkillsPage extends BaseComponent {
     if (panel) {
       panel.classList.add('show');
     }
+  }
+
+  /**
+   * 獲取熟練度對應的顏色
+   */
+  getProficiencyColor(proficiency) {
+    if (proficiency >= 90) return '#d4af37'; // 金色 - 專家
+    if (proficiency >= 75) return '#27ae60'; // 綠色 - 熟練
+    if (proficiency >= 50) return '#2980b9'; // 藍色 - 中等
+    if (proficiency >= 25) return '#f39c12'; // 橙色 - 初級
+    return '#e74c3c'; // 紅色 - 新手
   }
 
   /**
