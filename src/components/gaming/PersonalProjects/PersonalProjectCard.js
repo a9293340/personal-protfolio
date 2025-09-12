@@ -161,7 +161,8 @@ export class PersonalProjectCard extends BaseComponent {
         </div>
         
         <div class="card-image" style="
-          flex: 1;
+          height: 140px;
+          width: 100%;
           background: linear-gradient(135deg, 
             rgba(${this.getRarityRgb(project.rarity)}, 0.1) 0%, 
             rgba(${this.getRarityRgb(project.rarity)}, 0.05) 100%);
@@ -199,21 +200,23 @@ export class PersonalProjectCard extends BaseComponent {
         ">${project.description}</div>
         
         <div class="card-stats" style="
-          display: flex;
-          justify-content: space-between;
+          display: grid;
+          grid-template-columns: 1fr 1fr 60px;
+          gap: 8px;
           align-items: center;
           font-size: 11px;
           color: #d4af37;
+          padding: 0 2px;
         ">
-          <div class="stat-group">
+          <div class="stat-group" style="text-align: left;">
             <span class="stat-label">ATK/</span>
             <span class="stat-value">${project.cardData?.attack || '???'}</span>
           </div>
-          <div class="stat-group">
+          <div class="stat-group" style="text-align: left;">
             <span class="stat-label">DEF/</span>
             <span class="stat-value">${project.cardData?.defense || '???'}</span>
           </div>
-          <div class="stat-group">
+          <div class="stat-group" style="text-align: center;">
             <span class="stat-label">LV</span>
             <span class="stat-value">${project.cardData?.level || '?'}</span>
           </div>

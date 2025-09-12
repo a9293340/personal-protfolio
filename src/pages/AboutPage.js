@@ -211,9 +211,11 @@ export class AboutPage extends BaseComponent {
   initProgressAnimations() {
     const progressBars = document.querySelectorAll('.progress-bar');
     progressBars.forEach((bar, index) => {
+      const targetWidth = bar.style.width;
+      bar.style.width = '0%';
       setTimeout(() => {
         bar.style.transition = 'width 1.5s ease-out';
-        bar.style.width = bar.style.width; // 觸發動畫
+        bar.style.width = targetWidth;
       }, index * 200);
     });
   }
@@ -535,7 +537,7 @@ export class AboutPage extends BaseComponent {
       rootMargin: '0px 0px -50px 0px'
     };
     
-    const sectionObserver = new IntersectionObserver((entries) => {
+    const sectionObserver = new window.IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('section-visible');

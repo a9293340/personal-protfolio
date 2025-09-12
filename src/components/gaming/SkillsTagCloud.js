@@ -443,7 +443,7 @@ export class SkillsTagCloud extends BaseComponent {
     }, 600);
     
     // 發送自定義事件（供頁面監聽）
-    const event = new CustomEvent('tag-clicked', {
+    const event = new window.CustomEvent('tag-clicked', {
       detail: { tagName, level, tag },
       bubbles: true
     });

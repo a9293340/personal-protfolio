@@ -6,8 +6,8 @@
 import { HomePage } from '../pages/HomePage.js';
 import { AboutPage } from '../pages/AboutPage.js';
 import { SkillsPage } from '../pages/SkillsPage.js';
-import { ProjectsPage } from '../pages/ProjectsPage.js';
 import { WorkProjectsPage } from '../pages/WorkProjectsPage.js';
+import { PersonalProjectsPage } from '../pages/PersonalProjectsPage.js';
 import { ContactPage } from '../pages/ContactPage.js';
 
 /**
@@ -46,16 +46,6 @@ export const routesConfig = [
     }
   },
   {
-    path: '/projects',
-    component: ProjectsPage,
-    title: '專案展示 | Gaming Portfolio',
-    meta: {
-      description: '展示我參與開發的重要專案與技術成果',
-      keywords: 'projects, portfolio, technical achievements, case studies',
-      icon: '🚀'
-    }
-  },
-  {
     path: '/work-projects',
     component: WorkProjectsPage,
     title: '工作專案時間軸 | Gaming Portfolio',
@@ -63,6 +53,16 @@ export const routesConfig = [
       description: '以互動時間軸展示工作專案發展歷程，體驗專業項目開發軌跡',
       keywords: 'work projects, timeline, professional development, interactive timeline',
       icon: '⏱️'
+    }
+  },
+  {
+    path: '/personal-projects',
+    component: PersonalProjectsPage,
+    title: '個人專案卡牌收藏 | Gaming Portfolio',
+    meta: {
+      description: '遊戲王風格個人專案展示，體驗召喚特效與卡牌收藏系統',
+      keywords: 'personal projects, yugioh cards, summoning animation, portfolio showcase',
+      icon: '🎴'
     }
   },
   {
@@ -104,7 +104,8 @@ export const notFoundConfig = {
                 <a href="#/" style="background: rgba(212, 175, 55, 0.2); border: 1px solid #d4af37; color: #d4af37; padding: 10px; text-decoration: none; border-radius: 6px; display: block;">🏠 首頁</a>
                 <a href="#/about" style="background: rgba(212, 175, 55, 0.2); border: 1px solid #d4af37; color: #d4af37; padding: 10px; text-decoration: none; border-radius: 6px; display: block;">📋 關於</a>
                 <a href="#/skills" style="background: rgba(212, 175, 55, 0.2); border: 1px solid #d4af37; color: #d4af37; padding: 10px; text-decoration: none; border-radius: 6px; display: block;">🌟 技能</a>
-                <a href="#/projects" style="background: rgba(212, 175, 55, 0.2); border: 1px solid #d4af37; color: #d4af37; padding: 10px; text-decoration: none; border-radius: 6px; display: block;">🚀 專案</a>
+                <a href="#/work-projects" style="background: rgba(212, 175, 55, 0.2); border: 1px solid #d4af37; color: #d4af37; padding: 10px; text-decoration: none; border-radius: 6px; display: block;">⏱️ 工作專案</a>
+                <a href="#/personal-projects" style="background: rgba(212, 175, 55, 0.2); border: 1px solid #d4af37; color: #d4af37; padding: 10px; text-decoration: none; border-radius: 6px; display: block;">🎴 個人專案</a>
               </div>
             </div>
             

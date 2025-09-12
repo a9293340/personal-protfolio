@@ -309,7 +309,7 @@ export class AchievementBadges extends BaseComponent {
     }, 600);
     
     // 發送自定義事件（供頁面監聽）
-    const event = new CustomEvent('achievement-clicked', {
+    const event = new window.CustomEvent('achievement-clicked', {
       detail: { achievementId, badge },
       bubbles: true
     });

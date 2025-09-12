@@ -132,14 +132,14 @@ export class PersonalProjectModal extends BaseComponent {
    */
   createElement() {
     this.element = document.createElement('div');
-    this.element.className = 'personal-project-modal';
     this.element.style.cssText = `
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: ${this.config.zIndex};
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 10000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -147,64 +147,52 @@ export class PersonalProjectModal extends BaseComponent {
     `;
     
     this.element.innerHTML = `
-      <div class="modal-backdrop" style="
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, ${this.config.animation.backdropOpacity});
-        backdrop-filter: blur(5px);
-      "></div>
-      
-      <div class="modal-container" style="
-        position: relative;
-        max-width: ${this.config.size.maxWidth};
-        max-height: ${this.config.size.maxHeight};
-        min-width: ${this.config.size.minWidth};
-        margin: 20px;
-        background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+      <div style="
+        width: 95vw;
+        height: 90vh;
+        background: linear-gradient(145deg, rgba(15, 15, 25, 0.98), rgba(25, 15, 35, 0.95));
         border-radius: 16px;
-        border: 3px solid #d4af37;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 3px solid rgba(212, 175, 55, 0.6);
+        display: flex;
+        flex-direction: column;
         overflow: hidden;
-        transform: scale(0.8);
       ">
-        <div class="modal-header" style="
+        <div style="
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 20px;
+          padding: 20px 30px;
           border-bottom: 2px solid rgba(212, 175, 55, 0.3);
-          background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
+          background: linear-gradient(90deg, rgba(212, 175, 55, 0.15), transparent);
         ">
-          <h2 class="modal-title" style="
+          <h2 style="
             margin: 0;
-            color: #ffffff;
-            font-size: 24px;
-            font-weight: bold;
-          "></h2>
-          
-          <button class="modal-close" style="
-            background: none;
-            border: 2px solid #d4af37;
             color: #d4af37;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
+            font-size: 1.8rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-          " title="關閉 (ESC)">×</button>
+            gap: 0.8rem;
+          "></h2>
+          <button style="
+            background: transparent;
+            border: 2px solid rgba(212, 175, 55, 0.6);
+            color: #d4af37;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+          ">×</button>
         </div>
         
-        <div class="modal-content" style="
-          padding: 20px;
-          max-height: 70vh;
+        <div style="
+          flex: 1;
+          padding: 30px;
           overflow-y: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         ">
           <div class="project-details">
             <!-- 內容將動態插入 -->
@@ -214,9 +202,27 @@ export class PersonalProjectModal extends BaseComponent {
     `;
     
     // 獲取子元素引用
-    this.backdrop = this.element.querySelector('.modal-backdrop');
-    this.modal = this.element.querySelector('.modal-container');
-    this.closeBtn = this.element.querySelector('.modal-close');
+    this.backdrop = this.element;
+    this.modal = this.element.querySelector('div');
+    this.closeBtn = this.element.querySelector('button');
+    this.titleEl = this.element.querySelector('h2');
+    this.contentEl = this.element.querySelector('.project-details');
+    
+    // 隱藏 webkit scrollbar
+    const scrollableDiv = this.element.querySelector('div[style*="overflow-y: auto"]');
+    scrollableDiv.style.setProperty('-webkit-scrollbar-width', '0');
+    scrollableDiv.addEventListener('scroll', function() {
+      this.style.setProperty('::-webkit-scrollbar', 'display: none');
+    });
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      div[style*="overflow-y: auto"]::-webkit-scrollbar {
+        width: 0 !important;
+        background: transparent !important;
+      }
+    `;
+    document.head.appendChild(style);
   }
   
   /**
@@ -224,18 +230,19 @@ export class PersonalProjectModal extends BaseComponent {
    */
   updateContent(project) {
     // 更新標題
-    const titleEl = this.element.querySelector('.modal-title');
-    if (titleEl) {
-      titleEl.innerHTML = `
+    if (this.titleEl) {
+      this.titleEl.innerHTML = `
         ${this.getRarityIcon(project.rarity)}
         ${project.title}
       `;
     }
     
     // 更新詳情內容
-    const detailsEl = this.element.querySelector('.project-details');
-    if (detailsEl) {
-      detailsEl.innerHTML = this.generateProjectDetails(project);
+    if (this.contentEl) {
+      this.contentEl.innerHTML = this.generateProjectDetails(project);
+      
+      // 應用響應式布局
+      this.applyResponsiveLayout();
     }
     
     // 應用稀有度樣式
@@ -247,219 +254,164 @@ export class PersonalProjectModal extends BaseComponent {
    */
   generateProjectDetails(project) {
     return `
-      <div class="project-overview" style="margin-bottom: 30px;">
-        <div class="project-meta" style="
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 20px;
-          margin-bottom: 20px;
+      <div style="width: 100%; color: white;">
+        <!-- 圖片輪播區域 -->
+        <div style="
+          width: 100%; 
+          height: 300px; 
+          background: rgba(255,255,255,0.05); 
+          border-radius: 12px; 
+          margin-bottom: 3rem;
+          border: 2px dashed rgba(212,175,55,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 1rem;
         ">
-          <div class="meta-card" style="
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 15px;
-            border-left: 4px solid #d4af37;
-          ">
-            <h4 style="margin: 0 0 8px 0; color: #d4af37;">基本資訊</h4>
-            <div class="meta-item">
-              <span style="color: #a0a0a0;">類型：</span>
-              <span style="color: #ffffff;">${this.getCategoryLabel(project.category)}</span>
+          <div style="
+            font-size: 3rem;
+            opacity: 0.6;
+            color: #d4af37;
+          ">📸</div>
+          <div style="
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            font-size: 1.1rem;
+          ">圖片輪播區域<br><small style="opacity: 0.6;">(預留空間，未來添加專案截圖)</small></div>
+        </div>
+        
+        <div class="modal-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem;">
+          <div style="background: rgba(255,255,255,0.08); padding: 2rem; border-radius: 12px; width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden;">
+            <h4 style="color: #d4af37; font-size: 1.3rem; margin-bottom: 1.5rem;">基本資訊</h4>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+              <span>類型：</span>
+              <span>${this.getCategoryLabel(project.category)}</span>
             </div>
-            <div class="meta-item">
-              <span style="color: #a0a0a0;">稀有度：</span>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+              <span>稀有度：</span>
               <span style="color: ${this.getRarityColor(project.rarity)};">
                 ${this.getRarityIcon(project.rarity)} ${this.getRarityLabel(project.rarity)}
               </span>
             </div>
-            <div class="meta-item">
-              <span style="color: #a0a0a0;">狀態：</span>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+              <span>狀態：</span>
               <span style="color: ${this.getStatusColor(project.status)};">
                 ${this.getStatusLabel(project.status)}
               </span>
             </div>
-            <div class="meta-item">
-              <span style="color: #a0a0a0;">完成時間：</span>
-              <span style="color: #ffffff;">${project.completedDate}</span>
+            <div style="display: flex; justify-content: space-between;">
+              <span>完成時間：</span>
+              <span>${project.completedDate}</span>
             </div>
           </div>
           
           ${project.cardData ? `
-            <div class="meta-card" style="
-              background: rgba(255, 255, 255, 0.05);
-              border-radius: 8px;
-              padding: 15px;
-              border-left: 4px solid #4169e1;
-            ">
-              <h4 style="margin: 0 0 8px 0; color: #4169e1;">卡牌數據</h4>
-              <div class="card-stats" style="
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-                font-family: monospace;
-              ">
-                <div>
-                  <span style="color: #a0a0a0;">ATK：</span>
+            <div style="background: rgba(255,255,255,0.08); padding: 2rem; border-radius: 12px; width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden;">
+              <h4 style="color: #4169e1; font-size: 1.3rem; margin-bottom: 1.5rem;">卡牌數據</h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div style="display: flex; justify-content: space-between; padding: 0.8rem; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                  <span>ATK：</span>
                   <span style="color: #ff6b6b; font-weight: bold;">${project.cardData.attack || '???'}</span>
                 </div>
-                <div>
-                  <span style="color: #a0a0a0;">DEF：</span>
+                <div style="display: flex; justify-content: space-between; padding: 0.8rem; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                  <span>DEF：</span>
                   <span style="color: #4ecdc4; font-weight: bold;">${project.cardData.defense || '???'}</span>
                 </div>
-                <div>
-                  <span style="color: #a0a0a0;">Level：</span>
+                <div style="display: flex; justify-content: space-between; padding: 0.8rem; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                  <span>Level：</span>
                   <span style="color: #ffd93d; font-weight: bold;">${project.cardData.level || '?'}</span>
                 </div>
-                <div>
-                  <span style="color: #a0a0a0;">Type：</span>
-                  <span style="color: #a0a0a0; font-size: 12px;">${project.cardData.type || 'Unknown'}</span>
+                <div style="display: flex; justify-content: space-between; padding: 0.8rem; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                  <span>Type：</span>
+                  <span style="font-size: 0.8rem;">${project.cardData.type || 'Unknown'}</span>
                 </div>
               </div>
             </div>
           ` : ''}
         </div>
         
-        <div class="project-description" style="
-          background: rgba(255, 255, 255, 0.03);
-          border-radius: 8px;
-          padding: 20px;
-          margin-bottom: 20px;
-        ">
-          <h4 style="margin: 0 0 12px 0; color: #ffffff;">專案描述</h4>
-          <p style="
-            color: #e0e0e0;
-            line-height: 1.6;
-            margin: 0;
-          ">${project.description}</p>
+        <div style="background: rgba(255,255,255,0.06); padding: 2.5rem; border-radius: 12px; margin-bottom: 3rem; width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden;">
+          <h4 style="color: white; font-size: 1.3rem; margin-bottom: 1.5rem;">專案描述</h4>
+          <p style="color: rgba(255,255,255,0.85); line-height: 1.8; font-size: 1.1rem;">${project.description}</p>
         </div>
+        
+        ${project.technologies && project.technologies.length > 0 ? `
+          <div style="margin-bottom: 3rem; width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden;">
+            <h4 style="color: white; font-size: 1.3rem; margin-bottom: 1.5rem;">🔧 技術棧</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+              ${project.technologies.map(tech => `
+                <div style="background: ${this.getTechColor(tech)}; color: white; padding: 0.8rem 1.2rem; border-radius: 8px; text-align: center; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${this.getTechIcon(tech)} ${tech}</div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+        
+        ${project.links && Object.keys(project.links).length > 0 ? `
+          <div style="width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden;">
+            <h4 style="color: white; font-size: 1.3rem; margin-bottom: 1.5rem;">🔗 相關連結</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+              ${Object.entries(project.links).map(([type, url]) => `
+                <a href="${url}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1.2rem 2rem; background: linear-gradient(135deg, rgba(22,33,62,0.8), rgba(26,26,46,0.8)); border: 2px solid rgba(212,175,55,0.4); border-radius: 12px; color: #d4af37; text-decoration: none; font-size: 1.1rem; font-weight: 600;">
+                  ${this.getLinkIcon(type)} ${this.getLinkLabel(type)}
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
       </div>
-      
-      ${project.technologies && project.technologies.length > 0 ? `
-        <div class="project-technologies" style="margin-bottom: 30px;">
-          <h4 style="margin: 0 0 15px 0; color: #ffffff;">
-            🔧 技術棧
-          </h4>
-          <div class="tech-tags" style="
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-          ">
-            ${project.technologies.map(tech => `
-              <span class="tech-tag" style="
-                background: linear-gradient(135deg, #4169e1, #357abd);
-                color: white;
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                font-weight: 500;
-              ">${tech}</span>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
-      
-      ${project.images && project.images.screenshots && project.images.screenshots.length > 0 ? `
-        <div class="project-gallery" style="margin-bottom: 30px;">
-          <h4 style="margin: 0 0 15px 0; color: #ffffff;">
-            🖼️ 專案截圖
-          </h4>
-          <div class="gallery-grid" style="
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-          ">
-            ${project.images.screenshots.map((img, index) => `
-              <div class="gallery-item" style="
-                position: relative;
-                aspect-ratio: 16/9;
-                border-radius: 8px;
-                overflow: hidden;
-                cursor: pointer;
-                transition: transform 0.3s ease;
-              " onmouseover="this.style.transform='scale(1.05)'" 
-                 onmouseout="this.style.transform='scale(1)'">
-                <img src="${img}" alt="Screenshot ${index + 1}" style="
-                  width: 100%;
-                  height: 100%;
-                  object-fit: cover;
-                ">
-                <div style="
-                  position: absolute;
-                  bottom: 0;
-                  left: 0;
-                  right: 0;
-                  background: linear-gradient(transparent, rgba(0,0,0,0.7));
-                  color: white;
-                  padding: 10px;
-                  font-size: 12px;
-                ">截圖 ${index + 1}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
-      
-      ${project.links && Object.keys(project.links).length > 0 ? `
-        <div class="project-links">
-          <h4 style="margin: 0 0 15px 0; color: #ffffff;">
-            🔗 相關連結
-          </h4>
-          <div class="links-grid" style="
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-          ">
-            ${Object.entries(project.links).map(([type, url]) => `
-              <a href="${url}" target="_blank" rel="noopener noreferrer" 
-                 class="link-button" style="
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                padding: 12px;
-                background: linear-gradient(135deg, #16213e, #1a1a2e);
-                border: 2px solid #d4af37;
-                border-radius: 8px;
-                color: #d4af37;
-                text-decoration: none;
-                font-size: 14px;
-                font-weight: 500;
-                transition: all 0.3s ease;
-              " onmouseover="this.style.background='linear-gradient(135deg, #d4af37, #f4d03f)'; this.style.color='#1a1a2e';"
-                 onmouseout="this.style.background='linear-gradient(135deg, #16213e, #1a1a2e)'; this.style.color='#d4af37';">
-                ${this.getLinkIcon(type)}
-                ${this.getLinkLabel(type)}
-              </a>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
     `;
   }
   
   /**
+   * 應用響應式布局
+   */
+  applyResponsiveLayout() {
+    console.log('🔧 [PersonalProjectModal] 應用響應式布局，視窗寬度:', window.innerWidth);
+    
+    const infoGrid = this.element.querySelector('.modal-info-grid');
+    const contentContainer = this.element.querySelector('div[style*="padding: 30px"]');
+    
+    console.log('📱 [PersonalProjectModal] 找到元素:', { infoGrid: !!infoGrid, contentContainer: !!contentContainer });
+    
+    if (infoGrid) {
+      const isMobile = window.innerWidth <= 768;
+      console.log('📱 [PersonalProjectModal] 是手機版:', isMobile);
+      
+      infoGrid.style.gridTemplateColumns = isMobile ? '1fr' : '1fr 1fr';
+      infoGrid.style.gap = isMobile ? '1.5rem' : '2rem';
+      
+      // 手機版對齊修復
+      if (isMobile) {
+        infoGrid.style.justifyItems = 'stretch';
+        infoGrid.style.alignItems = 'start';
+        infoGrid.style.width = '100%';
+        infoGrid.style.maxWidth = '100%';
+        console.log('✅ [PersonalProjectModal] 已應用手機版布局');
+      } else {
+        infoGrid.style.justifyItems = 'stretch';
+        infoGrid.style.alignItems = 'start';
+      }
+    }
+    
+    // 調整內容容器的 padding
+    if (contentContainer) {
+      const isMobile = window.innerWidth <= 768;
+      contentContainer.style.padding = isMobile ? '20px' : '30px';
+      console.log('✅ [PersonalProjectModal] 已調整內容 padding:', isMobile ? '20px' : '30px');
+    }
+  }
+
+  /**
    * 應用稀有度樣式
    */
   applyRarityStyles(project) {
-    const rarityColors = {
-      normal: '#8e8e8e',
-      rare: '#4169e1',
-      superRare: '#9400d3',
-      legendary: '#ffd700'
-    };
-    
-    const color = rarityColors[project.rarity] || rarityColors.normal;
-    
-    if (this.modal) {
-      this.modal.style.borderColor = color;
+    if (this.modal && project.rarity) {
+      // 清除舊的稀有度類名
+      this.modal.classList.remove('common', 'rare', 'epic', 'legendary');
       
-      // 傳說級額外效果
-      if (project.rarity === 'legendary') {
-        this.modal.style.boxShadow = `
-          0 20px 60px rgba(0, 0, 0, 0.5),
-          0 0 30px ${color}40,
-          inset 0 1px 0 rgba(255, 255, 255, 0.1)
-        `;
-      }
+      // 添加新的稀有度類名
+      this.modal.classList.add(project.rarity);
     }
   }
   
@@ -557,6 +509,12 @@ export class PersonalProjectModal extends BaseComponent {
       };
       document.addEventListener('keydown', this.escHandler);
     }
+    
+    // 窗口大小改變時重新應用響應式布局
+    this.resizeHandler = () => {
+      this.applyResponsiveLayout();
+    };
+    window.addEventListener('resize', this.resizeHandler);
   }
   
   /**
@@ -566,6 +524,11 @@ export class PersonalProjectModal extends BaseComponent {
     if (this.escHandler) {
       document.removeEventListener('keydown', this.escHandler);
       this.escHandler = null;
+    }
+    
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+      this.resizeHandler = null;
     }
   }
   
@@ -608,6 +571,82 @@ export class PersonalProjectModal extends BaseComponent {
   getLinkLabel(type) {
     const labels = { demo: 'Demo', github: 'GitHub', article: '文章', store: 'App Store', website: '網站' };
     return labels[type] || type;
+  }
+  
+  getTechColor(tech) {
+    const techName = tech.toLowerCase();
+    
+    // 語言類別
+    if (techName.includes('javascript') || techName.includes('js')) return 'linear-gradient(135deg, #f7df1e, #e6c200)';
+    if (techName.includes('typescript') || techName.includes('ts')) return 'linear-gradient(135deg, #3178c6, #235bb7)';
+    if (techName.includes('python')) return 'linear-gradient(135deg, #3776ab, #306998)';
+    if (techName.includes('java')) return 'linear-gradient(135deg, #ed8b00, #c97400)';
+    if (techName.includes('html')) return 'linear-gradient(135deg, #e34f26, #c4372d)';
+    if (techName.includes('css')) return 'linear-gradient(135deg, #1572b6, #0f5a8c)';
+    
+    // 框架類別
+    if (techName.includes('react')) return 'linear-gradient(135deg, #61dafb, #21a9c7)';
+    if (techName.includes('vue')) return 'linear-gradient(135deg, #4fc08d, #349268)';
+    if (techName.includes('angular')) return 'linear-gradient(135deg, #dd0031, #b8002a)';
+    if (techName.includes('node')) return 'linear-gradient(135deg, #339933, #2b7d2b)';
+    if (techName.includes('express')) return 'linear-gradient(135deg, #404040, #333333)';
+    
+    // 工具類別
+    if (techName.includes('vite')) return 'linear-gradient(135deg, #646cff, #535bf2)';
+    if (techName.includes('webpack')) return 'linear-gradient(135deg, #8dd6f9, #1c78c0)';
+    if (techName.includes('docker')) return 'linear-gradient(135deg, #2496ed, #1975c1)';
+    if (techName.includes('git')) return 'linear-gradient(135deg, #f05032, #d63319)';
+    
+    // 動畫/設計類別
+    if (techName.includes('gsap')) return 'linear-gradient(135deg, #88ce02, #6ba000)';
+    if (techName.includes('three')) return 'linear-gradient(135deg, #049ef4, #026db3)';
+    if (techName.includes('canvas')) return 'linear-gradient(135deg, #ff6b6b, #e55555)';
+    
+    // API類別
+    if (techName.includes('api')) return 'linear-gradient(135deg, #ff9500, #e6850e)';
+    if (techName.includes('audio')) return 'linear-gradient(135deg, #9d4edd, #7209b7)';
+    if (techName.includes('web')) return 'linear-gradient(135deg, #6366f1, #4f46e5)';
+    
+    // 預設顏色
+    return 'linear-gradient(135deg, #6366f1, #4f46e5)';
+  }
+  
+  getTechIcon(tech) {
+    const techName = tech.toLowerCase();
+    
+    // 語言圖示
+    if (techName.includes('javascript') || techName.includes('js')) return '⚡';
+    if (techName.includes('typescript') || techName.includes('ts')) return '🔷';
+    if (techName.includes('python')) return '🐍';
+    if (techName.includes('java')) return '☕';
+    if (techName.includes('html')) return '📄';
+    if (techName.includes('css')) return '🎨';
+    
+    // 框架圖示
+    if (techName.includes('react')) return '⚛️';
+    if (techName.includes('vue')) return '💚';
+    if (techName.includes('angular')) return '🅰️';
+    if (techName.includes('node')) return '🚀';
+    if (techName.includes('express')) return '🛤️';
+    
+    // 工具圖示
+    if (techName.includes('vite')) return '⚡';
+    if (techName.includes('webpack')) return '📦';
+    if (techName.includes('docker')) return '🐳';
+    if (techName.includes('git')) return '📝';
+    
+    // 動畫/設計圖示
+    if (techName.includes('gsap')) return '✨';
+    if (techName.includes('three')) return '🎮';
+    if (techName.includes('canvas')) return '🎭';
+    
+    // API圖示
+    if (techName.includes('api')) return '🔌';
+    if (techName.includes('audio')) return '🔊';
+    if (techName.includes('web')) return '🌐';
+    
+    // 預設圖示
+    return '⚙️';
   }
   
   /**

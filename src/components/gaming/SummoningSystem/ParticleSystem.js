@@ -18,6 +18,15 @@ export class ParticleSystem extends BaseComponent {
   constructor(config = {}) {
     super();
     
+    // 檢查 Three.js 可用性
+    this.threeJsAvailable = typeof window !== 'undefined' && window.THREE;
+    
+    if (!this.threeJsAvailable) {
+      console.warn('⚠️ [ParticleSystem] Three.js 不可用，粒子系統將使用降級模式');
+      this.fallbackMode = true;
+      return;
+    }
+    
     // 初始化配置和狀態
     this.config = this.mergeConfig(this.getDefaultConfig(), config);
     this.state = { ...this.getInitialState() };
@@ -102,6 +111,12 @@ export class ParticleSystem extends BaseComponent {
    */
   async init() {
     console.log('🔧 [ParticleSystem] 開始初始化');
+    
+    // 如果 Three.js 不可用，直接返回成功（降級模式）
+    if (this.fallbackMode) {
+      console.log('📱 [ParticleSystem] 降級模式初始化完成');
+      return;
+    }
     
     try {
       // 檢查 WebGL 支援
@@ -411,6 +426,12 @@ export class ParticleSystem extends BaseComponent {
    * 播放環形粒子流動畫
    */
   async playRingFlow() {
+    // 降級模式直接返回
+    if (this.fallbackMode) {
+      console.log('📱 [ParticleSystem] 降級模式：跳過環形粒子流動畫');
+      return Promise.resolve();
+    }
+    
     if (this.isAnimating) {
       console.warn('[ParticleSystem] 粒子系統正在動畫中，忽略 Ring Flow 請求');
       return;
@@ -456,6 +477,12 @@ export class ParticleSystem extends BaseComponent {
    * 播放星塵爆發動畫
    */
   async playBurst() {
+    // 降級模式直接返回
+    if (this.fallbackMode) {
+      console.log('📱 [ParticleSystem] 降級模式：跳過星塵爆發動畫');
+      return Promise.resolve();
+    }
+    
     if (this.isAnimating) {
       console.warn('[ParticleSystem] 粒子系統正在動畫中，忽略 Burst 請求');
       return;
@@ -639,6 +666,12 @@ export class ParticleSystem extends BaseComponent {
    */
   destroy() {
     console.log('🗑️ [ParticleSystem] 清理資源');
+    
+    // 降級模式直接調用父類清理
+    if (this.fallbackMode) {
+      super.destroy();
+      return;
+    }
     
     // 停止渲染循環
     if (this.animationFrame) {

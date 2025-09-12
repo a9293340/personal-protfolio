@@ -45,7 +45,7 @@ export const personalProjectsData = [
     
     // 專案圖片
     images: {
-      thumbnail: '/images/personal-projects/ai-chat/thumbnail.jpg',
+      thumbnail: null, // 使用預設圖標
       screenshots: [
         '/images/personal-projects/ai-chat/screenshot-1.jpg',
         '/images/personal-projects/ai-chat/screenshot-2.jpg',
@@ -101,12 +101,8 @@ export const personalProjectsData = [
     ],
     
     images: {
-      thumbnail: '/images/personal-projects/crypto-tracker/thumbnail.jpg',
-      screenshots: [
-        '/images/personal-projects/crypto-tracker/dashboard.jpg',
-        '/images/personal-projects/crypto-tracker/portfolio.jpg',
-        '/images/personal-projects/crypto-tracker/analytics.jpg'
-      ]
+      thumbnail: null, // 使用預設圖標
+      screenshots: []
     },
     
     links: {
@@ -154,7 +150,7 @@ export const personalProjectsData = [
     ],
     
     images: {
-      thumbnail: '/images/personal-projects/fitness-ai/thumbnail.jpg',
+      thumbnail: null, // 使用預設圖標
       screenshots: [
         '/images/personal-projects/fitness-ai/workout.jpg',
         '/images/personal-projects/fitness-ai/analysis.jpg'
@@ -206,7 +202,7 @@ export const personalProjectsData = [
     ],
     
     images: {
-      thumbnail: '/images/personal-projects/portfolio/thumbnail.jpg',
+      thumbnail: null, // 使用預設圖標
       screenshots: [
         '/images/personal-projects/portfolio/skill-tree.jpg',
         '/images/personal-projects/portfolio/timeline.jpg',
@@ -259,7 +255,7 @@ export const personalProjectsData = [
     ],
     
     images: {
-      thumbnail: '/images/personal-projects/whiteboard/thumbnail.jpg',
+      thumbnail: null, // 使用預設圖標
       screenshots: [
         '/images/personal-projects/whiteboard/collaboration.jpg',
         '/images/personal-projects/whiteboard/tools.jpg'
@@ -311,7 +307,7 @@ export const personalProjectsData = [
     ],
     
     images: {
-      thumbnail: '/images/personal-projects/smart-home/thumbnail.jpg',
+      thumbnail: null, // 使用預設圖標
       screenshots: [
         '/images/personal-projects/smart-home/dashboard.jpg',
         '/images/personal-projects/smart-home/automation.jpg'
@@ -363,7 +359,7 @@ export const personalProjectsData = [
     ],
     
     images: {
-      thumbnail: '/images/personal-projects/stock-bot/thumbnail.jpg',
+      thumbnail: null, // 使用預設圖標
       screenshots: [
         '/images/personal-projects/stock-bot/analysis.jpg',
         '/images/personal-projects/stock-bot/predictions.jpg'
@@ -415,7 +411,7 @@ export const personalProjectsData = [
     ],
     
     images: {
-      thumbnail: '/images/personal-projects/recipe-app/thumbnail.jpg',
+      thumbnail: null, // 使用預設圖標
       screenshots: [
         '/images/personal-projects/recipe-app/recommendations.jpg',
         '/images/personal-projects/recipe-app/cooking.jpg'
@@ -467,7 +463,7 @@ export const personalProjectsData = [
     ],
     
     images: {
-      thumbnail: '/images/personal-projects/blog-engine/thumbnail.jpg',
+      thumbnail: null, // 使用預設圖標
       screenshots: [
         '/images/personal-projects/blog-engine/admin.jpg',
         '/images/personal-projects/blog-engine/themes.jpg'
@@ -519,7 +515,7 @@ export const personalProjectsData = [
     ],
     
     images: {
-      thumbnail: '/images/personal-projects/password-manager/thumbnail.jpg',
+      thumbnail: null, // 使用預設圖標
       screenshots: [
         '/images/personal-projects/password-manager/vault.jpg'
       ]

@@ -531,7 +531,7 @@ export class SkillsPage extends BaseComponent {
    */
   extractKeywords(name) {
     return name.toLowerCase()
-      .replace(/[\/\-\.]/g, ' ')
+      .replace(/[/\-.]/g, ' ')
       .split(' ')
       .filter(word => word.length > 1);
   }

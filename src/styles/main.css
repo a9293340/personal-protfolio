@@ -9,6 +9,8 @@
 @import './components/AboutPage.css';
 @import './components/SkillsPage.css';
 @import './components/WorkProjectsPage.css';
+@import './components/PersonalProjectsPage.css';
+@import './components/PersonalProjectsGallery.css';
 @import './components/CharacterPanel.css';
 @import './components/ConceptTimeline.css';
 @import './components/AchievementBadges.css';

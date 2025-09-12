@@ -465,48 +465,44 @@ export class CardSummoning extends BaseComponent {
         }
       });
 
-    // Phase 2: 3D 旋轉展示 (0.5-2.5s) - 保持3秒旋轉效果
+    // Phase 2: 延長的 3D 旋轉展示 (0.5-3.5s) - 多轉兩圈無翻轉
     this.masterTimeline
       .to(this.cardElement, {
-        rotationY: 220, // 先轉到220度 (略過180度最佳翻轉點，增加懸念)
+        rotationY: 720, // 先轉兩圈 (720度)
         rotationX: this.config.effects.rotation.x,
         rotationZ: this.config.effects.rotation.z,
-        duration: 1.2, // 前段：旋轉到220度
+        duration: 2.0, // 延長旋轉時間
         ease: this.config.animation.easing.rotation,
         onStart: () => {
           this.state.currentPhase = 'rotating';
-          console.log('🌀 [CardSummoning] Phase 2 開始：旋轉展示');
+          console.log('🌀 [CardSummoning] Phase 2 開始：延長旋轉展示');
           this.startGlowAnimation(); // 旋轉時就開始發光
-        },
-        onComplete: () => {
-          // 在220度時執行翻轉
-          this.executeCardFlip();
         }
       }, '0.5')
       .to(this.cardElement, {
-        rotationY: 360, // 繼續旋轉到360度並回正
+        rotationY: 1080, // 再轉一圈 (總共3圈)
         rotationX: 0,
         rotationZ: 0,
-        duration: 0.8, // 後段：完成旋轉並穩定
+        duration: 1.0, // 最後一圈稍慢
         ease: this.config.animation.easing.rotation
       });
 
-    // Phase 3: 快速穩定 (2.5-3s) - 最終穩定狀態
+    // Phase 3: 快速穩定 (3.5-4s) - 最終穩定狀態，準備直接跳轉彈窗
     this.masterTimeline
       .to(this.cardElement, {
-        rotationY: 360, // 完美回正
+        rotationY: 1080, // 保持最後位置不變
         y: 0,
         duration: 0.5,
         ease: this.config.animation.easing.stabilize,
         onStart: () => {
           this.state.currentPhase = 'stabilizing';
-          console.log('🎯 [CardSummoning] Phase 3 開始：最終穩定');
+          console.log('🎯 [CardSummoning] Phase 3 開始：最終穩定（無翻轉）');
         },
         onComplete: () => {
           this.state.currentPhase = 'completed';
-          console.log('✅ [CardSummoning] 完整動畫序列結束（3秒），準備轉場');
+          console.log('✅ [CardSummoning] 延長旋轉動畫序列結束，準備直接跳轉彈窗');
         }
-      }, '2.5');
+      }, '3.5');
   }
 
   /**
@@ -738,7 +734,7 @@ export class CardSummoning extends BaseComponent {
       height: 100%;
       border-radius: ${this.config.card.borderRadius}px;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      border: 2px solid ${this.cardData.rarityConfig.borderColor};
+      border: 2px solid ${this.cardData.rarityConfig?.borderColor || '#8e8e8e'};
       opacity: 0;
       transform: rotateY(-180deg);
       backface-visibility: hidden;
@@ -769,16 +765,16 @@ export class CardSummoning extends BaseComponent {
             margin: 0;
             font-size: 16px;
             font-weight: bold;
-            color: ${this.cardData.rarityConfig.color};
-            text-shadow: 0 0 5px ${this.cardData.rarityConfig.glowColor};
+            color: ${this.cardData.rarityConfig?.color || '#ffffff'};
+            text-shadow: 0 0 5px ${this.cardData.rarityConfig?.glowColor || '#ffffff'};
             line-height: 1.2;
           ">${this.cardData.name}</h3>
           <div style="
             font-size: 10px;
-            color: ${this.cardData.attributeConfig.color};
+            color: ${this.cardData.attributeConfig?.color || '#ffffff'};
             margin-top: 2px;
           ">
-            ${this.cardData.attributeConfig.icon} ${this.cardData.attributeConfig.name}
+            ${this.cardData.attributeConfig?.icon || '⚡'} ${this.cardData.attributeConfig?.name || this.cardData.attribute || 'Unknown'}
           </div>
         </div>
 
@@ -800,9 +796,9 @@ export class CardSummoning extends BaseComponent {
           align-items: center;
           justify-content: center;
           font-size: 24px;
-          color: ${this.cardData.attributeConfig.color};
+          color: ${this.cardData.attributeConfig?.color || '#ffffff'};
         ">
-          ${this.cardData.attributeConfig.icon}
+          ${this.cardData.attributeConfig?.icon || '⚡'}
         </div>
 
         <!-- 攻擊力/防禦力 -->

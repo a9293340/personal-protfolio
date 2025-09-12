@@ -19,7 +19,11 @@ export class PersonalProjectsGallery extends BaseComponent {
   constructor(config = {}) {
     super();
     
-    this.config = this.mergeConfig(this.getDefaultConfig(), config);
+    // 直接合併配置，避免 mergeConfig 的 this.options 覆蓋問題
+    this.config = {
+      ...this.getDefaultConfig(),
+      ...config
+    };
     this.state = { ...this.getInitialState() };
     
     // 組件實例
@@ -417,6 +421,9 @@ export class PersonalProjectsGallery extends BaseComponent {
     // 插入到容器
     if (this.config.container) {
       this.config.container.appendChild(this.element);
+      console.log('✅ [PersonalProjectsGallery] Element appended to container');
+    } else {
+      console.error('❌ [PersonalProjectsGallery] No container provided');
     }
   }
   
@@ -644,6 +651,17 @@ export class PersonalProjectsGallery extends BaseComponent {
    */
   playGridAnimation() {
     const cards = this.galleryGrid.querySelectorAll('.project-card-wrapper');
+    
+    // 檢查 GSAP 是否可用
+    if (typeof gsap === 'undefined' || !window.gsap) {
+      console.warn('⚠️ [PersonalProjectsGallery] GSAP not available, skipping animation');
+      // 降級：直接顯示卡牌
+      cards.forEach(card => {
+        card.style.opacity = '1';
+        card.style.transform = 'scale(1) translateY(0)';
+      });
+      return;
+    }
     
     gsap.fromTo(cards, {
       opacity: 0,
