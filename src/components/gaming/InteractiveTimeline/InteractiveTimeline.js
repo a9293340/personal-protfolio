@@ -652,6 +652,8 @@ export class InteractiveTimeline extends BaseComponent {
                 </linearGradient>
               </defs>
               <path class="timeline-path" stroke="url(#timelineGradient)" fill="none"/>
+              <!-- 調試：顯示時間軸中心線 -->
+              <line class="timeline-debug-center" x1="0" y1="${this.calculateSVGDimensions().height / 2}" x2="${this.calculateSVGDimensions().width}" y2="${this.calculateSVGDimensions().height / 2}" stroke="rgba(255, 0, 0, 0.5)" stroke-width="2" stroke-dasharray="5,5"/>
             </svg>
             
             <div class="timeline-nodes">
@@ -1481,9 +1483,19 @@ export class InteractiveTimeline extends BaseComponent {
       // 轉換 SVG 坐標到實際像素坐標
       const actualPosition = this.convertSVGToPixelCoordinates(svg, svgPosition);
       
-      // 設定節點位置
+      // 設定節點位置 - 使用絕對定位並確保居中對齊
+      nodeElement.style.position = 'absolute';
       nodeElement.style.left = `${actualPosition.x}px`;
       nodeElement.style.top = `${actualPosition.y}px`;
+      
+      // 確保使用 transform 進行居中對齊（與 CSS 中的設定一致）
+      nodeElement.style.transform = 'translate(-50%, -50%)';
+      
+      // 調試：輸出節點位置信息
+      console.log(`🎯 [InteractiveTimeline] 節點 "${project.title}" 位置設定:`);
+      console.log(`   🌟 專案: ${project.title} (${project.date})`);
+      console.log(`   📍 最終位置: left=${actualPosition.x}px, top=${actualPosition.y}px`);
+      console.log(`   🎨 Transform: translate(-50%, -50%)`);
       
       nodesContainer.appendChild(nodeElement);
       this.nodes.push({
@@ -1498,17 +1510,26 @@ export class InteractiveTimeline extends BaseComponent {
       // 計算重要性縮放
       const importanceScale = 0.8 + (project.importance / 5) * 0.4;
       
-      // 延遲顯示動畫
+      // 延遲顯示動畫 - 保持居中對齊
       if (window.gsap) {
-        window.gsap.fromTo(nodeElement, {
+        // 先設置初始狀態，保持居中對齊
+        window.gsap.set(nodeElement, {
+          transformOrigin: 'center center',
           scale: 0,
           opacity: 0
-        }, {
+        });
+        
+        // 動畫到最終狀態
+        window.gsap.to(nodeElement, {
           scale: importanceScale,
           opacity: 1,
           duration: 0.6,
           delay: index * 0.15,
-          ease: "back.out(1.7)"
+          ease: "back.out(1.7)",
+          onComplete: function() {
+            // 確保動畫完成後保持正確的 transform
+            nodeElement.style.transform = `translate(-50%, -50%) scale(${importanceScale})`;
+          }
         });
       }
     });
@@ -1551,7 +1572,7 @@ export class InteractiveTimeline extends BaseComponent {
     nodeElement.style.width = `${nodeSize}px`;
     nodeElement.style.height = `${nodeSize}px`;
     
-    // 根據重要性調整節點大小
+    // 根據重要性調整節點大小 - 保持居中對齊
     const importanceScale = 0.8 + (project.importance / 5) * 0.4;
     nodeElement.style.transform = `translate(-50%, -50%) scale(${importanceScale})`;
     
@@ -2335,7 +2356,7 @@ export class InteractiveTimeline extends BaseComponent {
   }
 
   /**
-   * 轉換 SVG viewBox 坐標到實際像素坐標
+   * 轉換 SVG viewBox 坐標到實際像素坐標 - 修復桌面版點位脫節問題
    */
   convertSVGToPixelCoordinates(svg, svgPosition) {
     const svgRect = svg.getBoundingClientRect();
@@ -2345,30 +2366,80 @@ export class InteractiveTimeline extends BaseComponent {
     const viewBoxWidth = dimensions.width;
     const viewBoxHeight = dimensions.height;
     
+    // 獲取 timeline-content 容器的實際位置（考慮滾動和變換）
+    const timelineContent = this.element.querySelector('.timeline-content');
+    const timelineContentRect = timelineContent ? timelineContent.getBoundingClientRect() : svgRect;
+    
     // SVG 尺寸檢查和降級處理
     if (svgRect.width === 0 || svgRect.height === 0) {
       console.warn('[InteractiveTimeline] SVG 尺寸為 0，使用降級坐標計算');
       
-      // 降級方案：如果 viewBox 和容器尺寸比例相同，直接返回 SVG 坐標
-      console.log(`[InteractiveTimeline] 降級方案 - 直接使用 SVG 坐標: (${svgPosition.x}, ${svgPosition.y})`);
+      // 降級方案：基於容器實際尺寸計算
+      const fallbackX = (svgPosition.x / viewBoxWidth) * timelineContentRect.width;
+      const fallbackY = (svgPosition.y / viewBoxHeight) * timelineContentRect.height;
+      
+      console.log(`[InteractiveTimeline] 降級方案 - 基於容器計算: (${fallbackX}, ${fallbackY})`);
       
       return {
-        x: svgPosition.x,
-        y: svgPosition.y
+        x: fallbackX,
+        y: fallbackY
       };
     }
     
-    // 計算縮放比例
-    const scaleX = svgRect.width / viewBoxWidth;
-    const scaleY = svgRect.height / viewBoxHeight;
-    
+    // 修復：考慮 SVG 在容器中的實際位置和縮放
     const isVertical = this.state?.currentBreakpoint === 'mobile';
-    console.log(`[InteractiveTimeline] 坐標轉換 (${isVertical ? '垂直' : '水平'}): SVG(${svgPosition.x}, ${svgPosition.y}) -> 像素(${svgPosition.x * scaleX}, ${svgPosition.y * scaleY})`);
-    console.log(`[InteractiveTimeline] viewBox: ${viewBoxWidth}x${viewBoxHeight}, 實際: ${svgRect.width}x${svgRect.height}, 縮放: ${scaleX}x${scaleY}`);
+    
+    // 計算正確的縮放比例 - 基於實際渲染尺寸
+    const actualSVGWidth = svg.clientWidth || svgRect.width;
+    const actualSVGHeight = svg.clientHeight || svgRect.height;
+    
+    // 使用實際 DOM 元素尺寸而非 getBoundingClientRect
+    const scaleX = actualSVGWidth / viewBoxWidth;
+    const scaleY = actualSVGHeight / viewBoxHeight;
+    
+    // 桌面版：確保節點正確對齊到時間軸線
+    let correctedX = svgPosition.x * scaleX;
+    let correctedY = svgPosition.y * scaleY;
+    
+    // 桌面版額外修正：確保節點垂直居中於時間軸
+    if (!isVertical) {
+      // 獲取時間軸線的實際 Y 位置
+      const timelinePath = svg.querySelector('.timeline-path');
+      if (timelinePath) {
+        try {
+          // 獲取路徑中心點的 Y 坐標
+          const pathLength = timelinePath.getTotalLength();
+          const centerPoint = timelinePath.getPointAtLength(pathLength * 0.5);
+          const centerY = centerPoint.y * scaleY;
+          
+          // 如果節點 Y 坐標與時間軸中心相差太遠，調整到合理範圍內
+          const maxDeviation = 100; // 最大偏離距離
+          const deviation = Math.abs(correctedY - centerY);
+          
+          if (deviation < 10) {
+            // 如果太接近中心線，稍微分散開
+            correctedY = centerY + (Math.random() - 0.5) * 60;
+          } else if (deviation > maxDeviation) {
+            // 如果偏離太遠，拉回合理範圍
+            const direction = correctedY > centerY ? 1 : -1;
+            correctedY = centerY + direction * maxDeviation;
+          }
+        } catch (error) {
+          console.log('[InteractiveTimeline] 路徑中心點計算失敗，使用原始 Y 坐標');
+        }
+      }
+    }
+    
+    console.log(`🔧 [InteractiveTimeline] 坐標轉換詳情 (${isVertical ? '垂直' : '水平'}):`);
+    console.log(`   📊 SVG原始坐標: (${svgPosition.x}, ${svgPosition.y})`);
+    console.log(`   📏 SVG實際尺寸: ${actualSVGWidth}x${actualSVGHeight}`);
+    console.log(`   📐 viewBox尺寸: ${viewBoxWidth}x${viewBoxHeight}`);
+    console.log(`   🔄 縮放比例: ${scaleX.toFixed(3)}x${scaleY.toFixed(3)}`);
+    console.log(`   📍 修正後像素坐標: (${correctedX}, ${correctedY})`);
     
     return {
-      x: svgPosition.x * scaleX,
-      y: svgPosition.y * scaleY
+      x: correctedX,
+      y: correctedY
     };
   }
 
@@ -2432,6 +2503,12 @@ export class InteractiveTimeline extends BaseComponent {
       }
       
       const point = path.getPointAtLength(pathLength * progress);
+      
+      // 調試：輸出路徑計算信息
+      console.log(`🛤️ [InteractiveTimeline] 路徑計算 for "${project.title}":`);
+      console.log(`   📏 pathLength: ${pathLength}`);
+      console.log(`   📊 progress: ${progress.toFixed(4)}`);
+      console.log(`   📍 point: (${point.x}, ${point.y})`);
       
       // 手機版垂直佈局優化
       const isVertical = this.state.currentBreakpoint === 'mobile';
@@ -3114,14 +3191,14 @@ export class InteractiveTimeline extends BaseComponent {
 
       
       if (shouldShow) {
-        // 立即顯示節點
+        // 立即顯示節點 - 保持居中對齊
         const importanceScale = 0.8 + (project.importance / 5) * 0.4;
         node.element.style.opacity = '1';
         node.element.style.transform = `translate(-50%, -50%) scale(${importanceScale})`;
         node.element.style.visibility = 'visible';
         node.element.style.pointerEvents = 'auto';
       } else {
-        // 立即隱藏節點
+        // 立即隱藏節點 - 保持居中對齊
         node.element.style.opacity = '0';
         node.element.style.transform = 'translate(-50%, -50%) scale(0)';
         node.element.style.visibility = 'hidden';
