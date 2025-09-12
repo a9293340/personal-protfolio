@@ -7,6 +7,7 @@ import { HomePage } from '../pages/HomePage.js';
 import { AboutPage } from '../pages/AboutPage.js';
 import { SkillsPage } from '../pages/SkillsPage.js';
 import { ProjectsPage } from '../pages/ProjectsPage.js';
+import { WorkProjectsPage } from '../pages/WorkProjectsPage.js';
 import { ContactPage } from '../pages/ContactPage.js';
 
 /**
@@ -52,6 +53,16 @@ export const routesConfig = [
       description: '展示我參與開發的重要專案與技術成果',
       keywords: 'projects, portfolio, technical achievements, case studies',
       icon: '🚀'
+    }
+  },
+  {
+    path: '/work-projects',
+    component: WorkProjectsPage,
+    title: '工作專案時間軸 | Gaming Portfolio',
+    meta: {
+      description: '以互動時間軸展示工作專案發展歷程，體驗專業項目開發軌跡',
+      keywords: 'work projects, timeline, professional development, interactive timeline',
+      icon: '⏱️'
     }
   },
   {

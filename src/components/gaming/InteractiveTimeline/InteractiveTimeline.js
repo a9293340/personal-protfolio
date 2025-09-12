@@ -19,7 +19,7 @@ export class InteractiveTimeline extends BaseComponent {
   constructor(config = {}) {
     super();
     
-    this.config = this.mergeConfig(this.getDefaultConfig(), config);
+    this.config = this.mergeConfig(config);
     this.state = this.getInitialState();
     this.element = null;
     
@@ -217,6 +217,8 @@ export class InteractiveTimeline extends BaseComponent {
         
         // DOM 掛載後的設定
         this.setupAfterMount();
+      } else {
+        console.error('❌ [InteractiveTimeline] 沒有容器配置！');
       }
       
       this.state.isInitialized = true;
@@ -2309,9 +2311,16 @@ export class InteractiveTimeline extends BaseComponent {
     // 清空現有標記
     markersContainer.innerHTML = '';
     
-    // 收集專案年份並生成標記
-    this.generateYearMarkers(markersContainer, svg, path);
-    this.generatePeriodMarkers(markersContainer);
+    // 只在手機版顯示年份和時期標記，桌面版移除以避免遮擋
+    const isVertical = this.state.currentBreakpoint === 'mobile';
+    if (isVertical) {
+      // 收集專案年份並生成標記（僅手機版）
+      this.generateYearMarkers(markersContainer, svg, path);
+      this.generatePeriodMarkers(markersContainer);
+      console.log('[InteractiveTimeline] 手機版標記已生成');
+    } else {
+      console.log('[InteractiveTimeline] 桌面版跳過標記生成，避免遮擋');
+    }
     
     console.log('[InteractiveTimeline] 時間軸標記系統設定完成');
   }
@@ -4050,6 +4059,90 @@ export class InteractiveTimeline extends BaseComponent {
     }
 
     console.log('[DesktopEnhancement] 視覺特效增強完成');
+  }
+
+  /**
+   * 防抖函數工具
+   * @param {Function} func - 要防抖的函數
+   * @param {number} delay - 延遲時間（毫秒）
+   * @returns {Function} 防抖後的函數
+   */
+  debounce(func, delay) {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+
+  /**
+   * 獲取時間軸統計數據
+   * @returns {Object} 統計數據
+   */
+  getStats() {
+    if (!this.adaptedProjects || this.adaptedProjects.length === 0) {
+      return {
+        totalProjects: 0,
+        techTypes: 0,
+        yearSpan: 0,
+        featuredProjects: 0
+      };
+    }
+
+    // 計算專案總數
+    const totalProjects = this.adaptedProjects.length;
+
+    // 計算技術類型數量
+    const techTypes = new Set();
+    this.adaptedProjects.forEach(project => {
+      if (project.category) {
+        techTypes.add(project.category);
+      }
+      // 從技術標籤中提取類型
+      if (project.technologies) {
+        project.technologies.forEach(tech => techTypes.add(tech));
+      }
+    });
+
+    // 計算時間跨度
+    const years = new Set();
+    this.adaptedProjects.forEach(project => {
+      // 嘗試從不同的屬性中提取年份
+      if (project.startYear) {
+        years.add(project.startYear);
+      }
+      if (project.completedYear && project.completedYear !== project.startYear) {
+        years.add(project.completedYear);
+      }
+      // 如果沒有年份數據，從日期字符串中提取
+      if (!project.startYear && project.startDate) {
+        const year = new Date(project.startDate).getFullYear();
+        if (!isNaN(year)) years.add(year);
+      }
+      if (!project.completedYear && project.completedDate) {
+        const year = new Date(project.completedDate).getFullYear();
+        if (!isNaN(year)) years.add(year);
+      }
+    });
+    
+    const yearSpan = years.size > 1 ? `${Math.min(...years)}-${Math.max(...years)}` : 
+                    years.size === 1 ? `${[...years][0]}` : '無數據';
+    
+
+    // 計算特色專案數量 (高重要性或已完成的專案)
+    const featuredProjects = this.adaptedProjects.filter(project => 
+      project.importance === 'high' || 
+      project.status === 'completed' ||
+      project.rarity === 'legendary' ||
+      project.rarity === 'epic'
+    ).length;
+
+    return {
+      totalProjects,
+      techTypes: techTypes.size,
+      yearSpan,
+      featuredProjects
+    };
   }
 
   /**

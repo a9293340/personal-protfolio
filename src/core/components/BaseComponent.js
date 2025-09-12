@@ -3,8 +3,12 @@
  * Step 3.1.1c: 為所有頁面組件提供統一介面
  */
 
-export class BaseComponent {
+import { EventManager } from '../events/EventManager.js';
+
+export class BaseComponent extends EventManager {
   constructor(options = {}) {
+    super(); // Initialize EventManager
+    
     this.options = options;
     this.initialized = false;
     this.destroyed = false;
@@ -43,6 +47,9 @@ export class BaseComponent {
     if (this.destroyed) {
       return;
     }
+    
+    // Clean up event listeners first
+    super.destroy();
     
     this.destroyed = true;
     this.initialized = false;
