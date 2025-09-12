@@ -516,8 +516,9 @@ export class PersonalProjectsGallery extends BaseComponent {
    * 處理卡牌點擊
    */
   async handleCardClick(project, cardElement) {
-    if (this.state.isAnimating) {
-      console.log('⏳ [PersonalProjectsGallery] 動畫進行中，忽略點擊');
+    // 檢查是否為重複點擊同一張卡片
+    if (this.state.isAnimating && this.state.selectedProject?.id === project.id) {
+      console.log('⏳ [PersonalProjectsGallery] 同一卡片動畫進行中，忽略重複點擊');
       return;
     }
     
@@ -525,6 +526,19 @@ export class PersonalProjectsGallery extends BaseComponent {
     
     this.state.selectedProject = project;
     this.state.isAnimating = true;
+    
+    // 添加超時保護機制，避免狀態永久鎖定
+    const timeoutId = setTimeout(() => {
+      if (this.state.isAnimating) {
+        console.log('⚠️ [PersonalProjectsGallery] 動畫超時，強制重置狀態');
+        this.state.isAnimating = false;
+      }
+    }, 10000); // 10秒超時保護
+    
+    // 清理超時定時器
+    const cleanupTimeout = () => {
+      clearTimeout(timeoutId);
+    };
     
     // 檢查是否啟用召喚動畫
     const shouldSummon = this.shouldTriggerSummoning(project);
@@ -547,6 +561,8 @@ export class PersonalProjectsGallery extends BaseComponent {
       await this.showProjectModal(project);
     }
     
+    // 清理狀態和定時器
+    cleanupTimeout();
     this.state.isAnimating = false;
   }
   

@@ -29,6 +29,9 @@ export class PersonalProjectCard extends BaseComponent {
     this.isHovered = false;
     this.hoverAnimation = null;
     
+    // 點擊防抖
+    this.lastClickTime = 0;
+    
     console.log('🃏 [PersonalProjectCard] 卡牌組件初始化:', this.project?.title);
   }
   
@@ -461,19 +464,29 @@ export class PersonalProjectCard extends BaseComponent {
    * 處理點擊
    */
   handleClick() {
+    const now = Date.now();
+    const clickDebounceTime = 300; // 300ms 防抖間隔
+    
+    // 防抖檢查：忽略快速連續點擊
+    if (now - this.lastClickTime < clickDebounceTime) {
+      console.log(`⏳ [PersonalProjectCard] 點擊過快，忽略重複點擊: ${this.project.title}`);
+      return;
+    }
+    
+    this.lastClickTime = now;
     console.log(`🎯 [PersonalProjectCard] 卡牌點擊: ${this.project.title}`);
     
-    // 點擊動畫
+    // 立即觸發點擊回調，避免動畫延遲
+    this.onClick(this.project, this.element);
+    
+    // 點擊動畫作為視覺反饋
     gsap.to(this.element, {
       scale: this.config.animation.click.scale,
       duration: this.config.animation.click.duration,
       ease: "power2.out",
       yoyo: true,
       repeat: 1,
-      onComplete: () => {
-        // 觸發點擊回調
-        this.onClick(this.project, this.element);
-      }
+      overwrite: true  // 覆寫其他動畫避免衝突
     });
   }
   
