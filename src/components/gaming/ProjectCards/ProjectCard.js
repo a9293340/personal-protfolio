@@ -107,7 +107,7 @@ export class ProjectCard extends BaseComponent {
   async loadProjectData() {
     try {
       if (this.config.projectData && this.config.projectData.id && !this.config.projectData.title) {
-        const projectsModule = await import('../../../config/data/projects.data.js');
+        const projectsModule = await import('../../../config/data/work-projects/projects.data.js');
         const projectsConfig = projectsModule.projectsDataConfig || projectsModule.default;
         
         const projectData = projectsConfig.all[this.config.projectData.id];

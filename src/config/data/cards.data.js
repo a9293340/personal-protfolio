@@ -4,7 +4,7 @@
  * 基於 projects.data.js 生成的完整卡牌數據集
  */
 
-import { projectsDataConfig } from './projects.data.js';
+import { projectsDataConfig } from './work-projects/projects.data.js';
 import { CardDataConverter } from './card.config.js';
 
 /**

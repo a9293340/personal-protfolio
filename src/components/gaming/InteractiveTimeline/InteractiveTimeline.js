@@ -328,7 +328,7 @@ export class InteractiveTimeline extends BaseComponent {
       } else {
         // 載入真實專案數據
         console.log('[InteractiveTimeline] 載入真實專案數據 projects.data.js');
-        const projectsModule = await import('../../../config/data/projects.data.js');
+        const projectsModule = await import('../../../config/data/work-projects/projects.data.js');
         projectsConfig = projectsModule.projectsDataConfig || projectsModule.default;
       }
       

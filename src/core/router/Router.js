@@ -1,13 +1,20 @@
 /**
  * 簡單 SPA 路由系統
  * Step 3.1.1b: 基礎路由實現
+ * Step 3.5.2: 整合頁面轉場動畫系統
  */
+
+import { PageTransitionManager } from '../../systems/PageTransitionManager.js';
 
 export class Router {
   constructor() {
     this.routes = new Map();
     this.currentRoute = null;
     this.currentComponent = null;
+    this.previousRoute = null;
+    
+    // 初始化頁面轉場管理器
+    this.transitionManager = new PageTransitionManager();
     
     // 綁定 this 上下文
     this.handlePopState = this.handlePopState.bind(this);
@@ -19,7 +26,7 @@ export class Router {
     // 監聽 hash 變化（點擊連結時觸發）
     window.addEventListener('hashchange', this.handleHashChange);
     
-    console.log('🛣️ Router initialized');
+    console.log('🛣️ Router initialized with page transitions');
   }
   
   /**
@@ -42,10 +49,23 @@ export class Router {
    * 導航到指定路由
    * @param {string} path - 目標路徑
    * @param {boolean} pushState - 是否推送歷史記錄
+   * @param {Object} options - 導航選項
    */
-  async navigate(path, pushState = true) {
+  async navigate(path, pushState = true, options = {}) {
     try {
       console.log(`🧭 Navigating to: ${path}`);
+      
+      // 防止重複導航到相同路徑
+      if (path === this.currentRoute && !options.forceReload) {
+        console.log('📍 Already on this route, skipping navigation');
+        return;
+      }
+      
+      // 檢查是否正在轉場中
+      if (this.transitionManager.isInTransition()) {
+        console.warn('⚠️ Navigation blocked - transition in progress');
+        return;
+      }
       
       // 檢查路由是否存在
       let route = this.routes.get(path);
@@ -67,7 +87,16 @@ export class Router {
       // 更新頁面標題
       document.title = route.title;
       
-      // 渲染組件
+      // 決定轉場類型
+      const transitionType = this.transitionManager.getTransitionTypeForRoute(
+        this.currentRoute, 
+        path
+      );
+      
+      // 記錄路由變化
+      this.previousRoute = this.currentRoute;
+      
+      // 暫時使用原始渲染方式來修復 3.5.1 問題
       await this.renderComponent(route.component, path);
       
       // 更新當前路由
@@ -82,13 +111,36 @@ export class Router {
   }
   
   /**
-   * 渲染組件到頁面
+   * 使用轉場動畫渲染組件
+   * @param {Function} ComponentClass - 組件類別
+   * @param {string} path - 當前路徑
+   * @param {Object} transitionOptions - 轉場選項
+   */
+  async renderComponentWithTransition(ComponentClass, path, transitionOptions = {}) {
+    console.log(`🎬 Rendering component with transition: ${path}`);
+    console.log(`📦 Component class:`, ComponentClass.name);
+    console.log(`✨ Transition options:`, transitionOptions);
+    
+    const container = document.getElementById('page-content');
+    if (!container) {
+      throw new Error('Page content container not found');
+    }
+    
+    // 使用轉場管理器執行轉場動畫
+    await this.transitionManager.executeTransition(
+      container,
+      () => this.renderComponentContent(ComponentClass, path),
+      transitionOptions
+    );
+  }
+  
+  /**
+   * 渲染組件內容（不含轉場動畫）
    * @param {Function} ComponentClass - 組件類別
    * @param {string} path - 當前路徑
    */
-  async renderComponent(ComponentClass, path) {
-    console.log(`🎨 Rendering component for path: ${path}`);
-    console.log(`📦 Component class:`, ComponentClass.name);
+  async renderComponentContent(ComponentClass, path) {
+    console.log(`🎨 Rendering component content for path: ${path}`);
     
     const container = document.getElementById('page-content');
     if (!container) {
@@ -123,6 +175,16 @@ export class Router {
     } else {
       throw new Error('Component must have render method');
     }
+  }
+  
+  /**
+   * 渲染組件到頁面（原始方法，作為後備）
+   * @param {Function} ComponentClass - 組件類別
+   * @param {string} path - 當前路徑
+   */
+  async renderComponent(ComponentClass, path) {
+    console.log(`🎨 Rendering component (fallback): ${path}`);
+    return this.renderComponentContent(ComponentClass, path);
   }
   
   /**
@@ -187,6 +249,11 @@ export class Router {
     
     if (this.currentComponent && typeof this.currentComponent.destroy === 'function') {
       this.currentComponent.destroy();
+    }
+    
+    // 銷毀轉場管理器
+    if (this.transitionManager) {
+      this.transitionManager.destroy();
     }
     
     console.log('🔥 Router destroyed');

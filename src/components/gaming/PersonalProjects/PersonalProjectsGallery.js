@@ -147,7 +147,7 @@ export class PersonalProjectsGallery extends BaseComponent {
   async loadProjectsData() {
     try {
       // 動態載入個人專案配置數據
-      const { personalProjectsData } = await import('../../../config/data/personal-projects.data.js');
+      const { personalProjectsData } = await import('../../../config/data/personal-projects/projects.data.js');
       this.projectsData = personalProjectsData;
       this.filteredProjects = [...this.projectsData];
       

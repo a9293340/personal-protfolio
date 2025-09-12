@@ -13,7 +13,7 @@ import { contactPageConfig } from './pages/contact.config.js';
 
 import { personalDataConfig } from './data/personal.config.js';
 import { skillsDataConfig } from './data/skills.data.js';
-import { projectsDataConfig } from './data/projects.data.js';
+import { projectsDataConfig } from './data/work-projects/projects.data.js';
 import { socialDataConfig } from './data/social.data.js';
 
 import { colorsConfig } from './theme/colors.config.js';
