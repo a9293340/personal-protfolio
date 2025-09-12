@@ -190,7 +190,7 @@
 /* 專案統計面板 */
 .projects-stats-panel {
   position: fixed;
-  bottom: 2rem;
+  bottom: 8rem;
   right: 2rem;
   background: rgba(26, 26, 46, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.1);

@@ -1813,130 +1813,241 @@ export class InteractiveTimeline extends BaseComponent {
     card.innerHTML = `
       <div class="card-header" style="
         background: linear-gradient(90deg, ${themeColors.primary}33 0%, ${themeColors.secondary}33 100%);
-        padding: 25px 30px;
+        padding: 20px 25px;
         border-bottom: 2px solid ${themeColors.primary}66;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        min-height: 120px;
+        min-height: 100px;
       ">
-        <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
           <div style="
-            font-size: 60px;
-            padding: 15px;
+            font-size: 50px;
+            padding: 12px;
             background: ${themeColors.primary}22;
             border-radius: 12px;
             border: 2px solid ${themeColors.primary}44;
           ">${categoryIcon}</div>
           <div>
-            <h2 style="margin: 0 0 8px 0; font-size: 28px; color: ${themeColors.primary}; font-weight: 700;">${project.title}</h2>
-            <p style="margin: 0; font-size: 16px; opacity: 0.8;">${this.formatProjectDate(project.date)}</p>
-            <div style="margin-top: 8px;">
+            <h2 style="margin: 0 0 6px 0; font-size: 24px; color: ${themeColors.primary}; font-weight: 700;">${project.title}</h2>
+            <p style="margin: 0; font-size: 14px; opacity: 0.8;">${this.formatProjectDate(project.date)}</p>
+            <div style="margin-top: 6px;">
               <span style="
                 background: ${themeColors.primary}33;
                 color: ${themeColors.primary};
-                padding: 4px 12px;
-                border-radius: 20px;
-                font-size: 14px;
+                padding: 3px 10px;
+                border-radius: 16px;
+                font-size: 12px;
                 font-weight: 500;
               ">${project.category || 'general'}</span>
             </div>
           </div>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 18px; color: ${themeColors.primary};">
+          <div style="font-size: 16px; color: ${themeColors.primary};">
             重要性: ${'★'.repeat(project.importance || 1)}
           </div>
         </div>
       </div>
       
       <div class="card-content" style="
-        padding: 25px 30px 50px 30px;
-        height: calc(100% - 140px);
+        padding: 20px 25px 40px 25px;
+        height: calc(100% - 120px);
         overflow-y: auto;
         overflow-x: hidden;
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        gap: 16px;
         box-sizing: border-box;
         scrollbar-width: thin;
         scrollbar-color: rgba(74, 144, 226, 0.5) rgba(255, 255, 255, 0.1);
       ">
-        <div>
-          <h3 style="margin: 0 0 12px 0; font-size: 18px; color: ${themeColors.secondary};">專案描述</h3>
-          <p style="margin: 0; font-size: 16px; line-height: 1.6; opacity: 0.9;">${project.description}</p>
+        <!-- 專案描述 (桌面版左上) -->
+        <div class="desktop-description">
+          <h3 style="margin: 0 0 10px 0; font-size: 16px; color: ${themeColors.secondary};">📋 專案描述</h3>
+          <p style="margin: 0; font-size: 14px; line-height: 1.6; opacity: 0.9;">${project.description || project.originalData?.shortDescription || project.title}</p>
         </div>
         
-        <div>
-          <h3 style="margin: 0 0 12px 0; font-size: 18px; color: ${themeColors.secondary};">技術亮點</h3>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
-              <div style="font-weight: 600; margin-bottom: 5px;">開發時間</div>
-              <div style="opacity: 0.8;">${this.formatProjectDate(project.date)}</div>
-            </div>
-            <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
-              <div style="font-weight: 600; margin-bottom: 5px;">專案類型</div>
-              <div style="opacity: 0.8;">${project.category || 'general'}</div>
-            </div>
-            <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
-              <div style="font-weight: 600; margin-bottom: 5px;">專案狀態</div>
-              <div style="opacity: 0.8;">${project.status || 'completed'}</div>
+        <!-- 技術資訊 (桌面版右上) -->
+        <div class="desktop-tech-info">
+          <!-- 技術亮點 -->
+          ${project.originalData && project.originalData.highlights && project.originalData.highlights.length > 0 ? `
+          <div>
+            <h3 style="margin: 0 0 10px 0; font-size: 16px; color: ${themeColors.secondary};">✨ 技術亮點</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px;">
+              ${project.originalData.highlights.map(highlight => `
+                <div style="
+                  background: ${themeColors.primary}15;
+                  border: 1px solid ${themeColors.primary}40;
+                  padding: 8px 12px;
+                  border-radius: 8px;
+                  font-size: 13px;
+                  color: ${themeColors.primary};
+                  font-weight: 500;
+                ">
+                  💡 ${highlight}
+                </div>
+              `).join('')}
             </div>
           </div>
+          ` : ''}
+          
+          <!-- 技術棧 -->
+          ${project.technologies && project.technologies.length > 0 ? `
+          <div>
+            <h3 style="margin: 0 0 10px 0; font-size: 16px; color: ${themeColors.secondary};">🛠️ 技術棧</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              ${project.technologies.map(tech => `
+                <span style="
+                  background: ${this.getTechCategoryColor(tech.category)}22;
+                  color: ${this.getTechCategoryColor(tech.category)};
+                  border: 1px solid ${this.getTechCategoryColor(tech.category)}44;
+                  padding: 4px 8px;
+                  border-radius: 6px;
+                  font-size: 12px;
+                  font-weight: 500;
+                ">
+                  ${tech.name}
+                </span>
+              `).join('')}
+            </div>
+          </div>
+          ` : ''}
         </div>
         
-        <div style="margin-top: auto;">
-          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <button style="
-              background: ${themeColors.primary};
-              color: white;
-              border: none;
-              padding: 12px 24px;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 14px;
-              font-weight: 600;
-              transition: all 0.2s ease;
-            " onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-              📖 查看詳情
-            </button>
-            <button style="
-              background: transparent;
-              color: ${themeColors.secondary};
-              border: 2px solid ${themeColors.secondary};
-              padding: 12px 24px;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 14px;
-              font-weight: 600;
-              transition: all 0.2s ease;
-            " onmouseover="this.style.background='${themeColors.secondary}22'" onmouseout="this.style.background='transparent'">
-              🔗 線上展示
-            </button>
+        <!-- 底部區塊：統計和連結 (桌面版下方) -->
+        <div class="desktop-bottom">
+          <!-- 專案統計 -->
+          ${project.originalData && project.originalData.stats ? `
+          <div>
+            <h3 style="margin: 0 0 10px 0; font-size: 16px; color: ${themeColors.secondary};">📊 專案統計</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+              <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 20px; color: ${themeColors.primary}; font-weight: 700;">${project.originalData.stats.complexity}/10</div>
+                <div style="font-size: 11px; opacity: 0.7;">複雜度</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 20px; color: ${themeColors.primary}; font-weight: 700;">${project.originalData.stats.developmentTime}</div>
+                <div style="font-size: 11px; opacity: 0.7;">開發時間</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 20px; color: ${themeColors.primary}; font-weight: 700;">${project.originalData.stats.teamSize}人</div>
+                <div style="font-size: 11px; opacity: 0.7;">團隊規模</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 20px; color: ${themeColors.primary}; font-weight: 700;">${project.originalData.stats.linesOfCode}</div>
+                <div style="font-size: 11px; opacity: 0.7;">代碼行數</div>
+              </div>
+            </div>
           </div>
+          ` : ''}
+          
+          <!-- 連結按鈕 -->
+          ${project.originalData && project.originalData.links && (project.originalData.links.github || project.originalData.links.demo || project.originalData.links.documentation || project.originalData.links.article) ? `
+          <div>
+            <h3 style="margin: 0 0 10px 0; font-size: 16px; color: ${themeColors.secondary};">🔗 相關連結</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              ${project.originalData.links.github ? `
+                <a href="${project.originalData.links.github}" target="_blank" style="
+                  background: #24292e;
+                  color: white;
+                  text-decoration: none;
+                  padding: 8px 12px;
+                  border-radius: 6px;
+                  font-size: 12px;
+                  font-weight: 500;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  transition: all 0.2s ease;
+                " onmouseover="this.style.background='#1a1e22'" onmouseout="this.style.background='#24292e'">
+                  📁 GitHub
+                </a>
+              ` : ''}
+              ${project.originalData.links.demo ? `
+                <a href="${project.originalData.links.demo}" target="_blank" style="
+                  background: ${themeColors.primary};
+                  color: white;
+                  text-decoration: none;
+                  padding: 8px 12px;
+                  border-radius: 6px;
+                  font-size: 12px;
+                  font-weight: 500;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  transition: all 0.2s ease;
+                " onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                  🚀 Demo
+                </a>
+              ` : ''}
+              ${project.originalData.links.documentation ? `
+                <a href="${project.originalData.links.documentation}" target="_blank" style="
+                  background: #f39c12;
+                  color: white;
+                  text-decoration: none;
+                  padding: 8px 12px;
+                  border-radius: 6px;
+                  font-size: 12px;
+                  font-weight: 500;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  transition: all 0.2s ease;
+                " onmouseover="this.style.background='#d68910'" onmouseout="this.style.background='#f39c12'">
+                  📖 文件
+                </a>
+              ` : ''}
+              ${project.originalData.links.article ? `
+                <a href="${project.originalData.links.article}" target="_blank" style="
+                  background: #9b59b6;
+                  color: white;
+                  text-decoration: none;
+                  padding: 8px 12px;
+                  border-radius: 6px;
+                  font-size: 12px;
+                  font-weight: 500;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  transition: all 0.2s ease;
+                " onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='#9b59b6'">
+                  📝 文章
+                </a>
+              ` : ''}
+            </div>
+          </div>
+          ` : ''}
         </div>
       </div>
       
-      <div class="card-close" style="
+      <!-- 關閉按鈕 -->
+      <div style="
         position: absolute;
-        top: 20px;
-        right: 20px;
+        top: 15px;
+        right: 15px;
         width: 40px;
         height: 40px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 255, 255, 0.2);
+        background: rgba(231, 76, 60, 0.2);
+        border: 2px solid rgba(231, 76, 60, 0.5);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        font-size: 20px;
+        color: #e74c3c;
+        font-size: 18px;
+        font-weight: bold;
         transition: all 0.2s ease;
         backdrop-filter: blur(5px);
-      " onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">✕</div>
+      " onclick="this.closest('.project-flying-card').remove()" 
+         onmouseover="this.style.background='rgba(231, 76, 60, 0.3)'; this.style.transform='scale(1.1)'" 
+         onmouseout="this.style.background='rgba(231, 76, 60, 0.2)'; this.style.transform='scale(1)'">
+        ×
+      </div>
     `;
     
-    // 添加自定義滾動條樣式 (WebKit browsers)
+    // 添加自定義滾動條樣式和響應式設計 (WebKit browsers)
     const style = document.createElement('style');
     style.textContent = `
       .project-flying-card .card-content::-webkit-scrollbar {
@@ -1954,14 +2065,77 @@ export class InteractiveTimeline extends BaseComponent {
       .project-flying-card .card-content::-webkit-scrollbar-thumb:hover {
         background: rgba(74, 144, 226, 0.7);
       }
+      
+      /* 桌面版佈局 */
+      @media (min-width: 769px) {
+        .card-content {
+          display: grid !important;
+          grid-template-rows: 2fr 1fr !important;
+          grid-template-columns: 1fr 1fr !important;
+          gap: 20px !important;
+          grid-template-areas: 
+            "description tech-info"
+            "stats stats" !important;
+        }
+        
+        .desktop-description { grid-area: description !important; }
+        .desktop-tech-info { 
+          grid-area: tech-info !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 16px !important;
+        }
+        .desktop-bottom { 
+          grid-area: stats !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 16px !important;
+        }
+      }
+      
+      /* 手機版調整 */
+      @media (max-width: 768px) {
+        .project-flying-card {
+          height: 90vh !important;
+          max-height: none !important;
+        }
+        
+        .card-content {
+          padding-bottom: 180px !important; /* 大幅增加底部空間讓視覺更舒適 */
+          height: calc(100% - 80px) !important; /* 調整內容區高度 */
+          overflow-y: auto !important; /* 確保可滾動 */
+          -webkit-overflow-scrolling: touch !important; /* iOS 滑順滾動 */
+        }
+        
+        /* 手機版保持 flex column 佈局 */
+        .desktop-description,
+        .desktop-tech-info, 
+        .desktop-bottom {
+          display: block !important;
+        }
+        
+        .desktop-tech-info {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 16px !important;
+        }
+        
+        .desktop-bottom {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 16px !important;
+          margin-top: 16px !important;
+        }
+      }
     `;
     document.head.appendChild(style);
     
-    // 添加關閉事件
-    const closeBtn = card.querySelector('.card-close');
-    closeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.closeProjectCard(card);
+    // 添加關閉事件 - 直接在卡片上點擊關閉
+    card.addEventListener('click', (e) => {
+      if (e.target.textContent === '×') {
+        e.stopPropagation();
+        this.closeProjectCard(card);
+      }
     });
     
     // 點擊卡片外部關閉
@@ -4073,6 +4247,29 @@ export class InteractiveTimeline extends BaseComponent {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => func.apply(this, args), delay);
     };
+  }
+
+  /**
+   * 獲取技術分類顏色
+   * @param {string} category - 技術分類
+   * @returns {string} 顏色代碼
+   */
+  getTechCategoryColor(category) {
+    const colors = {
+      backend: '#4ecdc4',
+      frontend: '#ff6b35', 
+      database: '#95e1d3',
+      cache: '#f38181',
+      messaging: '#ffeaa7',
+      containerization: '#74b9ff',
+      orchestration: '#a29bfe',
+      proxy: '#fd79a8',
+      monitoring: '#fdcb6e',
+      visualization: '#6c5ce7',
+      async: '#00b894',
+      general: '#ddd'
+    };
+    return colors[category] || colors.general;
   }
 
   /**
