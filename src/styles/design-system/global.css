@@ -20,12 +20,12 @@ body {
   background-color: var(--theme-background);
   min-height: 100vh;
   overflow-x: hidden;
-  
+
   /* 優化文字渲染 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  
+
   /* 硬體加速 */
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
@@ -40,7 +40,12 @@ body {
 
 /* ===== 標題樣式 ===== */
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-heading);
@@ -168,7 +173,8 @@ a:focus {
 
 /* ===== 列表樣式 ===== */
 
-ul, ol {
+ul,
+ol {
   margin-bottom: var(--space-4);
   padding-left: var(--space-6);
 }
@@ -209,13 +215,19 @@ ol li {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 /* ===== 代碼樣式 ===== */
 
-code, pre {
+code,
+pre {
   font-family: var(--font-code);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-code);
@@ -256,7 +268,8 @@ table {
   overflow: hidden;
 }
 
-th, td {
+th,
+td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
   border-bottom: 1px solid var(--theme-border);
@@ -378,12 +391,24 @@ blockquote cite::before {
   gap: var(--space-6);
 }
 
-.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
-.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-.grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
-.grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+.grid-cols-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.grid-cols-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+.grid-cols-12 {
+  grid-template-columns: repeat(12, 1fr);
+}
 
 /* 響應式網格 */
 @media (max-width: 768px) {
@@ -418,20 +443,44 @@ blockquote cite::before {
   flex-wrap: wrap;
 }
 
-.items-start { align-items: flex-start; }
-.items-center { align-items: center; }
-.items-end { align-items: flex-end; }
-.items-stretch { align-items: stretch; }
+.items-start {
+  align-items: flex-start;
+}
+.items-center {
+  align-items: center;
+}
+.items-end {
+  align-items: flex-end;
+}
+.items-stretch {
+  align-items: stretch;
+}
 
-.justify-start { justify-content: flex-start; }
-.justify-center { justify-content: center; }
-.justify-end { justify-content: flex-end; }
-.justify-between { justify-content: space-between; }
-.justify-around { justify-content: space-around; }
+.justify-start {
+  justify-content: flex-start;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-around {
+  justify-content: space-around;
+}
 
-.flex-1 { flex: 1; }
-.flex-auto { flex: auto; }
-.flex-none { flex: none; }
+.flex-1 {
+  flex: 1;
+}
+.flex-auto {
+  flex: auto;
+}
+.flex-none {
+  flex: none;
+}
 
 /* ===== 遊戲化全域樣式 ===== */
 
@@ -473,8 +522,12 @@ body::before {
 }
 
 @keyframes rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* 遊戲風格滾動指示器 */
@@ -494,30 +547,46 @@ body::before {
 /* ===== 響應式設計 ===== */
 
 /* 隱藏/顯示類別 */
-.hidden { display: none !important; }
-.visible { display: block !important; }
+.hidden {
+  display: none !important;
+}
+.visible {
+  display: block !important;
+}
 
 /* 響應式隱藏/顯示 */
 @media (max-width: 640px) {
-  .sm-hidden { display: none !important; }
+  .sm-hidden {
+    display: none !important;
+  }
 }
 
 @media (min-width: 641px) {
-  .sm-only { display: none !important; }
+  .sm-only {
+    display: none !important;
+  }
 }
 
 @media (max-width: 768px) {
-  .md-hidden { display: none !important; }
+  .md-hidden {
+    display: none !important;
+  }
 }
 
 @media (min-width: 769px) {
-  .md-only { display: none !important; }
+  .md-only {
+    display: none !important;
+  }
 }
 
 @media (max-width: 1024px) {
-  .lg-hidden { display: none !important; }
+  .lg-hidden {
+    display: none !important;
+  }
 }
 
 @media (min-width: 1025px) {
-  .lg-only { display: none !important; }
+  .lg-only {
+    display: none !important;
+  }
 }

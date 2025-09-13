@@ -1,9 +1,9 @@
 /**
  * SkillTree 類型定義文件
- * 
+ *
  * 定義技能樹系統中使用的所有數據結構和類型
  * 基於配置文件 skills.data.js 的結構設計
- * 
+ *
  * @author Claude
  * @version 2.1.0 - 適配新配置系統
  */
@@ -14,12 +14,12 @@ import type { HexCoord } from './HexCoordSystem.js';
 export type SkillStatus = 'mastered' | 'available' | 'learning' | 'locked';
 
 // 技能類別類型
-export type SkillCategory = 
-  | 'backend' 
-  | 'architecture' 
-  | 'database' 
-  | 'devops' 
-  | 'frontend' 
+export type SkillCategory =
+  | 'backend'
+  | 'architecture'
+  | 'database'
+  | 'devops'
+  | 'frontend'
   | 'soft';
 
 // 單一技能定義（技能節點內的子技能）
@@ -51,22 +51,22 @@ export interface SkillNode {
   category: SkillCategory;
   level: number; // 1-5
   status: SkillStatus;
-  
+
   // 座標信息
   coordinates: HexCoord;
-  
+
   // 學習依賴
   prerequisites?: string[]; // 前置技能 ID 數組
-  
+
   // 描述信息
   description: string;
-  
+
   // 子技能列表
   skills: Skill[];
-  
+
   // 相關專案
   projects?: string[];
-  
+
   // 學習資源
   learningResources?: LearningResource[];
 }
@@ -145,26 +145,26 @@ export interface SkillTreeConfig {
   // 基本設置
   nodeSize?: number;
   gridSize?: number;
-  
+
   // 視窗設置
   viewWidth?: number;
   viewHeight?: number;
   centerX?: number;
   centerY?: number;
-  
+
   // 交互功能
   enableDrag?: boolean;
   enableZoom?: boolean;
   enableNodeClick?: boolean;
-  
+
   // 視覺設置
   showGrid?: boolean;
   showConnections?: boolean;
   animationDuration?: number;
-  
+
   // 數據源
   skillsData?: SkillsDataConfig;
-  
+
   // 調試模式
   debug?: boolean;
 }
@@ -174,12 +174,12 @@ export interface RenderedSkillNode extends SkillNode {
   // 像素座標
   x: number;
   y: number;
-  
+
   // 視覺屬性
   isVisible: boolean;
   isClickable: boolean;
   opacity: number;
-  
+
   // 連線信息
   connections: Array<{
     to: string;
@@ -253,11 +253,14 @@ export const DEFAULT_SKILL_TREE_CONFIG: Required<SkillTreeConfig> = {
 };
 
 // 技能狀態樣式映射
-export const SKILL_STATUS_STYLES: Record<SkillStatus, { 
-  color: string; 
-  opacity: number; 
-  glow: boolean; 
-}> = {
+export const SKILL_STATUS_STYLES: Record<
+  SkillStatus,
+  {
+    color: string;
+    opacity: number;
+    glow: boolean;
+  }
+> = {
   mastered: { color: 'var(--color-primary-gold)', opacity: 1.0, glow: true },
   available: { color: 'var(--color-primary-blue)', opacity: 0.8, glow: false },
   learning: { color: 'var(--color-primary-green)', opacity: 0.7, glow: false },
@@ -267,7 +270,7 @@ export const SKILL_STATUS_STYLES: Record<SkillStatus, {
 // 技能類別顏色映射
 export const SKILL_CATEGORY_COLORS: Record<SkillCategory, string> = {
   backend: 'var(--color-skill-backend)',
-  architecture: 'var(--color-skill-architecture)', 
+  architecture: 'var(--color-skill-architecture)',
   database: 'var(--color-skill-database)',
   devops: 'var(--color-skill-devops)',
   frontend: 'var(--color-skill-frontend)',

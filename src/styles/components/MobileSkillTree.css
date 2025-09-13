@@ -346,10 +346,10 @@
   opacity: 0.8;
 }
 
-
 /* === 動畫效果 === */
 @keyframes pulseGold {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
   }
   50% {
@@ -362,42 +362,42 @@
   .mobile-skill-tree {
     padding: var(--space-3);
   }
-  
+
   .skill-tree-title {
     font-size: 1.5rem;
   }
-  
+
   .stats-grid {
     gap: var(--space-1);
   }
-  
+
   .stat-item {
     padding: var(--space-2);
   }
-  
+
   .center-skill-node {
     padding: var(--space-4);
   }
-  
+
   .skill-level-ring {
     width: 60px;
     height: 60px;
   }
-  
+
   .skill-emoji {
     font-size: 1.5rem;
   }
-  
+
   .branch-header {
     padding: var(--space-3);
   }
-  
+
   .category-emoji {
     font-size: 1.2rem;
     width: 35px;
     height: 35px;
   }
-  
+
   .skills-list {
     padding: 0 var(--space-3) var(--space-3);
   }
@@ -417,7 +417,7 @@
     border-color: var(--text-primary);
     border-width: 2px;
   }
-  
+
   .branch-header:hover,
   .skill-main:hover {
     background: rgba(255, 255, 255, 0.2);

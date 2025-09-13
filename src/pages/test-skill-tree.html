@@ -1,320 +1,334 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SkillTree 組件測試頁面</title>
-    
+
     <!-- 基礎樣式 - 替代設計系統樣式 -->
-    
+
     <style>
-        /* CSS 變數定義 */
-        :root {
-            /* 色彩系統 */
-            --color-primary-dark: #0a0a0a;
-            --color-primary-gold: #d4af37;
-            --color-gold-bright: #f4d03f;
-            --color-primary-blue: #2980b9;
-            --color-blue-bright: #3498db;
-            --color-status-success: #27ae60;
-            --color-status-error: #e74c3c;
-            --color-gray-900: #1a1a1a;
-            --color-gray-800: #2d2d2d;
-            --color-gray-700: #404040;
-            --color-gray-600: #666666;
-            
-            /* 主題色彩 */
-            --theme-background: var(--color-primary-dark);
-            --theme-text-primary: #ffffff;
-            --theme-accent: var(--color-primary-gold);
-            
-            /* 間距系統 */
-            --space-1: 0.25rem;
-            --space-2: 0.5rem;
-            --space-2-5: 0.625rem;
-            --space-3: 0.75rem;
-            --space-4: 1rem;
-            --space-5: 1.25rem;
-            --space-6: 1.5rem;
-            --space-8: 2rem;
-            
-            /* 字體系統 */
-            --font-body: 'Inter', 'Noto Sans TC', sans-serif;
-            --font-heading: 'Cinzel', 'Noto Serif TC', serif;
-            --font-code: 'Fira Code', 'JetBrains Mono', monospace;
-            --font-size-sm: 0.875rem;
-            --font-size-base: 1rem;
-            --font-size-xl: 1.25rem;
-            --font-weight-semi-bold: 600;
-            
-            /* 動畫系統 */
-            --animation-fast: 150ms;
-            --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-            
-            /* 陰影系統 */
-            --shadow-glow-gold: 0 0 20px rgba(212, 175, 55, 0.5);
-            
-            /* 透明度 */
-            --opacity-bg-light: rgba(255, 255, 255, 0.05);
-            --opacity-bg-medium: rgba(255, 255, 255, 0.1);
-            --opacity-blue-10: rgba(41, 128, 185, 0.1);
-            --opacity-green-10: rgba(39, 174, 96, 0.1);
-            --opacity-red-10: rgba(231, 76, 60, 0.1);
-            --opacity-gold-10: rgba(212, 175, 55, 0.1);
-        }
-        
-        /* 基礎重置 */
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-        
-        /* 測試頁面專用樣式 */
-        body {
-            margin: 0;
-            padding: var(--space-4);
-            background: var(--theme-background);
-            color: var(--theme-text-primary);
-            font-family: var(--font-body);
-            font-size: var(--font-size-base);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-        
+      /* CSS 變數定義 */
+      :root {
+        /* 色彩系統 */
+        --color-primary-dark: #0a0a0a;
+        --color-primary-gold: #d4af37;
+        --color-gold-bright: #f4d03f;
+        --color-primary-blue: #2980b9;
+        --color-blue-bright: #3498db;
+        --color-status-success: #27ae60;
+        --color-status-error: #e74c3c;
+        --color-gray-900: #1a1a1a;
+        --color-gray-800: #2d2d2d;
+        --color-gray-700: #404040;
+        --color-gray-600: #666666;
+
+        /* 主題色彩 */
+        --theme-background: var(--color-primary-dark);
+        --theme-text-primary: #ffffff;
+        --theme-accent: var(--color-primary-gold);
+
+        /* 間距系統 */
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-2-5: 0.625rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.25rem;
+        --space-6: 1.5rem;
+        --space-8: 2rem;
+
+        /* 字體系統 */
+        --font-body: 'Inter', 'Noto Sans TC', sans-serif;
+        --font-heading: 'Cinzel', 'Noto Serif TC', serif;
+        --font-code: 'Fira Code', 'JetBrains Mono', monospace;
+        --font-size-sm: 0.875rem;
+        --font-size-base: 1rem;
+        --font-size-xl: 1.25rem;
+        --font-weight-semi-bold: 600;
+
+        /* 動畫系統 */
+        --animation-fast: 150ms;
+        --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+        /* 陰影系統 */
+        --shadow-glow-gold: 0 0 20px rgba(212, 175, 55, 0.5);
+
+        /* 透明度 */
+        --opacity-bg-light: rgba(255, 255, 255, 0.05);
+        --opacity-bg-medium: rgba(255, 255, 255, 0.1);
+        --opacity-blue-10: rgba(41, 128, 185, 0.1);
+        --opacity-green-10: rgba(39, 174, 96, 0.1);
+        --opacity-red-10: rgba(231, 76, 60, 0.1);
+        --opacity-gold-10: rgba(212, 175, 55, 0.1);
+      }
+
+      /* 基礎重置 */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      /* 測試頁面專用樣式 */
+      body {
+        margin: 0;
+        padding: var(--space-4);
+        background: var(--theme-background);
+        color: var(--theme-text-primary);
+        font-family: var(--font-body);
+        font-size: var(--font-size-base);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .test-container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .test-header {
+        text-align: center;
+        margin-bottom: var(--space-8);
+      }
+
+      .test-header h1 {
+        font-family: var(--font-heading);
+        color: var(--theme-accent);
+        margin-bottom: var(--space-4);
+      }
+
+      .test-info {
+        background: var(--opacity-bg-light);
+        border: 1px solid var(--theme-accent);
+        border-radius: 8px;
+        padding: var(--space-4);
+        margin-bottom: var(--space-6);
+      }
+
+      .skill-tree-container {
+        width: 100%;
+        min-height: 600px;
+        border: 2px dashed var(--theme-accent);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--opacity-bg-medium);
+        position: relative;
+      }
+
+      .loading-message {
+        font-family: var(--font-heading);
+        font-size: var(--font-size-xl);
+        color: var(--theme-accent);
+        text-align: center;
+      }
+
+      .test-controls {
+        margin-top: var(--space-6);
+        display: flex;
+        gap: var(--space-4);
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .test-btn {
+        background: var(--theme-accent);
+        color: var(--theme-background);
+        border: none;
+        padding: var(--space-2-5) var(--space-6);
+        border-radius: 4px;
+        font-weight: var(--font-weight-semi-bold);
+        cursor: pointer;
+        transition: all var(--animation-fast) var(--easing-smooth);
+        font-family: inherit;
+      }
+
+      .test-btn:hover {
+        background: var(--color-gold-bright);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-glow-gold);
+      }
+
+      .test-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .status-panel {
+        margin-top: var(--space-6);
+        background: var(--color-gray-900);
+        border: 1px solid var(--color-primary-blue);
+        border-radius: 8px;
+        padding: var(--space-4);
+      }
+
+      .status-panel h3 {
+        color: var(--color-primary-blue);
+        margin-bottom: var(--space-3);
+      }
+
+      .status-log {
+        font-family: var(--font-code);
+        font-size: var(--font-size-sm);
+        line-height: var(--line-height-code);
+        color: var(--theme-text-primary);
+        max-height: 200px;
+        overflow-y: auto;
+        background: var(--color-gray-800);
+        padding: var(--space-3);
+        border-radius: 4px;
+      }
+
+      .log-entry {
+        margin-bottom: var(--space-1);
+        padding: var(--space-1);
+        border-radius: 2px;
+      }
+
+      .log-info {
+        background: var(--opacity-blue-10);
+      }
+      .log-success {
+        background: var(--opacity-green-10);
+      }
+      .log-error {
+        background: var(--opacity-red-10);
+      }
+      .log-warn {
+        background: var(--opacity-gold-10);
+      }
+
+      @media (max-width: 768px) {
         .test-container {
-            max-width: 1400px;
-            margin: 0 auto;
+          padding: var(--space-2);
         }
-        
-        .test-header {
-            text-align: center;
-            margin-bottom: var(--space-8);
-        }
-        
-        .test-header h1 {
-            font-family: var(--font-heading);
-            color: var(--theme-accent);
-            margin-bottom: var(--space-4);
-        }
-        
-        .test-info {
-            background: var(--opacity-bg-light);
-            border: 1px solid var(--theme-accent);
-            border-radius: 8px;
-            padding: var(--space-4);
-            margin-bottom: var(--space-6);
-        }
-        
+
         .skill-tree-container {
-            width: 100%;
-            min-height: 600px;
-            border: 2px dashed var(--theme-accent);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--opacity-bg-medium);
-            position: relative;
+          min-height: 400px;
         }
-        
-        .loading-message {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-xl);
-            color: var(--theme-accent);
-            text-align: center;
-        }
-        
+
         .test-controls {
-            margin-top: var(--space-6);
-            display: flex;
-            gap: var(--space-4);
-            justify-content: center;
-            flex-wrap: wrap;
+          flex-direction: column;
+          align-items: center;
         }
-        
-        .test-btn {
-            background: var(--theme-accent);
-            color: var(--theme-background);
-            border: none;
-            padding: var(--space-2-5) var(--space-6);
-            border-radius: 4px;
-            font-weight: var(--font-weight-semi-bold);
-            cursor: pointer;
-            transition: all var(--animation-fast) var(--easing-smooth);
-            font-family: inherit;
-        }
-        
-        .test-btn:hover {
-            background: var(--color-gold-bright);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-glow-gold);
-        }
-        
-        .test-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .status-panel {
-            margin-top: var(--space-6);
-            background: var(--color-gray-900);
-            border: 1px solid var(--color-primary-blue);
-            border-radius: 8px;
-            padding: var(--space-4);
-        }
-        
-        .status-panel h3 {
-            color: var(--color-primary-blue);
-            margin-bottom: var(--space-3);
-        }
-        
-        .status-log {
-            font-family: var(--font-code);
-            font-size: var(--font-size-sm);
-            line-height: var(--line-height-code);
-            color: var(--theme-text-primary);
-            max-height: 200px;
-            overflow-y: auto;
-            background: var(--color-gray-800);
-            padding: var(--space-3);
-            border-radius: 4px;
-        }
-        
-        .log-entry {
-            margin-bottom: var(--space-1);
-            padding: var(--space-1);
-            border-radius: 2px;
-        }
-        
-        .log-info { background: var(--opacity-blue-10); }
-        .log-success { background: var(--opacity-green-10); }
-        .log-error { background: var(--opacity-red-10); }
-        .log-warn { background: var(--opacity-gold-10); }
-        
-        @media (max-width: 768px) {
-            .test-container {
-                padding: var(--space-2);
-            }
-            
-            .skill-tree-container {
-                min-height: 400px;
-            }
-            
-            .test-controls {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="test-container">
-        <header class="test-header">
-            <h1>🎮 SkillTree 組件測試</h1>
-            <p>Step 2.1.1: POC-001 代碼遷移驗證</p>
-        </header>
-        
-        <div class="test-info">
-            <strong>測試目標：</strong>
-            <ul>
-                <li>驗證 SkillTree 組件可以正常載入</li>
-                <li>確認 BaseComponent 基類整合正常</li>
-                <li>檢查六角形座標系統運作</li>
-                <li>驗證類型定義和模組匯出</li>
-            </ul>
+      <header class="test-header">
+        <h1>🎮 SkillTree 組件測試</h1>
+        <p>Step 2.1.1: POC-001 代碼遷移驗證</p>
+      </header>
+
+      <div class="test-info">
+        <strong>測試目標：</strong>
+        <ul>
+          <li>驗證 SkillTree 組件可以正常載入</li>
+          <li>確認 BaseComponent 基類整合正常</li>
+          <li>檢查六角形座標系統運作</li>
+          <li>驗證類型定義和模組匯出</li>
+        </ul>
+      </div>
+
+      <!-- 技能樹容器 -->
+      <div id="skillTreeContainer" class="skill-tree-container">
+        <div class="loading-message">
+          <div>🔄 載入 SkillTree 組件中...</div>
+          <div
+            style="font-size: var(--font-size-base); margin-top: var(--space-2)"
+          >
+            請檢查控制台輸出
+          </div>
         </div>
-        
-        <!-- 技能樹容器 -->
-        <div id="skillTreeContainer" class="skill-tree-container">
-            <div class="loading-message">
-                <div>🔄 載入 SkillTree 組件中...</div>
-                <div style="font-size: var(--font-size-base); margin-top: var(--space-2);">
-                    請檢查控制台輸出
-                </div>
-            </div>
+      </div>
+
+      <!-- 測試控制按鈕 -->
+      <div class="test-controls">
+        <button id="initBtn" class="test-btn">初始化組件</button>
+        <button id="testHexBtn" class="test-btn" disabled>
+          測試六角形系統
+        </button>
+        <button id="resetBtn" class="test-btn" disabled>重置組件</button>
+        <button id="clearLogBtn" class="test-btn">清空日誌</button>
+      </div>
+
+      <!-- 狀態面板 -->
+      <div class="status-panel">
+        <h3>📊 測試狀態</h3>
+        <div id="statusLog" class="status-log">
+          <div class="log-entry log-info">系統初始化完成，等待用戶操作...</div>
         </div>
-        
-        <!-- 測試控制按鈕 -->
-        <div class="test-controls">
-            <button id="initBtn" class="test-btn">初始化組件</button>
-            <button id="testHexBtn" class="test-btn" disabled>測試六角形系統</button>
-            <button id="resetBtn" class="test-btn" disabled>重置組件</button>
-            <button id="clearLogBtn" class="test-btn">清空日誌</button>
-        </div>
-        
-        <!-- 狀態面板 -->
-        <div class="status-panel">
-            <h3>📊 測試狀態</h3>
-            <div id="statusLog" class="status-log">
-                <div class="log-entry log-info">系統初始化完成，等待用戶操作...</div>
-            </div>
-        </div>
+      </div>
     </div>
-    
+
     <script type="module">
-        // 測試腳本
-        let skillTree = null;
-        let hexSystem = null;
-        
-        const statusLog = document.getElementById('statusLog');
-        const initBtn = document.getElementById('initBtn');
-        const testHexBtn = document.getElementById('testHexBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const clearLogBtn = document.getElementById('clearLogBtn');
-        
-        // 日誌函數
-        function log(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const logEntry = document.createElement('div');
-            logEntry.className = `log-entry log-${type}`;
-            logEntry.textContent = `[${timestamp}] ${message}`;
-            statusLog.appendChild(logEntry);
-            statusLog.scrollTop = statusLog.scrollHeight;
-            
-            // 同時輸出到控制台
-            console.log(`[SkillTree Test] ${message}`);
-        }
-        
-        // 初始化組件
-        async function initializeComponent() {
-            try {
-                log('開始載入 SkillTree 組件模組...', 'info');
-                
-                // 動態載入 SkillTree 組件
-                const { SkillTree, HexCoordSystem, DEFAULT_SKILL_TREE_CONFIG } = 
-                    await import('../components/gaming/SkillTree/index.ts');
-                
-                log('SkillTree 模組載入成功', 'success');
-                
-                // 測試六角形座標系統
-                hexSystem = new HexCoordSystem(30);
-                log('HexCoordSystem 初始化成功', 'success');
-                
-                // 初始化 SkillTree 組件
-                const container = document.getElementById('skillTreeContainer');
-                const config = {
-                    ...DEFAULT_SKILL_TREE_CONFIG,
-                    debug: true,
-                };
-                
-                // 正確的 BaseComponent 使用方式
-                skillTree = new SkillTree(container, config);
-                
-                // 組件會自動初始化，等待一小段時間確保完成
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                log('SkillTree 組件初始化完成', 'success');
-                
-                // 更新按鈕狀態
-                initBtn.disabled = true;
-                testHexBtn.disabled = false;
-                resetBtn.disabled = false;
-                
-                // 更新容器內容
-                const loadingMessage = container.querySelector('.loading-message');
-                if (loadingMessage) {
-                    loadingMessage.innerHTML = `
+      // 測試腳本
+      let skillTree = null;
+      let hexSystem = null;
+
+      const statusLog = document.getElementById('statusLog');
+      const initBtn = document.getElementById('initBtn');
+      const testHexBtn = document.getElementById('testHexBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const clearLogBtn = document.getElementById('clearLogBtn');
+
+      // 日誌函數
+      function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry log-${type}`;
+        logEntry.textContent = `[${timestamp}] ${message}`;
+        statusLog.appendChild(logEntry);
+        statusLog.scrollTop = statusLog.scrollHeight;
+
+        // 同時輸出到控制台
+        console.log(`[SkillTree Test] ${message}`);
+      }
+
+      // 初始化組件
+      async function initializeComponent() {
+        try {
+          log('開始載入 SkillTree 組件模組...', 'info');
+
+          // 動態載入 SkillTree 組件
+          const { SkillTree, HexCoordSystem, DEFAULT_SKILL_TREE_CONFIG } =
+            await import('../components/gaming/SkillTree/index.ts');
+
+          log('SkillTree 模組載入成功', 'success');
+
+          // 測試六角形座標系統
+          hexSystem = new HexCoordSystem(30);
+          log('HexCoordSystem 初始化成功', 'success');
+
+          // 初始化 SkillTree 組件
+          const container = document.getElementById('skillTreeContainer');
+          const config = {
+            ...DEFAULT_SKILL_TREE_CONFIG,
+            debug: true,
+          };
+
+          // 正確的 BaseComponent 使用方式
+          skillTree = new SkillTree(container, config);
+
+          // 組件會自動初始化，等待一小段時間確保完成
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          log('SkillTree 組件初始化完成', 'success');
+
+          // 更新按鈕狀態
+          initBtn.disabled = true;
+          testHexBtn.disabled = false;
+          resetBtn.disabled = false;
+
+          // 更新容器內容
+          const loadingMessage = container.querySelector('.loading-message');
+          if (loadingMessage) {
+            loadingMessage.innerHTML = `
                         <div style="color: var(--color-status-success);">
                             ✅ SkillTree 組件載入成功
                         </div>
@@ -322,16 +336,15 @@
                             基礎框架已建立，等待後續實作
                         </div>
                     `;
-                }
-                
-            } catch (error) {
-                log(`組件初始化失敗: ${error.message}`, 'error');
-                console.error('SkillTree initialization error:', error);
-                
-                const container = document.getElementById('skillTreeContainer');
-                const loadingMessage = container.querySelector('.loading-message');
-                if (loadingMessage) {
-                    loadingMessage.innerHTML = `
+          }
+        } catch (error) {
+          log(`組件初始化失敗: ${error.message}`, 'error');
+          console.error('SkillTree initialization error:', error);
+
+          const container = document.getElementById('skillTreeContainer');
+          const loadingMessage = container.querySelector('.loading-message');
+          if (loadingMessage) {
+            loadingMessage.innerHTML = `
                         <div style="color: var(--color-status-error);">
                             ❌ 組件載入失敗
                         </div>
@@ -339,96 +352,101 @@
                             ${error.message}
                         </div>
                     `;
-                }
-            }
+          }
         }
-        
-        // 測試六角形座標系統
-        function testHexCoordSystem() {
-            if (!hexSystem) {
-                log('六角形座標系統未初始化', 'error');
-                return;
-            }
-            
-            try {
-                log('開始測試六角形座標系統...', 'info');
-                
-                // 測試座標轉換
-                const hexCoord = { q: 2, r: 1 };
-                const pixelCoord = hexSystem.hexToPixel(hexCoord);
-                const backToHex = hexSystem.pixelToHex(pixelCoord);
-                
-                log(`六角形座標 (${hexCoord.q}, ${hexCoord.r}) → 像素座標 (${pixelCoord.x.toFixed(2)}, ${pixelCoord.y.toFixed(2)})`, 'info');
-                log(`像素座標轉回六角形座標: (${backToHex.q}, ${backToHex.r})`, 'info');
-                
-                // 測試距離計算
-                const coord1 = { q: 0, r: 0 };
-                const coord2 = { q: 3, r: 2 };
-                const distance = hexSystem.hexDistance(coord1, coord2);
-                log(`座標 (0,0) 到 (3,2) 的距離: ${distance}`, 'info');
-                
-                // 測試鄰居計算
-                const neighbors = hexSystem.getNeighbors({ q: 0, r: 0 });
-                log(`原點的鄰居座標數量: ${neighbors.length}`, 'info');
-                
-                log('六角形座標系統測試完成', 'success');
-                
-            } catch (error) {
-                log(`六角形座標系統測試失敗: ${error.message}`, 'error');
-                console.error('HexCoordSystem test error:', error);
-            }
+      }
+
+      // 測試六角形座標系統
+      function testHexCoordSystem() {
+        if (!hexSystem) {
+          log('六角形座標系統未初始化', 'error');
+          return;
         }
-        
-        // 重置組件
-        async function resetComponent() {
-            try {
-                if (skillTree) {
-                    await skillTree.destroy();
-                    skillTree = null;
-                    log('SkillTree 組件已重置', 'info');
-                }
-                
-                if (hexSystem) {
-                    hexSystem = null;
-                    log('HexCoordSystem 已重置', 'info');
-                }
-                
-                // 重置按鈕狀態
-                initBtn.disabled = false;
-                testHexBtn.disabled = true;
-                resetBtn.disabled = true;
-                
-                // 重置容器內容
-                const container = document.getElementById('skillTreeContainer');
-                container.innerHTML = `
+
+        try {
+          log('開始測試六角形座標系統...', 'info');
+
+          // 測試座標轉換
+          const hexCoord = { q: 2, r: 1 };
+          const pixelCoord = hexSystem.hexToPixel(hexCoord);
+          const backToHex = hexSystem.pixelToHex(pixelCoord);
+
+          log(
+            `六角形座標 (${hexCoord.q}, ${hexCoord.r}) → 像素座標 (${pixelCoord.x.toFixed(2)}, ${pixelCoord.y.toFixed(2)})`,
+            'info'
+          );
+          log(
+            `像素座標轉回六角形座標: (${backToHex.q}, ${backToHex.r})`,
+            'info'
+          );
+
+          // 測試距離計算
+          const coord1 = { q: 0, r: 0 };
+          const coord2 = { q: 3, r: 2 };
+          const distance = hexSystem.hexDistance(coord1, coord2);
+          log(`座標 (0,0) 到 (3,2) 的距離: ${distance}`, 'info');
+
+          // 測試鄰居計算
+          const neighbors = hexSystem.getNeighbors({ q: 0, r: 0 });
+          log(`原點的鄰居座標數量: ${neighbors.length}`, 'info');
+
+          log('六角形座標系統測試完成', 'success');
+        } catch (error) {
+          log(`六角形座標系統測試失敗: ${error.message}`, 'error');
+          console.error('HexCoordSystem test error:', error);
+        }
+      }
+
+      // 重置組件
+      async function resetComponent() {
+        try {
+          if (skillTree) {
+            await skillTree.destroy();
+            skillTree = null;
+            log('SkillTree 組件已重置', 'info');
+          }
+
+          if (hexSystem) {
+            hexSystem = null;
+            log('HexCoordSystem 已重置', 'info');
+          }
+
+          // 重置按鈕狀態
+          initBtn.disabled = false;
+          testHexBtn.disabled = true;
+          resetBtn.disabled = true;
+
+          // 重置容器內容
+          const container = document.getElementById('skillTreeContainer');
+          container.innerHTML = `
                     <div class="loading-message">
                         <div>🔄 組件已重置，可重新初始化</div>
                     </div>
                 `;
-                
-            } catch (error) {
-                log(`組件重置失敗: ${error.message}`, 'error');
-                console.error('Component reset error:', error);
-            }
-        }
-        
-        // 清空日誌
-        function clearLog() {
-            statusLog.innerHTML = '<div class="log-entry log-info">日誌已清空</div>';
-        }
-        
-        // 綁定事件監聽器
-        initBtn.addEventListener('click', initializeComponent);
-        testHexBtn.addEventListener('click', testHexCoordSystem);
-        resetBtn.addEventListener('click', resetComponent);
-        clearLogBtn.addEventListener('click', clearLog);
-        
-        // 初始化頁面
-        try {
-            log('測試頁面準備就緒，點擊「初始化組件」開始測試', 'success');
         } catch (error) {
-            console.error('Page initialization error:', error);
+          log(`組件重置失敗: ${error.message}`, 'error');
+          console.error('Component reset error:', error);
         }
+      }
+
+      // 清空日誌
+      function clearLog() {
+        statusLog.innerHTML =
+          '<div class="log-entry log-info">日誌已清空</div>';
+      }
+
+      // 綁定事件監聽器
+      initBtn.addEventListener('click', initializeComponent);
+      testHexBtn.addEventListener('click', testHexCoordSystem);
+      resetBtn.addEventListener('click', resetComponent);
+      clearLogBtn.addEventListener('click', clearLog);
+
+      // 初始化頁面
+      try {
+        log('測試頁面準備就緒，點擊「初始化組件」開始測試', 'success');
+      } catch (error) {
+        console.error('Page initialization error:', error);
+      }
     </script>
-</body>
+  </body>
 </html>

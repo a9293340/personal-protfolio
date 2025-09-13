@@ -18,7 +18,7 @@ export class AboutPage extends BaseComponent {
     this.achievementBadges = null;
     this.skillsTagCloud = null;
   }
-  
+
   /**
    * 獲取默認配置
    */
@@ -46,12 +46,16 @@ export class AboutPage extends BaseComponent {
    * 渲染職涯目標區塊
    */
   renderCareerGoal(goalConfig) {
-    const goalsHtml = goalConfig.goals.map(goal => `
+    const goalsHtml = goalConfig.goals
+      .map(
+        goal => `
       <div class="goal-item">
         <h4 class="goal-primary">${goal.primary}</h4>
         <p class="goal-description">${goal.description}</p>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     return `
       <section class="career-goal-section" 
@@ -70,7 +74,9 @@ export class AboutPage extends BaseComponent {
    * 渲染技術專長區塊
    */
   renderTechnicalSkills(skillsConfig) {
-    const categoriesHtml = skillsConfig.categories.map(category => `
+    const categoriesHtml = skillsConfig.categories
+      .map(
+        category => `
       <div class="skill-category">
         <h3 class="category-title" style="color: ${category.color};">
           <span class="category-icon">${category.icon}</span>
@@ -80,7 +86,9 @@ export class AboutPage extends BaseComponent {
           ${category.skills.map(skill => `<li class="skill-item">${skill}</li>`).join('')}
         </ul>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     return `
       <section class="technical-skills-section" 
@@ -99,7 +107,9 @@ export class AboutPage extends BaseComponent {
    * 渲染個人特質區塊
    */
   renderPersonalTraits(traitsConfig) {
-    const traitsHtml = traitsConfig.traits.map(trait => `
+    const traitsHtml = traitsConfig.traits
+      .map(
+        trait => `
       <div class="trait-item">
         <div class="trait-header">
           <span class="trait-icon">${trait.icon}</span>
@@ -111,7 +121,9 @@ export class AboutPage extends BaseComponent {
           <div class="progress-bar" style="width: ${trait.level}%"></div>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     return `
       <section class="personal-traits-section" 
@@ -131,7 +143,7 @@ export class AboutPage extends BaseComponent {
    */
   async render() {
     const config = this.mergeConfig();
-    
+
     return `
       <div class="about-page">
         <div class="about-container" style="max-width: ${config.layout.maxWidth}; padding: ${config.layout.padding};">
@@ -180,29 +192,31 @@ export class AboutPage extends BaseComponent {
    */
   async init() {
     await super.init();
-    
+
     // 添加進度條動畫
     this.initProgressAnimations();
-    
+
     // 初始化 RPG 角色面板
     await this.initCharacterPanel();
-    
+
     // 初始化概念型時間軸
     await this.initConceptTimeline();
-    
+
     // 初始化成就徽章系統
     await this.initAchievementBadges();
-    
+
     // 初始化技能標籤雲
     await this.initSkillsTagCloud();
-    
+
     // 設置組件間互動效果
     this.setupComponentInteractions();
-    
+
     // 啟動頁面過渡動畫
     this.startPageTransitions();
-    
-    console.log('📋 AboutPage initialized with Config-Driven architecture + RPG Character Panel + Concept Timeline + Achievement Badges + Skills Tag Cloud');
+
+    console.log(
+      '📋 AboutPage initialized with Config-Driven architecture + RPG Character Panel + Concept Timeline + Achievement Badges + Skills Tag Cloud'
+    );
   }
 
   /**
@@ -227,13 +241,13 @@ export class AboutPage extends BaseComponent {
     const container = document.getElementById('character-panel-container');
     if (container) {
       this.characterPanel = new CharacterPanel({
-        container: container
+        container: container,
       });
-      
+
       // 渲染組件 HTML 並插入容器
       const html = await this.characterPanel.render();
       container.innerHTML = html;
-      
+
       // 初始化組件功能
       await this.characterPanel.init();
       console.log('🎮 CharacterPanel integrated into AboutPage');
@@ -247,13 +261,13 @@ export class AboutPage extends BaseComponent {
     const container = document.getElementById('concept-timeline-container');
     if (container) {
       this.conceptTimeline = new ConceptTimeline({
-        container: container
+        container: container,
       });
-      
+
       // 渲染組件 HTML 並插入容器
       const html = await this.conceptTimeline.render();
       container.innerHTML = html;
-      
+
       // 初始化組件功能
       await this.conceptTimeline.init();
       console.log('⏰ ConceptTimeline integrated into AboutPage');
@@ -267,19 +281,20 @@ export class AboutPage extends BaseComponent {
     const container = document.getElementById('achievement-badges-container');
     if (container) {
       // 確保配置正確傳遞
-      const achievementsConfig = aboutConfig.achievementBadges || aboutConfig.default?.achievementBadges;
-      
+      const achievementsConfig =
+        aboutConfig.achievementBadges || aboutConfig.default?.achievementBadges;
+
       console.log('🔍 AchievementBadges config:', achievementsConfig); // 調試輸出
-      
+
       this.achievementBadges = new AchievementBadges({
         container: container,
-        ...achievementsConfig  // 直接展開配置
+        ...achievementsConfig, // 直接展開配置
       });
-      
+
       // 渲染組件 HTML 並插入容器
       const html = await this.achievementBadges.render();
       container.innerHTML = html;
-      
+
       // 初始化組件功能
       await this.achievementBadges.init();
       console.log('🏆 AchievementBadges integrated into AboutPage');
@@ -293,19 +308,20 @@ export class AboutPage extends BaseComponent {
     const container = document.getElementById('skills-tag-cloud-container');
     if (container) {
       // 確保配置正確傳遞
-      const skillsConfig = aboutConfig.skillsTagCloud || aboutConfig.default?.skillsTagCloud;
-      
+      const skillsConfig =
+        aboutConfig.skillsTagCloud || aboutConfig.default?.skillsTagCloud;
+
       console.log('🔍 SkillsTagCloud config:', skillsConfig); // 調試輸出
-      
+
       this.skillsTagCloud = new SkillsTagCloud({
         container: container,
-        ...skillsConfig  // 直接展開配置
+        ...skillsConfig, // 直接展開配置
       });
-      
+
       // 渲染組件 HTML 並插入容器
       const html = await this.skillsTagCloud.render();
       container.innerHTML = html;
-      
+
       // 初始化組件功能
       await this.skillsTagCloud.init();
       console.log('☁️ SkillsTagCloud integrated into AboutPage');
@@ -318,7 +334,7 @@ export class AboutPage extends BaseComponent {
    */
   setupComponentInteractions() {
     // 簡化版本：直接使用DOM事件而不是自定義事件系統
-    
+
     // 成就點擊處理
     const achievementBadges = document.querySelectorAll('.achievement-badge');
     achievementBadges.forEach(badge => {
@@ -327,7 +343,7 @@ export class AboutPage extends BaseComponent {
         this.handleAchievementClick({ achievementId });
       });
     });
-    
+
     // 技能標籤點擊處理
     const skillTags = document.querySelectorAll('.skill-tag');
     skillTags.forEach(tag => {
@@ -336,10 +352,10 @@ export class AboutPage extends BaseComponent {
         this.handleSkillTagClick({ tagName });
       });
     });
-    
+
     // 滾動視差效果
     this.setupScrollParallax();
-    
+
     console.log('🔗 Component interactions setup complete');
   }
 
@@ -348,14 +364,14 @@ export class AboutPage extends BaseComponent {
    */
   handleAchievementClick(achievementData) {
     const { achievementId } = achievementData;
-    
+
     // 根據成就類型高亮相關技能標籤
     const relatedSkills = this.getRelatedSkillsByAchievement(achievementId);
-    
+
     if (relatedSkills.length > 0) {
       this.highlightSkillTags(relatedSkills);
     }
-    
+
     console.log(`🏆 Achievement clicked: ${achievementId}`);
   }
 
@@ -364,10 +380,10 @@ export class AboutPage extends BaseComponent {
    */
   handleSkillTagClick(skillData) {
     const { tagName } = skillData;
-    
+
     // 在角色面板中突出顯示相關屬性
     this.highlightCharacterAttribute(tagName);
-    
+
     // 顯示技能相關的成就
     this.highlightRelatedAchievements(tagName);
   }
@@ -382,9 +398,9 @@ export class AboutPage extends BaseComponent {
       'performance-optimizer': ['Redis', 'MySQL', 'Node.js', 'Linux'],
       'team-leader': ['Git', 'CI/CD', 'System Design'],
       'innovation-pioneer': ['WebSocket', 'GraphQL', 'Serverless'],
-      'mentorship-master': ['Git', 'JavaScript', 'HTML5', 'CSS3']
+      'mentorship-master': ['Git', 'JavaScript', 'HTML5', 'CSS3'],
     };
-    
+
     return skillMap[achievementId] || [];
   }
 
@@ -393,13 +409,13 @@ export class AboutPage extends BaseComponent {
    */
   highlightSkillTags(skillNames) {
     const allTags = document.querySelectorAll('.skill-tag');
-    
+
     // 重置所有標籤
     allTags.forEach(tag => {
       tag.style.filter = 'brightness(0.5)';
       tag.style.opacity = '0.3';
     });
-    
+
     // 高亮指定標籤
     skillNames.forEach(skillName => {
       const tag = document.querySelector(`[data-tag="${skillName}"]`);
@@ -410,7 +426,7 @@ export class AboutPage extends BaseComponent {
         tag.style.boxShadow = '0 10px 30px rgba(212, 175, 55, 0.6)';
       }
     });
-    
+
     // 3秒後恢復正常
     setTimeout(() => {
       allTags.forEach(tag => {
@@ -429,23 +445,25 @@ export class AboutPage extends BaseComponent {
     // 技能與屬性的映射關係
     const attributeMap = {
       'Node.js': 'attack',
-      'Python': 'attack', 
-      'JavaScript': 'attack',
+      Python: 'attack',
+      JavaScript: 'attack',
       'System Design': 'intelligence',
-      'AWS': 'intelligence',
-      'Docker': 'agility',
-      'Git': 'charisma',
-      'MySQL': 'defense'
+      AWS: 'intelligence',
+      Docker: 'agility',
+      Git: 'charisma',
+      MySQL: 'defense',
     };
-    
+
     const attributeName = attributeMap[skillName];
     if (attributeName) {
-      const attributeElement = document.querySelector(`[data-attribute="${attributeName}"]`);
+      const attributeElement = document.querySelector(
+        `[data-attribute="${attributeName}"]`
+      );
       if (attributeElement) {
         // 添加脈衝動畫
         attributeElement.style.animation = 'pulse 2s ease-in-out 3';
         attributeElement.style.boxShadow = '0 0 20px var(--primary-gold)';
-        
+
         setTimeout(() => {
           attributeElement.style.animation = '';
           attributeElement.style.boxShadow = '';
@@ -465,9 +483,9 @@ export class AboutPage extends BaseComponent {
       'performance-optimizer': ['Redis', 'MySQL', 'Node.js', 'Linux'],
       'team-leader': ['Git', 'CI/CD', 'System Design'],
       'innovation-pioneer': ['WebSocket', 'GraphQL', 'Serverless'],
-      'mentorship-master': ['Git', 'JavaScript', 'HTML5', 'CSS3']
+      'mentorship-master': ['Git', 'JavaScript', 'HTML5', 'CSS3'],
     };
-    
+
     // 找到包含該技能的成就
     const relatedAchievements = [];
     Object.entries(skillMap).forEach(([achievementId, skills]) => {
@@ -475,14 +493,16 @@ export class AboutPage extends BaseComponent {
         relatedAchievements.push(achievementId);
       }
     });
-    
+
     // 高亮相關成就徽章
     relatedAchievements.forEach(achievementId => {
-      const badge = document.querySelector(`[data-achievement="${achievementId}"]`);
+      const badge = document.querySelector(
+        `[data-achievement="${achievementId}"]`
+      );
       if (badge) {
         badge.style.animation = 'glow 1s ease-in-out 2';
         badge.style.transform = 'scale(1.05)';
-        
+
         setTimeout(() => {
           badge.style.animation = '';
           badge.style.transform = '';
@@ -496,31 +516,31 @@ export class AboutPage extends BaseComponent {
    */
   setupScrollParallax() {
     let ticking = false;
-    
+
     const updateParallax = () => {
       const scrollTop = window.pageYOffset;
       const sections = document.querySelectorAll('.about-page section');
-      
+
       sections.forEach((section, index) => {
         const rect = section.getBoundingClientRect();
-        const speed = 0.1 + (index * 0.05); // 不同層級不同速度
-        
+        const speed = 0.1 + index * 0.05; // 不同層級不同速度
+
         if (rect.top < window.innerHeight && rect.bottom > 0) {
           const yPos = -(scrollTop * speed);
           section.style.transform = `translateY(${yPos}px)`;
         }
       });
-      
+
       ticking = false;
     };
-    
+
     const requestTick = () => {
       if (!ticking) {
         requestAnimationFrame(updateParallax);
         ticking = true;
       }
     };
-    
+
     window.addEventListener('scroll', requestTick, { passive: true });
   }
 
@@ -530,32 +550,32 @@ export class AboutPage extends BaseComponent {
    */
   startPageTransitions() {
     const sections = document.querySelectorAll('.about-page section');
-    
+
     // 創建交叉觀察器用於滾動動畫
     const observerOptions = {
       threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+      rootMargin: '0px 0px -50px 0px',
     };
-    
-    const sectionObserver = new window.IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
+
+    const sectionObserver = new window.IntersectionObserver(entries => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('section-visible');
           this.triggerSectionAnimation(entry.target);
         }
       });
     }, observerOptions);
-    
+
     // 觀察所有section
     sections.forEach((section, index) => {
       section.style.opacity = '0';
       section.style.transform = 'translateY(50px)';
       section.style.transition = 'all 0.8s cubic-bezier(0.25, 0.25, 0.25, 1)';
       section.style.transitionDelay = `${index * 0.1}s`;
-      
+
       sectionObserver.observe(section);
     });
-    
+
     console.log('🎬 Page transition animations started');
   }
 
@@ -565,7 +585,7 @@ export class AboutPage extends BaseComponent {
   triggerSectionAnimation(section) {
     section.style.opacity = '1';
     section.style.transform = 'translateY(0)';
-    
+
     // 根據section類型添加特殊動畫
     if (section.classList.contains('character-panel-section')) {
       this.animateCharacterPanelEntrance();
@@ -618,22 +638,22 @@ export class AboutPage extends BaseComponent {
       this.characterPanel.destroy();
       this.characterPanel = null;
     }
-    
+
     if (this.conceptTimeline) {
       this.conceptTimeline.destroy();
       this.conceptTimeline = null;
     }
-    
+
     if (this.achievementBadges) {
       this.achievementBadges.destroy();
       this.achievementBadges = null;
     }
-    
+
     if (this.skillsTagCloud) {
       this.skillsTagCloud.destroy();
       this.skillsTagCloud = null;
     }
-    
+
     super.destroy();
     console.log('📋 AboutPage destroyed');
   }

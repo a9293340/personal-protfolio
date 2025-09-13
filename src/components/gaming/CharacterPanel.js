@@ -26,12 +26,15 @@ export class CharacterPanel extends BaseComponent {
   async render() {
     const config = this.mergeConfig();
     const { careerProgression, skillDomains } = config;
-    
+
     // 獲取屬性數據 (從配置的正確位置)
     const attributesConfig = characterConfig.attributes?.attributes || {};
 
     // 計算屬性總值 (使用 .value 屬性)
-    const totalStats = Object.values(attributesConfig).reduce((sum, attr) => sum + (attr.value || 0), 0);
+    const totalStats = Object.values(attributesConfig).reduce(
+      (sum, attr) => sum + (attr.value || 0),
+      0
+    );
     const averageStats = Math.round(totalStats / 6);
 
     return `
@@ -82,12 +85,18 @@ export class CharacterPanel extends BaseComponent {
    * 渲染職業發展階段
    */
   renderCareerStages(stages) {
-    return stages.map(stage => {
-      const statusClass = stage.status === 'current' ? 'current-stage' : 
-                         stage.status === 'completed' ? 'completed-stage' :
-                         stage.status === 'target' ? 'target-stage' : 'stage';
-      
-      return `
+    return stages
+      .map(stage => {
+        const statusClass =
+          stage.status === 'current'
+            ? 'current-stage'
+            : stage.status === 'completed'
+              ? 'completed-stage'
+              : stage.status === 'target'
+                ? 'target-stage'
+                : 'stage';
+
+        return `
         <div class="career-stage ${statusClass}">
           <div class="stage-icon">${stage.icon}</div>
           <div class="stage-info">
@@ -97,17 +106,21 @@ export class CharacterPanel extends BaseComponent {
           </div>
         </div>
       `;
-    }).join('<div class="stage-arrow">→</div>');
+      })
+      .join('<div class="stage-arrow">→</div>');
   }
 
   /**
    * 渲染技能領域系統
    */
   renderSkillDomains(domains) {
-    return Object.entries(domains).map(([key, domain]) => {
-      const expPercentage = Math.round((domain.experience / domain.maxExperience) * 100);
-      
-      return `
+    return Object.entries(domains)
+      .map(([key, domain]) => {
+        const expPercentage = Math.round(
+          (domain.experience / domain.maxExperience) * 100
+        );
+
+        return `
         <div class="skill-domain" data-domain="${key}">
           <div class="domain-header">
             <span class="domain-icon" style="color: ${domain.color}">${domain.icon}</span>
@@ -129,7 +142,8 @@ export class CharacterPanel extends BaseComponent {
           </div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
   }
 
   /**
@@ -142,13 +156,14 @@ export class CharacterPanel extends BaseComponent {
       agility: { icon: '⚡', name: '敏捷度', description: '學習適應力' },
       intelligence: { icon: '🧠', name: '智力', description: '架構思維' },
       charisma: { icon: '🤝', name: '魅力', description: '團隊協作' },
-      luck: { icon: '🎯', name: '幸運', description: '問題解決' }
+      luck: { icon: '🎯', name: '幸運', description: '問題解決' },
     };
 
-    return Object.entries(attributes).map(([key, attrObj]) => {
-      const info = attributeInfo[key];
-      const value = attrObj.value || 0;
-      return `
+    return Object.entries(attributes)
+      .map(([key, attrObj]) => {
+        const info = attributeInfo[key];
+        const value = attrObj.value || 0;
+        return `
         <div class="attribute-item" data-attribute="${key}">
           <div class="attribute-header">
             <span class="attribute-icon">${info.icon}</span>
@@ -165,7 +180,8 @@ export class CharacterPanel extends BaseComponent {
           </div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
   }
 
   /**
@@ -173,19 +189,19 @@ export class CharacterPanel extends BaseComponent {
    */
   async init() {
     await super.init();
-    
+
     // 等待下一個事件循環，確保DOM已渲染
     await new Promise(resolve => setTimeout(resolve, 50));
-    
+
     // 初始化雷達圖
     this.initRadarChart();
-    
+
     // 啟動屬性條動畫
     this.animateAttributeBars();
-    
+
     // 啟動技能領域經驗條動畫
     this.animateSkillDomainBars();
-    
+
     console.log('🎮 CharacterPanel initialized with RPG systems');
   }
 
@@ -198,21 +214,21 @@ export class CharacterPanel extends BaseComponent {
 
     this.radarCanvas = canvas;
     const ctx = canvas.getContext('2d');
-    
+
     // 設置畫布分辨率 - 在手機版限制canvas實際尺寸
     const isMobile = window.innerWidth <= 768;
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    
+
     // 手機版限制最大canvas尺寸，避免DPR造成過大canvas
     const maxSize = isMobile ? 280 : rect.width;
     const actualWidth = Math.min(rect.width, maxSize);
     const actualHeight = Math.min(rect.height, maxSize);
-    
+
     canvas.width = actualWidth * (isMobile ? 1 : dpr);
     canvas.height = actualHeight * (isMobile ? 1 : dpr);
     ctx.scale(isMobile ? 1 : dpr, isMobile ? 1 : dpr);
-    
+
     // 開始雷達圖渲染動畫
     this.renderRadarChart();
   }
@@ -225,25 +241,27 @@ export class CharacterPanel extends BaseComponent {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    
+
     // 獲取屬性數據 (從配置的正確位置)
     const attributesConfig = characterConfig.attributes?.attributes || {};
-    
+
     const centerX = 140;
     const centerY = 140;
     const maxRadius = 80;
-    const attributeValues = Object.values(attributesConfig).map(attr => attr.value || 0);
+    const attributeValues = Object.values(attributesConfig).map(
+      attr => attr.value || 0
+    );
     const attributeNames = ['攻擊', '防禦', '敏捷', '智力', '魅力', '幸運'];
-    
+
     // 清除畫布
     ctx.clearRect(0, 0, 280, 280);
-    
+
     // 繪制背景網格
     this.drawRadarGrid(ctx, centerX, centerY, maxRadius);
-    
+
     // 繪制屬性數據
     this.drawRadarData(ctx, centerX, centerY, maxRadius, attributeValues);
-    
+
     // 繪制屬性標籤
     this.drawRadarLabels(ctx, centerX, centerY, maxRadius + 20, attributeNames);
   }
@@ -253,32 +271,33 @@ export class CharacterPanel extends BaseComponent {
    */
   drawRadarGrid(ctx, centerX, centerY, maxRadius) {
     const levels = 5;
-    
+
     // 繪制同心六角形
     for (let level = 1; level <= levels; level++) {
       const radius = (maxRadius / levels) * level;
       ctx.beginPath();
-      ctx.strokeStyle = level === levels ? '#d4af37' : 'rgba(255, 255, 255, 0.2)';
+      ctx.strokeStyle =
+        level === levels ? '#d4af37' : 'rgba(255, 255, 255, 0.2)';
       ctx.lineWidth = level === levels ? 2 : 1;
-      
+
       for (let i = 0; i < 6; i++) {
         const angle = (i * Math.PI) / 3 - Math.PI / 2;
         const x = centerX + Math.cos(angle) * radius;
         const y = centerY + Math.sin(angle) * radius;
-        
+
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
       ctx.closePath();
       ctx.stroke();
     }
-    
+
     // 繪制從中心到頂點的線
     for (let i = 0; i < 6; i++) {
       const angle = (i * Math.PI) / 3 - Math.PI / 2;
       const x = centerX + Math.cos(angle) * maxRadius;
       const y = centerY + Math.sin(angle) * maxRadius;
-      
+
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
       ctx.lineTo(x, y);
@@ -296,22 +315,22 @@ export class CharacterPanel extends BaseComponent {
     ctx.fillStyle = 'rgba(212, 175, 55, 0.3)';
     ctx.strokeStyle = '#d4af37';
     ctx.lineWidth = 2;
-    
+
     for (let i = 0; i < 6; i++) {
       const angle = (i * Math.PI) / 3 - Math.PI / 2;
       const value = values[i] / 100; // 標準化到 0-1
       const radius = maxRadius * value;
       const x = centerX + Math.cos(angle) * radius;
       const y = centerY + Math.sin(angle) * radius;
-      
+
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
-    
+
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    
+
     // 繪制數據點
     for (let i = 0; i < 6; i++) {
       const angle = (i * Math.PI) / 3 - Math.PI / 2;
@@ -319,7 +338,7 @@ export class CharacterPanel extends BaseComponent {
       const radius = maxRadius * value;
       const x = centerX + Math.cos(angle) * radius;
       const y = centerY + Math.sin(angle) * radius;
-      
+
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, 2 * Math.PI);
       ctx.fillStyle = '#d4af37';
@@ -338,12 +357,12 @@ export class CharacterPanel extends BaseComponent {
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    
+
     for (let i = 0; i < 6; i++) {
       const angle = (i * Math.PI) / 3 - Math.PI / 2;
       const x = centerX + Math.cos(angle) * radius;
       const y = centerY + Math.sin(angle) * radius;
-      
+
       ctx.fillText(labels[i], x, y);
     }
   }
@@ -357,7 +376,7 @@ export class CharacterPanel extends BaseComponent {
       setTimeout(() => {
         bar.style.transition = 'width 1.5s ease-out';
         bar.style.width = bar.dataset.value + '%';
-        
+
         // 添加發光效果
         setTimeout(() => {
           bar.classList.add('glow-effect');
@@ -372,15 +391,18 @@ export class CharacterPanel extends BaseComponent {
   animateSkillDomainBars() {
     const expFills = document.querySelectorAll('.skill-domain .exp-fill');
     expFills.forEach((bar, index) => {
-      setTimeout(() => {
-        bar.style.transition = 'width 1.8s ease-out';
-        const finalWidth = bar.style.width;
-        bar.style.width = '0%';
-        
-        setTimeout(() => {
-          bar.style.width = finalWidth;
-        }, 100);
-      }, index * 150 + 300);
+      setTimeout(
+        () => {
+          bar.style.transition = 'width 1.8s ease-out';
+          const finalWidth = bar.style.width;
+          bar.style.width = '0%';
+
+          setTimeout(() => {
+            bar.style.width = finalWidth;
+          }, 100);
+        },
+        index * 150 + 300
+      );
     });
   }
 
@@ -391,7 +413,7 @@ export class CharacterPanel extends BaseComponent {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
-    
+
     this.radarCanvas = null;
     super.destroy();
     console.log('🎮 CharacterPanel destroyed');

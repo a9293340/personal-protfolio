@@ -1,6 +1,6 @@
 /**
  * ProjectNode - 專案節點組件
- * 
+ *
  * 職責：
  * - 單一專案節點的渲染和狀態管理
  * - 節點基礎互動（懸停、點擊、鍵盤導航）
@@ -13,17 +13,17 @@ import { BaseComponent } from '../../../core/components/BaseComponent.js';
 export class ProjectNode extends BaseComponent {
   constructor(config = {}) {
     super();
-    
+
     this.config = this.mergeConfig(this.getDefaultConfig(), config);
     this.state = this.getInitialState();
-    
+
     // 節點相關屬性
     this.project = null;
     this.index = -1;
     this.element = null;
     this.position = { x: 0, y: 0 };
     this.isInteractive = true;
-    
+
     // 事件回調
     this.onNodeClick = null;
     this.onNodeHover = null;
@@ -35,35 +35,35 @@ export class ProjectNode extends BaseComponent {
       nodeSize: 16,
       nodeColors: {
         default: '#d4af37',
-        hover: '#f4d03f', 
+        hover: '#f4d03f',
         active: '#ffeb3b',
         completed: '#4caf50',
         inProgress: '#ff9800',
-        planned: '#757575'
+        planned: '#757575',
       },
-      
+
       // 動畫配置
       animations: {
         enabled: true,
         hoverScale: 1.3,
         clickScale: 1.5,
-        duration: 0.3
+        duration: 0.3,
       },
-      
+
       // 互動配置
       interaction: {
         enabled: true,
         keyboard: true,
         tooltip: true,
-        clickFeedback: true
+        clickFeedback: true,
       },
-      
+
       // 響應式配置
       responsive: {
         mobile: { nodeSize: 12, hoverScale: 1.2 },
         tablet: { nodeSize: 14, hoverScale: 1.25 },
-        desktop: { nodeSize: 16, hoverScale: 1.3 }
-      }
+        desktop: { nodeSize: 16, hoverScale: 1.3 },
+      },
     };
   }
 
@@ -73,7 +73,7 @@ export class ProjectNode extends BaseComponent {
       isActive: false,
       isClicking: false,
       currentBreakpoint: 'desktop',
-      animationTimeline: null
+      animationTimeline: null,
     };
   }
 
@@ -88,10 +88,10 @@ export class ProjectNode extends BaseComponent {
     this.index = index;
     this.onNodeClick = callbacks.onNodeClick || (() => {});
     this.onNodeHover = callbacks.onNodeHover || (() => {});
-    
+
     this.createElement();
     this.setupInteractions();
-    
+
     return this.element;
   }
 
@@ -106,7 +106,7 @@ export class ProjectNode extends BaseComponent {
 
     const nodeElement = document.createElement('div');
     const nodeSize = this.getCurrentNodeSize();
-    
+
     nodeElement.className = `timeline-node project-node ${this.project.status || 'default'}`;
     nodeElement.style.cssText = `
       width: ${nodeSize}px;
@@ -123,17 +123,17 @@ export class ProjectNode extends BaseComponent {
       align-items: center;
       justify-content: center;
     `;
-    
+
     // 添加節點內部圖標或標記
     this.addNodeContent(nodeElement);
-    
+
     // 添加工具提示
     if (this.config.interaction.tooltip) {
       this.addTooltip(nodeElement);
     }
-    
+
     this.element = nodeElement;
-    
+
     console.log(`[ProjectNode] 節點已創建: ${this.project.title}`);
   }
 
@@ -145,12 +145,12 @@ export class ProjectNode extends BaseComponent {
     const iconMap = {
       backend: '⚡',
       frontend: '🎨',
-      fullstack: '🚀', 
+      fullstack: '🚀',
       architecture: '🏗️',
       opensource: '❤️',
-      default: '●'
+      default: '●',
     };
-    
+
     const icon = document.createElement('span');
     icon.textContent = iconMap[this.project.category] || iconMap.default;
     icon.style.cssText = `
@@ -159,7 +159,7 @@ export class ProjectNode extends BaseComponent {
       user-select: none;
       pointer-events: none;
     `;
-    
+
     nodeElement.appendChild(icon);
   }
 
@@ -174,7 +174,7 @@ export class ProjectNode extends BaseComponent {
       <div class="tooltip-date">${this.project.date}</div>
       <div class="tooltip-category">${this.project.category}</div>
     `;
-    
+
     tooltip.style.cssText = `
       position: absolute;
       bottom: 100%;
@@ -194,7 +194,7 @@ export class ProjectNode extends BaseComponent {
       z-index: 1000;
       margin-bottom: 8px;
     `;
-    
+
     nodeElement.appendChild(tooltip);
   }
 
@@ -207,16 +207,16 @@ export class ProjectNode extends BaseComponent {
     }
 
     // 滑鼠懸停效果
-    this.element.addEventListener('mouseenter', (event) => {
+    this.element.addEventListener('mouseenter', event => {
       this.handleMouseEnter(event);
     });
 
-    this.element.addEventListener('mouseleave', (event) => {
+    this.element.addEventListener('mouseleave', event => {
       this.handleMouseLeave(event);
     });
 
     // 點擊事件
-    this.element.addEventListener('click', (event) => {
+    this.element.addEventListener('click', event => {
       event.stopPropagation();
       this.handleClick(event);
     });
@@ -234,8 +234,8 @@ export class ProjectNode extends BaseComponent {
     this.element.setAttribute('tabindex', '0');
     this.element.setAttribute('role', 'button');
     this.element.setAttribute('aria-label', `專案節點: ${this.project.title}`);
-    
-    this.element.addEventListener('keydown', (event) => {
+
+    this.element.addEventListener('keydown', event => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         this.handleClick(event);
@@ -248,27 +248,27 @@ export class ProjectNode extends BaseComponent {
    */
   handleMouseEnter(event) {
     this.state.isHovered = true;
-    
+
     // 顯示工具提示
     const tooltip = this.element.querySelector('.node-tooltip');
     if (tooltip) {
       tooltip.style.opacity = '1';
       tooltip.style.visibility = 'visible';
     }
-    
+
     // 懸停動畫效果
     if (this.config.animations.enabled && window.gsap) {
       const scale = this.getCurrentHoverScale();
       gsap.to(this.element, {
         scale: scale,
         duration: this.config.animations.duration,
-        ease: 'power2.out'
+        ease: 'power2.out',
       });
     }
-    
+
     // 觸發懸停回調
     this.onNodeHover(this.project, this.index, 'enter', event);
-    
+
     console.log(`[ProjectNode] 節點懸停: ${this.project.title}`);
   }
 
@@ -277,23 +277,23 @@ export class ProjectNode extends BaseComponent {
    */
   handleMouseLeave(event) {
     this.state.isHovered = false;
-    
+
     // 隱藏工具提示
     const tooltip = this.element.querySelector('.node-tooltip');
     if (tooltip) {
       tooltip.style.opacity = '0';
       tooltip.style.visibility = 'hidden';
     }
-    
+
     // 恢復原始大小
     if (this.config.animations.enabled && window.gsap) {
       gsap.to(this.element, {
         scale: 1,
         duration: this.config.animations.duration,
-        ease: 'power2.out'
+        ease: 'power2.out',
       });
     }
-    
+
     // 觸發懸停回調
     this.onNodeHover(this.project, this.index, 'leave', event);
   }
@@ -307,17 +307,20 @@ export class ProjectNode extends BaseComponent {
     }
 
     this.state.isClicking = true;
-    
+
     console.log(`[ProjectNode] 節點被點擊: ${this.project.title}`);
-    
+
     // 點擊反饋動畫
-    if (this.config.animations.enabled && this.config.interaction.clickFeedback) {
+    if (
+      this.config.animations.enabled &&
+      this.config.interaction.clickFeedback
+    ) {
       this.animateClickFeedback();
     }
-    
+
     // 觸發點擊回調
     this.onNodeClick(this.element, this.project, this.index, event);
-    
+
     // 重置點擊狀態
     setTimeout(() => {
       this.state.isClicking = false;
@@ -332,17 +335,17 @@ export class ProjectNode extends BaseComponent {
 
     const timeline = gsap.timeline();
     const clickScale = this.config.animations.clickScale;
-    
+
     timeline
       .to(this.element, {
         scale: clickScale,
         duration: 0.1,
-        ease: 'power2.out'
+        ease: 'power2.out',
       })
       .to(this.element, {
         scale: this.state.isHovered ? this.getCurrentHoverScale() : 1,
         duration: 0.2,
-        ease: 'elastic.out(1, 0.5)'
+        ease: 'elastic.out(1, 0.5)',
       });
   }
 
@@ -352,12 +355,12 @@ export class ProjectNode extends BaseComponent {
    */
   updatePosition(position) {
     if (!this.element || !position) return;
-    
+
     this.position = { ...position };
-    
+
     this.element.style.left = `${position.x}px`;
     this.element.style.top = `${position.y}px`;
-    
+
     // 存儲節點的像素位置用於邊界計算
     if (this.element._nodeData) {
       this.element._nodeData.position = position;
@@ -375,7 +378,7 @@ export class ProjectNode extends BaseComponent {
       isHovered: this.state.isHovered,
       isActive: this.state.isActive,
       isInteractive: this.isInteractive,
-      element: this.element
+      element: this.element,
     };
   }
 
@@ -387,10 +390,12 @@ export class ProjectNode extends BaseComponent {
       this.state.isActive = newState.isActive;
       this.updateNodeAppearance();
     }
-    
+
     if (newState.isInteractive !== undefined) {
       this.isInteractive = newState.isInteractive;
-      this.element.style.pointerEvents = newState.isInteractive ? 'auto' : 'none';
+      this.element.style.pointerEvents = newState.isInteractive
+        ? 'auto'
+        : 'none';
     }
   }
 
@@ -399,10 +404,10 @@ export class ProjectNode extends BaseComponent {
    */
   updateNodeAppearance() {
     if (!this.element) return;
-    
+
     const color = this.getNodeColor();
     this.element.style.background = color;
-    
+
     if (this.state.isActive) {
       this.element.style.boxShadow = `0 0 20px ${color}, 0 0 40px ${color}`;
     } else {
@@ -415,10 +420,10 @@ export class ProjectNode extends BaseComponent {
    */
   getNodeColor() {
     const colors = this.config.nodeColors;
-    
+
     if (this.state.isActive) return colors.active;
     if (this.state.isHovered) return colors.hover;
-    
+
     return colors[this.project.status] || colors.default;
   }
 
@@ -443,7 +448,7 @@ export class ProjectNode extends BaseComponent {
    */
   updateBreakpoint(breakpoint) {
     this.state.currentBreakpoint = breakpoint;
-    
+
     if (this.element) {
       const newSize = this.getCurrentNodeSize();
       this.element.style.width = `${newSize}px`;
@@ -456,19 +461,19 @@ export class ProjectNode extends BaseComponent {
    */
   show(animated = true) {
     if (!this.element) return;
-    
+
     if (animated && this.config.animations.enabled && window.gsap) {
       gsap.to(this.element, {
         opacity: 1,
         scale: 1,
         duration: this.config.animations.duration,
-        ease: 'power2.out'
+        ease: 'power2.out',
       });
     } else {
       this.element.style.opacity = '1';
       this.element.style.transform = 'scale(1)';
     }
-    
+
     this.element.style.display = 'flex';
   }
 
@@ -477,7 +482,7 @@ export class ProjectNode extends BaseComponent {
    */
   hide(animated = true) {
     if (!this.element) return;
-    
+
     if (animated && this.config.animations.enabled && window.gsap) {
       gsap.to(this.element, {
         opacity: 0,
@@ -486,7 +491,7 @@ export class ProjectNode extends BaseComponent {
         ease: 'power2.in',
         onComplete: () => {
           this.element.style.display = 'none';
-        }
+        },
       });
     } else {
       this.element.style.opacity = '0';
@@ -504,24 +509,24 @@ export class ProjectNode extends BaseComponent {
       this.element.removeEventListener('mouseenter', this.handleMouseEnter);
       this.element.removeEventListener('mouseleave', this.handleMouseLeave);
       this.element.removeEventListener('click', this.handleClick);
-      
+
       // 停止所有動畫
       if (window.gsap) {
         gsap.killTweensOf(this.element);
       }
-      
+
       // 移除DOM元素
       if (this.element.parentNode) {
         this.element.parentNode.removeChild(this.element);
       }
     }
-    
+
     // 清理引用
     this.element = null;
     this.project = null;
     this.onNodeClick = null;
     this.onNodeHover = null;
-    
+
     console.log(`[ProjectNode] 節點已銷毀`);
   }
 }

@@ -20,10 +20,12 @@ export const routesConfig = [
     component: HomePage,
     title: '遊戲化個人作品集 | Gaming Portfolio',
     meta: {
-      description: '融合遊戲元素的個人作品集網站，展現後端工程師向系統架構師發展的專業軌跡',
-      keywords: 'portfolio, backend engineer, system architect, gaming, homepage',
-      icon: '🎮'
-    }
+      description:
+        '融合遊戲元素的個人作品集網站，展現後端工程師向系統架構師發展的專業軌跡',
+      keywords:
+        'portfolio, backend engineer, system architect, gaming, homepage',
+      icon: '🎮',
+    },
   },
   {
     path: '/about',
@@ -32,8 +34,8 @@ export const routesConfig = [
     meta: {
       description: '了解我的技術背景、職涯發展與專業理念',
       keywords: 'about, backend engineer, career, professional background',
-      icon: '📋'
-    }
+      icon: '📋',
+    },
   },
   {
     path: '/skills',
@@ -42,8 +44,8 @@ export const routesConfig = [
     meta: {
       description: '以遊戲化方式展示我的技術技能發展軌跡',
       keywords: 'skills, technical expertise, skill tree, backend technologies',
-      icon: '🌟'
-    }
+      icon: '🌟',
+    },
   },
   {
     path: '/work-projects',
@@ -51,9 +53,10 @@ export const routesConfig = [
     title: '工作專案時間軸 | Gaming Portfolio',
     meta: {
       description: '以互動時間軸展示工作專案發展歷程，體驗專業項目開發軌跡',
-      keywords: 'work projects, timeline, professional development, interactive timeline',
-      icon: '⏱️'
-    }
+      keywords:
+        'work projects, timeline, professional development, interactive timeline',
+      icon: '⏱️',
+    },
   },
   {
     path: '/personal-projects',
@@ -61,9 +64,10 @@ export const routesConfig = [
     title: '個人專案卡牌收藏 | Gaming Portfolio',
     meta: {
       description: '遊戲王風格個人專案展示，體驗召喚特效與卡牌收藏系統',
-      keywords: 'personal projects, yugioh cards, summoning animation, portfolio showcase',
-      icon: '🎴'
-    }
+      keywords:
+        'personal projects, yugioh cards, summoning animation, portfolio showcase',
+      icon: '🎴',
+    },
   },
   {
     path: '/contact',
@@ -72,9 +76,9 @@ export const routesConfig = [
     meta: {
       description: '與我取得聯繫，討論技術合作或職位機會',
       keywords: 'contact, collaboration, career opportunities, communication',
-      icon: '📬'
-    }
-  }
+      icon: '📬',
+    },
+  },
 ];
 
 /**
@@ -117,11 +121,11 @@ export const notFoundConfig = {
         </div>
       `;
     }
-    
+
     async init() {
       console.log('🚫 404 Page initialized');
     }
-    
+
     destroy() {
       console.log('🚫 404 Page destroyed');
     }
@@ -130,8 +134,8 @@ export const notFoundConfig = {
   meta: {
     description: '頁面未找到，請返回首頁或使用導航',
     keywords: '404, page not found, error',
-    icon: '🚫'
-  }
+    icon: '🚫',
+  },
 };
 
 /**
@@ -162,7 +166,7 @@ export function getNavigationItems() {
       path: route.path,
       title: route.meta.icon + ' ' + route.title.split(' | ')[0],
       icon: route.meta.icon,
-      name: route.title.split(' | ')[0]
+      name: route.title.split(' | ')[0],
     }));
 }
 
@@ -175,19 +179,19 @@ export function validateRoutesConfig() {
     // 檢查是否有重複路径
     const paths = routesConfig.map(route => route.path);
     const uniquePaths = [...new Set(paths)];
-    
+
     if (paths.length !== uniquePaths.length) {
       console.error('❌ Duplicate routes found:', paths);
       return false;
     }
-    
+
     // 檢查是否有首頁路由
     const hasHomePage = routesConfig.some(route => route.path === '/');
     if (!hasHomePage) {
       console.error('❌ No home page route found');
       return false;
     }
-    
+
     // 檢查每個路由是否有必要屬性
     for (const route of routesConfig) {
       if (!route.path || !route.component || !route.title) {
@@ -195,10 +199,9 @@ export function validateRoutesConfig() {
         return false;
       }
     }
-    
+
     console.log('✅ Routes configuration is valid');
     return true;
-    
   } catch (error) {
     console.error('❌ Error validating routes config:', error);
     return false;
@@ -214,6 +217,6 @@ export function getRouteStats() {
     totalRoutes: routesConfig.length,
     regularRoutes: routesConfig.length - 1, // 排除404頁面
     hasNotFoundPage: true,
-    navigationItems: getNavigationItems().length
+    navigationItems: getNavigationItems().length,
   };
 }

@@ -6,10 +6,12 @@
 /* 主要容器 */
 .personal-projects-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     rgba(8, 8, 12, 0.98) 0%,
     rgba(25, 15, 25, 0.98) 50%,
-    rgba(8, 8, 12, 0.98) 100%);
+    rgba(8, 8, 12, 0.98) 100%
+  );
   color: white;
   overflow: hidden;
   position: relative;
@@ -124,7 +126,7 @@
   overflow: hidden;
   position: relative;
   backdrop-filter: blur(5px);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   min-height: 600px;
@@ -132,7 +134,7 @@
 
 .gallery-container:hover {
   border-color: rgba(138, 43, 226, 0.3);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     0 0 40px rgba(138, 43, 226, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -438,25 +440,34 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 @keyframes highlightPulse {
-  0% { 
+  0% {
     background: rgba(138, 43, 226, 0.1);
     box-shadow: none;
   }
-  50% { 
+  50% {
     background: rgba(255, 215, 0, 0.3);
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
   }
-  100% { 
+  100% {
     background: rgba(255, 215, 0, 0.2);
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
   }
@@ -470,17 +481,17 @@
     margin: 1rem auto 0;
     max-width: 600px;
   }
-  
+
   .personal-projects-main {
     padding-bottom: 1rem;
   }
-  
+
   .guide-items {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
   }
-  
+
   .guide-item {
     flex: 1;
     min-width: 140px;
@@ -491,43 +502,43 @@
   .personal-projects-header {
     padding: 1rem;
   }
-  
+
   .personal-projects-header-content {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .personal-projects-title {
     font-size: 1.6rem;
   }
-  
+
   .personal-projects-controls {
     width: 100%;
     justify-content: center;
   }
-  
+
   .control-btn .btn-text {
     display: none;
   }
-  
+
   .personal-projects-main {
     padding: 140px 1rem 1rem;
   }
-  
+
   .gallery-container {
     border-radius: 0.75rem;
   }
-  
+
   .summoning-guide-panel {
     margin: 1rem 0 0;
     padding: 1rem;
   }
-  
+
   .guide-items {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   .modal-content {
     width: 95%;
     margin: 1rem;
@@ -542,16 +553,16 @@
     text-align: center;
     gap: 0.5rem;
   }
-  
+
   .personal-projects-controls {
     gap: 0.5rem;
   }
-  
+
   .control-btn {
     padding: 0.5rem;
     font-size: 1rem;
   }
-  
+
   .guide-items {
     grid-template-columns: 1fr;
   }
@@ -563,16 +574,16 @@
     background: #000;
     color: #fff;
   }
-  
+
   .control-btn {
     background: rgba(138, 43, 226, 0.3);
     border-color: #9932cc;
   }
-  
+
   .gallery-container {
     border-color: #9932cc;
   }
-  
+
   .summoning-guide-panel {
     background: rgba(0, 0, 0, 0.9);
     border-color: #9932cc;

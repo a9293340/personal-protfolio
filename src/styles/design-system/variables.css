@@ -7,31 +7,31 @@
 
 :root {
   /* ===== 色彩系統 ===== */
-  
+
   /* 主要色彩 - 暗色系背景 */
   --color-primary-dark: #0a0a0a;
   --color-dark-lighter: #141414;
   --color-dark-secondary: #1a1a2e;
   --color-dark-tertiary: #16213e;
-  
+
   /* 主要色彩 - 金色系強調 */
   --color-primary-gold: #d4af37;
   --color-gold-bright: #f4d03f;
   --color-gold-dark: #b8860b;
   --color-gold-light: #f7dc6f;
-  
+
   /* 主要色彩 - 藍色系次要強調 */
   --color-primary-blue: #2980b9;
   --color-blue-bright: #3498db;
   --color-blue-dark: #1f4e79;
   --color-blue-light: #85c1e9;
-  
+
   /* 狀態色彩 */
   --color-primary-red: #8b0000;
   --color-red-bright: #e74c3c;
   --color-primary-green: #27ae60;
   --color-green-bright: #2ecc71;
-  
+
   /* 中性色階 */
   --color-gray-900: #1a1a1a;
   --color-gray-800: #2d2d2d;
@@ -43,36 +43,43 @@
   --color-gray-200: #cccccc;
   --color-gray-100: #e6e6e6;
   --color-gray-50: #f5f5f5;
-  
+
   /* 遊戲化色彩 - 稀有度系統 */
-  --color-rarity-normal: #8B4513;
-  --color-rarity-normal-secondary: #A0522D;
-  --color-rarity-normal-accent: #DEB887;
+  --color-rarity-normal: #8b4513;
+  --color-rarity-normal-secondary: #a0522d;
+  --color-rarity-normal-accent: #deb887;
   --color-rarity-normal-glow: rgba(139, 69, 19, 0.3);
-  
-  --color-rarity-rare: #C0C0C0;
-  --color-rarity-rare-secondary: #A9A9A9;
-  --color-rarity-rare-accent: #E5E5E5;
+
+  --color-rarity-rare: #c0c0c0;
+  --color-rarity-rare-secondary: #a9a9a9;
+  --color-rarity-rare-accent: #e5e5e5;
   --color-rarity-rare-glow: rgba(192, 192, 192, 0.4);
-  
-  --color-rarity-super-rare: #FFD700;
-  --color-rarity-super-rare-secondary: #DAA520;
-  --color-rarity-super-rare-accent: #FFFF99;
+
+  --color-rarity-super-rare: #ffd700;
+  --color-rarity-super-rare-secondary: #daa520;
+  --color-rarity-super-rare-accent: #ffff99;
   --color-rarity-super-rare-glow: rgba(255, 215, 0, 0.5);
-  
-  --color-rarity-legendary: #FF6347;
-  --color-rarity-legendary-secondary: #FF4500;
-  --color-rarity-legendary-accent: #FFB6C1;
+
+  --color-rarity-legendary: #ff6347;
+  --color-rarity-legendary-secondary: #ff4500;
+  --color-rarity-legendary-accent: #ffb6c1;
   --color-rarity-legendary-glow: rgba(255, 99, 71, 0.6);
-  --color-rarity-legendary-holographic: linear-gradient(45deg, #ff6347, #ffd700, #32cd32, #1e90ff, #ff69b4);
-  
+  --color-rarity-legendary-holographic: linear-gradient(
+    45deg,
+    #ff6347,
+    #ffd700,
+    #32cd32,
+    #1e90ff,
+    #ff69b4
+  );
+
   /* 技能樹色彩 */
   --color-skill-mastered: #d4af37;
   --color-skill-available: #2980b9;
   --color-skill-locked: #666666;
   --color-skill-learning: #f39c12;
   --color-skill-connecting: #d4af37;
-  
+
   /* 技能分類色彩 */
   --color-skill-backend: #2980b9;
   --color-skill-architecture: #d4af37;
@@ -80,87 +87,116 @@
   --color-skill-devops: #27ae60;
   --color-skill-frontend: #9b59b6;
   --color-skill-soft: #e67e22;
-  
+
   /* UI 狀態色彩 */
   --color-status-success: #27ae60;
   --color-status-warning: #f39c12;
   --color-status-error: #e74c3c;
   --color-status-info: #3498db;
   --color-status-neutral: #95a5a6;
-  
+
   /* ===== 漸層系統 ===== */
-  
+
   /* 主要漸層 */
   --gradient-primary: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
   --gradient-secondary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  
+
   /* 色彩漸層 */
   --gradient-gold: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
   --gradient-gold-dark: linear-gradient(135deg, #b8860b 0%, #d4af37 100%);
   --gradient-blue: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
   --gradient-blue-dark: linear-gradient(135deg, #1f4e79 0%, #2980b9 100%);
-  
+
   /* 特效漸層 */
-  --gradient-neon: linear-gradient(135deg, #ff006e 0%, #8338ec 50%, #3a86ff 100%);
-  --gradient-sunset: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
-  --gradient-aurora: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
-  
+  --gradient-neon: linear-gradient(
+    135deg,
+    #ff006e 0%,
+    #8338ec 50%,
+    #3a86ff 100%
+  );
+  --gradient-sunset: linear-gradient(
+    135deg,
+    #ff9a9e 0%,
+    #fecfef 50%,
+    #fecfef 100%
+  );
+  --gradient-aurora: linear-gradient(
+    135deg,
+    #a8edea 0%,
+    #fed6e3 50%,
+    #d299c2 100%
+  );
+
   /* 遊戲化特效 */
-  --gradient-holographic: linear-gradient(45deg, #ff6347, #ffd700, #32cd32, #1e90ff, #ff69b4);
-  --gradient-magical-circle: conic-gradient(from 0deg, #d4af37, #f4d03f, #d4af37, #b8860b, #d4af37);
-  
+  --gradient-holographic: linear-gradient(
+    45deg,
+    #ff6347,
+    #ffd700,
+    #32cd32,
+    #1e90ff,
+    #ff69b4
+  );
+  --gradient-magical-circle: conic-gradient(
+    from 0deg,
+    #d4af37,
+    #f4d03f,
+    #d4af37,
+    #b8860b,
+    #d4af37
+  );
+
   /* ===== 陰影系統 ===== */
-  
+
   /* 標準陰影 */
   --shadow-small: 0 2px 4px rgba(0, 0, 0, 0.3);
   --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.4);
   --shadow-large: 0 8px 16px rgba(0, 0, 0, 0.5);
-  
+
   /* 色彩陰影 */
   --shadow-gold: 0 4px 8px rgba(212, 175, 55, 0.3);
   --shadow-blue: 0 4px 8px rgba(41, 128, 185, 0.3);
   --shadow-red: 0 4px 8px rgba(231, 76, 60, 0.3);
-  
+
   /* 發光效果 */
   --shadow-glow-gold: 0 0 20px rgba(212, 175, 55, 0.5);
   --shadow-glow-blue: 0 0 20px rgba(41, 128, 185, 0.5);
   --shadow-glow-red: 0 0 20px rgba(231, 76, 60, 0.5);
   --shadow-glow-green: 0 0 20px rgba(39, 174, 96, 0.5);
-  
+
   /* 內部陰影 */
   --shadow-inset-light: inset 0 2px 4px rgba(255, 255, 255, 0.1);
   --shadow-inset-dark: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-  
+
   /* ===== 字體系統 ===== */
-  
+
   /* 字體族群 */
   --font-heading: 'Cinzel', 'Noto Serif TC', serif;
   --font-body: 'Inter', 'Noto Sans TC', sans-serif;
   --font-code: 'Fira Code', 'JetBrains Mono', monospace;
   --font-gaming: 'Orbitron', 'Rajdhani', sans-serif;
-  
+
   /* 備用字體 */
   --font-fallback-serif: Georgia, 'Times New Roman', serif;
   --font-fallback-sans-serif: Arial, Helvetica, sans-serif;
   --font-fallback-monospace: 'Courier New', monospace;
-  
+
   /* 字體大小 */
-  --font-size-xs: 0.75rem;      /* 12px */
-  --font-size-sm: 0.875rem;     /* 14px */
-  --font-size-base: 1rem;       /* 16px */
-  --font-size-lg: 1.125rem;     /* 18px */
-  --font-size-xl: 1.25rem;      /* 20px */
-  --font-size-2xl: 1.5rem;      /* 24px */
-  --font-size-3xl: 1.875rem;    /* 30px */
-  --font-size-4xl: 2.25rem;     /* 36px */
-  --font-size-5xl: 3rem;        /* 48px */
-  --font-size-6xl: 3.75rem;     /* 60px */
-  --font-size-7xl: 4.5rem;      /* 72px */
-  
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem; /* 36px */
+  --font-size-5xl: 3rem; /* 48px */
+  --font-size-6xl: 3.75rem; /* 60px */
+  --font-size-7xl: 4.5rem; /* 72px */
+
   /* 特殊尺寸 */
-  --font-size-hero: 5rem;       /* 80px */
-  --font-size-display: 6rem;    /* 96px */
-  
+  --font-size-hero: 5rem; /* 80px */
+  --font-size-display: 6rem; /* 96px */
+
   /* 字重 */
   --font-weight-thin: 100;
   --font-weight-extra-light: 200;
@@ -171,7 +207,7 @@
   --font-weight-bold: 700;
   --font-weight-extra-bold: 800;
   --font-weight-black: 900;
-  
+
   /* 行高 */
   --line-height-none: 1;
   --line-height-tight: 1.25;
@@ -179,12 +215,12 @@
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.625;
   --line-height-loose: 2;
-  
+
   /* 特定用途行高 */
   --line-height-heading: 1.2;
   --line-height-body: 1.6;
   --line-height-code: 1.4;
-  
+
   /* 字距 */
   --letter-spacing-tighter: -0.05em;
   --letter-spacing-tight: -0.025em;
@@ -193,33 +229,33 @@
   --letter-spacing-wider: 0.05em;
   --letter-spacing-widest: 0.1em;
   --letter-spacing-gaming: 0.1em;
-  
+
   /* ===== 間距系統 ===== */
-  
+
   /* 基礎間距 (基於 8px 網格) */
-  --space-0-5: 0.125rem;        /* 2px */
-  --space-1: 0.25rem;           /* 4px */
-  --space-1-5: 0.375rem;        /* 6px */
-  --space-2: 0.5rem;            /* 8px */
-  --space-2-5: 0.625rem;        /* 10px */
-  --space-3: 0.75rem;           /* 12px */
-  --space-4: 1rem;              /* 16px */
-  --space-5: 1.25rem;           /* 20px */
-  --space-6: 1.5rem;            /* 24px */
-  --space-7: 1.75rem;           /* 28px */
-  --space-8: 2rem;              /* 32px */
-  --space-10: 2.5rem;           /* 40px */
-  --space-12: 3rem;             /* 48px */
-  --space-14: 3.5rem;           /* 56px */
-  --space-16: 4rem;             /* 64px */
-  --space-20: 5rem;             /* 80px */
-  --space-24: 6rem;             /* 96px */
-  --space-32: 8rem;             /* 128px */
-  --space-40: 10rem;            /* 160px */
-  --space-48: 12rem;            /* 192px */
-  --space-56: 14rem;            /* 224px */
-  --space-64: 16rem;            /* 256px */
-  
+  --space-0-5: 0.125rem; /* 2px */
+  --space-1: 0.25rem; /* 4px */
+  --space-1-5: 0.375rem; /* 6px */
+  --space-2: 0.5rem; /* 8px */
+  --space-2-5: 0.625rem; /* 10px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-7: 1.75rem; /* 28px */
+  --space-8: 2rem; /* 32px */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem; /* 48px */
+  --space-14: 3.5rem; /* 56px */
+  --space-16: 4rem; /* 64px */
+  --space-20: 5rem; /* 80px */
+  --space-24: 6rem; /* 96px */
+  --space-32: 8rem; /* 128px */
+  --space-40: 10rem; /* 160px */
+  --space-48: 12rem; /* 192px */
+  --space-56: 14rem; /* 224px */
+  --space-64: 16rem; /* 256px */
+
   /* 佈局間距 */
   --layout-page-mobile: var(--space-4);
   --layout-page-tablet: var(--space-6);
@@ -227,14 +263,14 @@
   --layout-section-small: var(--space-8);
   --layout-section-medium: var(--space-12);
   --layout-section-large: var(--space-16);
-  
+
   /* 容器設定 */
   --container-max-width: 1200px;
   --container-padding-mobile: var(--space-4);
   --container-padding-desktop: var(--space-8);
-  
+
   /* ===== 動畫系統 ===== */
-  
+
   /* 動畫時長 */
   --animation-instant: 0ms;
   --animation-fast: 150ms;
@@ -242,53 +278,53 @@
   --animation-slow: 500ms;
   --animation-slower: 750ms;
   --animation-slowest: 1000ms;
-  
+
   /* 特殊動畫時長 */
   --animation-page-transition: 400ms;
   --animation-modal-transition: 250ms;
   --animation-tooltip-transition: 200ms;
   --animation-hover-transition: 150ms;
-  
+
   /* 緩動函數 */
   --easing-linear: linear;
   --easing-ease: ease;
   --easing-ease-in: ease-in;
   --easing-ease-out: ease-out;
   --easing-ease-in-out: ease-in-out;
-  
+
   /* 自定義貝塞爾曲線 */
   --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   --easing-bouncy: cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --easing-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  
+
   /* 遊戲化緩動 */
   --easing-gaming: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --easing-heroic: cubic-bezier(0.19, 1, 0.22, 1);
   --easing-magical: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  
+
   /* ===== 透明度變體 ===== */
-  
+
   /* 背景透明度 */
   --opacity-bg-light: rgba(255, 255, 255, 0.05);
   --opacity-bg-medium: rgba(255, 255, 255, 0.1);
   --opacity-bg-strong: rgba(255, 255, 255, 0.15);
-  
+
   /* 覆蓋層透明度 */
   --opacity-overlay-light: rgba(0, 0, 0, 0.3);
   --opacity-overlay-medium: rgba(0, 0, 0, 0.5);
   --opacity-overlay-strong: rgba(0, 0, 0, 0.7);
-  
+
   /* 色彩透明度變體 */
   --opacity-gold-10: rgba(212, 175, 55, 0.1);
   --opacity-gold-20: rgba(212, 175, 55, 0.2);
   --opacity-gold-30: rgba(212, 175, 55, 0.3);
   --opacity-gold-50: rgba(212, 175, 55, 0.5);
-  
+
   --opacity-blue-10: rgba(41, 128, 185, 0.1);
   --opacity-blue-20: rgba(41, 128, 185, 0.2);
   --opacity-blue-30: rgba(41, 128, 185, 0.3);
   --opacity-blue-50: rgba(41, 128, 185, 0.5);
-  
+
   /* ===== Z-Index 層級系統 ===== */
   --z-dropdown: 1000;
   --z-modal: 1050;
@@ -313,17 +349,17 @@
 /* 響應式字體大小 */
 @media (max-width: 768px) {
   :root {
-    --font-size-hero: 2.5rem;      /* 40px on mobile */
-    --font-size-display: 3rem;     /* 48px on mobile */
-    --font-size-5xl: 2.25rem;      /* 36px on mobile */
-    --font-size-4xl: 1.875rem;     /* 30px on mobile */
+    --font-size-hero: 2.5rem; /* 40px on mobile */
+    --font-size-display: 3rem; /* 48px on mobile */
+    --font-size-5xl: 2.25rem; /* 36px on mobile */
+    --font-size-4xl: 1.875rem; /* 30px on mobile */
   }
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
   :root {
-    --font-size-hero: 3.5rem;      /* 56px on tablet */
-    --font-size-display: 4.5rem;   /* 72px on tablet */
+    --font-size-hero: 3.5rem; /* 56px on tablet */
+    --font-size-display: 4.5rem; /* 72px on tablet */
   }
 }
 
@@ -343,7 +379,7 @@
 }
 
 /* 亮色主題 */
-[data-theme="light"] {
+[data-theme='light'] {
   --theme-background: #f5f5f5;
   --theme-foreground: #1a1a1a;
   --theme-accent: #b8860b;
@@ -356,7 +392,7 @@
 }
 
 /* 霓虹主題 */
-[data-theme="neon"] {
+[data-theme='neon'] {
   --theme-background: #0d1117;
   --theme-foreground: #00ff9f;
   --theme-accent: #ff006e;
@@ -411,12 +447,12 @@
   --skill-node-spacing-mobile: 80px;
   --skill-node-spacing-tablet: 100px;
   --skill-node-spacing-desktop: 120px;
-  
+
   /* 卡片間距 */
   --gaming-card-gap: var(--space-6);
   --gaming-card-padding: var(--space-4);
   --gaming-card-margin: var(--space-3);
-  
+
   /* 遊戲UI */
   --game-ui-panel-padding: var(--space-6);
   --game-ui-control-spacing: var(--space-3);

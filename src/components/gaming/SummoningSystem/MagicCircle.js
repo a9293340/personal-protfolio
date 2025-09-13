@@ -1,14 +1,14 @@
 // @ts-nocheck
 /**
  * MagicCircle - SVG 魔法陣組件
- * 
+ *
  * 基於 POC-003 設計，實現遊戲王風格的魔法陣動畫：
  * - outer-ring (外環) → 逆時針旋轉
- * - middle-ring (中環) → 順時針旋轉  
+ * - middle-ring (中環) → 順時針旋轉
  * - inner-ring (內環) → 快速逆時針旋轉
  * - runes (符文) → 依序點亮
  * - central-gem (中心寶石) → 脈衝發光
- * 
+ *
  * 職責：
  * - SVG 魔法陣的創建和渲染
  * - 旋轉動畫的控制和管理
@@ -21,10 +21,10 @@ import { BaseComponent } from '../../../core/components/BaseComponent.js';
 export class MagicCircle extends BaseComponent {
   constructor(config = {}) {
     super();
-    
+
     this.config = this.mergeConfig(this.getDefaultConfig(), config);
     this.state = this.getInitialState();
-    
+
     // 魔法陣相關屬性
     this.svgElement = null;
     this.uniqueId = 'mc_' + Math.random().toString(36).substr(2, 9); // 唯一ID避免衝突
@@ -33,9 +33,9 @@ export class MagicCircle extends BaseComponent {
       middleRing: null,
       innerRing: null,
       runes: [],
-      centralGem: null
+      centralGem: null,
     };
-    
+
     this.isAnimating = false;
     this.isExpanded = false;
   }
@@ -46,63 +46,66 @@ export class MagicCircle extends BaseComponent {
   async init() {
     // 創建元素
     this.createElement();
-    
+
     // 將元素添加到容器或頁面
     if (this.config.container) {
       this.config.container.appendChild(this.element);
     } else {
       document.body.appendChild(this.element);
     }
-    
-    console.log('✅ [MagicCircle] 魔法陣初始化完成，SVG元素:', !!this.svgElement);
+
+    console.log(
+      '✅ [MagicCircle] 魔法陣初始化完成，SVG元素:',
+      !!this.svgElement
+    );
   }
 
   getDefaultConfig() {
     return {
       // 魔法陣基礎配置
       circle: {
-        size: 400,                    // 魔法陣直徑 (px)
-        strokeWidth: 3,               // 線條寬度
-        color: '#d4af37',             // 主色調 (金色)
-        glowColor: '#f4d03f',         // 發光色彩
-        opacity: 0.9                  // 透明度
+        size: 400, // 魔法陣直徑 (px)
+        strokeWidth: 3, // 線條寬度
+        color: '#d4af37', // 主色調 (金色)
+        glowColor: '#f4d03f', // 發光色彩
+        opacity: 0.9, // 透明度
       },
-      
+
       // 動畫配置
       animation: {
-        expandDuration: 2,            // 展開時間 (秒)
+        expandDuration: 2, // 展開時間 (秒)
         rotationSpeed: {
-          outer: -0.5,                // 外環旋轉速度 (逆時針)
-          middle: 0.3,                // 中環旋轉速度 (順時針)
-          inner: -1.2                 // 內環旋轉速度 (快速逆時針)
+          outer: -0.5, // 外環旋轉速度 (逆時針)
+          middle: 0.3, // 中環旋轉速度 (順時針)
+          inner: -1.2, // 內環旋轉速度 (快速逆時針)
         },
-        runeDelay: 0.2,              // 符文點亮間隔 (秒)
-        pulseSpeed: 1.5               // 中心寶石脈衝速度
+        runeDelay: 0.2, // 符文點亮間隔 (秒)
+        pulseSpeed: 1.5, // 中心寶石脈衝速度
       },
-      
+
       // 響應式配置
       responsive: {
         mobile: {
-          size: 300,                  // 移動端縮小
-          strokeWidth: 2
-        }
+          size: 300, // 移動端縮小
+          strokeWidth: 2,
+        },
       },
-      
+
       // 定位配置
       position: {
-        x: '50%',                     // 水平中心
-        y: '50%',                     // 垂直中心
-        zIndex: 10001                 // 圖層順序 - 在召喚容器之上
-      }
+        x: '50%', // 水平中心
+        y: '50%', // 垂直中心
+        zIndex: 10001, // 圖層順序 - 在召喚容器之上
+      },
     };
   }
 
   getInitialState() {
     return {
       isVisible: false,
-      currentPhase: 'idle',           // idle, expanding, active, collapsing
+      currentPhase: 'idle', // idle, expanding, active, collapsing
       runesActivated: 0,
-      animationProgress: 0
+      animationProgress: 0,
     };
   }
 
@@ -112,7 +115,7 @@ export class MagicCircle extends BaseComponent {
   createElement() {
     const container = document.createElement('div');
     container.className = 'magic-circle-container';
-    
+
     // 應用基礎樣式
     container.style.cssText = `
       position: fixed;
@@ -126,14 +129,14 @@ export class MagicCircle extends BaseComponent {
       width: auto;
       height: auto;
     `;
-    
+
     // 創建 SVG 元素
     const svg = this.createSVGElement();
     container.appendChild(svg);
-    
+
     this.element = container;
     this.svgElement = svg;
-    
+
     return container;
   }
 
@@ -145,38 +148,53 @@ export class MagicCircle extends BaseComponent {
     const padding = 50; // 增加邊距避免裁剪
     const svgSize = size + padding * 2;
     const center = svgSize / 2;
-    
+
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', svgSize);
     svg.setAttribute('height', svgSize);
     svg.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
     svg.setAttribute('class', 'magic-circle-svg');
-    
+
     // 確保 SVG 不被裁剪
     svg.style.overflow = 'visible';
-    
+
     // 創建漸變定義
     const defs = this.createGradientDefinitions();
     svg.appendChild(defs);
-    
+
     // 創建三個旋轉環
-    const outerRing = this.createRing(center, center, center * 0.9, 'outer-ring');
-    const middleRing = this.createRing(center, center, center * 0.7, 'middle-ring');
-    const innerRing = this.createRing(center, center, center * 0.5, 'inner-ring');
-    
+    const outerRing = this.createRing(
+      center,
+      center,
+      center * 0.9,
+      'outer-ring'
+    );
+    const middleRing = this.createRing(
+      center,
+      center,
+      center * 0.7,
+      'middle-ring'
+    );
+    const innerRing = this.createRing(
+      center,
+      center,
+      center * 0.5,
+      'inner-ring'
+    );
+
     // 創建符文
     const runesGroup = this.createRunesGroup(center);
-    
+
     // 創建中心寶石
     const centralGem = this.createCentralGem(center);
-    
+
     // 添加所有元素到 SVG
     svg.appendChild(outerRing);
     svg.appendChild(middleRing);
     svg.appendChild(innerRing);
     svg.appendChild(runesGroup);
     svg.appendChild(centralGem);
-    
+
     return svg;
   }
 
@@ -185,21 +203,27 @@ export class MagicCircle extends BaseComponent {
    */
   createGradientDefinitions() {
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    
+
     // 主漸變 - 使用唯一ID
     const gradientId = `magic-circle-gradient-${this.uniqueId}`;
     const filterId = `magic-glow-${this.uniqueId}`;
-    
-    const mainGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+
+    const mainGradient = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'linearGradient'
+    );
     mainGradient.setAttribute('id', gradientId);
     mainGradient.innerHTML = `
       <stop offset="0%" style="stop-color:${this.config.circle.color};stop-opacity:0.3" />
       <stop offset="50%" style="stop-color:${this.config.circle.glowColor};stop-opacity:1" />
       <stop offset="100%" style="stop-color:${this.config.circle.color};stop-opacity:0.3" />
     `;
-    
+
     // 發光濾鏡 - 增強版本
-    const glowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    const glowFilter = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'filter'
+    );
     glowFilter.setAttribute('id', filterId);
     glowFilter.setAttribute('x', '-50%');
     glowFilter.setAttribute('y', '-50%');
@@ -213,14 +237,14 @@ export class MagicCircle extends BaseComponent {
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     `;
-    
+
     defs.appendChild(mainGradient);
     defs.appendChild(glowFilter);
-    
+
     // 存儲ID供其他方法使用
     this.gradientId = gradientId;
     this.filterId = filterId;
-    
+
     return defs;
   }
 
@@ -228,7 +252,10 @@ export class MagicCircle extends BaseComponent {
    * 創建旋轉環
    */
   createRing(cx, cy, radius, className) {
-    const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const ring = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'circle'
+    );
     ring.setAttribute('cx', cx);
     ring.setAttribute('cy', cy);
     ring.setAttribute('r', radius);
@@ -238,7 +265,7 @@ export class MagicCircle extends BaseComponent {
     ring.setAttribute('stroke-width', this.config.circle.strokeWidth);
     ring.setAttribute('filter', `url(#${this.filterId})`);
     ring.setAttribute('opacity', this.config.circle.opacity);
-    
+
     return ring;
   }
 
@@ -248,20 +275,20 @@ export class MagicCircle extends BaseComponent {
   createRunesGroup(center) {
     const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     group.setAttribute('class', 'runes-group');
-    
+
     // 創建6個符文，均勻分布在圓周上
     const runeCount = 6;
     const radius = center * 0.8;
-    
+
     for (let i = 0; i < runeCount; i++) {
-      const angle = (i * 360 / runeCount) * Math.PI / 180;
+      const angle = (((i * 360) / runeCount) * Math.PI) / 180;
       const x = center + radius * Math.cos(angle);
       const y = center + radius * Math.sin(angle);
-      
+
       const rune = this.createRune(x, y, i);
       group.appendChild(rune);
     }
-    
+
     return group;
   }
 
@@ -269,7 +296,10 @@ export class MagicCircle extends BaseComponent {
    * 創建單個符文
    */
   createRune(x, y, index) {
-    const rune = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const rune = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'circle'
+    );
     rune.setAttribute('cx', x);
     rune.setAttribute('cy', y);
     rune.setAttribute('r', 8);
@@ -277,7 +307,7 @@ export class MagicCircle extends BaseComponent {
     rune.setAttribute('fill', this.config.circle.color);
     rune.setAttribute('opacity', 0);
     rune.setAttribute('filter', `url(#${this.filterId})`);
-    
+
     return rune;
   }
 
@@ -285,7 +315,10 @@ export class MagicCircle extends BaseComponent {
    * 創建中心寶石
    */
   createCentralGem(center) {
-    const gem = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    const gem = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'circle'
+    );
     gem.setAttribute('cx', center);
     gem.setAttribute('cy', center);
     gem.setAttribute('r', 15);
@@ -293,7 +326,7 @@ export class MagicCircle extends BaseComponent {
     gem.setAttribute('fill', this.config.circle.glowColor);
     gem.setAttribute('opacity', 0.8);
     gem.setAttribute('filter', `url(#${this.filterId})`);
-    
+
     return gem;
   }
 
@@ -324,17 +357,21 @@ export class MagicCircle extends BaseComponent {
     const tl = window.gsap.timeline();
 
     // 階段1：魔法陣淡入並放大
-    tl.fromTo(this.svgElement, {
-      scale: 0,
-      opacity: 0,
-      rotation: -90
-    }, {
-      scale: 1,
-      opacity: this.config.circle.opacity,
-      rotation: 0,
-      duration: this.config.animation.expandDuration * 0.4,
-      ease: "power2.out"
-    });
+    tl.fromTo(
+      this.svgElement,
+      {
+        scale: 0,
+        opacity: 0,
+        rotation: -90,
+      },
+      {
+        scale: 1,
+        opacity: this.config.circle.opacity,
+        rotation: 0,
+        duration: this.config.animation.expandDuration * 0.4,
+        ease: 'power2.out',
+      }
+    );
 
     // 階段2：啟動旋轉動畫
     this.startRotationAnimations();
@@ -342,16 +379,20 @@ export class MagicCircle extends BaseComponent {
     // 階段3：依序點亮符文
     const runeElements = this.svgElement.querySelectorAll('.rune');
     runeElements.forEach((rune, index) => {
-      tl.to(rune, {
-        opacity: 1,
-        scale: 1.5,
-        duration: 0.3,
-        ease: "bounce.out",
-        onComplete: () => {
-          this.state.runesActivated++;
-          console.log(`[MagicCircle] 符文 ${index + 1} 已激活`);
-        }
-      }, `+=${this.config.animation.runeDelay}`);
+      tl.to(
+        rune,
+        {
+          opacity: 1,
+          scale: 1.5,
+          duration: 0.3,
+          ease: 'bounce.out',
+          onComplete: () => {
+            this.state.runesActivated++;
+            console.log(`[MagicCircle] 符文 ${index + 1} 已激活`);
+          },
+        },
+        `+=${this.config.animation.runeDelay}`
+      );
     });
 
     // 階段4：中心寶石脈衝
@@ -376,10 +417,10 @@ export class MagicCircle extends BaseComponent {
       console.error('❌ [MagicCircle] SVG 元素未初始化，無法啟動動畫');
       return;
     }
-    
+
     // 先展開魔法陣使其可見
     this.expand();
-    
+
     const outerRing = this.svgElement.querySelector('.outer-ring');
     const middleRing = this.svgElement.querySelector('.middle-ring');
     const innerRing = this.svgElement.querySelector('.inner-ring');
@@ -395,8 +436,8 @@ export class MagicCircle extends BaseComponent {
       rotation: 360 * this.config.animation.rotationSpeed.outer,
       duration: Math.abs(1 / this.config.animation.rotationSpeed.outer),
       repeat: -1,
-      ease: "none",
-      transformOrigin: `${center}px ${center}px`
+      ease: 'none',
+      transformOrigin: `${center}px ${center}px`,
     });
 
     // 中環 - 順時針旋轉
@@ -404,8 +445,8 @@ export class MagicCircle extends BaseComponent {
       rotation: 360 * this.config.animation.rotationSpeed.middle,
       duration: Math.abs(1 / this.config.animation.rotationSpeed.middle),
       repeat: -1,
-      ease: "none",
-      transformOrigin: `${center}px ${center}px`
+      ease: 'none',
+      transformOrigin: `${center}px ${center}px`,
     });
 
     // 內環 - 快速逆時針旋轉
@@ -413,11 +454,14 @@ export class MagicCircle extends BaseComponent {
       rotation: 360 * this.config.animation.rotationSpeed.inner,
       duration: Math.abs(1 / this.config.animation.rotationSpeed.inner),
       repeat: -1,
-      ease: "none",
-      transformOrigin: `${center}px ${center}px`
+      ease: 'none',
+      transformOrigin: `${center}px ${center}px`,
     });
 
-    console.log('[MagicCircle] 🌀 旋轉動畫已啟動，中心點:', `${center}px ${center}px`);
+    console.log(
+      '[MagicCircle] 🌀 旋轉動畫已啟動，中心點:',
+      `${center}px ${center}px`
+    );
   }
 
   /**
@@ -425,20 +469,21 @@ export class MagicCircle extends BaseComponent {
    */
   startCentralGemPulse() {
     const centralGem = this.svgElement.querySelector('.central-gem');
-    
+
     // 創建更明顯的脈衝效果
-    this.animations.centralGem = window.gsap.timeline({ repeat: -1 })
+    this.animations.centralGem = window.gsap
+      .timeline({ repeat: -1 })
       .to(centralGem, {
         scale: 1.8,
         opacity: 1,
         duration: this.config.animation.pulseSpeed * 0.6,
-        ease: "power2.out"
+        ease: 'power2.out',
       })
       .to(centralGem, {
         scale: 1,
         opacity: 0.6,
         duration: this.config.animation.pulseSpeed * 0.4,
-        ease: "power2.in"
+        ease: 'power2.in',
       });
 
     console.log('[MagicCircle] 💎 中心寶石脈衝已啟動 - 增強版');
@@ -453,16 +498,16 @@ export class MagicCircle extends BaseComponent {
         animation.kill();
       }
     });
-    
+
     // 清空動畫引用
     this.animations = {
       outerRing: null,
       middleRing: null,
       innerRing: null,
       runes: [],
-      centralGem: null
+      centralGem: null,
     };
-    
+
     console.log('[MagicCircle] ⏹️ 所有動畫已停止');
   }
 
@@ -479,15 +524,15 @@ export class MagicCircle extends BaseComponent {
     // 收縮動畫
     if (window.gsap && this.element) {
       const tl = window.gsap.timeline();
-      
+
       tl.to(this.svgElement, {
         scale: 0,
         opacity: 0,
         rotation: 90,
         duration: 1,
-        ease: "power2.in"
+        ease: 'power2.in',
       });
-      
+
       tl.to(this.element, {
         opacity: 0,
         duration: 0.3,
@@ -497,7 +542,7 @@ export class MagicCircle extends BaseComponent {
           this.isExpanded = false;
           this.state.runesActivated = 0;
           console.log('[MagicCircle] ✅ 魔法陣已隱藏');
-        }
+        },
       });
 
       return tl;
@@ -512,11 +557,11 @@ export class MagicCircle extends BaseComponent {
     this.state = this.getInitialState();
     this.isAnimating = false;
     this.isExpanded = false;
-    
+
     if (this.element) {
       window.gsap.set(this.element, { opacity: 0 });
     }
-    
+
     console.log('[MagicCircle] 🔄 魔法陣已重置');
   }
 
@@ -525,14 +570,14 @@ export class MagicCircle extends BaseComponent {
    */
   destroy() {
     this.stopAnimations();
-    
+
     if (this.element) {
       this.element.remove();
     }
-    
+
     this.svgElement = null;
     super.destroy();
-    
+
     console.log('[MagicCircle] 🗑️ 魔法陣組件已銷毀');
   }
 }

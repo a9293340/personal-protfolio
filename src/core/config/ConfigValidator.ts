@@ -1,13 +1,13 @@
 /**
  * ConfigValidator - 配置驗證器
- * 
+ *
  * 功能：
  * 1. Schema 定義和驗證
  * 2. 類型檢查和約束
  * 3. 必填欄位檢查
  * 4. 自訂驗證規則
  * 5. 詳細錯誤報告
- * 
+ *
  * @author Claude
  * @version 1.0.0
  */
@@ -19,7 +19,7 @@ import type {
   MultiValidationResult,
   ValidatorFunction,
   SchemaDefinition,
-  CustomValidateFunction
+  CustomValidateFunction,
 } from '../../types/config.js';
 
 export class ConfigValidator {
@@ -29,7 +29,7 @@ export class ConfigValidator {
   constructor() {
     this.schemas = new Map();
     this.customValidators = new Map();
-    
+
     this.registerBuiltInValidators();
   }
 
@@ -41,63 +41,86 @@ export class ConfigValidator {
     this.customValidators.set('string', (value: any): string | null => {
       return typeof value === 'string' ? null : 'Expected string';
     });
-    
+
     this.customValidators.set('number', (value: any): string | null => {
-      return typeof value === 'number' && !isNaN(value) ? null : 'Expected number';
+      return typeof value === 'number' && !isNaN(value)
+        ? null
+        : 'Expected number';
     });
-    
+
     this.customValidators.set('integer', (value: any): string | null => {
       return Number.isInteger(value) ? null : 'Expected integer';
     });
-    
+
     this.customValidators.set('boolean', (value: any): string | null => {
       return typeof value === 'boolean' ? null : 'Expected boolean';
     });
-    
+
     this.customValidators.set('array', (value: any): string | null => {
       return Array.isArray(value) ? null : 'Expected array';
     });
-    
+
     this.customValidators.set('object', (value: any): string | null => {
-      return value !== null && typeof value === 'object' && !Array.isArray(value) 
-        ? null : 'Expected object';
+      return value !== null &&
+        typeof value === 'object' &&
+        !Array.isArray(value)
+        ? null
+        : 'Expected object';
     });
-    
+
     // 範圍驗證器
-    this.customValidators.set('min', (value: any, constraint: number): string | null => {
-      if (typeof value === 'number') {
-        return value >= constraint ? null : `Must be at least ${constraint}`;
+    this.customValidators.set(
+      'min',
+      (value: any, constraint: number): string | null => {
+        if (typeof value === 'number') {
+          return value >= constraint ? null : `Must be at least ${constraint}`;
+        }
+        if (typeof value === 'string' || Array.isArray(value)) {
+          return value.length >= constraint
+            ? null
+            : `Length must be at least ${constraint}`;
+        }
+        return 'Cannot apply min constraint to this type';
       }
-      if (typeof value === 'string' || Array.isArray(value)) {
-        return value.length >= constraint ? null : `Length must be at least ${constraint}`;
+    );
+
+    this.customValidators.set(
+      'max',
+      (value: any, constraint: number): string | null => {
+        if (typeof value === 'number') {
+          return value <= constraint ? null : `Must be at most ${constraint}`;
+        }
+        if (typeof value === 'string' || Array.isArray(value)) {
+          return value.length <= constraint
+            ? null
+            : `Length must be at most ${constraint}`;
+        }
+        return 'Cannot apply max constraint to this type';
       }
-      return 'Cannot apply min constraint to this type';
-    });
-    
-    this.customValidators.set('max', (value: any, constraint: number): string | null => {
-      if (typeof value === 'number') {
-        return value <= constraint ? null : `Must be at most ${constraint}`;
-      }
-      if (typeof value === 'string' || Array.isArray(value)) {
-        return value.length <= constraint ? null : `Length must be at most ${constraint}`;
-      }
-      return 'Cannot apply max constraint to this type';
-    });
-    
+    );
+
     // 模式驗證器
-    this.customValidators.set('pattern', (value: any, constraint: string): string | null => {
-      if (typeof value !== 'string') {
-        return 'Pattern can only be applied to strings';
+    this.customValidators.set(
+      'pattern',
+      (value: any, constraint: string): string | null => {
+        if (typeof value !== 'string') {
+          return 'Pattern can only be applied to strings';
+        }
+        const regex = new RegExp(constraint);
+        return regex.test(value) ? null : `Must match pattern: ${constraint}`;
       }
-      const regex = new RegExp(constraint);
-      return regex.test(value) ? null : `Must match pattern: ${constraint}`;
-    });
-    
+    );
+
     // 枚舉驗證器
-    this.customValidators.set('enum', (value: any, constraint: any[]): string | null => {
-      return constraint.includes(value) ? null : `Must be one of: ${constraint.join(', ')}`;
-    });
-    
+    this.customValidators.set(
+      'enum',
+      (value: any, constraint: any[]): string | null => {
+        return constraint.includes(value)
+          ? null
+          : `Must be one of: ${constraint.join(', ')}`;
+      }
+    );
+
     // URL 驗證器
     this.customValidators.set('url', (value: any): string | null => {
       if (typeof value !== 'string') {
@@ -110,7 +133,7 @@ export class ConfigValidator {
         return 'Must be a valid URL';
       }
     });
-    
+
     // Email 驗證器
     this.customValidators.set('email', (value: any): string | null => {
       if (typeof value !== 'string') {
@@ -119,14 +142,17 @@ export class ConfigValidator {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(value) ? null : 'Must be a valid email address';
     });
-    
+
     // 顏色驗證器
     this.customValidators.set('color', (value: any): string | null => {
       if (typeof value !== 'string') {
         return 'Color must be a string';
       }
-      const colorRegex = /^#([0-9A-Fa-f]{3}){1,2}$|^rgb\(|^rgba\(|^hsl\(|^hsla\(/;
-      return colorRegex.test(value) ? null : 'Must be a valid color (hex, rgb, rgba, hsl, hsla)';
+      const colorRegex =
+        /^#([0-9A-Fa-f]{3}){1,2}$|^rgb\(|^rgba\(|^hsl\(|^hsla\(/;
+      return colorRegex.test(value)
+        ? null
+        : 'Must be a valid color (hex, rgb, rgba, hsl, hsla)';
     });
   }
 
@@ -146,30 +172,30 @@ export class ConfigValidator {
     if (!schema || typeof schema !== 'object') {
       throw new Error('Schema must be an object');
     }
-    
+
     const validateNode = (node: any, path = ''): void => {
       if (!node || typeof node !== 'object') return;
-      
+
       // 檢查是否為欄位定義
       if ('type' in node || 'required' in node || 'validator' in node) {
         if (node.type && typeof node.type !== 'string') {
           throw new Error(`Invalid type at ${path}: must be string`);
         }
-        
+
         if (node.required !== undefined && typeof node.required !== 'boolean') {
           throw new Error(`Invalid required at ${path}: must be boolean`);
         }
-        
+
         return;
       }
-      
+
       // 遞歸檢查子節點
       for (const [key, value] of Object.entries(node)) {
         const currentPath = path ? `${path}.${key}` : key;
         validateNode(value, currentPath);
       }
     };
-    
+
     validateNode(schema);
   }
 
@@ -181,12 +207,12 @@ export class ConfigValidator {
     if (!schema) {
       throw new Error(`Schema '${schemaName}' not found`);
     }
-    
+
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
-    
+
     this.validateNode(config, schema, '', errors, warnings);
-    
+
     return {
       valid: errors.length === 0,
       errors,
@@ -195,8 +221,8 @@ export class ConfigValidator {
         totalErrors: errors.length,
         totalWarnings: warnings.length,
         errorsByType: this.groupErrorsByType(errors),
-        warningsByType: this.groupErrorsByType(warnings as any)
-      }
+        warningsByType: this.groupErrorsByType(warnings as any),
+      },
     };
   }
 
@@ -204,10 +230,10 @@ export class ConfigValidator {
    * 驗證節點
    */
   private validateNode(
-    value: any, 
-    schema: SchemaDefinition, 
-    path: string, 
-    errors: ValidationError[], 
+    value: any,
+    schema: SchemaDefinition,
+    path: string,
+    errors: ValidationError[],
     warnings: ValidationWarning[]
   ): void {
     // 檢查必填欄位
@@ -216,16 +242,16 @@ export class ConfigValidator {
         type: 'required',
         path,
         message: 'Required field is missing',
-        value
+        value,
       });
       return;
     }
-    
+
     // 如果值為空且非必填，跳過驗證
     if (value === undefined || value === null) {
       return;
     }
-    
+
     // 類型驗證
     if (schema.type) {
       const typeValidator = this.customValidators.get(schema.type);
@@ -238,16 +264,18 @@ export class ConfigValidator {
             message: error,
             expected: schema.type,
             actual: typeof value,
-            value
+            value,
           });
           return; // 類型錯誤時不再繼續驗證
         }
       }
     }
-    
+
     // 約束驗證
     if (schema.constraints) {
-      for (const [constraintName, constraintValue] of Object.entries(schema.constraints)) {
+      for (const [constraintName, constraintValue] of Object.entries(
+        schema.constraints
+      )) {
         const validator = this.customValidators.get(constraintName);
         if (validator) {
           const error = validator(value, constraintValue);
@@ -258,13 +286,13 @@ export class ConfigValidator {
               path,
               message: error,
               value,
-              expected: constraintValue
+              expected: constraintValue,
             });
           }
         }
       }
     }
-    
+
     // 自訂驗證器
     if (schema.validator) {
       const validatorName = schema.validator;
@@ -277,7 +305,7 @@ export class ConfigValidator {
             validator: validatorName,
             path,
             message: error,
-            value
+            value,
           });
         }
       } else {
@@ -285,11 +313,11 @@ export class ConfigValidator {
           type: 'unknown_validator',
           path,
           message: `Unknown validator: ${validatorName}`,
-          value
+          value,
         });
       }
     }
-    
+
     // 自訂驗證函數
     if (typeof schema.validate === 'function') {
       try {
@@ -298,8 +326,9 @@ export class ConfigValidator {
           errors.push({
             type: 'custom_function',
             path,
-            message: typeof result === 'string' ? result : 'Custom validation failed',
-            value
+            message:
+              typeof result === 'string' ? result : 'Custom validation failed',
+            value,
           });
         }
       } catch (error) {
@@ -307,13 +336,18 @@ export class ConfigValidator {
           type: 'custom_function_error',
           path,
           message: `Validation function threw error: ${(error as Error).message}`,
-          value
+          value,
         });
       }
     }
-    
+
     // 物件屬性驗證
-    if (schema.type === 'object' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    if (
+      schema.type === 'object' &&
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value)
+    ) {
       // 檢查定義的屬性
       if (schema.properties) {
         for (const [key, subSchema] of Object.entries(schema.properties)) {
@@ -321,7 +355,7 @@ export class ConfigValidator {
           this.validateNode(value[key], subSchema, subPath, errors, warnings);
         }
       }
-      
+
       // 檢查額外屬性
       if (schema.additionalProperties === false && schema.properties) {
         const allowedKeys = Object.keys(schema.properties);
@@ -331,13 +365,13 @@ export class ConfigValidator {
               type: 'additional_property',
               path: path ? `${path}.${key}` : key,
               message: 'Additional property not defined in schema',
-              value: value[key]
+              value: value[key],
             });
           }
         }
       }
     }
-    
+
     // 陣列元素驗證
     if (schema.type === 'array' && Array.isArray(value) && schema.items) {
       value.forEach((item, index) => {
@@ -350,25 +384,33 @@ export class ConfigValidator {
   /**
    * 按類型分組錯誤
    */
-  private groupErrorsByType(errors: { type: string }[]): Record<string, number> {
-    return errors.reduce((groups, error) => {
-      const type = error.type;
-      if (!groups[type]) {
-        groups[type] = 0;
-      }
-      groups[type]++;
-      return groups;
-    }, {} as Record<string, number>);
+  private groupErrorsByType(
+    errors: { type: string }[]
+  ): Record<string, number> {
+    return errors.reduce(
+      (groups, error) => {
+        const type = error.type;
+        if (!groups[type]) {
+          groups[type] = 0;
+        }
+        groups[type]++;
+        return groups;
+      },
+      {} as Record<string, number>
+    );
   }
 
   /**
    * 註冊自訂驗證器
    */
-  registerValidator(name: string, validator: ValidatorFunction): ConfigValidator {
+  registerValidator(
+    name: string,
+    validator: ValidatorFunction
+  ): ConfigValidator {
     if (typeof validator !== 'function') {
       throw new Error('Validator must be a function');
     }
-    
+
     this.customValidators.set(name, validator);
     return this;
   }
@@ -421,38 +463,46 @@ export class ConfigValidator {
    */
   validateMany(configs: Record<string, any>): MultiValidationResult {
     const results: Record<string, ValidationResult> = {};
-    
+
     for (const [schemaName, config] of Object.entries(configs)) {
       try {
         results[schemaName] = this.validate(schemaName, config);
       } catch (error) {
         results[schemaName] = {
           valid: false,
-          errors: [{
-            type: 'custom_function_error',
-            path: '',
-            message: (error as Error).message,
-          }],
+          errors: [
+            {
+              type: 'custom_function_error',
+              path: '',
+              message: (error as Error).message,
+            },
+          ],
           warnings: [],
           summary: {
             totalErrors: 1,
             totalWarnings: 0,
-            errorsByType: { 'custom_function_error': 1 },
-            warningsByType: {}
-          }
+            errorsByType: { custom_function_error: 1 },
+            warningsByType: {},
+          },
         };
       }
     }
-    
+
     return {
       results,
       summary: {
         total: Object.keys(configs).length,
         passed: Object.values(results).filter(r => r.valid).length,
         failed: Object.values(results).filter(r => !r.valid).length,
-        totalErrors: Object.values(results).reduce((sum, r) => sum + (r.errors?.length || 0), 0),
-        totalWarnings: Object.values(results).reduce((sum, r) => sum + (r.warnings?.length || 0), 0)
-      }
+        totalErrors: Object.values(results).reduce(
+          (sum, r) => sum + (r.errors?.length || 0),
+          0
+        ),
+        totalWarnings: Object.values(results).reduce(
+          (sum, r) => sum + (r.warnings?.length || 0),
+          0
+        ),
+      },
     };
   }
 }

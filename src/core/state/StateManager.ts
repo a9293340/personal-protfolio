@@ -1,13 +1,13 @@
 /**
  * StateManager - 全域狀態管理器
- * 
+ *
  * 功能：
  * 1. 全域狀態存儲 - 中央化狀態管理
  * 2. 狀態訂閱機制 - 響應式狀態更新
  * 3. 狀態變化通知 - 事件驅動更新
  * 4. 狀態持久化 - 本地存儲整合
  * 5. 模組化狀態 - 命名空間管理
- * 
+ *
  * @author Claude
  * @version 1.0.0
  */
@@ -19,7 +19,10 @@ export interface StateModule<T = any> {
   namespace: string;
   initialState: T;
   mutations?: Record<string, (state: T, payload?: any) => void>;
-  actions?: Record<string, (context: StateActionContext<T>, payload?: any) => any>;
+  actions?: Record<
+    string,
+    (context: StateActionContext<T>, payload?: any) => any
+  >;
   getters?: Record<string, (state: T, rootState?: any) => any>;
   strict?: boolean;
   persistent?: boolean;
@@ -65,34 +68,34 @@ export interface StateManagerConfig {
 
 export class StateManager extends EventEmitter {
   private static instance: StateManager | null = null;
-  
+
   // 狀態存儲
   private state: Record<string, any> = {};
   private modules: Map<string, StateModule> = new Map();
-  
+
   // 訂閱管理
   private subscriptions: Map<string, StateSubscription> = new Map();
   private subscriptionCounter = 0;
-  
+
   // 變更歷史
   private mutations: StateMutation[] = [];
   private snapshots: StateSnapshot[] = [];
-  
+
   // 配置
   private config: StateManagerConfig;
 
   constructor(config: StateManagerConfig = {}) {
     super();
-    
+
     this.config = {
       strict: false,
       devtools: true,
       persistent: false,
       storageKey: 'app-state',
       maxHistorySize: 100,
-      ...config
+      ...config,
     };
-    
+
     this.initializePersistentState();
     this.setupDevtools();
   }
@@ -118,28 +121,30 @@ export class StateManager extends EventEmitter {
    */
   registerModule<T>(module: StateModule<T>): void {
     if (this.modules.has(module.namespace)) {
-      console.warn(`Module ${module.namespace} already registered. Overriding...`);
+      console.warn(
+        `Module ${module.namespace} already registered. Overriding...`
+      );
     }
-    
+
     // 驗證模組
     this.validateModule(module);
-    
+
     // 註冊模組
     this.modules.set(module.namespace, module);
-    
+
     // 初始化狀態
     this.state[module.namespace] = { ...module.initialState };
-    
+
     // 持久化恢復
     if (module.persistent && this.config.persistent) {
       this.restoreModuleState(module.namespace);
     }
-    
+
     console.log(`✅ State module registered: ${module.namespace}`);
-    
+
     this.emit('stateManager:moduleRegistered', {
       namespace: module.namespace,
-      module
+      module,
     });
   }
 
@@ -150,20 +155,20 @@ export class StateManager extends EventEmitter {
     if (!this.modules.has(namespace)) {
       return false;
     }
-    
+
     // 移除狀態
     delete this.state[namespace];
-    
+
     // 移除模組
     this.modules.delete(namespace);
-    
+
     // 清理相關訂閱
     this.cleanupModuleSubscriptions(namespace);
-    
+
     console.log(`🗑️ State module unregistered: ${namespace}`);
-    
+
     this.emit('stateManager:moduleUnregistered', { namespace });
-    
+
     return true;
   }
 
@@ -203,7 +208,7 @@ export class StateManager extends EventEmitter {
   getStateValue<T = any>(path: string): T | undefined {
     const keys = path.split('.');
     let current = this.state;
-    
+
     for (const key of keys) {
       if (current && typeof current === 'object' && key in current) {
         current = current[key];
@@ -211,7 +216,7 @@ export class StateManager extends EventEmitter {
         return undefined;
       }
     }
-    
+
     return current as T;
   }
 
@@ -223,10 +228,10 @@ export class StateManager extends EventEmitter {
     if (!module || !module.getters || !module.getters[getterName]) {
       throw new Error(`Getter ${namespace}/${getterName} not found`);
     }
-    
+
     const getter = module.getters[getterName];
     const moduleState = this.state[namespace];
-    
+
     return getter(moduleState, this.state);
   }
 
@@ -241,49 +246,48 @@ export class StateManager extends EventEmitter {
    */
   commit(type: string, payload?: any): void {
     const [namespace, mutationName] = this.parseMutationType(type);
-    
+
     if (!namespace || !mutationName) {
       throw new Error(`Invalid mutation type: ${type}`);
     }
-    
+
     const module = this.modules.get(namespace);
     if (!module) {
       throw new Error(`Module ${namespace} not found`);
     }
-    
+
     if (!module.mutations || !module.mutations[mutationName]) {
       throw new Error(`Mutation ${type} not found`);
     }
-    
+
     // 嚴格模式檢查
     if (this.config.strict || module.strict) {
       this.ensureStrictMode();
     }
-    
+
     // 執行變更
     const previousState = JSON.parse(JSON.stringify(this.state[namespace]));
-    
+
     try {
       module.mutations[mutationName](this.state[namespace], payload);
-      
+
       // 記錄變更
       const mutation: StateMutation = {
         type,
         namespace,
         payload,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
-      
+
       this.recordMutation(mutation);
-      
+
       // 觸發變更事件
       this.notifyStateChange(mutation, previousState, this.state[namespace]);
-      
+
       // 持久化
       if (module.persistent && this.config.persistent) {
         this.persistModuleState(namespace);
       }
-      
     } catch (error) {
       console.error(`Mutation ${type} failed:`, error);
       // 恢復狀態
@@ -303,46 +307,49 @@ export class StateManager extends EventEmitter {
    */
   async dispatch(type: string, payload?: any): Promise<any> {
     const [namespace, actionName] = this.parseMutationType(type);
-    
+
     if (!namespace || !actionName) {
       throw new Error(`Invalid action type: ${type}`);
     }
-    
+
     const module = this.modules.get(namespace);
     if (!module) {
       throw new Error(`Module ${namespace} not found`);
     }
-    
+
     if (!module.actions || !module.actions[actionName]) {
       throw new Error(`Action ${type} not found`);
     }
-    
+
     // 創建動作上下文
     const context: StateActionContext = {
       state: this.state[namespace],
       rootState: this.state,
       commit: (mutationType: string, mutationPayload?: any) => {
         // 如果沒有命名空間前綴，添加當前模組命名空間
-        const fullType = mutationType.includes('/') ? mutationType : `${namespace}/${mutationType}`;
+        const fullType = mutationType.includes('/')
+          ? mutationType
+          : `${namespace}/${mutationType}`;
         this.commit(fullType, mutationPayload);
       },
       dispatch: (actionType: string, actionPayload?: any) => {
         // 如果沒有命名空間前綴，添加當前模組命名空間
-        const fullType = actionType.includes('/') ? actionType : `${namespace}/${actionType}`;
+        const fullType = actionType.includes('/')
+          ? actionType
+          : `${namespace}/${actionType}`;
         return this.dispatch(fullType, actionPayload);
       },
-      getters: this.getModuleGetters(namespace)
+      getters: this.getModuleGetters(namespace),
     };
-    
+
     try {
       this.emit('stateManager:actionStart', { type, payload });
-      
+
       const result = await module.actions[actionName](context, payload);
-      
+
       this.emit('stateManager:actionEnd', { type, payload, result });
-      
+
       return result;
-      
     } catch (error) {
       this.emit('stateManager:actionError', { type, payload, error });
       throw error;
@@ -367,17 +374,17 @@ export class StateManager extends EventEmitter {
     } = {}
   ): () => void {
     const subscriptionId = `sub_${++this.subscriptionCounter}`;
-    
+
     const subscription: StateSubscription = {
       id: subscriptionId,
       namespace: options.namespace,
       mutation: options.mutation,
       callback,
-      once: options.once
+      once: options.once,
     };
-    
+
     this.subscriptions.set(subscriptionId, subscription);
-    
+
     // 返回取消訂閱函數
     return () => {
       this.subscriptions.delete(subscriptionId);
@@ -428,18 +435,18 @@ export class StateManager extends EventEmitter {
       id: label || `snapshot-${Date.now()}`,
       timestamp: Date.now(),
       state: JSON.parse(JSON.stringify(this.state)),
-      mutations: [...this.mutations]
+      mutations: [...this.mutations],
     };
-    
+
     this.snapshots.push(snapshot);
-    
+
     // 限制快照數量
     if (this.snapshots.length > (this.config.maxHistorySize || 100)) {
       this.snapshots.shift();
     }
-    
+
     this.emit('stateManager:snapshotCreated', { snapshot, label });
-    
+
     return snapshot;
   }
 
@@ -449,15 +456,15 @@ export class StateManager extends EventEmitter {
   restoreSnapshot(snapshot: StateSnapshot): void {
     this.state = JSON.parse(JSON.stringify(snapshot.state));
     this.mutations = [...snapshot.mutations];
-    
+
     this.emit('stateManager:snapshotRestored', { snapshot });
-    
+
     // 通知所有訂閱者
     this.notifyAllSubscribers({
       type: 'SNAPSHOT_RESTORED',
       namespace: '*',
       payload: snapshot,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -493,14 +500,14 @@ export class StateManager extends EventEmitter {
     if (!module || !module.getters) {
       return {};
     }
-    
+
     const getters: Record<string, any> = {};
     const moduleState = this.state[namespace];
-    
+
     Object.keys(module.getters).forEach(key => {
       getters[key] = module.getters![key](moduleState, this.state);
     });
-    
+
     return getters;
   }
 
@@ -509,7 +516,7 @@ export class StateManager extends EventEmitter {
    */
   private recordMutation(mutation: StateMutation): void {
     this.mutations.push(mutation);
-    
+
     // 限制歷史大小
     if (this.mutations.length > (this.config.maxHistorySize || 100)) {
       this.mutations.shift();
@@ -519,15 +526,19 @@ export class StateManager extends EventEmitter {
   /**
    * 通知狀態變更
    */
-  private notifyStateChange(mutation: StateMutation, previousState: any, currentState: any): void {
+  private notifyStateChange(
+    mutation: StateMutation,
+    previousState: any,
+    currentState: any
+  ): void {
     // 通知所有相關訂閱者
     this.notifySubscribers(mutation, currentState);
-    
+
     // 發送全域事件
     this.emit('stateManager:stateChanged', {
       mutation,
       previousState,
-      currentState
+      currentState,
     });
   }
 
@@ -536,32 +547,37 @@ export class StateManager extends EventEmitter {
    */
   private notifySubscribers(mutation: StateMutation, state: any): void {
     const toRemove: string[] = [];
-    
-    this.subscriptions.forEach((subscription) => {
-      const { namespace, mutation: mutationType, callback, once } = subscription;
-      
+
+    this.subscriptions.forEach(subscription => {
+      const {
+        namespace,
+        mutation: mutationType,
+        callback,
+        once,
+      } = subscription;
+
       // 檢查命名空間匹配
       if (namespace && namespace !== mutation.namespace) {
         return;
       }
-      
+
       // 檢查變更類型匹配
       if (mutationType && mutationType !== mutation.type) {
         return;
       }
-      
+
       try {
         callback(mutation, state);
       } catch (error) {
         console.error('Subscription callback error:', error);
       }
-      
+
       // 一次性訂閱清理
       if (once) {
         toRemove.push(subscription.id);
       }
     });
-    
+
     // 清理一次性訂閱
     toRemove.forEach(id => this.subscriptions.delete(id));
   }
@@ -586,11 +602,11 @@ export class StateManager extends EventEmitter {
     if (!module.namespace) {
       throw new Error('Module must have a namespace');
     }
-    
+
     if (!module.initialState) {
       throw new Error('Module must have an initial state');
     }
-    
+
     // 驗證變更名稱不包含斜線
     if (module.mutations) {
       Object.keys(module.mutations).forEach(key => {
@@ -599,7 +615,7 @@ export class StateManager extends EventEmitter {
         }
       });
     }
-    
+
     // 驗證動作名稱不包含斜線
     if (module.actions) {
       Object.keys(module.actions).forEach(key => {
@@ -615,13 +631,13 @@ export class StateManager extends EventEmitter {
    */
   private cleanupModuleSubscriptions(namespace: string): void {
     const toRemove: string[] = [];
-    
+
     this.subscriptions.forEach((subscription, id) => {
       if (subscription.namespace === namespace) {
         toRemove.push(id);
       }
     });
-    
+
     toRemove.forEach(id => this.subscriptions.delete(id));
   }
 
@@ -636,7 +652,7 @@ export class StateManager extends EventEmitter {
    */
   private initializePersistentState(): void {
     if (!this.config.persistent) return;
-    
+
     try {
       const stored = localStorage.getItem(this.config.storageKey!);
       if (stored) {
@@ -653,13 +669,13 @@ export class StateManager extends EventEmitter {
    */
   private persistModuleState(namespace: string): void {
     if (!this.config.persistent) return;
-    
+
     try {
       const current = localStorage.getItem(this.config.storageKey!);
       const data = current ? JSON.parse(current) : {};
-      
+
       data[namespace] = this.state[namespace];
-      
+
       localStorage.setItem(this.config.storageKey!, JSON.stringify(data));
     } catch (error) {
       console.warn(`Failed to persist state for module ${namespace}:`, error);
@@ -675,7 +691,10 @@ export class StateManager extends EventEmitter {
       if (stored) {
         const data = JSON.parse(stored);
         if (data[namespace]) {
-          this.state[namespace] = { ...this.state[namespace], ...data[namespace] };
+          this.state[namespace] = {
+            ...this.state[namespace],
+            ...data[namespace],
+          };
         }
       }
     } catch (error) {
@@ -696,19 +715,37 @@ export class StateManager extends EventEmitter {
     if (!this.config.devtools || typeof window === 'undefined') {
       return;
     }
-    
+
     // 簡單的開發工具支援
     (window as any).__STATE_MANAGER__ = this;
-    
-    this.on('stateManager:stateChanged', ({ mutation, previousState, currentState }) => {
-      if (console.group) {
-        console.group(`%c mutation ${mutation.type}`, 'color: #03A9F4; font-weight: bold');
-        console.log('%c prev state', 'color: #9E9E9E; font-weight: bold', previousState);
-        console.log('%c mutation', 'color: #03A9F4; font-weight: bold', mutation);
-        console.log('%c next state', 'color: #4CAF50; font-weight: bold', currentState);
-        console.groupEnd();
+
+    this.on(
+      'stateManager:stateChanged',
+      ({ mutation, previousState, currentState }) => {
+        if (console.group) {
+          console.group(
+            `%c mutation ${mutation.type}`,
+            'color: #03A9F4; font-weight: bold'
+          );
+          console.log(
+            '%c prev state',
+            'color: #9E9E9E; font-weight: bold',
+            previousState
+          );
+          console.log(
+            '%c mutation',
+            'color: #03A9F4; font-weight: bold',
+            mutation
+          );
+          console.log(
+            '%c next state',
+            'color: #4CAF50; font-weight: bold',
+            currentState
+          );
+          console.groupEnd();
+        }
       }
-    });
+    );
   }
 
   /**
@@ -733,12 +770,12 @@ export class StateManager extends EventEmitter {
     this.mutations = [];
     this.snapshots = [];
     this.subscriptions.clear();
-    
+
     // 重新初始化模組狀態
     this.modules.forEach(module => {
       this.state[module.namespace] = { ...module.initialState };
     });
-    
+
     this.emit('stateManager:reset');
   }
 
@@ -751,7 +788,7 @@ export class StateManager extends EventEmitter {
       subscriptions: this.subscriptions.size,
       mutations: this.mutations.length,
       snapshots: this.snapshots.length,
-      stateSize: JSON.stringify(this.state).length
+      stateSize: JSON.stringify(this.state).length,
     };
   }
 
@@ -763,11 +800,11 @@ export class StateManager extends EventEmitter {
     this.mutations = [];
     this.snapshots = [];
     this.removeAllListeners();
-    
+
     if (typeof window !== 'undefined') {
       delete (window as any).__STATE_MANAGER__;
     }
-    
+
     StateManager.instance = null;
   }
 }

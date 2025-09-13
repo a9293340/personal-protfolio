@@ -4,7 +4,11 @@
  */
 
 import { Router } from './core/router/Router.js';
-import { routesConfig, validateRoutesConfig, getRouteStats } from './config/routes.config.js';
+import {
+  routesConfig,
+  validateRoutesConfig,
+  getRouteStats,
+} from './config/routes.config.js';
 import { NavBar } from './components/layout/NavBar.js';
 import { initializeGlobalNavigation } from './systems/NavigationManager.js';
 
@@ -18,26 +22,26 @@ class GamingPortfolioApp {
     this.navigationManager = null;
     this.initialized = false;
   }
-  
+
   /**
    * 初始化應用程式
    */
   async init() {
     try {
       console.log('🎮 Gaming Portfolio - Starting...');
-      
+
       // 驗證路由配置
       if (!validateRoutesConfig()) {
         throw new Error('Invalid routes configuration');
       }
-      
+
       // 顯示路由統計
       const stats = getRouteStats();
       console.log('📊 Routes Stats:', stats);
-      
+
       // 準備 DOM
       this.prepareDOMElements();
-      
+
       // 初始化導航系統
       await this.initializeNavBar();
 
@@ -46,32 +50,31 @@ class GamingPortfolioApp {
 
       // 初始化路由系統
       await this.initializeRouter();
-      
+
       // 隱藏載入畫面
       this.hideLoadingScreen();
-      
+
       // 啟動路由
       this.router.start();
-      
+
       this.initialized = true;
       console.log('✅ Gaming Portfolio - Initialized successfully!');
-      
     } catch (error) {
       console.error('❌ Application initialization failed:', error);
       this.showError(`Application failed to initialize: ${error.message}`);
     }
   }
-  
+
   /**
    * 準備 DOM 元素
    */
   prepareDOMElements() {
     console.log('📄 Preparing DOM elements...');
-    
-    const loadingScreen = document.getElementById('loading-screen');
+
+    const _loadingScreen = document.getElementById('loading-screen');
     const mainContainer = document.getElementById('main-container');
     const pageContent = document.getElementById('page-content');
-    
+
     // 確保主容器顯示
     if (mainContainer) {
       mainContainer.classList.remove('hidden');
@@ -81,42 +84,42 @@ class GamingPortfolioApp {
       mainContainer.style.background = '#1a1a2e';
       mainContainer.style.minHeight = '100vh';
     }
-    
+
     // 設置頁面內容樣式
     if (pageContent) {
       pageContent.style.background = '#1a1a2e';
       pageContent.style.color = 'white';
       pageContent.style.minHeight = '100vh';
     }
-    
+
     // 設置 body 樣式
     document.body.style.background = '#1a1a2e';
     document.body.style.margin = '0';
     document.body.style.padding = '0';
     document.body.style.minHeight = '100vh';
-    
+
     console.log('✅ DOM elements prepared');
   }
-  
+
   /**
    * 初始化導航系統
    */
   async initializeNavBar() {
     console.log('🧭 Initializing navbar...');
-    
+
     const navContainer = document.getElementById('navigation');
     if (navContainer) {
       this.navbar = new NavBar();
       const navHTML = await this.navbar.render();
       navContainer.innerHTML = navHTML;
       await this.navbar.init();
-      
+
       console.log('✅ NavBar initialized');
     } else {
       console.warn('⚠️ Navigation container not found');
     }
   }
-  
+
   /**
    * 初始化導航管理器
    */
@@ -140,31 +143,31 @@ class GamingPortfolioApp {
     routesConfig.forEach(route => {
       this.router.register(route.path, route.component, {
         title: route.title,
-        meta: route.meta
+        meta: route.meta,
       });
     });
 
     console.log('✅ Router initialized with', routesConfig.length, 'routes');
   }
-  
+
   /**
    * 隱藏載入畫面
    */
   hideLoadingScreen() {
     const loadingScreen = document.getElementById('loading-screen');
-    
+
     if (loadingScreen) {
       loadingScreen.style.display = 'none';
       console.log('✅ Loading screen hidden');
     }
   }
-  
+
   /**
    * 顯示錯誤頁面
    */
   showError(message) {
     const pageContent = document.getElementById('page-content');
-    
+
     if (pageContent) {
       pageContent.innerHTML = `
         <div style="text-align: center; padding: 50px; color: #ff4757;">
@@ -179,14 +182,14 @@ class GamingPortfolioApp {
       `;
     }
   }
-  
+
   /**
    * 獲取路由器實例
    */
   getRouter() {
     return this.router;
   }
-  
+
   /**
    * 銷毀應用程式
    */
@@ -220,17 +223,17 @@ let app = null;
 document.addEventListener('DOMContentLoaded', async () => {
   app = new GamingPortfolioApp();
   await app.init();
-  
+
   // 將應用實例掛載到全域
   window.gamingPortfolioApp = app;
 });
 
 // 全域錯誤處理
-window.addEventListener('error', (event) => {
+window.addEventListener('error', event => {
   console.error('Global error:', event.error);
 });
 
-window.addEventListener('unhandledrejection', (event) => {
+window.addEventListener('unhandledrejection', event => {
   console.error('Unhandled promise rejection:', event.reason);
 });
 

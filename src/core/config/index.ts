@@ -1,6 +1,6 @@
 /**
  * Config 系統入口文件
- * 
+ *
  * 統一匯出所有配置相關類別和類型
  */
 
@@ -37,30 +37,36 @@ export type {
   BatchLoadResult,
   EnvironmentVariables,
   BrowserInfo,
-  TimeInfo
+  TimeInfo,
 } from '../../types/config.js';
 
 /**
  * 創建完整的配置系統實例
  */
-export function createConfigSystem(options: {
-  enableValidator?: boolean;
-  enableLoader?: boolean;
-  defaultLoadOptions?: Partial<import('../../types/config.js').LoadOptions>;
-} = {}) {
+export function createConfigSystem(
+  options: {
+    enableValidator?: boolean;
+    enableLoader?: boolean;
+    defaultLoadOptions?: Partial<import('../../types/config.js').LoadOptions>;
+  } = {}
+) {
   const manager = new ConfigManager();
-  const validator = options.enableValidator !== false ? new ConfigValidator() : undefined;
-  const loader = options.enableLoader !== false ? new ConfigLoader(manager, validator) : undefined;
-  
+  const validator =
+    options.enableValidator !== false ? new ConfigValidator() : undefined;
+  const loader =
+    options.enableLoader !== false
+      ? new ConfigLoader(manager, validator)
+      : undefined;
+
   // 設定預設載入選項
   if (loader && options.defaultLoadOptions) {
     loader.setDefaultOptions(options.defaultLoadOptions);
   }
-  
+
   return {
     manager,
     validator,
-    loader
+    loader,
   };
 }
 

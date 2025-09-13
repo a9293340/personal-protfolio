@@ -20,7 +20,7 @@ export class MobileNavigationEnhancer extends BaseComponent {
       gestureStartY: 0,
       isBottomNavVisible: false,
       currentPage: 0,
-      totalPages: 6
+      totalPages: 6,
     };
 
     // 頁面映射（用於手勢導航）
@@ -30,7 +30,7 @@ export class MobileNavigationEnhancer extends BaseComponent {
       { path: '/skills', name: '技能', icon: '🌲' },
       { path: '/work-projects', name: '任務', icon: '💼' },
       { path: '/personal-projects', name: '作品', icon: '🎴' },
-      { path: '/contact', name: '聯絡', icon: '📮' }
+      { path: '/contact', name: '聯絡', icon: '📮' },
     ];
 
     // 綁定方法
@@ -53,7 +53,7 @@ export class MobileNavigationEnhancer extends BaseComponent {
       swipeThreshold: 50,
       swipeVelocityThreshold: 0.3,
       bottomNavAutoHide: true,
-      adaptiveInterface: true
+      adaptiveInterface: true,
     };
   }
 
@@ -81,14 +81,18 @@ export class MobileNavigationEnhancer extends BaseComponent {
         </div>
 
         <!-- 底部導航欄 (僅移動端) -->
-        ${enableBottomNavigation && this.state.isMobile ? `
+        ${
+          enableBottomNavigation && this.state.isMobile
+            ? `
           <nav class="mobile-bottom-navigation ${isBottomNavVisible ? 'bottom-nav--visible' : ''}"
                id="mobile-bottom-nav"
                role="navigation"
                aria-label="移動端底部導航">
 
             <div class="bottom-nav-container">
-              ${this.pageRoutes.map((route, index) => `
+              ${this.pageRoutes
+                .map(
+                  (route, index) => `
                 <a href="#${route.path}"
                    class="bottom-nav-item ${index === currentPage ? 'bottom-nav-item--active' : ''}"
                    data-page-index="${index}"
@@ -100,12 +104,18 @@ export class MobileNavigationEnhancer extends BaseComponent {
                     <span class="nav-item-label">${route.name}</span>
 
                     <!-- 活躍指示器 -->
-                    ${index === currentPage ? `
+                    ${
+                      index === currentPage
+                        ? `
                       <div class="nav-item-indicator"></div>
-                    ` : ''}
+                    `
+                        : ''
+                    }
                   </div>
                 </a>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
 
             <!-- 底部導航控制 -->
@@ -119,7 +129,9 @@ export class MobileNavigationEnhancer extends BaseComponent {
             </div>
 
           </nav>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- 浮動導航按鈕 (導航隱藏時顯示) -->
         <button class="floating-nav-toggle ${!isBottomNavVisible ? 'floating-nav--visible' : ''}"
@@ -186,25 +198,30 @@ export class MobileNavigationEnhancer extends BaseComponent {
     const screenHeight = window.innerHeight;
 
     // 檢測觸控設備
-    this.state.touchDevice = 'ontouchstart' in window ||
-                             navigator.maxTouchPoints > 0 ||
-                             navigator.msMaxTouchPoints > 0;
+    this.state.touchDevice =
+      'ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      navigator.msMaxTouchPoints > 0;
 
     // 檢測移動設備
-    this.state.isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) ||
-                          screenWidth <= 768;
+    this.state.isMobile =
+      /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+        userAgent
+      ) || screenWidth <= 768;
 
     // 檢測平板
-    this.state.isTablet = screenWidth > 768 && screenWidth <= 1024 && this.state.touchDevice;
+    this.state.isTablet =
+      screenWidth > 768 && screenWidth <= 1024 && this.state.touchDevice;
 
     // 檢測方向
-    this.state.orientation = screenWidth > screenHeight ? 'landscape' : 'portrait';
+    this.state.orientation =
+      screenWidth > screenHeight ? 'landscape' : 'portrait';
 
     console.log('📱 Device detected:', {
       isMobile: this.state.isMobile,
       isTablet: this.state.isTablet,
       touchDevice: this.state.touchDevice,
-      orientation: this.state.orientation
+      orientation: this.state.orientation,
     });
   }
 
@@ -213,7 +230,7 @@ export class MobileNavigationEnhancer extends BaseComponent {
    */
   bindEvents() {
     // 底部導航事件
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       const navItem = e.target.closest('.bottom-nav-item');
       const hideBtn = e.target.closest('#bottom-nav-hide');
       const showBtn = e.target.closest('#floating-nav-toggle');
@@ -244,9 +261,15 @@ export class MobileNavigationEnhancer extends BaseComponent {
     if (!this.state.touchDevice) return;
 
     // 綁定觸控事件
-    document.addEventListener('touchstart', this.handleTouchStart, { passive: false });
-    document.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-    document.addEventListener('touchend', this.handleTouchEnd, { passive: false });
+    document.addEventListener('touchstart', this.handleTouchStart, {
+      passive: false,
+    });
+    document.addEventListener('touchmove', this.handleTouchMove, {
+      passive: false,
+    });
+    document.addEventListener('touchend', this.handleTouchEnd, {
+      passive: false,
+    });
 
     console.log('📱 Swipe navigation initialized');
   }
@@ -316,9 +339,11 @@ export class MobileNavigationEnhancer extends BaseComponent {
     this.hideGestureIndicator();
 
     // 判斷滑動手勢
-    if (Math.abs(deltaX) > Math.abs(deltaY) &&
-        (Math.abs(deltaX) > this.config.swipeThreshold || velocity > this.config.swipeVelocityThreshold)) {
-
+    if (
+      Math.abs(deltaX) > Math.abs(deltaY) &&
+      (Math.abs(deltaX) > this.config.swipeThreshold ||
+        velocity > this.config.swipeVelocityThreshold)
+    ) {
       if (deltaX > 0) {
         // 向右滑動 - 上一頁
         this.navigateToPreviousPage();
@@ -374,7 +399,8 @@ export class MobileNavigationEnhancer extends BaseComponent {
    */
   navigateToPreviousPage() {
     const currentIndex = this.getCurrentPageIndex();
-    const previousIndex = currentIndex > 0 ? currentIndex - 1 : this.pageRoutes.length - 1;
+    const previousIndex =
+      currentIndex > 0 ? currentIndex - 1 : this.pageRoutes.length - 1;
     const previousPage = this.pageRoutes[previousIndex];
 
     this.navigateToPage(previousPage.path);
@@ -386,7 +412,8 @@ export class MobileNavigationEnhancer extends BaseComponent {
    */
   navigateToNextPage() {
     const currentIndex = this.getCurrentPageIndex();
-    const nextIndex = currentIndex < this.pageRoutes.length - 1 ? currentIndex + 1 : 0;
+    const nextIndex =
+      currentIndex < this.pageRoutes.length - 1 ? currentIndex + 1 : 0;
     const nextPage = this.pageRoutes[nextIndex];
 
     this.navigateToPage(nextPage.path);
@@ -462,7 +489,7 @@ export class MobileNavigationEnhancer extends BaseComponent {
     const types = {
       mobile: '📱 手機',
       tablet: '📱 平板',
-      desktop: '💻 桌機'
+      desktop: '💻 桌機',
     };
     return types[this.getDeviceType()] || '🖥️ 未知';
   }
@@ -571,7 +598,7 @@ export class MobileNavigationEnhancer extends BaseComponent {
     const patterns = {
       light: 10,
       medium: 20,
-      heavy: 50
+      heavy: 50,
     };
 
     navigator.vibrate(patterns[type] || patterns.medium);
@@ -618,7 +645,7 @@ export class MobileNavigationEnhancer extends BaseComponent {
       currentPage: this.state.currentPage,
       totalPages: this.state.totalPages,
       swipeEnabled: this.config.enableSwipeNavigation,
-      bottomNavEnabled: this.config.enableBottomNavigation
+      bottomNavEnabled: this.config.enableBottomNavigation,
     };
   }
 
@@ -630,15 +657,22 @@ export class MobileNavigationEnhancer extends BaseComponent {
     document.removeEventListener('touchstart', this.handleTouchStart);
     document.removeEventListener('touchmove', this.handleTouchMove);
     document.removeEventListener('touchend', this.handleTouchEnd);
-    window.removeEventListener('orientationchange', this.handleOrientationChange);
+    window.removeEventListener(
+      'orientationchange',
+      this.handleOrientationChange
+    );
     window.removeEventListener('resize', this.handleResize);
     window.removeEventListener('scroll', this.handleScroll);
 
     // 清理樣式類別
     document.body.classList.remove(
-      'device-mobile', 'device-tablet', 'device-desktop',
-      'orientation-portrait', 'orientation-landscape',
-      'touch-device', 'no-touch'
+      'device-mobile',
+      'device-tablet',
+      'device-desktop',
+      'orientation-portrait',
+      'orientation-landscape',
+      'touch-device',
+      'no-touch'
     );
 
     super.destroy();

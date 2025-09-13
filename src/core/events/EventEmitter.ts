@@ -1,8 +1,8 @@
 /**
  * EventEmitter - 事件發射器基類
- * 
+ *
  * 提供事件監聽、觸發、移除等基礎功能
- * 
+ *
  * @author Claude
  * @version 1.0.0
  */
@@ -78,7 +78,7 @@ export class EventEmitter {
 
     // 複製監聽器列表以避免在執行過程中被修改
     const listenersClone = [...listeners];
-    
+
     for (const listener of listenersClone) {
       try {
         listener(...args);

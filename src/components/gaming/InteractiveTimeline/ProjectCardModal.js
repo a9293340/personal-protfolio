@@ -1,6 +1,6 @@
 /**
  * ProjectCardModal - 飛出卡片彈窗組件
- * 
+ *
  * 職責：
  * - 專案詳情卡片的創建和渲染
  * - 卡片飛出動畫（從節點到模態框）
@@ -14,17 +14,17 @@ import { BaseComponent } from '../../../core/components/BaseComponent.js';
 export class ProjectCardModal extends BaseComponent {
   constructor(config = {}) {
     super();
-    
+
     this.config = this.mergeConfig(this.getDefaultConfig(), config);
     this.state = this.getInitialState();
-    
+
     // 卡片相關屬性
     this.currentCard = null;
     this.backdrop = null;
     this.sourceNode = null;
     this.isAnimating = false;
     this.isOpen = false;
-    
+
     // 事件回調
     this.onCardOpen = null;
     this.onCardClose = null;
@@ -42,9 +42,10 @@ export class ProjectCardModal extends BaseComponent {
         borderRadius: '15px',
         background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
         border: '2px solid rgba(212, 175, 55, 0.6)',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.3)'
+        boxShadow:
+          '0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.3)',
       },
-      
+
       // 動畫配置
       animations: {
         enabled: true,
@@ -55,35 +56,35 @@ export class ProjectCardModal extends BaseComponent {
         easing: {
           flyOut: 'power2.out',
           flyBack: 'power2.inOut',
-          modal: 'power1.inOut'
-        }
+          modal: 'power1.inOut',
+        },
       },
-      
+
       // 飛出軌跡配置
       trajectory: {
         type: 'arc', // 'arc', 'spiral', 'direct'
         intensity: 1.2,
         rotations: 2,
-        randomOffset: 0.1
+        randomOffset: 0.1,
       },
-      
+
       // 互動配置
       interaction: {
         closeOnOutsideClick: true,
         closeOnEscape: true,
         preventBodyScroll: false, // 暫時關閉，避免影響背景顯示
-        focusManagement: true
+        focusManagement: true,
       },
-      
+
       // 背景遮罩配置
       backdrop: {
         enabled: true,
         background: 'rgba(0, 0, 0, 0.7)', // 使用較深的黑色半透明遮罩
         backdropFilter: '', // 暫時移除模糊效果避免變白
         zIndex: 9999,
-        animationDuration: 0.3
+        animationDuration: 0.3,
       },
-      
+
       // 內容配置
       content: {
         showThumbnail: true,
@@ -91,24 +92,24 @@ export class ProjectCardModal extends BaseComponent {
         showStats: true,
         showLinks: true,
         showDescription: true,
-        maxDescriptionLength: 500
+        maxDescriptionLength: 500,
       },
-      
+
       // 響應式配置
       responsive: {
         mobile: {
           card: { width: '98%', height: '95%' },
-          animations: { flyOutDuration: 0.6 }
+          animations: { flyOutDuration: 0.6 },
         },
         tablet: {
           card: { width: '90%', height: '85%' },
-          animations: { flyOutDuration: 0.7 }
+          animations: { flyOutDuration: 0.7 },
         },
         desktop: {
           card: { width: '95%', height: '92%' },
-          animations: { flyOutDuration: 0.8 }
-        }
-      }
+          animations: { flyOutDuration: 0.8 },
+        },
+      },
     };
   }
 
@@ -118,7 +119,7 @@ export class ProjectCardModal extends BaseComponent {
       animationTimeline: null,
       isModalOpen: false,
       focusedElement: null,
-      scrollPosition: 0
+      scrollPosition: 0,
     };
   }
 
@@ -130,9 +131,9 @@ export class ProjectCardModal extends BaseComponent {
     this.onCardOpen = callbacks.onCardOpen || (() => {});
     this.onCardClose = callbacks.onCardClose || (() => {});
     this.onCardClick = callbacks.onCardClick || (() => {});
-    
+
     this.setupGlobalEventListeners();
-    
+
     console.log('[ProjectCardModal] 卡片模態框系統初始化完成');
   }
 
@@ -142,7 +143,7 @@ export class ProjectCardModal extends BaseComponent {
   setupGlobalEventListeners() {
     // ESC 鍵關閉
     if (this.config.interaction.closeOnEscape) {
-      document.addEventListener('keydown', (event) => {
+      document.addEventListener('keydown', event => {
         if (event.key === 'Escape' && this.isOpen) {
           this.closeCard();
         }
@@ -164,29 +165,29 @@ export class ProjectCardModal extends BaseComponent {
 
     this.sourceNode = sourceNode;
     this.isAnimating = true;
-    
+
     // 防止重複創建
     this.removeExistingCard();
-    
+
     // 創建背景遮罩
     if (this.config.backdrop.enabled) {
       this.createBackdrop();
     }
-    
+
     // 創建卡片
     const card = this.createProjectCard(project, sourceNode);
     this.currentCard = card;
-    
+
     // 計算飛出軌跡
     const trajectory = this.calculateCardTrajectory(sourceNode);
-    
+
     // 執行飛出動畫
     this.animateCardFlyOut(card, trajectory, () => {
       this.isAnimating = false;
       this.isOpen = true;
       this.onCardOpen(project, sourceNode, index);
     });
-    
+
     console.log(`[ProjectCardModal] 顯示專案卡片: ${project.title}`);
   }
 
@@ -196,7 +197,7 @@ export class ProjectCardModal extends BaseComponent {
   createBackdrop() {
     this.backdrop = document.createElement('div');
     this.backdrop.className = 'project-card-backdrop';
-    
+
     this.backdrop.style.cssText = `
       position: fixed;
       top: 0;
@@ -209,21 +210,21 @@ export class ProjectCardModal extends BaseComponent {
       transition: opacity ${this.config.backdrop.animationDuration}s ease;
       cursor: pointer;
     `;
-    
+
     // 點擊背景關閉
     if (this.config.interaction.closeOnOutsideClick) {
       this.backdrop.addEventListener('click', () => {
         this.closeCard();
       });
     }
-    
+
     document.body.appendChild(this.backdrop);
-    
+
     // 淡入動畫
     requestAnimationFrame(() => {
       this.backdrop.style.opacity = '1';
     });
-    
+
     console.log('[ProjectCardModal] 背景遮罩已創建');
   }
 
@@ -233,27 +234,27 @@ export class ProjectCardModal extends BaseComponent {
   createProjectCard(project, sourceNode) {
     const card = document.createElement('div');
     card.className = 'project-flying-card';
-    
+
     // 獲取節點的世界座標作為起始位置
     const nodeRect = sourceNode.getBoundingClientRect();
     const startX = nodeRect.left + nodeRect.width / 2;
     const startY = nodeRect.top + nodeRect.height / 2;
-    
+
     // 設置卡片樣式
     this.applyCardStyles(card);
-    
+
     // 設置初始位置（節點位置）
     card.style.left = `${startX}px`;
     card.style.top = `${startY}px`;
     card.style.transform = 'translate(-50%, -50%) scale(0.1)';
     card.style.opacity = '0';
-    
+
     // 創建卡片內容
     this.createCardContent(card, project);
-    
+
     // 設置事件監聽
     this.setupCardEventListeners(card, project);
-    
+
     document.body.appendChild(card);
     return card;
   }
@@ -263,7 +264,7 @@ export class ProjectCardModal extends BaseComponent {
    */
   applyCardStyles(card) {
     const cardConfig = this.getCurrentCardConfig();
-    
+
     card.style.cssText = `
       position: fixed;
       width: ${cardConfig.width};
@@ -296,70 +297,106 @@ export class ProjectCardModal extends BaseComponent {
       </div>
       
       <div class="card-body">
-        ${this.config.content.showThumbnail && project.thumbnail ? `
+        ${
+          this.config.content.showThumbnail && project.thumbnail
+            ? `
           <div class="card-thumbnail">
             <img src="${project.thumbnail}" alt="${project.title}" loading="lazy">
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         
-        ${this.config.content.showDescription ? `
+        ${
+          this.config.content.showDescription
+            ? `
           <div class="card-description">
             <h3>專案描述</h3>
             <p>${this.truncateDescription(project.description || project.shortDescription || '暫無描述')}</p>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         
-        ${this.config.content.showTechnology && project.technologies ? `
+        ${
+          this.config.content.showTechnology && project.technologies
+            ? `
           <div class="card-technologies">
             <h3>技術棧</h3>
             <div class="tech-tags">
-              ${project.technologies.map(tech => `
+              ${project.technologies
+                .map(
+                  tech => `
                 <span class="tech-tag ${tech.category || 'default'}">${tech.name || tech}</span>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         
-        ${this.config.content.showStats && project.stats ? `
+        ${
+          this.config.content.showStats && project.stats
+            ? `
           <div class="card-stats">
             <h3>專案統計</h3>
             <div class="stats-grid">
-              ${Object.entries(project.stats).map(([key, value]) => `
+              ${Object.entries(project.stats)
+                .map(
+                  ([key, value]) => `
                 <div class="stat-item">
                   <div class="stat-label">${this.getStatLabel(key)}</div>
                   <div class="stat-value">${value}</div>
                 </div>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         
-        ${project.highlights ? `
+        ${
+          project.highlights
+            ? `
           <div class="card-highlights">
             <h3>技術亮點</h3>
             <ul class="highlights-list">
               ${project.highlights.map(highlight => `<li>${highlight}</li>`).join('')}
             </ul>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         
-        ${this.config.content.showLinks && project.links ? `
+        ${
+          this.config.content.showLinks && project.links
+            ? `
           <div class="card-links">
             <h3>相關連結</h3>
             <div class="links-grid">
-              ${Object.entries(project.links).map(([key, url]) => `
+              ${Object.entries(project.links)
+                .map(
+                  ([key, url]) => `
                 <a href="${url}" target="_blank" rel="noopener noreferrer" class="link-btn ${key}">
                   ${this.getLinkIcon(key)} ${this.getLinkLabel(key)}
                 </a>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     `;
-    
+
     card.innerHTML = content;
-    
+
     // 添加內部樣式
     this.addCardInternalStyles(card);
   }
@@ -371,30 +408,37 @@ export class ProjectCardModal extends BaseComponent {
     // 關閉按鈕
     const closeBtn = card.querySelector('.card-close-btn');
     if (closeBtn) {
-      closeBtn.addEventListener('click', (event) => {
+      closeBtn.addEventListener('click', event => {
         event.stopPropagation();
         this.closeCard();
       });
     }
-    
+
     // 點擊外部關閉 (現在由背景遮罩處理，這裡做為備用)
-    if (this.config.interaction.closeOnOutsideClick && !this.config.backdrop.enabled) {
+    if (
+      this.config.interaction.closeOnOutsideClick &&
+      !this.config.backdrop.enabled
+    ) {
       setTimeout(() => {
-        document.addEventListener('click', this.handleOutsideClick.bind(this, card), { once: true });
+        document.addEventListener(
+          'click',
+          this.handleOutsideClick.bind(this, card),
+          { once: true }
+        );
       }, 100);
     }
-    
+
     // 防止卡片內部點擊冒泡
-    card.addEventListener('click', (event) => {
+    card.addEventListener('click', event => {
       event.stopPropagation();
       this.onCardClick(project, event);
     });
-    
+
     // 焦點管理
     if (this.config.interaction.focusManagement) {
       this.manageFocus(card);
     }
-    
+
     // 防止背景滾動（使用更溫和的方式，避免影響背景顯示）
     if (this.config.interaction.preventBodyScroll) {
       this.state.scrollPosition = window.pageYOffset;
@@ -413,26 +457,30 @@ export class ProjectCardModal extends BaseComponent {
     const nodeRect = sourceNode.getBoundingClientRect();
     const startX = nodeRect.left + nodeRect.width / 2;
     const startY = nodeRect.top + nodeRect.height / 2;
-    
+
     // 目標位置（螢幕中心）
     const endX = window.innerWidth / 2;
     const endY = window.innerHeight / 2;
-    
+
     const trajectory = {
       start: { x: startX, y: startY },
       end: { x: endX, y: endY },
-      distance: Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2))
+      distance: Math.sqrt(
+        Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)
+      ),
     };
-    
+
     // 根據軌跡類型添加控制點
     if (this.config.trajectory.type === 'arc') {
       const midX = (startX + endX) / 2;
-      const midY = (startY + endY) / 2 - trajectory.distance * 0.3 * this.config.trajectory.intensity;
+      const midY =
+        (startY + endY) / 2 -
+        trajectory.distance * 0.3 * this.config.trajectory.intensity;
       trajectory.control = { x: midX, y: midY };
     } else if (this.config.trajectory.type === 'spiral') {
       trajectory.rotations = this.config.trajectory.rotations;
     }
-    
+
     return trajectory;
   }
 
@@ -449,23 +497,27 @@ export class ProjectCardModal extends BaseComponent {
       onComplete();
       return;
     }
-    
+
     const duration = this.getCurrentAnimationDuration('flyOut');
     const timeline = gsap.timeline({
-      onComplete: onComplete
+      onComplete: onComplete,
     });
-    
+
     // 第一階段：從節點飛出並旋轉
     timeline.to(card, {
-      x: trajectory.control ? trajectory.control.x - trajectory.start.x : trajectory.end.x - trajectory.start.x,
-      y: trajectory.control ? trajectory.control.y - trajectory.start.y : trajectory.end.y - trajectory.start.y,
+      x: trajectory.control
+        ? trajectory.control.x - trajectory.start.x
+        : trajectory.end.x - trajectory.start.x,
+      y: trajectory.control
+        ? trajectory.control.y - trajectory.start.y
+        : trajectory.end.y - trajectory.start.y,
       scale: 0.6,
       rotation: 360 * this.config.trajectory.rotations,
       opacity: 0.8,
       duration: duration * 0.6,
-      ease: this.config.animations.easing.flyOut
+      ease: this.config.animations.easing.flyOut,
     });
-    
+
     // 第二階段：到達中心並展開
     if (trajectory.control) {
       timeline.to(card, {
@@ -475,7 +527,7 @@ export class ProjectCardModal extends BaseComponent {
         rotation: 360 * this.config.trajectory.rotations,
         opacity: 1,
         duration: duration * 0.4,
-        ease: 'power2.out'
+        ease: 'power2.out',
       });
     } else {
       timeline.to(card, {
@@ -483,23 +535,30 @@ export class ProjectCardModal extends BaseComponent {
         rotation: 360 * this.config.trajectory.rotations,
         opacity: 1,
         duration: duration * 0.4,
-        ease: 'power2.out'
+        ease: 'power2.out',
       });
     }
-    
+
     // 內容動畫
-    const cardContent = card.querySelectorAll('.card-header > *, .card-body > *');
-    timeline.fromTo(cardContent, {
-      y: 20,
-      opacity: 0
-    }, {
-      y: 0,
-      opacity: 1,
-      stagger: this.config.animations.stagger,
-      duration: 0.3,
-      ease: 'power2.out'
-    }, '-=0.2');
-    
+    const cardContent = card.querySelectorAll(
+      '.card-header > *, .card-body > *'
+    );
+    timeline.fromTo(
+      cardContent,
+      {
+        y: 20,
+        opacity: 0,
+      },
+      {
+        y: 0,
+        opacity: 1,
+        stagger: this.config.animations.stagger,
+        duration: 0.3,
+        ease: 'power2.out',
+      },
+      '-=0.2'
+    );
+
     this.state.animationTimeline = timeline;
   }
 
@@ -508,10 +567,10 @@ export class ProjectCardModal extends BaseComponent {
    */
   closeCard() {
     if (!this.currentCard || this.isAnimating) return;
-    
+
     this.isAnimating = true;
     this.isOpen = false;
-    
+
     // 執行收回動畫
     this.animateCardFlyBack(this.currentCard, () => {
       this.removeCard(this.currentCard);
@@ -530,44 +589,56 @@ export class ProjectCardModal extends BaseComponent {
     if (this.backdrop) {
       this.backdrop.style.opacity = '0';
     }
-    
+
     if (!window.gsap || !this.sourceNode) {
       this.removeCard(card);
       onComplete();
       return;
     }
-    
+
     const sourceRect = this.sourceNode.getBoundingClientRect();
     const currentRect = card.getBoundingClientRect();
-    
-    const targetX = sourceRect.left + sourceRect.width / 2 - currentRect.left - currentRect.width / 2;
-    const targetY = sourceRect.top + sourceRect.height / 2 - currentRect.top - currentRect.height / 2;
-    
+
+    const targetX =
+      sourceRect.left +
+      sourceRect.width / 2 -
+      currentRect.left -
+      currentRect.width / 2;
+    const targetY =
+      sourceRect.top +
+      sourceRect.height / 2 -
+      currentRect.top -
+      currentRect.height / 2;
+
     const duration = this.getCurrentAnimationDuration('flyBack');
-    
+
     const timeline = gsap.timeline({
-      onComplete: onComplete
+      onComplete: onComplete,
     });
-    
+
     // 淡出內容
     timeline.to(card.querySelectorAll('.card-header > *, .card-body > *'), {
       y: -20,
       opacity: 0,
       stagger: this.config.animations.stagger / 2,
       duration: 0.2,
-      ease: 'power2.in'
+      ease: 'power2.in',
     });
-    
+
     // 收回到節點
-    timeline.to(card, {
-      x: targetX,
-      y: targetY,
-      scale: 0.1,
-      rotation: -180,
-      opacity: 0,
-      duration: duration,
-      ease: this.config.animations.easing.flyBack
-    }, '-=0.1');
+    timeline.to(
+      card,
+      {
+        x: targetX,
+        y: targetY,
+        scale: 0.1,
+        rotation: -180,
+        opacity: 0,
+        duration: duration,
+        ease: this.config.animations.easing.flyBack,
+      },
+      '-=0.1'
+    );
   }
 
   /**
@@ -587,7 +658,7 @@ export class ProjectCardModal extends BaseComponent {
     if (existingCard) {
       this.removeCard(existingCard);
     }
-    
+
     // 移除現有背景遮罩
     const existingBackdrop = document.querySelector('.project-card-backdrop');
     if (existingBackdrop) {
@@ -602,12 +673,12 @@ export class ProjectCardModal extends BaseComponent {
     if (card && card.parentNode) {
       card.parentNode.removeChild(card);
     }
-    
+
     // 移除背景遮罩
     if (this.backdrop) {
       this.removeBackdrop(this.backdrop);
     }
-    
+
     // 恢復背景滾動
     if (this.config.interaction.preventBodyScroll) {
       document.body.style.overflow = '';
@@ -617,7 +688,7 @@ export class ProjectCardModal extends BaseComponent {
       // document.body.style.width = '';
       // window.scrollTo(0, this.state.scrollPosition);
     }
-    
+
     // 恢復焦點
     if (this.state.focusedElement) {
       this.state.focusedElement.focus();
@@ -632,7 +703,7 @@ export class ProjectCardModal extends BaseComponent {
     if (backdrop && backdrop.parentNode) {
       backdrop.parentNode.removeChild(backdrop);
     }
-    
+
     if (this.backdrop === backdrop) {
       this.backdrop = null;
     }
@@ -643,25 +714,28 @@ export class ProjectCardModal extends BaseComponent {
    */
   manageFocus(card) {
     this.state.focusedElement = document.activeElement;
-    
+
     // 使卡片可獲得焦點
     card.setAttribute('tabindex', '-1');
     card.focus();
-    
+
     // 限制焦點在模態框內
     const focusableElements = card.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
-    
+
     const firstFocusable = focusableElements[0];
     const lastFocusable = focusableElements[focusableElements.length - 1];
-    
-    card.addEventListener('keydown', (event) => {
+
+    card.addEventListener('keydown', event => {
       if (event.key === 'Tab') {
         if (event.shiftKey && document.activeElement === firstFocusable) {
           event.preventDefault();
           lastFocusable.focus();
-        } else if (!event.shiftKey && document.activeElement === lastFocusable) {
+        } else if (
+          !event.shiftKey &&
+          document.activeElement === lastFocusable
+        ) {
           event.preventDefault();
           firstFocusable.focus();
         }
@@ -679,7 +753,7 @@ export class ProjectCardModal extends BaseComponent {
       fullstack: '全端開發',
       architecture: '系統架構',
       opensource: '開源專案',
-      default: '其他'
+      default: '其他',
     };
     return categoryMap[category] || categoryMap.default;
   }
@@ -705,7 +779,7 @@ export class ProjectCardModal extends BaseComponent {
       teamSize: '團隊規模',
       linesOfCode: '代碼行數',
       services: '服務數量',
-      apis: 'API 數量'
+      apis: 'API 數量',
     };
     return labelMap[key] || key;
   }
@@ -719,7 +793,7 @@ export class ProjectCardModal extends BaseComponent {
       demo: '🚀',
       documentation: '📚',
       article: '📝',
-      website: '🌐'
+      website: '🌐',
     };
     return iconMap[type] || '🔗';
   }
@@ -733,7 +807,7 @@ export class ProjectCardModal extends BaseComponent {
       demo: '線上演示',
       documentation: '說明文檔',
       article: '技術文章',
-      website: '官方網站'
+      website: '官方網站',
     };
     return labelMap[type] || type;
   }
@@ -752,7 +826,7 @@ export class ProjectCardModal extends BaseComponent {
   getCurrentAnimationDuration(type) {
     const responsive = this.config.responsive[this.state.currentBreakpoint];
     const animations = { ...this.config.animations, ...responsive?.animations };
-    
+
     switch (type) {
       case 'flyOut':
         return animations.flyOutDuration;
@@ -967,7 +1041,7 @@ export class ProjectCardModal extends BaseComponent {
         }
       }
     `;
-    
+
     card.appendChild(style);
   }
 
@@ -980,7 +1054,7 @@ export class ProjectCardModal extends BaseComponent {
       isAnimating: this.isAnimating,
       currentCard: this.currentCard,
       sourceNode: this.sourceNode,
-      breakpoint: this.state.currentBreakpoint
+      breakpoint: this.state.currentBreakpoint,
     };
   }
 
@@ -992,16 +1066,16 @@ export class ProjectCardModal extends BaseComponent {
     if (this.isOpen) {
       this.closeCard();
     }
-    
+
     // 停止動畫
     if (this.state.animationTimeline) {
       this.state.animationTimeline.kill();
     }
-    
+
     if (window.gsap && this.currentCard) {
       gsap.killTweensOf(this.currentCard);
     }
-    
+
     // 清理引用
     this.currentCard = null;
     this.backdrop = null;
@@ -1009,7 +1083,7 @@ export class ProjectCardModal extends BaseComponent {
     this.onCardOpen = null;
     this.onCardClose = null;
     this.onCardClick = null;
-    
+
     console.log('[ProjectCardModal] 卡片模態框系統已銷毀');
   }
 }

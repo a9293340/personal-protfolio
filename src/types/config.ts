@@ -3,7 +3,13 @@
  */
 
 // 基礎類型
-export type ConfigValue = string | number | boolean | null | ConfigObject | ConfigArray;
+export type ConfigValue =
+  | string
+  | number
+  | boolean
+  | null
+  | ConfigObject
+  | ConfigArray;
 export interface ConfigObject {
   [key: string]: ConfigValue;
 }
@@ -68,7 +74,13 @@ export interface ConfigValidationResult {
 
 // Schema 驗證相關類型
 export interface ValidationError {
-  type: 'required' | 'type' | 'constraint' | 'custom' | 'custom_function' | 'custom_function_error';
+  type:
+    | 'required'
+    | 'type'
+    | 'constraint'
+    | 'custom'
+    | 'custom_function'
+    | 'custom_function_error';
   path: string;
   message: string;
   value?: any;
@@ -110,7 +122,9 @@ export interface MultiValidationResult {
 
 // Schema 定義類型
 export type ValidatorFunction = (value: any, constraint?: any) => string | null;
-export type CustomValidateFunction = (value: any) => string | boolean | null | undefined;
+export type CustomValidateFunction = (
+  value: any
+) => string | boolean | null | undefined;
 
 export interface SchemaConstraints {
   min?: number;

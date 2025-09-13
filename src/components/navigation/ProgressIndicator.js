@@ -19,51 +19,71 @@ export class ProgressIndicator extends BaseComponent {
         icon: '🏰',
         weight: 10,
         category: 'hub',
-        description: '冒險的起點'
+        description: '冒險的起點',
       },
       '/about': {
         name: '角色檔案',
         icon: '👤',
         weight: 20,
         category: 'character',
-        description: '了解角色背景'
+        description: '了解角色背景',
       },
       '/skills': {
         name: '技能樹',
         icon: '🌲',
         weight: 25,
         category: 'skills',
-        description: '掌握專業技能'
+        description: '掌握專業技能',
       },
       '/work-projects': {
         name: '職業任務',
         icon: '💼',
         weight: 25,
         category: 'quests',
-        description: '完成工作挑戰'
+        description: '完成工作挑戰',
       },
       '/personal-projects': {
         name: '個人收藏',
         icon: '🎴',
         weight: 15,
         category: 'collection',
-        description: '探索個人作品'
+        description: '探索個人作品',
       },
       '/contact': {
         name: '聯絡據點',
         icon: '📮',
         weight: 5,
         category: 'social',
-        description: '建立聯繫'
-      }
+        description: '建立聯繫',
+      },
     };
 
     // 里程碑配置
     this.milestoneConfig = [
-      { threshold: 25, name: '初級探索者', icon: '🌱', description: '開始了解基本資訊' },
-      { threshold: 50, name: '中級冒險者', icon: '⚔️', description: '深入了解技能和經歷' },
-      { threshold: 75, name: '高級探索者', icon: '🏆', description: '全面了解專業能力' },
-      { threshold: 100, name: '完全探索者', icon: '👑', description: '完整體驗所有內容' }
+      {
+        threshold: 25,
+        name: '初級探索者',
+        icon: '🌱',
+        description: '開始了解基本資訊',
+      },
+      {
+        threshold: 50,
+        name: '中級冒險者',
+        icon: '⚔️',
+        description: '深入了解技能和經歷',
+      },
+      {
+        threshold: 75,
+        name: '高級探索者',
+        icon: '🏆',
+        description: '全面了解專業能力',
+      },
+      {
+        threshold: 100,
+        name: '完全探索者',
+        icon: '👑',
+        description: '完整體驗所有內容',
+      },
     ];
 
     // 綁定方法
@@ -84,7 +104,7 @@ export class ProgressIndicator extends BaseComponent {
       visitedPages: new Set(savedState.visitedPages || []),
       currentPageIndex: 0,
       isVisible: true,
-      milestones: savedState.milestones || []
+      milestones: savedState.milestones || [],
     };
   }
 
@@ -94,7 +114,8 @@ export class ProgressIndicator extends BaseComponent {
   loadStateFromStorage() {
     try {
       const storageType = this.config?.storageType || 'localStorage';
-      const storage = storageType === 'sessionStorage' ? sessionStorage : localStorage;
+      const storage =
+        storageType === 'sessionStorage' ? sessionStorage : localStorage;
       const saved = storage.getItem('progress-indicator-state');
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -113,12 +134,13 @@ export class ProgressIndicator extends BaseComponent {
   saveStateToStorage() {
     try {
       const storageType = this.config?.storageType || 'localStorage';
-      const storage = storageType === 'sessionStorage' ? sessionStorage : localStorage;
+      const storage =
+        storageType === 'sessionStorage' ? sessionStorage : localStorage;
       const stateToSave = {
         currentProgress: this.state.currentProgress,
         totalPages: this.state.totalPages,
         visitedPages: Array.from(this.state.visitedPages),
-        milestones: this.state.milestones
+        milestones: this.state.milestones,
       };
       storage.setItem('progress-indicator-state', JSON.stringify(stateToSave));
       console.log(`💾 Saved state to ${storageType}:`, stateToSave);
@@ -138,7 +160,7 @@ export class ProgressIndicator extends BaseComponent {
       animationEnabled: true,
       style: 'gaming', // gaming, minimal, elegant
       position: 'top-right', // top-right, top-left, bottom-right, bottom-left
-      storageType: 'localStorage' // 'localStorage' | 'sessionStorage'
+      storageType: 'localStorage', // 'localStorage' | 'sessionStorage'
     };
   }
 
@@ -156,15 +178,15 @@ export class ProgressIndicator extends BaseComponent {
       showPercentage,
       showVisitedCount,
       style,
-      position
+      position,
     } = this.config;
 
     const {
       currentProgress,
       visitedPages,
       totalPages,
-      milestones,
-      isVisible
+      milestones: _milestones,
+      isVisible,
     } = this.state;
 
     if (!isVisible) {
@@ -179,7 +201,7 @@ export class ProgressIndicator extends BaseComponent {
       visitedPagesSize: visitedPages.size,
       totalPages,
       currentMilestone: currentMilestone ? currentMilestone.name : 'none',
-      nextMilestone: nextMilestone ? nextMilestone.name : 'none'
+      nextMilestone: nextMilestone ? nextMilestone.name : 'none',
     });
 
     return `
@@ -213,19 +235,23 @@ export class ProgressIndicator extends BaseComponent {
                       transform="rotate(-90 60 60)"/>
 
               <!-- 當前里程碑圖標 -->
-              ${currentMilestone ? `
+              ${
+                currentMilestone
+                  ? `
                 <foreignObject x="35" y="35" width="50" height="50">
                   <div class="progress-milestone-icon">
                     ${currentMilestone.icon}
                   </div>
                 </foreignObject>
-              ` : `
+              `
+                  : `
                 <foreignObject x="45" y="45" width="30" height="30">
                   <div class="progress-percentage">
                     ${Math.round(currentProgress)}%
                   </div>
                 </foreignObject>
-              `}
+              `
+              }
             </svg>
 
             <!-- 脈衝動畫 -->
@@ -234,43 +260,63 @@ export class ProgressIndicator extends BaseComponent {
 
           <!-- 進度資訊 -->
           <div class="progress-info">
-            ${showPercentage ? `
+            ${
+              showPercentage
+                ? `
               <div class="progress-percentage-text">
                 ${Math.round(currentProgress)}%
               </div>
-            ` : ''}
+            `
+                : ''
+            }
 
-            ${showVisitedCount ? `
+            ${
+              showVisitedCount
+                ? `
               <div class="progress-stats">
                 <span class="progress-visited">${visitedPages.size}</span>
                 <span class="progress-separator">/</span>
                 <span class="progress-total">${totalPages}</span>
                 <span class="progress-label">頁面</span>
               </div>
-            ` : ''}
+            `
+                : ''
+            }
 
-            ${currentMilestone ? `
+            ${
+              currentMilestone
+                ? `
               <div class="progress-milestone-name">
                 ${currentMilestone.name}
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
 
         </div>
 
         <!-- 里程碑指示器 -->
-        ${showMilestones ? `
+        ${
+          showMilestones
+            ? `
           <div class="progress-milestones">
-            ${this.milestoneConfig.map(milestone => `
+            ${this.milestoneConfig
+              .map(
+                milestone => `
               <div class="progress-milestone ${currentProgress >= milestone.threshold ? 'progress-milestone--achieved' : ''}"
                    data-threshold="${milestone.threshold}"
                    title="${milestone.name}: ${milestone.description}">
                 <span class="milestone-icon">${milestone.icon}</span>
                 <div class="milestone-progress">${milestone.threshold}%</div>
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
 
         <!-- 詳情切換按鈕 -->
@@ -289,7 +335,9 @@ export class ProgressIndicator extends BaseComponent {
 
             <!-- 頁面完成狀態 -->
             <div class="details-pages">
-              ${Object.entries(this.pageConfig).map(([path, config]) => `
+              ${Object.entries(this.pageConfig)
+                .map(
+                  ([path, config]) => `
                 <div class="details-page ${visitedPages.has(path) ? 'details-page--visited' : ''}" data-path="${path}">
                   <span class="page-icon">${config.icon}</span>
                   <span class="page-name">${config.name}</span>
@@ -297,7 +345,9 @@ export class ProgressIndicator extends BaseComponent {
                     ${visitedPages.has(path) ? '✅' : '⭕'}
                   </span>
                 </div>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
 
             <!-- 成就統計 -->
@@ -333,8 +383,11 @@ export class ProgressIndicator extends BaseComponent {
     await super.init();
 
     // 設置元素引用
-    this.element = document.querySelector('.progress-indicator') ||
-                   document.getElementById('progress-indicator-container')?.querySelector('.progress-indicator');
+    this.element =
+      document.querySelector('.progress-indicator') ||
+      document
+        .getElementById('progress-indicator-container')
+        ?.querySelector('.progress-indicator');
 
     // 計算總頁面數並更新狀態
     const totalPages = Object.keys(this.pageConfig).length;
@@ -345,7 +398,7 @@ export class ProgressIndicator extends BaseComponent {
 
     this.setState({
       totalPages,
-      visitedPages
+      visitedPages,
     });
 
     // 綁定事件
@@ -371,7 +424,7 @@ export class ProgressIndicator extends BaseComponent {
       totalPages,
       currentPath,
       visitedPages: visitedPages.size,
-      element: this.element ? 'found' : 'not found'
+      element: this.element ? 'found' : 'not found',
     });
 
     // 在全局暴露實例，方便調試
@@ -381,15 +434,24 @@ export class ProgressIndicator extends BaseComponent {
     const currentStats = this.getProgressStats();
     if (currentStats.milestonesAchieved >= this.milestoneConfig.length) {
       console.log('🔧 ALL MILESTONES ALREADY ACHIEVED!');
-      console.log('🔧 To test upgrade notifications, use: window.progressIndicator.resetProgress()');
-      console.log('🔧 Then visit pages or use: window.progressIndicator.setProgressForTesting(25) for 25%');
+      console.log(
+        '🔧 To test upgrade notifications, use: window.progressIndicator.resetProgress()'
+      );
+      console.log(
+        '🔧 Then visit pages or use: window.progressIndicator.setProgressForTesting(25) for 25%'
+      );
     } else {
-      console.log('🔧 Milestones available to achieve:', this.milestoneConfig.length - currentStats.milestonesAchieved);
+      console.log(
+        '🔧 Milestones available to achieve:',
+        this.milestoneConfig.length - currentStats.milestonesAchieved
+      );
     }
 
     console.log('🔧 Debug commands:');
     console.log('   • resetProgress() - Reset all progress');
-    console.log('   • setProgressForTesting(percentage) - Set progress to specific %');
+    console.log(
+      '   • setProgressForTesting(percentage) - Set progress to specific %'
+    );
     console.log('   • showProgressDebug() - Show full debug info');
   }
 
@@ -403,7 +465,7 @@ export class ProgressIndicator extends BaseComponent {
     }
 
     // 創建新的事件處理器
-    this.boundEventHandler = (e) => {
+    this.boundEventHandler = e => {
       const toggleBtn = e.target.closest('#progress-toggle');
       const closeBtn = e.target.closest('#progress-details-close');
       const details = document.getElementById('progress-details');
@@ -458,7 +520,12 @@ export class ProgressIndicator extends BaseComponent {
     this.setState({ visitedPages: newVisitedPages });
 
     if (wasNewPage) {
-      console.log('✨ New page visited:', currentPath, 'Total:', newVisitedPages.size);
+      console.log(
+        '✨ New page visited:',
+        currentPath,
+        'Total:',
+        newVisitedPages.size
+      );
 
       // 當有新頁面被訪問時，立即更新進度並檢查里程碑
       setTimeout(() => {
@@ -513,12 +580,12 @@ export class ProgressIndicator extends BaseComponent {
       totalWeight,
       visitedWeight,
       progress,
-      finalProgress
+      finalProgress,
     });
 
     // 更新狀態
     this.setState({
-      currentProgress: finalProgress
+      currentProgress: finalProgress,
     });
 
     // 檢查里程碑
@@ -542,18 +609,22 @@ export class ProgressIndicator extends BaseComponent {
     console.log('🔍 Checking milestones:', {
       currentProgress,
       existingMilestones: milestones.map(m => `${m.name}(${m.threshold}%)`),
-      allMilestones: this.milestoneConfig.map(m => `${m.name}(${m.threshold}%)`)
+      allMilestones: this.milestoneConfig.map(
+        m => `${m.name}(${m.threshold}%)`
+      ),
     });
 
     this.milestoneConfig.forEach(milestone => {
-      const alreadyAchieved = milestones.find(m => m.threshold === milestone.threshold);
+      const alreadyAchieved = milestones.find(
+        m => m.threshold === milestone.threshold
+      );
       const shouldAchieve = currentProgress >= milestone.threshold;
 
       console.log(`📊 Milestone ${milestone.name}:`, {
         threshold: milestone.threshold,
         currentProgress,
         shouldAchieve,
-        alreadyAchieved: !!alreadyAchieved
+        alreadyAchieved: !!alreadyAchieved,
       });
 
       if (shouldAchieve && !alreadyAchieved) {
@@ -586,13 +657,17 @@ export class ProgressIndicator extends BaseComponent {
    */
   getCurrentMilestone() {
     const { currentProgress } = this.state;
-    const achieved = this.milestoneConfig.filter(m => currentProgress >= m.threshold);
+    const achieved = this.milestoneConfig.filter(
+      m => currentProgress >= m.threshold
+    );
     const current = achieved.length > 0 ? achieved[achieved.length - 1] : null;
 
     console.log('🏆 getCurrentMilestone:', {
       currentProgress,
       achievedMilestones: achieved.map(m => `${m.name}(${m.threshold}%)`),
-      currentMilestone: current ? `${current.name}(${current.threshold}%)` : 'none'
+      currentMilestone: current
+        ? `${current.name}(${current.threshold}%)`
+        : 'none',
     });
 
     return current;
@@ -634,14 +709,14 @@ export class ProgressIndicator extends BaseComponent {
 
     // 動畫效果 - 根據配置決定是否啟用動畫
     if (window.gsap && this.config.animationEnabled) {
-      window.gsap.timeline()
-        .fromTo(notification,
+      window.gsap
+        .timeline()
+        .fromTo(
+          notification,
           { opacity: 0, scale: 0.5, y: 50 },
-          { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.7)" }
+          { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: 'back.out(1.7)' }
         )
-        .to(notification,
-          { opacity: 0, y: -50, duration: 0.3, delay: 3 }
-        )
+        .to(notification, { opacity: 0, y: -50, duration: 0.3, delay: 3 })
         .call(() => {
           if (document.body.contains(notification)) {
             document.body.removeChild(notification);
@@ -675,14 +750,15 @@ export class ProgressIndicator extends BaseComponent {
       window.gsap.to(progressCircle, {
         strokeDashoffset: 339.292 * (1 - this.state.currentProgress / 100),
         duration: 1,
-        ease: "power2.out"
+        ease: 'power2.out',
       });
 
       // 脈衝動畫
       if (progressPulse) {
-        window.gsap.fromTo(progressPulse,
+        window.gsap.fromTo(
+          progressPulse,
           { scale: 1, opacity: 0.8 },
-          { scale: 1.2, opacity: 0, duration: 0.6, ease: "power2.out" }
+          { scale: 1.2, opacity: 0, duration: 0.6, ease: 'power2.out' }
         );
       }
     }
@@ -716,7 +792,8 @@ export class ProgressIndicator extends BaseComponent {
 
     // 清除存儲（根據配置決定用哪種存儲）
     const storageType = this.config?.storageType || 'localStorage';
-    const storage = storageType === 'sessionStorage' ? sessionStorage : localStorage;
+    const storage =
+      storageType === 'sessionStorage' ? sessionStorage : localStorage;
     storage.removeItem('progress-indicator-state');
 
     // 重置狀態到初始值
@@ -724,7 +801,7 @@ export class ProgressIndicator extends BaseComponent {
       currentProgress: 0,
       totalPages: this.state.totalPages,
       visitedPages: new Set(),
-      milestones: []
+      milestones: [],
     });
 
     this.saveStateToStorage();
@@ -742,12 +819,14 @@ export class ProgressIndicator extends BaseComponent {
     const routePaths = Object.keys(this.pageConfig);
     const visitedPages = new Set(routePaths.slice(0, targetPages));
 
-    console.log(`🧪 Setting progress to ${percentage}% (${targetPages}/${this.state.totalPages} pages)`);
+    console.log(
+      `🧪 Setting progress to ${percentage}% (${targetPages}/${this.state.totalPages} pages)`
+    );
 
     this.setState({
       currentProgress: percentage,
       visitedPages: visitedPages,
-      milestones: [] // 清空里程碑讓它重新計算
+      milestones: [], // 清空里程碑讓它重新計算
     });
 
     this.saveStateToStorage();
@@ -764,10 +843,12 @@ export class ProgressIndicator extends BaseComponent {
     const stats = this.getProgressStats();
     console.log('📊 Current Progress Debug:', {
       state: this.state,
-      localStorage: JSON.parse(localStorage.getItem('progress-indicator-state') || '{}'),
+      localStorage: JSON.parse(
+        localStorage.getItem('progress-indicator-state') || '{}'
+      ),
       stats,
       pageConfig: this.pageConfig,
-      milestoneConfig: this.milestoneConfig
+      milestoneConfig: this.milestoneConfig,
     });
     return stats;
   }
@@ -776,7 +857,8 @@ export class ProgressIndicator extends BaseComponent {
    * 獲取進度統計
    */
   getProgressStats() {
-    const { currentProgress, visitedPages, totalPages, milestones } = this.state;
+    const { currentProgress, visitedPages, totalPages, milestones } =
+      this.state;
 
     return {
       progress: currentProgress,
@@ -785,7 +867,7 @@ export class ProgressIndicator extends BaseComponent {
       completionRate: visitedPages.size / totalPages,
       milestonesAchieved: milestones.length,
       currentMilestone: this.getCurrentMilestone(),
-      nextMilestone: this.getNextMilestone()
+      nextMilestone: this.getNextMilestone(),
     };
   }
 
@@ -796,7 +878,9 @@ export class ProgressIndicator extends BaseComponent {
     try {
       // 更新進度百分比
       const progressPercentage = document.querySelector('.progress-percentage');
-      const progressPercentageText = document.querySelector('.progress-percentage-text');
+      const progressPercentageText = document.querySelector(
+        '.progress-percentage-text'
+      );
 
       if (progressPercentage) {
         progressPercentage.textContent = `${Math.round(progress)}%`;
@@ -833,7 +917,7 @@ export class ProgressIndicator extends BaseComponent {
       console.log('🔍 DOM elements found:', {
         milestoneIcon: milestoneIcon ? 'found' : 'not found',
         milestoneName: milestoneName ? 'found' : 'not found',
-        currentMilestone: currentMilestone ? currentMilestone.name : 'none'
+        currentMilestone: currentMilestone ? currentMilestone.name : 'none',
       });
 
       // 如果有當前里程碑，更新圖標和名稱
@@ -852,20 +936,27 @@ export class ProgressIndicator extends BaseComponent {
       }
 
       // 更新里程碑進度條
-      document.querySelectorAll('.progress-milestone').forEach((milestoneEl, index) => {
-        const threshold = parseInt(milestoneEl.getAttribute('data-threshold'));
-        if (progress >= threshold) {
-          milestoneEl.classList.add('progress-milestone--achieved');
-        } else {
-          milestoneEl.classList.remove('progress-milestone--achieved');
-        }
-      });
+      document
+        .querySelectorAll('.progress-milestone')
+        .forEach((milestoneEl, _index) => {
+          const threshold = parseInt(
+            milestoneEl.getAttribute('data-threshold')
+          );
+          if (progress >= threshold) {
+            milestoneEl.classList.add('progress-milestone--achieved');
+          } else {
+            milestoneEl.classList.remove('progress-milestone--achieved');
+          }
+        });
 
       // 更新詳情面板內容
       this.updateDetailsPanelContent();
 
-      console.log('📊 Progress DOM updated:', { progress, visitedCount, currentMilestone: currentMilestone?.name });
-
+      console.log('📊 Progress DOM updated:', {
+        progress,
+        visitedCount,
+        currentMilestone: currentMilestone?.name,
+      });
     } catch (error) {
       console.error('📊 Progress DOM update failed:', error);
     }
@@ -880,8 +971,10 @@ export class ProgressIndicator extends BaseComponent {
       const currentMilestone = this.getCurrentMilestone();
 
       // 更新頁面狀態
-      Object.entries(this.pageConfig).forEach(([path, config]) => {
-        const pageEl = document.querySelector(`.details-page[data-path="${path}"]`);
+      Object.entries(this.pageConfig).forEach(([path, _config]) => {
+        const pageEl = document.querySelector(
+          `.details-page[data-path="${path}"]`
+        );
         if (pageEl) {
           const isVisited = visitedPages.has(path);
           const statusEl = pageEl.querySelector('.page-status');
@@ -911,14 +1004,15 @@ export class ProgressIndicator extends BaseComponent {
               valueEl.textContent = `${visitedPages.size}/${totalPages}`;
               break;
             case '當前等級':
-              valueEl.textContent = currentMilestone ? currentMilestone.name : '新手';
+              valueEl.textContent = currentMilestone
+                ? currentMilestone.name
+                : '新手';
               break;
           }
         }
       });
 
       console.log('📋 Details panel content updated');
-
     } catch (error) {
       console.error('📋 Details panel update failed:', error);
     }

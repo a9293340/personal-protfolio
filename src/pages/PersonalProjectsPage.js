@@ -28,9 +28,9 @@ export class PersonalProjectsPage extends BaseComponent {
         layout: {
           desktop: 4,
           tablet: 3,
-          mobile: 2
-        }
-      }
+          mobile: 2,
+        },
+      },
     };
   }
 
@@ -39,7 +39,7 @@ export class PersonalProjectsPage extends BaseComponent {
    */
   async render() {
     const config = this.mergeConfig();
-    
+
     return `
       <div class="personal-projects-page">
         <!-- 頁面頭部 -->
@@ -179,19 +179,18 @@ export class PersonalProjectsPage extends BaseComponent {
    */
   async init() {
     await super.init();
-    
+
     try {
       // 設置全局實例
       window.personalProjectsPageInstance = this;
-      
+
       // 初始化個人專案畫廊
       await this.initializeGallery();
-      
+
       // 綁定UI事件
       this.bindEvents();
-      
+
       console.log('🎴 PersonalProjectsPage initialized');
-      
     } catch (error) {
       console.error('❌ PersonalProjectsPage initialization failed:', error);
       this.showError('個人專案卡牌載入失敗');
@@ -204,10 +203,10 @@ export class PersonalProjectsPage extends BaseComponent {
   async initializeGallery() {
     // 等待DOM完全渲染
     await new Promise(resolve => setTimeout(resolve, 0));
-    
+
     const container = document.getElementById('gallery-container');
     const loading = document.getElementById('gallery-loading');
-    
+
     if (!container) {
       throw new Error('卡牌畫廊容器不存在');
     }
@@ -215,25 +214,28 @@ export class PersonalProjectsPage extends BaseComponent {
     try {
       // 顯示載入狀態
       loading.style.display = 'flex';
-      
+
       // 創建個人專案畫廊組件
       const config = this.mergeConfig();
-      
+
       const galleryConfig = {
         container: container,
         layout: config.gallery.layout,
         summoning: {
           enabled: config.gallery.enableSummoning,
           triggerOnClick: true,
-          legendaryOnly: false
-        }
+          legendaryOnly: false,
+        },
         // 使用默認的 filters 和 sorting 配置
       };
-      
+
       this.personalProjectsGallery = new PersonalProjectsGallery(galleryConfig);
 
-      console.log('🔧 PersonalProjectsGallery 實例已創建:', this.personalProjectsGallery);
-      
+      console.log(
+        '🔧 PersonalProjectsGallery 實例已創建:',
+        this.personalProjectsGallery
+      );
+
       // 容器狀態檢查
       if (!container.offsetWidth || !container.offsetHeight) {
         console.warn('⚠️ 卡牌畫廊容器可能不可見');
@@ -241,15 +243,17 @@ export class PersonalProjectsPage extends BaseComponent {
 
       // 監聽畫廊事件
       this.setupGalleryEvents();
-      
+
       // 初始化畫廊組件
       await this.personalProjectsGallery.init();
-      
+
       // 隱藏載入狀態
       loading.style.display = 'none';
-      
-      console.log('✅ PersonalProjectsGallery initialized in PersonalProjectsPage');
-      
+
+      console.log(
+        '✅ PersonalProjectsGallery initialized in PersonalProjectsPage'
+      );
+
       // 驗證卡牌內容是否正確載入
       setTimeout(() => {
         const galleryGrid = container.querySelector('.gallery-grid');
@@ -260,7 +264,6 @@ export class PersonalProjectsPage extends BaseComponent {
           console.warn('⚠️ 個人專案卡牌未正確載入');
         }
       }, 1000);
-      
     } catch (error) {
       console.error('❌ Gallery initialization failed:', error);
       loading.innerHTML = `
@@ -281,30 +284,30 @@ export class PersonalProjectsPage extends BaseComponent {
     if (!this.personalProjectsGallery) return;
 
     // 卡牌點擊事件
-    this.personalProjectsGallery.on?.('card-clicked', (data) => {
+    this.personalProjectsGallery.on?.('card-clicked', data => {
       console.log('🎴 卡牌點擊事件:', data);
       this.handleCardClick(data);
     });
 
     // 召喚動畫開始事件
-    this.personalProjectsGallery.on?.('summoning-started', (data) => {
+    this.personalProjectsGallery.on?.('summoning-started', data => {
       console.log('🌟 召喚動畫開始:', data);
       this.highlightSummoningGuide(data.rarity);
     });
 
     // 召喚動畫結束事件
-    this.personalProjectsGallery.on?.('summoning-completed', (data) => {
+    this.personalProjectsGallery.on?.('summoning-completed', data => {
       console.log('✨ 召喚動畫完成:', data);
       this.resetSummoningGuide();
     });
 
     // 篩選變更事件
-    this.personalProjectsGallery.on?.('filter-changed', (data) => {
+    this.personalProjectsGallery.on?.('filter-changed', data => {
       console.log('🔍 篩選變更:', data);
     });
 
     // 錯誤處理
-    this.personalProjectsGallery.on?.('gallery-error', (data) => {
+    this.personalProjectsGallery.on?.('gallery-error', data => {
       console.error('🚨 畫廊錯誤:', data.error);
       this.showError('個人專案畫廊運行錯誤: ' + data.error.message);
     });
@@ -315,7 +318,7 @@ export class PersonalProjectsPage extends BaseComponent {
    */
   handleCardClick(data) {
     console.log('🎯 處理卡牌點擊:', data.projectId);
-    
+
     // 高亮召喚指南相應稀有度
     this.highlightSummoningGuide(data.rarity);
   }
@@ -326,24 +329,24 @@ export class PersonalProjectsPage extends BaseComponent {
   highlightSummoningGuide(rarity) {
     const guide = document.getElementById('summoning-guide-panel');
     const items = guide?.querySelectorAll('.guide-item');
-    
+
     if (!items) return;
 
     // 移除所有高亮
     items.forEach(item => item.classList.remove('highlight'));
-    
+
     // 高亮對應稀有度
     const rarityMap = {
-      'legendary': 0,
-      'superRare': 1,
-      'rare': 2,
-      'normal': 3
+      legendary: 0,
+      superRare: 1,
+      rare: 2,
+      normal: 3,
     };
-    
+
     const index = rarityMap[rarity];
     if (items[index]) {
       items[index].classList.add('highlight');
-      
+
       // 3秒後移除高亮
       setTimeout(() => {
         items[index].classList.remove('highlight');
@@ -357,7 +360,7 @@ export class PersonalProjectsPage extends BaseComponent {
   resetSummoningGuide() {
     const guide = document.getElementById('summoning-guide-panel');
     const items = guide?.querySelectorAll('.guide-item');
-    
+
     if (items) {
       items.forEach(item => item.classList.remove('highlight'));
     }
@@ -394,7 +397,7 @@ export class PersonalProjectsPage extends BaseComponent {
     // 說明彈窗關閉
     const infoCloseBtn = document.getElementById('info-close-btn');
     const infoBackdrop = document.getElementById('info-backdrop');
-    
+
     if (infoCloseBtn) {
       infoCloseBtn.addEventListener('click', () => {
         this.hideInfo();
@@ -408,7 +411,7 @@ export class PersonalProjectsPage extends BaseComponent {
     }
 
     // ESC 鍵處理
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', event => {
       if (event.key === 'Escape') {
         if (this.isInfoModalOpen) {
           this.hideInfo();
@@ -422,7 +425,10 @@ export class PersonalProjectsPage extends BaseComponent {
    * 重置篩選條件
    */
   resetFilters() {
-    if (this.personalProjectsGallery && this.personalProjectsGallery.resetFilters) {
+    if (
+      this.personalProjectsGallery &&
+      this.personalProjectsGallery.resetFilters
+    ) {
       this.personalProjectsGallery.resetFilters();
       console.log('🔄 篩選條件已重置');
     }
@@ -432,7 +438,10 @@ export class PersonalProjectsPage extends BaseComponent {
    * 顯示隨機卡牌
    */
   showRandomCard() {
-    if (this.personalProjectsGallery && this.personalProjectsGallery.showRandomCard) {
+    if (
+      this.personalProjectsGallery &&
+      this.personalProjectsGallery.showRandomCard
+    ) {
       this.personalProjectsGallery.showRandomCard();
       console.log('🎲 顯示隨機卡牌');
     } else {
@@ -476,7 +485,7 @@ export class PersonalProjectsPage extends BaseComponent {
    */
   showError(message) {
     console.error('🚨 PersonalProjectsPage Error:', message);
-    
+
     const loading = document.getElementById('gallery-loading');
     if (loading) {
       loading.innerHTML = `
@@ -507,7 +516,13 @@ export class PersonalProjectsPage extends BaseComponent {
       }
 
       // 移除事件監聽器
-      const buttons = ['reset-filters-btn', 'random-card-btn', 'info-btn', 'info-close-btn', 'info-backdrop'];
+      const buttons = [
+        'reset-filters-btn',
+        'random-card-btn',
+        'info-btn',
+        'info-close-btn',
+        'info-backdrop',
+      ];
       buttons.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
@@ -520,7 +535,6 @@ export class PersonalProjectsPage extends BaseComponent {
 
       super.destroy();
       console.log('🎴 PersonalProjectsPage destroyed');
-      
     } catch (error) {
       console.error('❌ PersonalProjectsPage destroy error:', error);
     }

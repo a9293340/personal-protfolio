@@ -97,7 +97,11 @@
   color: #d4af37;
   font-weight: 600;
   text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 208, 63, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(212, 175, 55, 0.1),
+    rgba(244, 208, 63, 0.1)
+  );
   padding: 2px 4px;
   border-radius: 3px;
   position: relative;
@@ -207,7 +211,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
+  background-image:
     linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
   background-size: 50px 50px;
@@ -220,8 +224,17 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 25% 25%, rgba(212, 175, 55, 0.1) 1px, transparent 1px),
-              radial-gradient(circle at 75% 75%, rgba(212, 175, 55, 0.05) 1px, transparent 1px);
+  background:
+    radial-gradient(
+      circle at 25% 25%,
+      rgba(212, 175, 55, 0.1) 1px,
+      transparent 1px
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      rgba(212, 175, 55, 0.05) 1px,
+      transparent 1px
+    );
   background-size: 100px 100px;
   animation: particleFloat 15s ease-in-out infinite;
 }
@@ -272,10 +285,12 @@
 }
 
 @keyframes blink {
-  0%, 50% {
+  0%,
+  50% {
     opacity: 1;
   }
-  51%, 100% {
+  51%,
+  100% {
     opacity: 0;
   }
 }
@@ -290,7 +305,8 @@
 }
 
 @keyframes particleFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
     opacity: 0.3;
   }
@@ -306,21 +322,21 @@
     padding: 80px 15px 20px;
     min-height: 90vh;
   }
-  
+
   .hero-main {
     margin-bottom: 30px;
   }
-  
+
   .hero-typing {
     min-height: 50px;
     margin-bottom: 30px;
   }
-  
+
   .hero-actions {
     gap: 15px;
     margin-top: 30px;
   }
-  
+
   .cta-button {
     padding: 12px 24px;
     font-size: 1rem;
@@ -333,7 +349,7 @@
     flex-direction: column;
     align-items: center;
   }
-  
+
   .cta-button {
     width: 100%;
     max-width: 280px;

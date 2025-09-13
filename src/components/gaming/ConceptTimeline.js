@@ -25,7 +25,7 @@ export class ConceptTimeline extends BaseComponent {
    */
   async render() {
     const config = { ...this.getDefaultConfig(), ...this.options };
-    const { metadata, stages, visual } = config;
+    const { metadata, stages, visual: _visual } = config;
 
     return `
       <div class="concept-timeline" id="concept-timeline">
@@ -67,11 +67,12 @@ export class ConceptTimeline extends BaseComponent {
    * 渲染時間軸階段節點
    */
   renderTimelineStages(stages) {
-    return stages.map((stage, index) => {
-      const statusClass = this.getStageStatusClass(stage.status);
-      const progressWidth = this.calculateProgress(index, stages.length);
-      
-      return `
+    return stages
+      .map((stage, index) => {
+        const statusClass = this.getStageStatusClass(stage.status);
+        const progressWidth = this.calculateProgress(index, stages.length);
+
+        return `
         <div class="timeline-stage ${statusClass}" 
              data-stage="${stage.id}"
              data-index="${index}">
@@ -100,9 +101,12 @@ export class ConceptTimeline extends BaseComponent {
             <div class="tooltip-title">${stage.title}</div>
             <div class="tooltip-description">${stage.description}</div>
             <div class="tooltip-achievements">
-              ${stage.keyAchievements.map(achievement => 
-                `<span class="achievement-tag">✓ ${achievement}</span>`
-              ).join('')}
+              ${stage.keyAchievements
+                .map(
+                  achievement =>
+                    `<span class="achievement-tag">✓ ${achievement}</span>`
+                )
+                .join('')}
             </div>
             <div class="tooltip-tech">
               <span class="tech-label">技術重點:</span>
@@ -111,7 +115,8 @@ export class ConceptTimeline extends BaseComponent {
           </div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
   }
 
   /**
@@ -120,8 +125,8 @@ export class ConceptTimeline extends BaseComponent {
   getStageStatusClass(status) {
     const statusMap = {
       completed: 'stage-completed',
-      current: 'stage-current', 
-      target: 'stage-target'
+      current: 'stage-current',
+      target: 'stage-target',
     };
     return statusMap[status] || 'stage-default';
   }
@@ -139,16 +144,16 @@ export class ConceptTimeline extends BaseComponent {
    */
   async init() {
     await super.init();
-    
+
     // 等待DOM渲染
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // 初始化互動功能
     this.initStageInteractions();
-    
+
     // 啟動載入動畫
     this.animateStagesLoad();
-    
+
     console.log('⏰ ConceptTimeline initialized with minimal design');
   }
 
@@ -157,19 +162,19 @@ export class ConceptTimeline extends BaseComponent {
    */
   initStageInteractions() {
     const stages = document.querySelectorAll('.timeline-stage');
-    
+
     stages.forEach(stage => {
       // 懸停顯示詳細信息
-      stage.addEventListener('mouseenter', (e) => {
+      stage.addEventListener('mouseenter', _e => {
         this.showStageTooltip(stage);
       });
-      
-      stage.addEventListener('mouseleave', (e) => {
+
+      stage.addEventListener('mouseleave', _e => {
         this.hideStageTooltip(stage);
       });
-      
+
       // 點擊顯示預覽
-      stage.addEventListener('click', (e) => {
+      stage.addEventListener('click', _e => {
         const stageId = stage.dataset.stage;
         this.showStagePreview(stageId);
       });
@@ -179,11 +184,11 @@ export class ConceptTimeline extends BaseComponent {
     const modal = document.getElementById('stage-preview-modal');
     const closeBtn = modal?.querySelector('.modal-close');
     const backdrop = modal?.querySelector('.modal-backdrop');
-    
+
     if (closeBtn) {
       closeBtn.addEventListener('click', () => this.hideStagePreview());
     }
-    
+
     if (backdrop) {
       backdrop.addEventListener('click', () => this.hideStagePreview());
     }
@@ -215,12 +220,12 @@ export class ConceptTimeline extends BaseComponent {
   showStagePreview(stageId) {
     const config = this.getDefaultConfig();
     const stage = config.stages.find(s => s.id === stageId);
-    
+
     if (!stage) return;
 
     const modal = document.getElementById('stage-preview-modal');
     const modalBody = document.getElementById('modal-body');
-    
+
     if (!modal || !modalBody) return;
 
     // 生成預覽內容
@@ -241,18 +246,18 @@ export class ConceptTimeline extends BaseComponent {
       <div class="preview-achievements">
         <h5>關鍵成就</h5>
         <ul>
-          ${stage.keyAchievements.map(achievement => 
-            `<li>✓ ${achievement}</li>`
-          ).join('')}
+          ${stage.keyAchievements
+            .map(achievement => `<li>✓ ${achievement}</li>`)
+            .join('')}
         </ul>
       </div>
       
       <div class="preview-technologies">
         <h5>主要技術</h5>
         <div class="tech-tags">
-          ${stage.technologies.map(tech => 
-            `<span class="tech-tag">${tech}</span>`
-          ).join('')}
+          ${stage.technologies
+            .map(tech => `<span class="tech-tag">${tech}</span>`)
+            .join('')}
         </div>
       </div>
       
@@ -283,7 +288,7 @@ export class ConceptTimeline extends BaseComponent {
    */
   animateStagesLoad() {
     const stages = document.querySelectorAll('.timeline-stage');
-    
+
     stages.forEach((stage, index) => {
       setTimeout(() => {
         stage.classList.add('stage-loaded');
@@ -300,7 +305,7 @@ export class ConceptTimeline extends BaseComponent {
     stages.forEach(stage => {
       stage.replaceWith(stage.cloneNode(true));
     });
-    
+
     super.destroy();
     console.log('⏰ ConceptTimeline destroyed');
   }

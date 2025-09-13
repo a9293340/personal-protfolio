@@ -73,11 +73,19 @@
   .grid-responsive {
     gap: var(--space-6);
   }
-  
-  .sm\:grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
-  .sm\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .sm\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .sm\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .sm\:grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .sm\:grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 /* 中等屏幕 (平板) */
@@ -85,12 +93,22 @@
   .grid-responsive {
     gap: var(--space-6);
   }
-  
-  .md\:grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
-  .md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .md\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .md\:grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+  .md\:grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .md\:grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .md\:grid-cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }
 
 /* 大屏幕 (桌面) */
@@ -98,135 +116,301 @@
   .grid-responsive {
     gap: var(--space-8);
   }
-  
-  .lg\:grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
-  .lg\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .lg\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .lg\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .lg\:grid-cols-5 { grid-template-columns: repeat(5, 1fr); }
-  .lg\:grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
-  .lg\:grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+
+  .lg\:grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .lg\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .lg\:grid-cols-5 {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .lg\:grid-cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .lg\:grid-cols-12 {
+    grid-template-columns: repeat(12, 1fr);
+  }
 }
 
 /* 超大屏幕 */
 @media (min-width: 1280px) {
-  .xl\:grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
-  .xl\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .xl\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .xl\:grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .xl\:grid-cols-5 { grid-template-columns: repeat(5, 1fr); }
-  .xl\:grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
-  .xl\:grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+  .xl\:grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .xl\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .xl\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .xl\:grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .xl\:grid-cols-5 {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .xl\:grid-cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .xl\:grid-cols-12 {
+    grid-template-columns: repeat(12, 1fr);
+  }
 }
 
 /* ===== 響應式工具類別 ===== */
 
 /* 隱藏/顯示 */
 @media (max-width: 639px) {
-  .xs\:hidden { display: none !important; }
+  .xs\:hidden {
+    display: none !important;
+  }
 }
 
 @media (min-width: 640px) and (max-width: 767px) {
-  .sm\:only { display: block !important; }
-  .sm\:hidden { display: none !important; }
+  .sm\:only {
+    display: block !important;
+  }
+  .sm\:hidden {
+    display: none !important;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
-  .md\:only { display: block !important; }
-  .md\:hidden { display: none !important; }
+  .md\:only {
+    display: block !important;
+  }
+  .md\:hidden {
+    display: none !important;
+  }
 }
 
 @media (min-width: 1024px) and (max-width: 1279px) {
-  .lg\:only { display: block !important; }
-  .lg\:hidden { display: none !important; }
+  .lg\:only {
+    display: block !important;
+  }
+  .lg\:hidden {
+    display: none !important;
+  }
 }
 
 @media (min-width: 1280px) {
-  .xl\:only { display: block !important; }
-  .xl\:hidden { display: none !important; }
+  .xl\:only {
+    display: block !important;
+  }
+  .xl\:hidden {
+    display: none !important;
+  }
 }
 
 /* 響應式文字大小 */
 @media (min-width: 640px) {
-  .sm\:text-xs { font-size: var(--font-size-xs); }
-  .sm\:text-sm { font-size: var(--font-size-sm); }
-  .sm\:text-base { font-size: var(--font-size-base); }
-  .sm\:text-lg { font-size: var(--font-size-lg); }
-  .sm\:text-xl { font-size: var(--font-size-xl); }
-  .sm\:text-2xl { font-size: var(--font-size-2xl); }
+  .sm\:text-xs {
+    font-size: var(--font-size-xs);
+  }
+  .sm\:text-sm {
+    font-size: var(--font-size-sm);
+  }
+  .sm\:text-base {
+    font-size: var(--font-size-base);
+  }
+  .sm\:text-lg {
+    font-size: var(--font-size-lg);
+  }
+  .sm\:text-xl {
+    font-size: var(--font-size-xl);
+  }
+  .sm\:text-2xl {
+    font-size: var(--font-size-2xl);
+  }
 }
 
 @media (min-width: 768px) {
-  .md\:text-xs { font-size: var(--font-size-xs); }
-  .md\:text-sm { font-size: var(--font-size-sm); }
-  .md\:text-base { font-size: var(--font-size-base); }
-  .md\:text-lg { font-size: var(--font-size-lg); }
-  .md\:text-xl { font-size: var(--font-size-xl); }
-  .md\:text-2xl { font-size: var(--font-size-2xl); }
-  .md\:text-3xl { font-size: var(--font-size-3xl); }
-  .md\:text-4xl { font-size: var(--font-size-4xl); }
+  .md\:text-xs {
+    font-size: var(--font-size-xs);
+  }
+  .md\:text-sm {
+    font-size: var(--font-size-sm);
+  }
+  .md\:text-base {
+    font-size: var(--font-size-base);
+  }
+  .md\:text-lg {
+    font-size: var(--font-size-lg);
+  }
+  .md\:text-xl {
+    font-size: var(--font-size-xl);
+  }
+  .md\:text-2xl {
+    font-size: var(--font-size-2xl);
+  }
+  .md\:text-3xl {
+    font-size: var(--font-size-3xl);
+  }
+  .md\:text-4xl {
+    font-size: var(--font-size-4xl);
+  }
 }
 
 @media (min-width: 1024px) {
-  .lg\:text-xs { font-size: var(--font-size-xs); }
-  .lg\:text-sm { font-size: var(--font-size-sm); }
-  .lg\:text-base { font-size: var(--font-size-base); }
-  .lg\:text-lg { font-size: var(--font-size-lg); }
-  .lg\:text-xl { font-size: var(--font-size-xl); }
-  .lg\:text-2xl { font-size: var(--font-size-2xl); }
-  .lg\:text-3xl { font-size: var(--font-size-3xl); }
-  .lg\:text-4xl { font-size: var(--font-size-4xl); }
-  .lg\:text-5xl { font-size: var(--font-size-5xl); }
-  .lg\:text-hero { font-size: var(--font-size-hero); }
+  .lg\:text-xs {
+    font-size: var(--font-size-xs);
+  }
+  .lg\:text-sm {
+    font-size: var(--font-size-sm);
+  }
+  .lg\:text-base {
+    font-size: var(--font-size-base);
+  }
+  .lg\:text-lg {
+    font-size: var(--font-size-lg);
+  }
+  .lg\:text-xl {
+    font-size: var(--font-size-xl);
+  }
+  .lg\:text-2xl {
+    font-size: var(--font-size-2xl);
+  }
+  .lg\:text-3xl {
+    font-size: var(--font-size-3xl);
+  }
+  .lg\:text-4xl {
+    font-size: var(--font-size-4xl);
+  }
+  .lg\:text-5xl {
+    font-size: var(--font-size-5xl);
+  }
+  .lg\:text-hero {
+    font-size: var(--font-size-hero);
+  }
 }
 
 /* 響應式間距 */
 @media (min-width: 640px) {
-  .sm\:p-0 { padding: 0; }
-  .sm\:p-1 { padding: var(--space-1); }
-  .sm\:p-2 { padding: var(--space-2); }
-  .sm\:p-4 { padding: var(--space-4); }
-  .sm\:p-6 { padding: var(--space-6); }
-  .sm\:p-8 { padding: var(--space-8); }
-  
-  .sm\:m-0 { margin: 0; }
-  .sm\:m-1 { margin: var(--space-1); }
-  .sm\:m-2 { margin: var(--space-2); }
-  .sm\:m-4 { margin: var(--space-4); }
-  .sm\:m-6 { margin: var(--space-6); }
-  .sm\:m-8 { margin: var(--space-8); }
+  .sm\:p-0 {
+    padding: 0;
+  }
+  .sm\:p-1 {
+    padding: var(--space-1);
+  }
+  .sm\:p-2 {
+    padding: var(--space-2);
+  }
+  .sm\:p-4 {
+    padding: var(--space-4);
+  }
+  .sm\:p-6 {
+    padding: var(--space-6);
+  }
+  .sm\:p-8 {
+    padding: var(--space-8);
+  }
+
+  .sm\:m-0 {
+    margin: 0;
+  }
+  .sm\:m-1 {
+    margin: var(--space-1);
+  }
+  .sm\:m-2 {
+    margin: var(--space-2);
+  }
+  .sm\:m-4 {
+    margin: var(--space-4);
+  }
+  .sm\:m-6 {
+    margin: var(--space-6);
+  }
+  .sm\:m-8 {
+    margin: var(--space-8);
+  }
 }
 
 @media (min-width: 768px) {
-  .md\:p-0 { padding: 0; }
-  .md\:p-2 { padding: var(--space-2); }
-  .md\:p-4 { padding: var(--space-4); }
-  .md\:p-6 { padding: var(--space-6); }
-  .md\:p-8 { padding: var(--space-8); }
-  .md\:p-12 { padding: var(--space-12); }
-  
-  .md\:m-0 { margin: 0; }
-  .md\:m-2 { margin: var(--space-2); }
-  .md\:m-4 { margin: var(--space-4); }
-  .md\:m-6 { margin: var(--space-6); }
-  .md\:m-8 { margin: var(--space-8); }
-  .md\:m-12 { margin: var(--space-12); }
+  .md\:p-0 {
+    padding: 0;
+  }
+  .md\:p-2 {
+    padding: var(--space-2);
+  }
+  .md\:p-4 {
+    padding: var(--space-4);
+  }
+  .md\:p-6 {
+    padding: var(--space-6);
+  }
+  .md\:p-8 {
+    padding: var(--space-8);
+  }
+  .md\:p-12 {
+    padding: var(--space-12);
+  }
+
+  .md\:m-0 {
+    margin: 0;
+  }
+  .md\:m-2 {
+    margin: var(--space-2);
+  }
+  .md\:m-4 {
+    margin: var(--space-4);
+  }
+  .md\:m-6 {
+    margin: var(--space-6);
+  }
+  .md\:m-8 {
+    margin: var(--space-8);
+  }
+  .md\:m-12 {
+    margin: var(--space-12);
+  }
 }
 
 @media (min-width: 1024px) {
-  .lg\:p-0 { padding: 0; }
-  .lg\:p-4 { padding: var(--space-4); }
-  .lg\:p-6 { padding: var(--space-6); }
-  .lg\:p-8 { padding: var(--space-8); }
-  .lg\:p-12 { padding: var(--space-12); }
-  .lg\:p-16 { padding: var(--space-16); }
-  
-  .lg\:m-0 { margin: 0; }
-  .lg\:m-4 { margin: var(--space-4); }
-  .lg\:m-6 { margin: var(--space-6); }
-  .lg\:m-8 { margin: var(--space-8); }
-  .lg\:m-12 { margin: var(--space-12); }
-  .lg\:m-16 { margin: var(--space-16); }
+  .lg\:p-0 {
+    padding: 0;
+  }
+  .lg\:p-4 {
+    padding: var(--space-4);
+  }
+  .lg\:p-6 {
+    padding: var(--space-6);
+  }
+  .lg\:p-8 {
+    padding: var(--space-8);
+  }
+  .lg\:p-12 {
+    padding: var(--space-12);
+  }
+  .lg\:p-16 {
+    padding: var(--space-16);
+  }
+
+  .lg\:m-0 {
+    margin: 0;
+  }
+  .lg\:m-4 {
+    margin: var(--space-4);
+  }
+  .lg\:m-6 {
+    margin: var(--space-6);
+  }
+  .lg\:m-8 {
+    margin: var(--space-8);
+  }
+  .lg\:m-12 {
+    margin: var(--space-12);
+  }
+  .lg\:m-16 {
+    margin: var(--space-16);
+  }
 }
 
 /* ===== 遊戲化響應式 ===== */
@@ -354,7 +538,7 @@
   .nav-mobile {
     display: none;
   }
-  
+
   .nav-desktop {
     display: block;
   }
@@ -379,15 +563,15 @@
     font-size: var(--font-size-2xl);
     line-height: var(--line-height-tight);
   }
-  
+
   h1 {
     font-size: var(--font-size-3xl);
   }
-  
+
   h2 {
     font-size: var(--font-size-2xl);
   }
-  
+
   h3 {
     font-size: var(--font-size-xl);
   }
@@ -408,7 +592,7 @@
     min-width: 44px;
     min-height: 44px;
   }
-  
+
   .skill-node,
   .project-card,
   .yugioh-card,
@@ -427,12 +611,12 @@
     animation-duration: 0.2s !important;
     transition-duration: 0.2s !important;
   }
-  
+
   /* 在移動端隱藏背景粒子以提升性能 */
   .particles-container {
     display: none;
   }
-  
+
   /* 簡化發光效果 */
   .glow-legendary,
   .glow-super-rare {
@@ -449,7 +633,7 @@
     transition: none !important;
     box-shadow: none !important;
   }
-  
+
   .magical-glow::before,
   .magical-aura::before {
     display: none;
@@ -463,16 +647,16 @@
     max-width: none;
     padding: 0;
   }
-  
+
   .grid-responsive {
     display: block;
   }
-  
+
   .grid-responsive > * {
     margin-bottom: var(--space-4);
     page-break-inside: avoid;
   }
-  
+
   /* 隱藏不必要的互動元素 */
   .skill-tree-container,
   .yugioh-cards-container,
@@ -489,14 +673,14 @@
   .container {
     border: 1px solid currentColor;
   }
-  
+
   .skill-node,
   .project-card,
   .yugioh-card {
     border: 2px solid currentColor !important;
     background: transparent !important;
   }
-  
+
   /* 移除複雜的視覺效果 */
   .glow-normal,
   .glow-rare,
@@ -521,14 +705,14 @@
     animation: none !important;
     transition: none !important;
   }
-  
+
   .floating,
   .magical-glow,
   .magical-aura,
   .holographic {
     animation: none !important;
   }
-  
+
   .skill-node:hover,
   .project-card:hover,
   .yugioh-card:hover {

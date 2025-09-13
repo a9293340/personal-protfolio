@@ -1,7 +1,7 @@
 /* global HTMLElement, CustomEvent */
 /**
  * InteractiveTimeline 互動時間軸組件
- * 
+ *
  * 核心功能：
  * - 可拖曳滾動的時間軸線條 (桌機水平/手機垂直)
  * - 動態專案節點系統
@@ -18,27 +18,27 @@ import { ImportanceScoring } from './ImportanceScoring.js';
 export class InteractiveTimeline extends BaseComponent {
   constructor(config = {}) {
     super();
-    
+
     this.config = this.mergeConfig(config);
     this.state = this.getInitialState();
     this.element = null;
-    
+
     // 時間軸核心屬性
     this.timelineData = [];
     this.nodes = [];
     this.currentPosition = 0;
     this.isDragging = false;
-    
+
     // 粒子系統屬性 (Step 2.2.2c)
     this.particleSystem = null;
-    
-    // Step 2.2.5c: 數據管理系統組件 
+
+    // Step 2.2.5c: 數據管理系統組件
     this.dataAdapter = null;
     this.layoutEngine = null;
     this.importanceScoring = null;
     this.adaptedProjects = [];
     this.layoutNodes = [];
-    
+
     // 不在構造函數中直接初始化，而是等待容器準備完成
     // this.init();
   }
@@ -49,96 +49,96 @@ export class InteractiveTimeline extends BaseComponent {
       container: null,
       width: '100%',
       height: '400px',
-      
+
       // 響應式配置
       responsive: {
         mobile: {
           orientation: 'vertical',
           nodeSize: 12,
-          lineWidth: 3
+          lineWidth: 3,
         },
         tablet: {
-          orientation: 'horizontal', 
+          orientation: 'horizontal',
           nodeSize: 16,
-          lineWidth: 4
+          lineWidth: 4,
         },
         desktop: {
           orientation: 'horizontal',
           nodeSize: 20,
-          lineWidth: 5
-        }
+          lineWidth: 5,
+        },
       },
-      
+
       // 動畫配置
       animations: {
         cardFlyOut: {
           duration: 1.2,
-          easing: "back.out(1.7)"
+          easing: 'back.out(1.7)',
         },
         nodeHover: {
           duration: 0.3,
-          scale: 1.5
+          scale: 1.5,
         },
         timelineScroll: {
           duration: 0.8,
-          easing: "power2.out"
-        }
+          easing: 'power2.out',
+        },
       },
-      
+
       // 視覺配置
       colors: {
         timeline: '#4a90e2',
         nodes: {
           current: '#ff6b35',
-          recent: '#4ecdc4', 
+          recent: '#4ecdc4',
           past: '#45b7d1',
-          archive: '#96ceb4'
+          archive: '#96ceb4',
         },
-        particles: '#ffffff'
+        particles: '#ffffff',
       },
-      
+
       // 粒子系統配置 (Step 2.2.2c)
       particles: {
         enabled: true,
         count: 50,
         size: {
           min: 1,
-          max: 3
+          max: 3,
         },
         speed: {
           min: 0.5,
-          max: 2.0
+          max: 2.0,
         },
         opacity: {
           min: 0.2,
-          max: 0.8
+          max: 0.8,
         },
         colors: ['#4a90e2', '#64b5f6', '#90caf9', '#bbdefb'],
         flowDirection: 'timeline', // 沿時間軸方向流動
         respawn: true,
         performance: {
-          mobile: { 
+          mobile: {
             count: 20, // Step 2.2.4b: 進一步減少移動端粒子數量
             size: { min: 0.5, max: 2 },
             frameRate: 30, // 限制移動端到30fps
-            simplifyRendering: true // 啟用簡化渲染
+            simplifyRendering: true, // 啟用簡化渲染
           },
-          tablet: { 
-            count: 35, 
+          tablet: {
+            count: 35,
             size: { min: 0.8, max: 2.5 },
-            frameRate: 45
+            frameRate: 45,
           },
-          desktop: { 
-            count: 50, 
+          desktop: {
+            count: 50,
             size: { min: 1, max: 3 },
-            frameRate: 60
-          }
-        }
+            frameRate: 60,
+          },
+        },
       },
-      
+
       // 專案數據
       projects: [],
-      
+
       // Step 2.2.4a: 年份篩選系統配置
       yearFilter: {
         enabled: true,
@@ -147,7 +147,7 @@ export class InteractiveTimeline extends BaseComponent {
         style: 'dropdown', // dropdown, tabs, buttons
         animation: {
           duration: 0.5,
-          easing: 'power2.out'
+          easing: 'power2.out',
         },
         // Step 2.2.4d: 年份切換體驗優化
         instantSwitch: true, // 立即切換節點，無動畫延遲
@@ -155,9 +155,9 @@ export class InteractiveTimeline extends BaseComponent {
         centerAnimation: {
           enabled: false, // 停用自動居中動畫
           duration: 0.6,
-          easing: 'power2.out'
-        }
-      }
+          easing: 'power2.out',
+        },
+      },
     };
   }
 
@@ -175,16 +175,16 @@ export class InteractiveTimeline extends BaseComponent {
         canvas: null,
         context: null,
         animationFrame: null,
-        particlePool: []
+        particlePool: [],
       },
-      
+
       // Step 2.2.4a: 年份篩選狀態
       yearFilter: {
         availableYears: [],
         selectedYear: null, // null = 顯示所有年份
         filteredProjects: [],
-        isFiltering: false
-      }
+        isFiltering: false,
+      },
     };
   }
 
@@ -198,11 +198,11 @@ export class InteractiveTimeline extends BaseComponent {
   async init() {
     try {
       console.log('[InteractiveTimeline] 開始初始化互動時間軸系統');
-      
+
       await this.loadGSAPLibraries();
       await this.loadProjectData();
       this.createElement();
-      
+
       // 將元素添加到容器中
       if (this.config.container) {
         if (typeof this.config.container === 'string') {
@@ -215,21 +215,20 @@ export class InteractiveTimeline extends BaseComponent {
           this.config.container.innerHTML = ''; // 清空容器
           this.config.container.appendChild(this.element);
         }
-        
+
         // DOM 掛載後的設定
         this.setupAfterMount();
       } else {
         console.error('❌ [InteractiveTimeline] 沒有容器配置！');
       }
-      
+
       this.state.isInitialized = true;
       console.log('[InteractiveTimeline] 互動時間軸初始化完成');
-      
+
       // 觸發數據載入回調
       if (this.config.callbacks && this.config.callbacks.onDataLoaded) {
         this.config.callbacks.onDataLoaded(this.timelineData);
       }
-      
     } catch (error) {
       console.error('[InteractiveTimeline] 初始化失敗:', error);
       this.handleInitializationError(error);
@@ -244,36 +243,39 @@ export class InteractiveTimeline extends BaseComponent {
       {
         name: 'gsap',
         url: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js',
-        type: 'js'
+        type: 'js',
       },
       {
         name: 'gsap-draggable',
         url: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js',
-        type: 'js'
+        type: 'js',
       },
       {
         name: 'gsap-scrolltrigger',
         url: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js',
-        type: 'js'
+        type: 'js',
       },
       {
         name: 'gsap-motionpath',
         url: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/MotionPathPlugin.min.js',
-        type: 'js'
-      }
+        type: 'js',
+      },
     ];
 
     const loadPromises = libraries.map(lib => this.loadLibrary(lib));
-    
+
     try {
       await Promise.all(loadPromises);
-      
+
       // 註冊 GSAP 插件
       if (window.gsap) {
-        window.gsap.registerPlugin(window.Draggable, window.ScrollTrigger, window.MotionPathPlugin);
+        window.gsap.registerPlugin(
+          window.Draggable,
+          window.ScrollTrigger,
+          window.MotionPathPlugin
+        );
         console.log('[InteractiveTimeline] GSAP 套件載入完成');
       }
-      
     } catch (error) {
       console.error('[InteractiveTimeline] GSAP 套件載入失敗:', error);
       throw error;
@@ -282,17 +284,18 @@ export class InteractiveTimeline extends BaseComponent {
 
   loadLibrary(library) {
     return new Promise((resolve, reject) => {
-      const selector = library.type === 'css' 
-        ? `link[href="${library.url}"]`
-        : `script[src="${library.url}"]`;
-      
+      const selector =
+        library.type === 'css'
+          ? `link[href="${library.url}"]`
+          : `script[src="${library.url}"]`;
+
       if (document.querySelector(selector)) {
         resolve();
         return;
       }
 
       let element;
-      
+
       if (library.type === 'css') {
         element = document.createElement('link');
         element.rel = 'stylesheet';
@@ -316,12 +319,12 @@ export class InteractiveTimeline extends BaseComponent {
   async loadProjectData() {
     try {
       console.log('[InteractiveTimeline] 🚀 開始載入並處理專案數據');
-      
+
       // 1. 初始化數據管理組件
       await this.initializeDataManagementSystem();
-      
+
       let projectsConfig;
-      
+
       if (this.config.projects && this.config.projects.length > 0) {
         // 使用配置傳入的專案數據
         console.log('[InteractiveTimeline] 使用配置傳入的專案數據');
@@ -329,16 +332,20 @@ export class InteractiveTimeline extends BaseComponent {
       } else {
         // 載入真實專案數據
         console.log('[InteractiveTimeline] 載入真實專案數據 projects.data.js');
-        const projectsModule = await import('../../../config/data/work-projects/projects.data.js');
-        projectsConfig = projectsModule.projectsDataConfig || projectsModule.default;
+        const projectsModule = await import(
+          '../../../config/data/work-projects/projects.data.js'
+        );
+        projectsConfig =
+          projectsModule.projectsDataConfig || projectsModule.default;
       }
-      
+
       // 2. 使用 DataAdapter 適配專案數據
-      this.adaptedProjects = await this.dataAdapter.loadProjectsData(projectsConfig);
-      
+      this.adaptedProjects =
+        await this.dataAdapter.loadProjectsData(projectsConfig);
+
       // 3. 計算智能時間軸佈局
       await this.calculateTimelineLayout();
-      
+
       // 4. 生成傳統格式的 timelineData 以保持向後兼容性
       this.timelineData = this.adaptedProjects.map(project => ({
         id: project.id,
@@ -353,18 +360,22 @@ export class InteractiveTimeline extends BaseComponent {
         rarity: project.visual.rarity,
         nodeSize: project.visual.nodeSize,
         position: project.layoutPosition || { x: 0, y: 0 },
-        originalData: project.originalData
+        originalData: project.originalData,
       }));
-      
+
       // 5. 更新年份篩選數據
       this.updateYearFilterOptions();
-      
-      console.log(`✅ [InteractiveTimeline] 成功載入並處理 ${this.adaptedProjects.length} 個專案`);
-      console.log('[InteractiveTimeline] 📊 數據統計:', this.dataAdapter.getDataStatistics());
-      
+
+      console.log(
+        `✅ [InteractiveTimeline] 成功載入並處理 ${this.adaptedProjects.length} 個專案`
+      );
+      console.log(
+        '[InteractiveTimeline] 📊 數據統計:',
+        this.dataAdapter.getDataStatistics()
+      );
     } catch (error) {
       console.error('❌ [InteractiveTimeline] 載入專案數據失敗:', error);
-      
+
       // 降級處理：使用簡單的測試數據
       await this.fallbackToTestData();
     }
@@ -375,7 +386,7 @@ export class InteractiveTimeline extends BaseComponent {
    */
   async initializeDataManagementSystem() {
     console.log('[InteractiveTimeline] 🔧 初始化數據管理系統');
-    
+
     // 1. 初始化數據適配器
     this.dataAdapter = new DataAdapter({
       // 從主配置繼承相關設置
@@ -384,7 +395,7 @@ export class InteractiveTimeline extends BaseComponent {
         maxYear: new Date().getFullYear() + 1,
       },
       importanceWeights: this.config.importanceWeights || {},
-      rarityScores: this.config.rarityScores || {}
+      rarityScores: this.config.rarityScores || {},
     });
 
     // 2. 初始化智能佈局引擎
@@ -392,17 +403,17 @@ export class InteractiveTimeline extends BaseComponent {
       layout: {
         timelineHeight: parseInt(this.config.height) || 600,
         timelineWidth: 800, // 初始寬度，後續會根據容器調整
-        type: this.config.layoutStrategy || 'adaptive'
+        type: this.config.layoutStrategy || 'adaptive',
       },
-      responsive: this.config.responsive || {}
+      responsive: this.config.responsive || {},
     });
 
     // 3. 初始化重要性評分系統
     this.importanceScoring = new ImportanceScoring({
       strategy: {
-        type: this.config.scoringStrategy || 'weighted_multi_factor'
+        type: this.config.scoringStrategy || 'weighted_multi_factor',
       },
-      dimensions: this.config.scoringDimensions || {}
+      dimensions: this.config.scoringDimensions || {},
     });
 
     console.log('✅ [InteractiveTimeline] 數據管理系統初始化完成');
@@ -421,12 +432,15 @@ export class InteractiveTimeline extends BaseComponent {
 
     // 獲取容器尺寸
     const viewport = this.getViewportDimensions();
-    
+
     // 使用佈局引擎計算節點位置
-    this.layoutNodes = this.layoutEngine.calculateLayout(this.adaptedProjects, viewport);
-    
+    this.layoutNodes = this.layoutEngine.calculateLayout(
+      this.adaptedProjects,
+      viewport
+    );
+
     // 將佈局結果應用到適配的專案數據
-    this.adaptedProjects.forEach((project, index) => {
+    this.adaptedProjects.forEach((project, _index) => {
       const layoutNode = this.layoutNodes.find(node => node.id === project.id);
       if (layoutNode) {
         project.layoutPosition = layoutNode.position;
@@ -434,13 +448,16 @@ export class InteractiveTimeline extends BaseComponent {
         project.layoutMetadata = {
           weight: layoutNode.weight,
           importance: layoutNode.importance,
-          adjustmentIterations: layoutNode.layoutState.adjustmentIterations
+          adjustmentIterations: layoutNode.layoutState.adjustmentIterations,
         };
       }
     });
 
     console.log('✅ [InteractiveTimeline] 智能佈局計算完成');
-    console.log('[InteractiveTimeline] 📊 佈局統計:', this.layoutEngine.getLayoutStatistics());
+    console.log(
+      '[InteractiveTimeline] 📊 佈局統計:',
+      this.layoutEngine.getLayoutStatistics()
+    );
   }
 
   /**
@@ -452,7 +469,7 @@ export class InteractiveTimeline extends BaseComponent {
       return {
         width: 800,
         height: 600,
-        scale: 1
+        scale: 1,
       };
     }
 
@@ -460,7 +477,7 @@ export class InteractiveTimeline extends BaseComponent {
     return {
       width: rect.width || 800,
       height: rect.height || 600,
-      scale: this.state.viewport?.scale || 1
+      scale: this.state.viewport?.scale || 1,
     };
   }
 
@@ -469,14 +486,14 @@ export class InteractiveTimeline extends BaseComponent {
    */
   async fallbackToTestData() {
     console.log('[InteractiveTimeline] 🔄 使用降級測試數據');
-    
+
     // 使用原有的測試數據邏輯
     this.timelineData = this.getDefaultTimelineData();
-    
+
     // 嘗試初始化基礎的數據管理系統（如果可能）
     try {
       await this.initializeDataManagementSystem();
-      
+
       // 創建簡化的適配數據
       this.adaptedProjects = this.timelineData.map((project, index) => ({
         id: project.id,
@@ -487,23 +504,25 @@ export class InteractiveTimeline extends BaseComponent {
         visual: {
           rarity: 'normal',
           nodeSize: 16,
-          glowIntensity: 0.3
+          glowIntensity: 0.3,
         },
         timeline: {
           importance: project.importance || 5,
           weight: 1,
-          position: index / this.timelineData.length
+          position: index / this.timelineData.length,
         },
         details: {
           shortDescription: project.description,
           technologies: project.technologies || [],
           highlights: [],
-          stats: {}
-        }
+          stats: {},
+        },
       }));
-      
     } catch (error) {
-      console.warn('[InteractiveTimeline] ⚠️ 降級模式下的數據管理系統初始化也失敗:', error);
+      console.warn(
+        '[InteractiveTimeline] ⚠️ 降級模式下的數據管理系統初始化也失敗:',
+        error
+      );
     }
   }
 
@@ -516,7 +535,7 @@ export class InteractiveTimeline extends BaseComponent {
     }
 
     const years = new Set();
-    
+
     this.adaptedProjects.forEach(project => {
       if (project.timeline && project.timeline.coordinates) {
         years.add(project.timeline.coordinates.year);
@@ -529,13 +548,18 @@ export class InteractiveTimeline extends BaseComponent {
       }
     });
 
-    this.state.yearFilter.availableYears = Array.from(years).sort((a, b) => b - a);
-    console.log('[InteractiveTimeline] 📅 更新年份篩選選項:', this.state.yearFilter.availableYears);
+    this.state.yearFilter.availableYears = Array.from(years).sort(
+      (a, b) => b - a
+    );
+    console.log(
+      '[InteractiveTimeline] 📅 更新年份篩選選項:',
+      this.state.yearFilter.availableYears
+    );
   }
 
   convertProjectsToTimelineData(projectsConfig) {
     const timelineData = [];
-    
+
     if (projectsConfig && projectsConfig.all) {
       Object.values(projectsConfig.all).forEach(project => {
         timelineData.push({
@@ -547,11 +571,14 @@ export class InteractiveTimeline extends BaseComponent {
           importance: project.importance || 3,
           category: project.category || 'general',
           links: project.links || {},
-          status: this.calculateProjectStatus(project.startDate, project.completedDate)
+          status: this.calculateProjectStatus(
+            project.startDate,
+            project.completedDate
+          ),
         });
       });
     }
-    
+
     return timelineData;
   }
 
@@ -559,12 +586,15 @@ export class InteractiveTimeline extends BaseComponent {
     const now = new Date();
     const start = new Date(startDate || '2024-01-01');
     const completed = completedDate ? new Date(completedDate) : null;
-    
-    if (!completed && (now - start) < 90 * 24 * 60 * 60 * 1000) {
+
+    if (!completed && now - start < 90 * 24 * 60 * 60 * 1000) {
       return 'current';
-    } else if (!completed || (now - new Date(completed)) < 365 * 24 * 60 * 60 * 1000) {
+    } else if (
+      !completed ||
+      now - new Date(completed) < 365 * 24 * 60 * 60 * 1000
+    ) {
       return 'recent';
-    } else if ((now - new Date(completed)) < 3 * 365 * 24 * 60 * 60 * 1000) {
+    } else if (now - new Date(completed) < 3 * 365 * 24 * 60 * 60 * 1000) {
       return 'past';
     } else {
       return 'archive';
@@ -580,16 +610,16 @@ export class InteractiveTimeline extends BaseComponent {
         description: '正在開發的最新專案',
         technologies: ['Vue 3', 'Node.js'],
         importance: 5,
-        status: 'current'
+        status: 'current',
       },
       {
-        id: 'project-2', 
+        id: 'project-2',
         title: '近期完成專案',
         date: '2024-01-15',
         description: '最近完成的重要專案',
         technologies: ['React', 'Express'],
         importance: 4,
-        status: 'recent'
+        status: 'recent',
       },
       {
         id: 'project-3',
@@ -598,7 +628,7 @@ export class InteractiveTimeline extends BaseComponent {
         description: '過去的重要專案',
         technologies: ['jQuery', 'PHP'],
         importance: 3,
-        status: 'past'
+        status: 'past',
       },
       {
         id: 'project-4',
@@ -607,8 +637,8 @@ export class InteractiveTimeline extends BaseComponent {
         description: '早期的專案作品',
         technologies: ['HTML', 'CSS'],
         importance: 2,
-        status: 'archive'
-      }
+        status: 'archive',
+      },
     ];
   }
 
@@ -619,17 +649,19 @@ export class InteractiveTimeline extends BaseComponent {
     this.element = document.createElement('div');
     this.element.className = 'interactive-timeline';
     this.element.innerHTML = this.generateHTML();
-    
+
     // 應用基礎樣式
     this.applyBaseStyles();
-    
+
     // 設置容器尺寸
     if (this.config.width) {
       this.element.style.width = this.config.width;
     }
     if (this.config.height) {
       this.element.style.height = this.config.height;
-      console.log(`🎨 InteractiveTimeline height set to: ${this.config.height}`);
+      console.log(
+        `🎨 InteractiveTimeline height set to: ${this.config.height}`
+      );
     } else {
       // 設定默認高度
       this.element.style.height = '600px';
@@ -640,12 +672,16 @@ export class InteractiveTimeline extends BaseComponent {
   generateHTML() {
     const breakpoint = this.state.currentBreakpoint;
     const isVertical = breakpoint === 'mobile';
-    
+
     return `
       <div class="timeline-container ${isVertical ? 'vertical' : 'horizontal'}">
-        ${this.config.yearFilter.enabled ? `<div class="timeline-controls ${isVertical ? 'mobile-layout' : 'desktop-layout'}">
+        ${
+          this.config.yearFilter.enabled
+            ? `<div class="timeline-controls ${isVertical ? 'mobile-layout' : 'desktop-layout'}">
           ${this.generateYearFilterHTML()}
-        </div>` : ''}
+        </div>`
+            : ''
+        }
         
         <div class="timeline-viewport">
           <div class="timeline-content">
@@ -685,7 +721,7 @@ export class InteractiveTimeline extends BaseComponent {
    */
   generateYearFilterHTML() {
     const isMobile = this.state?.currentBreakpoint === 'mobile';
-    
+
     return `
       <div class="timeline-year-filter">
         <label class="filter-label">篩選年份：</label>
@@ -699,7 +735,7 @@ export class InteractiveTimeline extends BaseComponent {
       </div>
     `;
   }
-  
+
   /**
    * 設定基礎樣式
    */
@@ -1309,7 +1345,7 @@ export class InteractiveTimeline extends BaseComponent {
         }
       </style>
     `;
-    
+
     if (!document.querySelector('#interactive-timeline-styles')) {
       document.head.insertAdjacentHTML('beforeend', styles);
     }
@@ -1320,7 +1356,7 @@ export class InteractiveTimeline extends BaseComponent {
    */
   calculateSVGDimensions() {
     const isVertical = this.state?.currentBreakpoint === 'mobile';
-    
+
     // 手機版根據篩選狀態決定專案數量
     let projectCount;
     if (isVertical && this.state?.yearFilter?.isFiltering) {
@@ -1328,7 +1364,7 @@ export class InteractiveTimeline extends BaseComponent {
     } else {
       projectCount = this.timelineData.length || 20;
     }
-    
+
     if (isVertical) {
       // 垂直模式：根據實際要顯示的專案數量計算高度
       // 年份篩選時使用較小的間距
@@ -1337,13 +1373,13 @@ export class InteractiveTimeline extends BaseComponent {
       const padding = this.state?.yearFilter?.isFiltering ? 300 : 600; // 篩選時減少緩衝
       return {
         width: 400,
-        height: Math.max(600, baseHeight + padding) // 篩選時最小高度降低
+        height: Math.max(600, baseHeight + padding), // 篩選時最小高度降低
       };
     } else {
       // 水平模式：每個專案需要約 100px 寬度，確保有足夠空間
       return {
         width: Math.max(1200, projectCount * 100),
-        height: 400
+        height: 400,
       };
     }
   }
@@ -1353,33 +1389,35 @@ export class InteractiveTimeline extends BaseComponent {
    */
   setupTimeline() {
     console.log('[InteractiveTimeline] 設定 SVG 時間軸路徑');
-    
+
     const svg = this.element.querySelector('.timeline-svg');
     const path = this.element.querySelector('.timeline-path');
-    
+
     if (!svg || !path) {
       console.error('[InteractiveTimeline] SVG 元素未找到');
       return;
     }
 
     const isVertical = this.state.currentBreakpoint === 'mobile';
-    
+
     // 使用動態尺寸計算
     const dimensions = this.calculateSVGDimensions();
     const svgWidth = dimensions.width;
     const svgHeight = dimensions.height;
-    
-    console.log(`[InteractiveTimeline] 使用響應式 SVG 尺寸: ${svgWidth}x${svgHeight}, 斷點: ${this.state.currentBreakpoint}`);
-    
+
+    console.log(
+      `[InteractiveTimeline] 使用響應式 SVG 尺寸: ${svgWidth}x${svgHeight}, 斷點: ${this.state.currentBreakpoint}`
+    );
+
     // 計算時間軸路徑
     const pathData = this.generateTimelinePath(svgWidth, svgHeight, isVertical);
     console.log(`[InteractiveTimeline] 生成路徑數據: ${pathData}`);
-    
+
     // 更新 SVG 尺寸和 viewBox 以匹配動態尺寸
     svg.setAttribute('width', svgWidth);
     svg.setAttribute('height', svgHeight);
     svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
-    
+
     // 強制設定 SVG CSS 尺寸，確保有實際的客戶端尺寸
     svg.style.width = svgWidth + 'px';
     svg.style.height = svgHeight + 'px';
@@ -1387,7 +1425,7 @@ export class InteractiveTimeline extends BaseComponent {
     svg.style.position = 'absolute';
     svg.style.top = '0';
     svg.style.left = '0';
-    
+
     // 同步更新粒子畫布尺寸
     const canvas = this.element.querySelector('.particles-canvas');
     if (canvas) {
@@ -1397,25 +1435,29 @@ export class InteractiveTimeline extends BaseComponent {
 
     // 設定 SVG 路徑
     path.setAttribute('d', pathData);
-    path.setAttribute('stroke-width', this.config.responsive[this.state.currentBreakpoint].lineWidth);
-    
+    path.setAttribute(
+      'stroke-width',
+      this.config.responsive[this.state.currentBreakpoint].lineWidth
+    );
+
     // 確保路徑有顏色 - 強制設定藍色，覆蓋任何 CSS
     path.setAttribute('stroke', this.config.colors.timeline);
     path.setAttribute('fill', 'none');
     path.style.stroke = this.config.colors.timeline + ' !important';
-    
+
     // 確保路徑立即可見，但保留後續流動效果的空間
     if (window.gsap) {
       // 簡單的淡入動畫，不設置 dash 屬性以免與後續流動效果衝突
-      window.gsap.fromTo(path, 
+      window.gsap.fromTo(
+        path,
         { opacity: 0 },
-        { opacity: 1, duration: 1, ease: "power2.out" }
+        { opacity: 1, duration: 1, ease: 'power2.out' }
       );
     } else {
       // 沒有GSAP時確保路徑基本可見
       path.style.opacity = '1';
     }
-    
+
     console.log('[InteractiveTimeline] 時間軸路徑設定完成');
   }
 
@@ -1423,19 +1465,19 @@ export class InteractiveTimeline extends BaseComponent {
    * 生成時間軸 SVG 路徑 - 自然曲線設計
    */
   generateTimelinePath(width, height, isVertical = false) {
-    const padding = 60;
-    const curveIntensity = 0.3;
-    
+    const _padding = 60;
+    const _curveIntensity = 0.3;
+
     if (isVertical) {
       // 垂直時間軸 (手機版) - 簡單直線，確保節點對齊
       const startY = 60;
       const endY = height - 40; // 延伸到接近底部，確保覆蓋最後節點
       const centerX = 200; // 固定在中心
-      
+
       // 創建幾乎直線的路徑，最小曲線
       const controlOffset = width * 0.04; // 更小的曲線，接近直線
       const midY = (startY + endY) / 2;
-      
+
       return `M ${centerX} ${startY} 
               Q ${centerX - controlOffset} ${midY - 30} ${centerX} ${midY}
               Q ${centerX + controlOffset} ${midY + 30} ${centerX} ${endY}`;
@@ -1444,13 +1486,13 @@ export class InteractiveTimeline extends BaseComponent {
       const startX = 0; // 從左邊開始，不要 padding
       const endX = width; // 延伸到右邊，不要 padding
       const centerY = height * 0.5; // 調整到50%高度位置，與紅色調試線對齊
-      
+
       // 創建自然的波浪曲線
       const controlOffset = height * 0.2;
       const curve1X = startX + (endX - startX) * 0.25;
       const curve2X = startX + (endX - startX) * 0.5;
       const curve3X = startX + (endX - startX) * 0.75;
-      
+
       return `M ${startX} ${centerY}
               Q ${curve1X} ${centerY - controlOffset} ${curve2X} ${centerY}
               Q ${curve3X} ${centerY + controlOffset} ${endX} ${centerY}`;
@@ -1462,11 +1504,11 @@ export class InteractiveTimeline extends BaseComponent {
    */
   setupNodes(useFilteredData = false) {
     console.log('[InteractiveTimeline] 設定動態專案節點');
-    
+
     const nodesContainer = this.element.querySelector('.timeline-nodes');
     const path = this.element.querySelector('.timeline-path');
     const svg = this.element.querySelector('.timeline-svg');
-    
+
     if (!nodesContainer || !path || !svg) {
       console.error('[InteractiveTimeline] 節點容器、路徑或SVG元素未找到');
       return;
@@ -1475,99 +1517,109 @@ export class InteractiveTimeline extends BaseComponent {
     // 清空現有節點
     nodesContainer.innerHTML = '';
     this.nodes = [];
-    
+
     // 決定要使用的數據源
-    const dataToUse = (useFilteredData && this.state.yearFilter?.isFiltering) 
-      ? this.state.yearFilter.filteredProjects 
-      : this.timelineData;
-    
-    console.log(`[InteractiveTimeline] 使用 ${dataToUse.length} 個專案建立節點`);
-    
+    const dataToUse =
+      useFilteredData && this.state.yearFilter?.isFiltering
+        ? this.state.yearFilter.filteredProjects
+        : this.timelineData;
+
+    console.log(
+      `[InteractiveTimeline] 使用 ${dataToUse.length} 個專案建立節點`
+    );
+
     // 為每個專案創建節點
     dataToUse.forEach((project, index) => {
       const nodeElement = this.createProjectNode(project, index);
-      
+
       // 計算節點在路徑上的位置（根據時間分佈）
       const svgPosition = this.calculateNodePosition(path, project, dataToUse);
-      
+
       // 轉換 SVG 坐標到實際像素坐標
-      const actualPosition = this.convertSVGToPixelCoordinates(svg, svgPosition);
-      
+      const actualPosition = this.convertSVGToPixelCoordinates(
+        svg,
+        svgPosition
+      );
+
       // 設定節點位置 - 使用絕對定位並確保居中對齊
       nodeElement.style.position = 'absolute';
       nodeElement.style.left = `${actualPosition.x}px`;
       nodeElement.style.top = `${actualPosition.y}px`;
-      
+
       // 確保使用 transform 進行居中對齊（與 CSS 中的設定一致）
       nodeElement.style.transform = 'translate(-50%, -50%)';
-      
+
       // 調試：輸出節點位置信息
       console.log(`🎯 [InteractiveTimeline] 節點 "${project.title}" 位置設定:`);
       console.log(`   🌟 專案: ${project.title} (${project.date})`);
-      console.log(`   📍 最終位置: left=${actualPosition.x}px, top=${actualPosition.y}px`);
+      console.log(
+        `   📍 最終位置: left=${actualPosition.x}px, top=${actualPosition.y}px`
+      );
       console.log(`   🎨 Transform: translate(-50%, -50%)`);
-      
+
       nodesContainer.appendChild(nodeElement);
       this.nodes.push({
         element: nodeElement,
         data: project,
-        position: actualPosition // 存儲節點的像素位置用於邊界計算
+        position: actualPosition, // 存儲節點的像素位置用於邊界計算
       });
-      
+
       // 立即顯示節點，後續添加動畫
       nodeElement.style.opacity = '1';
-      
+
       // 計算重要性縮放
       const importanceScale = 0.8 + (project.importance / 5) * 0.4;
-      
+
       // 延遲顯示動畫 - 保持居中對齊
       if (window.gsap) {
         // 先設置初始狀態，保持居中對齊
         window.gsap.set(nodeElement, {
           transformOrigin: 'center center',
           scale: 0,
-          opacity: 0
+          opacity: 0,
         });
-        
+
         // 動畫到最終狀態
         window.gsap.to(nodeElement, {
           scale: importanceScale,
           opacity: 1,
           duration: 0.6,
           delay: index * 0.15,
-          ease: "back.out(1.7)",
-          onComplete: function() {
+          ease: 'back.out(1.7)',
+          onComplete: function () {
             // 確保動畫完成後保持正確的 transform
             nodeElement.style.transform = `translate(-50%, -50%) scale(${importanceScale})`;
-          }
+          },
         });
       }
     });
-    
+
     // 手機版：動態設定容器高度以確保所有節點可見
     if (this.state.currentBreakpoint === 'mobile' && this.nodes.length > 0) {
       // 使用 SVG 的計算高度作為基準
       const svgDimensions = this.calculateSVGDimensions();
       const totalHeight = svgDimensions.height;
-      
+
       // 設定節點容器高度
       nodesContainer.style.height = `${totalHeight}px`;
-      
+
       // 設定 timeline-content 高度
       const timelineContent = this.element.querySelector('.timeline-content');
       if (timelineContent) {
         timelineContent.style.height = `${totalHeight}px`;
       }
-      
+
       // 設定 viewport 高度以包含所有內容
       const viewport = this.element.querySelector('.timeline-viewport');
       if (viewport) {
         viewport.style.minHeight = `${totalHeight}px`;
       }
-      
-      console.log(`[InteractiveTimeline] 手機版容器高度設定為: ${totalHeight}px`);
+
+      console.log(
+        `[InteractiveTimeline] 手機版容器高度設定為: ${totalHeight}px`
+      );
     }
-    
+
     console.log(`[InteractiveTimeline] 創建了 ${this.nodes.length} 個專案節點`);
   }
 
@@ -1576,21 +1628,22 @@ export class InteractiveTimeline extends BaseComponent {
    */
   createProjectNode(project, index) {
     const nodeElement = document.createElement('div');
-    const nodeSize = this.config.responsive[this.state.currentBreakpoint].nodeSize;
-    
+    const nodeSize =
+      this.config.responsive[this.state.currentBreakpoint].nodeSize;
+
     nodeElement.className = `timeline-node project-node ${project.status}`;
     nodeElement.style.width = `${nodeSize}px`;
     nodeElement.style.height = `${nodeSize}px`;
-    
+
     // 根據重要性調整節點大小 - 保持居中對齊
     const importanceScale = 0.8 + (project.importance / 5) * 0.4;
     nodeElement.style.transform = `translate(-50%, -50%) scale(${importanceScale})`;
-    
+
     // 節點內容和樣式 - Step 2.2.2a 色彩主題整合
     const nodeIcon = this.getProjectIcon(project.category || 'general');
     const formattedDate = this.formatProjectDate(project.date);
     const themeColors = this.getProjectThemeColors(project);
-    
+
     nodeElement.innerHTML = `
       <div class="node-icon">${nodeIcon}</div>
       <div class="node-label">
@@ -1599,25 +1652,28 @@ export class InteractiveTimeline extends BaseComponent {
       </div>
       <div class="node-pulse"></div>
     `;
-    
+
     // 應用時期色彩主題
     nodeElement.style.setProperty('--node-primary-color', themeColors.primary);
-    nodeElement.style.setProperty('--node-secondary-color', themeColors.secondary);
+    nodeElement.style.setProperty(
+      '--node-secondary-color',
+      themeColors.secondary
+    );
     nodeElement.style.setProperty('--node-glow-color', themeColors.glow);
     nodeElement.style.borderColor = themeColors.primary;
-    
+
     // 添加分類和主題類別
     nodeElement.classList.add(`category-${project.category || 'general'}`);
     nodeElement.classList.add(`theme-${this.getProjectTheme(project)}`);
-    
+
     // 添加數據屬性
     nodeElement.dataset.projectId = project.id;
     nodeElement.dataset.projectIndex = index;
     nodeElement.dataset.projectCategory = project.category || 'general';
-    
+
     // 添加點擊事件監聽器 (Step 2.2.3a)
     this.setupNodeClickHandler(nodeElement, project, index);
-    
+
     return nodeElement;
   }
 
@@ -1626,55 +1682,60 @@ export class InteractiveTimeline extends BaseComponent {
    */
   setupNodeClickHandler(nodeElement, project, index) {
     // 點擊事件監聽
-    nodeElement.addEventListener('click', (event) => {
+    nodeElement.addEventListener('click', event => {
       event.stopPropagation();
       this.handleNodeClick(nodeElement, project, index, event);
     });
-    
+
     // 鍵盤可訪問性
     nodeElement.setAttribute('tabindex', '0');
     nodeElement.setAttribute('role', 'button');
-    nodeElement.setAttribute('aria-label', `專案: ${project.title}, ${project.date}`);
-    
+    nodeElement.setAttribute(
+      'aria-label',
+      `專案: ${project.title}, ${project.date}`
+    );
+
     // 鍵盤事件監聽
-    nodeElement.addEventListener('keydown', (event) => {
+    nodeElement.addEventListener('keydown', event => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         this.handleNodeClick(nodeElement, project, index, event);
       }
     });
-    
+
     console.log(`[InteractiveTimeline] 節點點擊處理器已設定: ${project.title}`);
   }
-  
+
   /**
    * 處理節點點擊事件 (Step 2.2.3a)
    */
   async handleNodeClick(nodeElement, project, index, event) {
     console.log(`[InteractiveTimeline] 節點被點擊: ${project.title}`);
-    
+
     // 防止重複點擊
     if (nodeElement.classList.contains('clicking')) {
       return;
     }
-    
+
     // 設定當前選中節點
     this.setSelectedNode(nodeElement, project, index);
-    
+
     // 執行點擊反饋動畫
     this.playNodeClickAnimation(nodeElement);
-    
+
     // Step 2.2.3b + Step 2.3.3: 卡片飛出動畫或召喚動畫
     setTimeout(async () => {
       await this.createAndAnimateProjectCard(nodeElement, project, index);
     }, 300); // 等待點擊動畫完成
-    
+
     // 觸發自定義事件
-    this.element.dispatchEvent(new CustomEvent('nodeClick', {
-      detail: { project, index, nodeElement, event }
-    }));
+    this.element.dispatchEvent(
+      new CustomEvent('nodeClick', {
+        detail: { project, index, nodeElement, event },
+      })
+    );
   }
-  
+
   /**
    * 設定選中節點狀態 (Step 2.2.3a)
    */
@@ -1684,142 +1745,155 @@ export class InteractiveTimeline extends BaseComponent {
     if (prevSelected) {
       prevSelected.classList.remove('selected');
     }
-    
+
     // 設定新選中節點
     nodeElement.classList.add('selected');
     this.state.selectedNode = {
       element: nodeElement,
       project: project,
-      index: index
+      index: index,
     };
-    
+
     console.log(`[InteractiveTimeline] 設定選中節點: ${project.title}`);
   }
-  
+
   /**
    * 播放節點點擊動畫 (Step 2.2.3a)
    */
   playNodeClickAnimation(nodeElement) {
     // 添加點擊狀態類
     nodeElement.classList.add('clicking');
-    
+
     // 使用 GSAP 創建點擊反饋動畫
     const tl = gsap.timeline({
       onComplete: () => {
         nodeElement.classList.remove('clicking');
-      }
+      },
     });
-    
+
     // 點擊縮放動畫
     tl.to(nodeElement, {
       duration: 0.1,
       scale: 0.9,
-      ease: "power2.out"
+      ease: 'power2.out',
     })
-    .to(nodeElement, {
-      duration: 0.2,
-      scale: 1.1,
-      ease: "back.out(2)"
-    })
-    .to(nodeElement, {
-      duration: 0.15,
-      scale: 1.0,
-      ease: "power2.out"
-    });
-    
+      .to(nodeElement, {
+        duration: 0.2,
+        scale: 1.1,
+        ease: 'back.out(2)',
+      })
+      .to(nodeElement, {
+        duration: 0.15,
+        scale: 1.0,
+        ease: 'power2.out',
+      });
+
     // 脈衝光環動畫
     const pulseRing = nodeElement.querySelector('.node-pulse');
     if (pulseRing) {
-      gsap.fromTo(pulseRing, {
-        scale: 0,
-        opacity: 0.8
-      }, {
-        duration: 0.6,
-        scale: 2,
-        opacity: 0,
-        ease: "power2.out"
-      });
+      gsap.fromTo(
+        pulseRing,
+        {
+          scale: 0,
+          opacity: 0.8,
+        },
+        {
+          duration: 0.6,
+          scale: 2,
+          opacity: 0,
+          ease: 'power2.out',
+        }
+      );
     }
-    
-    console.log(`[InteractiveTimeline] 播放節點點擊動畫: ${nodeElement.dataset.projectId}`);
+
+    console.log(
+      `[InteractiveTimeline] 播放節點點擊動畫: ${nodeElement.dataset.projectId}`
+    );
   }
 
   /**
    * 創建並動畫化專案卡片 (Step 2.2.3b + Step 2.3.3)
    */
-  async createAndAnimateProjectCard(nodeElement, project, index) {
+  async createAndAnimateProjectCard(nodeElement, project, _index) {
     console.log(`[InteractiveTimeline] 創建專案卡片: ${project.title}`);
-    
+
     // Step 2.3.3: 檢查是否啟用召喚動畫
     const enableSummoning = this.config.summoning?.enabled ?? false;
-    const isLegendaryProject = project.rarity === 'legendary' || project.importance >= 9;
-    
+    const isLegendaryProject =
+      project.rarity === 'legendary' || project.importance >= 9;
+
     // 只對傳說級專案或重要專案啟用召喚動畫
     if (enableSummoning && isLegendaryProject) {
-      console.log(`🎮 [InteractiveTimeline] 啟動遊戲王召喚序列: ${project.title}`);
-      
+      console.log(
+        `🎮 [InteractiveTimeline] 啟動遊戲王召喚序列: ${project.title}`
+      );
+
       try {
         // 動態導入召喚轉場控制器
-        const { SummoningTransition } = await import('../SummoningSystem/SummoningTransition.js');
-        
+        const { SummoningTransition } = await import(
+          '../SummoningSystem/SummoningTransition.js'
+        );
+
         // 創建並啟動召喚轉場
         const summoningTransition = new SummoningTransition({
           animation: {
             skipEnabled: true,
-            skipKey: 'Escape'
-          }
+            skipKey: 'Escape',
+          },
         });
-        
+
         // 執行召喚轉場
         await summoningTransition.startTransition(project, nodeElement);
-        
+
         // 召喚完成，不需要再顯示普通模態框
         return;
-        
       } catch (error) {
-        console.error('❌ [InteractiveTimeline] 召喚失敗，降級到普通模態框:', error);
+        console.error(
+          '❌ [InteractiveTimeline] 召喚失敗，降級到普通模態框:',
+          error
+        );
         // 降級到普通模態框
       }
     }
-    
+
     // 防止重複創建卡片
     const existingCard = document.querySelector('.project-flying-card');
     if (existingCard) {
       this.closeProjectCard(existingCard);
       return;
     }
-    
+
     // 創建卡片元素
     const card = this.createProjectCard(project, nodeElement);
-    
+
     // 計算飛出軌跡
     const trajectory = this.calculateCardTrajectory(nodeElement);
-    
+
     // 執行飛出動畫
     this.animateCardFlyOut(card, trajectory);
   }
-  
+
   /**
    * 創建專案詳情卡片 (Step 2.2.3b)
    */
   createProjectCard(project, nodeElement) {
     const card = document.createElement('div');
     card.className = 'project-flying-card';
-    
+
     // 獲取節點的世界座標作為起始位置
     const nodeRect = nodeElement.getBoundingClientRect();
     const startX = nodeRect.left + nodeRect.width / 2;
     const startY = nodeRect.top + nodeRect.height / 2;
-    
+
     // 計算大尺寸卡片 (95% 畫面，無最大限制)
     const cardWidth = window.innerWidth * 0.95;
     const cardHeight = window.innerHeight * 0.92;
-    
+
     // 設定卡片初始位置和樣式 (大尺寸版)
     card.style.cssText = `
       position: fixed;
-      left: ${startX - cardWidth/2}px;
-      top: ${startY - cardHeight/2}px;
+      left: ${startX - cardWidth / 2}px;
+      top: ${startY - cardHeight / 2}px;
       width: ${cardWidth}px;
       height: ${cardHeight}px;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -1836,11 +1910,11 @@ export class InteractiveTimeline extends BaseComponent {
       overflow: hidden;
       backdrop-filter: blur(10px);
     `;
-    
+
     // 卡片內容
     const themeColors = this.getProjectThemeColors(project);
     const categoryIcon = this.getProjectIcon(project.category || 'general');
-    
+
     card.innerHTML = `
       <div class="card-header" style="
         background: linear-gradient(90deg, ${themeColors.primary}33 0%, ${themeColors.secondary}33 100%);
@@ -1902,11 +1976,17 @@ export class InteractiveTimeline extends BaseComponent {
         <!-- 技術資訊 (桌面版右上) -->
         <div class="desktop-tech-info">
           <!-- 技術亮點 -->
-          ${project.originalData && project.originalData.highlights && project.originalData.highlights.length > 0 ? `
+          ${
+            project.originalData &&
+            project.originalData.highlights &&
+            project.originalData.highlights.length > 0
+              ? `
           <div>
             <h3 style="margin: 0 0 10px 0; font-size: 16px; color: ${themeColors.secondary};">✨ 技術亮點</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px;">
-              ${project.originalData.highlights.map(highlight => `
+              ${project.originalData.highlights
+                .map(
+                  highlight => `
                 <div style="
                   background: ${themeColors.primary}15;
                   border: 1px solid ${themeColors.primary}40;
@@ -1918,17 +1998,25 @@ export class InteractiveTimeline extends BaseComponent {
                 ">
                   💡 ${highlight}
                 </div>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
           
           <!-- 技術棧 -->
-          ${project.technologies && project.technologies.length > 0 ? `
+          ${
+            project.technologies && project.technologies.length > 0
+              ? `
           <div>
             <h3 style="margin: 0 0 10px 0; font-size: 16px; color: ${themeColors.secondary};">🛠️ 技術棧</h3>
             <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-              ${project.technologies.map(tech => `
+              ${project.technologies
+                .map(
+                  tech => `
                 <span style="
                   background: ${this.getTechCategoryColor(tech.category)}22;
                   color: ${this.getTechCategoryColor(tech.category)};
@@ -1940,16 +2028,22 @@ export class InteractiveTimeline extends BaseComponent {
                 ">
                   ${tech.name}
                 </span>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
         
         <!-- 底部區塊：統計和連結 (桌面版下方) -->
         <div class="desktop-bottom">
           <!-- 專案統計 -->
-          ${project.originalData && project.originalData.stats ? `
+          ${
+            project.originalData && project.originalData.stats
+              ? `
           <div>
             <h3 style="margin: 0 0 10px 0; font-size: 16px; color: ${themeColors.secondary};">📊 專案統計</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
@@ -1971,14 +2065,25 @@ export class InteractiveTimeline extends BaseComponent {
               </div>
             </div>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
           
           <!-- 連結按鈕 -->
-          ${project.originalData && project.originalData.links && (project.originalData.links.github || project.originalData.links.demo || project.originalData.links.documentation || project.originalData.links.article) ? `
+          ${
+            project.originalData &&
+            project.originalData.links &&
+            (project.originalData.links.github ||
+              project.originalData.links.demo ||
+              project.originalData.links.documentation ||
+              project.originalData.links.article)
+              ? `
           <div>
             <h3 style="margin: 0 0 10px 0; font-size: 16px; color: ${themeColors.secondary};">🔗 相關連結</h3>
             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              ${project.originalData.links.github ? `
+              ${
+                project.originalData.links.github
+                  ? `
                 <a href="${project.originalData.links.github}" target="_blank" style="
                   background: #24292e;
                   color: white;
@@ -1994,8 +2099,12 @@ export class InteractiveTimeline extends BaseComponent {
                 " onmouseover="this.style.background='#1a1e22'" onmouseout="this.style.background='#24292e'">
                   📁 GitHub
                 </a>
-              ` : ''}
-              ${project.originalData.links.demo ? `
+              `
+                  : ''
+              }
+              ${
+                project.originalData.links.demo
+                  ? `
                 <a href="${project.originalData.links.demo}" target="_blank" style="
                   background: ${themeColors.primary};
                   color: white;
@@ -2011,8 +2120,12 @@ export class InteractiveTimeline extends BaseComponent {
                 " onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                   🚀 Demo
                 </a>
-              ` : ''}
-              ${project.originalData.links.documentation ? `
+              `
+                  : ''
+              }
+              ${
+                project.originalData.links.documentation
+                  ? `
                 <a href="${project.originalData.links.documentation}" target="_blank" style="
                   background: #f39c12;
                   color: white;
@@ -2028,8 +2141,12 @@ export class InteractiveTimeline extends BaseComponent {
                 " onmouseover="this.style.background='#d68910'" onmouseout="this.style.background='#f39c12'">
                   📖 文件
                 </a>
-              ` : ''}
-              ${project.originalData.links.article ? `
+              `
+                  : ''
+              }
+              ${
+                project.originalData.links.article
+                  ? `
                 <a href="${project.originalData.links.article}" target="_blank" style="
                   background: #9b59b6;
                   color: white;
@@ -2045,10 +2162,14 @@ export class InteractiveTimeline extends BaseComponent {
                 " onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='#9b59b6'">
                   📝 文章
                 </a>
-              ` : ''}
+              `
+                  : ''
+              }
             </div>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
       </div>
       
@@ -2077,7 +2198,7 @@ export class InteractiveTimeline extends BaseComponent {
         ×
       </div>
     `;
-    
+
     // 添加自定義滾動條樣式和響應式設計 (WebKit browsers)
     const style = document.createElement('style');
     style.textContent = `
@@ -2160,22 +2281,26 @@ export class InteractiveTimeline extends BaseComponent {
       }
     `;
     document.head.appendChild(style);
-    
+
     // 添加關閉事件 - 直接在卡片上點擊關閉
-    card.addEventListener('click', (e) => {
+    card.addEventListener('click', e => {
       if (e.target.textContent === '×') {
         e.stopPropagation();
         this.closeProjectCard(card);
       }
     });
-    
+
     // 點擊卡片外部關閉
-    document.addEventListener('click', this.handleOutsideClick.bind(this, card), { once: true });
-    
+    document.addEventListener(
+      'click',
+      this.handleOutsideClick.bind(this, card),
+      { once: true }
+    );
+
     document.body.appendChild(card);
     return card;
   }
-  
+
   /**
    * 計算卡片飛出軌跡 (Step 2.2.3b) - 修復定位
    */
@@ -2183,84 +2308,85 @@ export class InteractiveTimeline extends BaseComponent {
     const nodeRect = nodeElement.getBoundingClientRect();
     const startX = nodeRect.left + nodeRect.width / 2;
     const startY = nodeRect.top + nodeRect.height / 2;
-    
+
     // 計算目標位置 (螢幕中央)
     const endX = window.innerWidth / 2;
     const endY = window.innerHeight / 2;
-    
+
     // 控制點：創建弧形軌跡
     const controlX = startX + (endX - startX) * 0.5;
     const controlY = Math.min(startY, endY) - 100;
-    
+
     return {
       start: { x: startX, y: startY },
       control: { x: controlX, y: controlY },
-      end: { x: endX, y: endY }
+      end: { x: endX, y: endY },
     };
   }
-  
+
   /**
    * 執行卡片飛出動畫 (Step 2.2.3b)
    */
-  animateCardFlyOut(card, trajectory) {
+  animateCardFlyOut(card, _trajectory) {
     console.log(`[InteractiveTimeline] 執行卡片飛出動畫 - 流暢版`);
-    
+
     // GSAP 時間軸動畫 - 流暢旋轉版本
     const tl = gsap.timeline();
-    
+
     // 第一階段：飛出並旋轉 - 使用連續旋轉
     tl.to(card, {
       duration: 0.8,
       opacity: 1,
       scale: 1,
       rotateY: 720, // 兩圈完整旋轉，更加流暢
-      left: (window.innerWidth / 2) - ((window.innerWidth * 0.95) / 2), // 移動到螢幕中央
-      top: (window.innerHeight / 2) - ((window.innerHeight * 0.92) / 2),
-      ease: "power2.out"
+      left: window.innerWidth / 2 - (window.innerWidth * 0.95) / 2, // 移動到螢幕中央
+      top: window.innerHeight / 2 - (window.innerHeight * 0.92) / 2,
+      ease: 'power2.out',
     })
-    // 第二階段：穩定落地
-    .to(card, {
-      duration: 0.3,
-      scale: 1.05,
-      ease: "back.out(1.7)"
-    })
-    // 第三階段：最終定位
-    .to(card, {
-      duration: 0.2,
-      scale: 1,
-      ease: "power2.out"
-    });
-    
+      // 第二階段：穩定落地
+      .to(card, {
+        duration: 0.3,
+        scale: 1.05,
+        ease: 'back.out(1.7)',
+      })
+      // 第三階段：最終定位
+      .to(card, {
+        duration: 0.2,
+        scale: 1,
+        ease: 'power2.out',
+      });
+
     // 添加發光脈衝效果
     gsap.to(card, {
       duration: 2,
       repeat: -1,
       yoyo: true,
-      ease: "power2.inOut",
-      boxShadow: "0 8px 32px rgba(74, 144, 226, 0.4), 0 0 0 1px rgba(74, 144, 226, 0.2)"
+      ease: 'power2.inOut',
+      boxShadow:
+        '0 8px 32px rgba(74, 144, 226, 0.4), 0 0 0 1px rgba(74, 144, 226, 0.2)',
     });
   }
-  
+
   /**
    * 關閉專案卡片 (Step 2.2.3b)
    */
   closeProjectCard(card) {
     console.log(`[InteractiveTimeline] 關閉專案卡片`);
-    
+
     gsap.to(card, {
       duration: 0.4,
       scale: 0,
       rotateY: 180,
       opacity: 0,
-      ease: "back.in(2)",
+      ease: 'back.in(2)',
       onComplete: () => {
         if (card.parentNode) {
           card.remove();
         }
-      }
+      },
     });
   }
-  
+
   /**
    * 處理點擊外部關閉卡片
    */
@@ -2275,19 +2401,19 @@ export class InteractiveTimeline extends BaseComponent {
    */
   getProjectIcon(category) {
     const icons = {
-      frontend: '🎨',     // 前端開發
-      backend: '⚙️',      // 後端開發
-      fullstack: '🔗',    // 全端開發
-      devops: '🚀',       // DevOps/部署
-      ai: '🤖',          // AI/機器學習
-      mobile: '📱',       // 移動端開發
-      blockchain: '⛓️',   // 區塊鏈
-      cloud: '☁️',        // 雲端服務
-      database: '🗄️',     // 資料庫
-      security: '🔒',     // 資訊安全
-      iot: '📡',         // 物聯網
-      game: '🎮',        // 遊戲開發
-      general: '💡'      // 通用/其他
+      frontend: '🎨', // 前端開發
+      backend: '⚙️', // 後端開發
+      fullstack: '🔗', // 全端開發
+      devops: '🚀', // DevOps/部署
+      ai: '🤖', // AI/機器學習
+      mobile: '📱', // 移動端開發
+      blockchain: '⛓️', // 區塊鏈
+      cloud: '☁️', // 雲端服務
+      database: '🗄️', // 資料庫
+      security: '🔒', // 資訊安全
+      iot: '📡', // 物聯網
+      game: '🎮', // 遊戲開發
+      general: '💡', // 通用/其他
     };
     return icons[category] || icons.general;
   }
@@ -2317,27 +2443,27 @@ export class InteractiveTimeline extends BaseComponent {
     // 根據時間距離和專案狀態決定色彩主題
     if (project.status === 'current') {
       return {
-        primary: '#4CAF50',    // 活躍綠
-        secondary: '#81C784',   
-        glow: 'rgba(76, 175, 80, 0.6)'
+        primary: '#4CAF50', // 活躍綠
+        secondary: '#81C784',
+        glow: 'rgba(76, 175, 80, 0.6)',
       };
     } else if (yearDiff <= 1) {
       return {
-        primary: '#2196F3',    // 近期藍
+        primary: '#2196F3', // 近期藍
         secondary: '#64B5F6',
-        glow: 'rgba(33, 150, 243, 0.5)'
+        glow: 'rgba(33, 150, 243, 0.5)',
       };
     } else if (yearDiff <= 2) {
       return {
-        primary: '#FF9800',    // 中期橙
+        primary: '#FF9800', // 中期橙
         secondary: '#FFB74D',
-        glow: 'rgba(255, 152, 0, 0.4)'
+        glow: 'rgba(255, 152, 0, 0.4)',
       };
     } else {
       return {
-        primary: '#795548',    // 歷史棕
+        primary: '#795548', // 歷史棕
         secondary: '#A1887F',
-        glow: 'rgba(121, 85, 72, 0.3)'
+        glow: 'rgba(121, 85, 72, 0.3)',
       };
     }
   }
@@ -2350,13 +2476,13 @@ export class InteractiveTimeline extends BaseComponent {
       const date = new Date(dateString);
       const month = date.getMonth() + 1; // 月份從0開始，所以+1
       const year = date.getFullYear();
-      
+
       // 如果是當前年份，只顯示月份
       const currentYear = new Date().getFullYear();
       if (year === currentYear) {
         return `${month}月`;
       }
-      
+
       // 其他年份顯示年份和月份
       return `${year}年${month}月`;
     } catch (error) {
@@ -2370,47 +2496,53 @@ export class InteractiveTimeline extends BaseComponent {
    */
   convertSVGToPixelCoordinates(svg, svgPosition) {
     const svgRect = svg.getBoundingClientRect();
-    
+
     // 使用動態尺寸計算
     const dimensions = this.calculateSVGDimensions();
     const viewBoxWidth = dimensions.width;
     const viewBoxHeight = dimensions.height;
-    
+
     // 獲取 timeline-content 容器的實際位置（考慮滾動和變換）
     const timelineContent = this.element.querySelector('.timeline-content');
-    const timelineContentRect = timelineContent ? timelineContent.getBoundingClientRect() : svgRect;
-    
+    const timelineContentRect = timelineContent
+      ? timelineContent.getBoundingClientRect()
+      : svgRect;
+
     // SVG 尺寸檢查和降級處理
     if (svgRect.width === 0 || svgRect.height === 0) {
       console.warn('[InteractiveTimeline] SVG 尺寸為 0，使用降級坐標計算');
-      
+
       // 降級方案：基於容器實際尺寸計算
-      const fallbackX = (svgPosition.x / viewBoxWidth) * timelineContentRect.width;
-      const fallbackY = (svgPosition.y / viewBoxHeight) * timelineContentRect.height;
-      
-      console.log(`[InteractiveTimeline] 降級方案 - 基於容器計算: (${fallbackX}, ${fallbackY})`);
-      
+      const fallbackX =
+        (svgPosition.x / viewBoxWidth) * timelineContentRect.width;
+      const fallbackY =
+        (svgPosition.y / viewBoxHeight) * timelineContentRect.height;
+
+      console.log(
+        `[InteractiveTimeline] 降級方案 - 基於容器計算: (${fallbackX}, ${fallbackY})`
+      );
+
       return {
         x: fallbackX,
-        y: fallbackY
+        y: fallbackY,
       };
     }
-    
+
     // 修復：考慮 SVG 在容器中的實際位置和縮放
     const isVertical = this.state?.currentBreakpoint === 'mobile';
-    
+
     // 計算正確的縮放比例 - 基於實際渲染尺寸
     const actualSVGWidth = svg.clientWidth || svgRect.width;
     const actualSVGHeight = svg.clientHeight || svgRect.height;
-    
+
     // 使用實際 DOM 元素尺寸而非 getBoundingClientRect
     const scaleX = actualSVGWidth / viewBoxWidth;
     const scaleY = actualSVGHeight / viewBoxHeight;
-    
+
     // 桌面版：確保節點正確對齊到時間軸線
-    let correctedX = svgPosition.x * scaleX;
+    const correctedX = svgPosition.x * scaleX;
     let correctedY = svgPosition.y * scaleY;
-    
+
     // 桌面版額外修正：確保節點垂直居中於時間軸
     if (!isVertical) {
       // 獲取時間軸線的實際 Y 位置
@@ -2421,11 +2553,11 @@ export class InteractiveTimeline extends BaseComponent {
           const pathLength = timelinePath.getTotalLength();
           const centerPoint = timelinePath.getPointAtLength(pathLength * 0.5);
           const centerY = centerPoint.y * scaleY;
-          
+
           // 如果節點 Y 坐標與時間軸中心相差太遠，調整到合理範圍內
           const maxDeviation = 100; // 最大偏離距離
           const deviation = Math.abs(correctedY - centerY);
-          
+
           if (deviation < 10) {
             // 如果太接近中心線，稍微分散開
             correctedY = centerY + (Math.random() - 0.5) * 60;
@@ -2435,21 +2567,25 @@ export class InteractiveTimeline extends BaseComponent {
             correctedY = centerY + direction * maxDeviation;
           }
         } catch (error) {
-          console.log('[InteractiveTimeline] 路徑中心點計算失敗，使用原始 Y 坐標');
+          console.log(
+            '[InteractiveTimeline] 路徑中心點計算失敗，使用原始 Y 坐標'
+          );
         }
       }
     }
-    
-    console.log(`🔧 [InteractiveTimeline] 坐標轉換詳情 (${isVertical ? '垂直' : '水平'}):`);
+
+    console.log(
+      `🔧 [InteractiveTimeline] 坐標轉換詳情 (${isVertical ? '垂直' : '水平'}):`
+    );
     console.log(`   📊 SVG原始坐標: (${svgPosition.x}, ${svgPosition.y})`);
     console.log(`   📏 SVG實際尺寸: ${actualSVGWidth}x${actualSVGHeight}`);
     console.log(`   📐 viewBox尺寸: ${viewBoxWidth}x${viewBoxHeight}`);
     console.log(`   🔄 縮放比例: ${scaleX.toFixed(3)}x${scaleY.toFixed(3)}`);
     console.log(`   📍 修正後像素坐標: (${correctedX}, ${correctedY})`);
-    
+
     return {
       x: correctedX,
-      y: correctedY
+      y: correctedY,
     };
   }
 
@@ -2460,31 +2596,37 @@ export class InteractiveTimeline extends BaseComponent {
     if (!path || allProjects.length === 0) {
       return { x: 0, y: 0 };
     }
-    
+
     try {
       const pathLength = path.getTotalLength();
-      console.log(`[InteractiveTimeline] 路徑長度: ${pathLength}, 專案: ${project.title}`);
-      
+      console.log(
+        `[InteractiveTimeline] 路徑長度: ${pathLength}, 專案: ${project.title}`
+      );
+
       if (pathLength === 0) {
         console.error('[InteractiveTimeline] SVG 路徑長度為 0，使用降級方案');
         const container = this.element.querySelector('.timeline-viewport');
         const rect = container.getBoundingClientRect();
         const index = allProjects.indexOf(project);
         return {
-          x: rect.width * 0.1 + (rect.width * 0.8 * (index / Math.max(allProjects.length - 1, 1))),
-          y: rect.height * 0.5
+          x:
+            rect.width * 0.1 +
+            rect.width * 0.8 * (index / Math.max(allProjects.length - 1, 1)),
+          y: rect.height * 0.5,
         };
       }
-      
+
       // 根據實際時間計算進度
       const projectDate = new Date(project.date);
-      const dates = allProjects.map(p => new Date(p.date)).sort((a, b) => a - b);
+      const dates = allProjects
+        .map(p => new Date(p.date))
+        .sort((a, b) => a - b);
       const minDate = dates[0];
       const maxDate = dates[dates.length - 1];
-      
+
       // 優化的節點分佈演算法
       let progress;
-      
+
       if (minDate.getTime() === maxDate.getTime()) {
         // 相同日期：均勻分佈所有節點
         const index = allProjects.findIndex(p => p.id === project.id);
@@ -2499,57 +2641,70 @@ export class InteractiveTimeline extends BaseComponent {
         const timeSpan = maxDate.getTime() - minDate.getTime();
         const projectOffset = projectDate.getTime() - minDate.getTime();
         const timeBasedProgress = (projectOffset / timeSpan) * 0.9 + 0.05;
-        
+
         // 防重疊：檢查是否與其他節點太接近
-        const minSpacing = 0.8 / Math.max(allProjects.length - 1, 1); // 最小間距
-        const sortedProjects = allProjects.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+        const _minSpacing = 0.8 / Math.max(allProjects.length - 1, 1); // 最小間距
+        const sortedProjects = allProjects
+          .slice()
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
         const currentIndex = sortedProjects.findIndex(p => p.id === project.id);
-        
+
         // 確保節點之間有最小間距
-        const idealProgress = (currentIndex / Math.max(allProjects.length - 1, 1)) * 0.9 + 0.05;
-        
+        const idealProgress =
+          (currentIndex / Math.max(allProjects.length - 1, 1)) * 0.9 + 0.05;
+
         // 在時間精確度和均勻分佈之間找平衡
         progress = timeBasedProgress * 0.7 + idealProgress * 0.3;
       }
-      
+
       const point = path.getPointAtLength(pathLength * progress);
-      
+
       // 調試：輸出路徑計算信息
       console.log(`🛤️ [InteractiveTimeline] 路徑計算 for "${project.title}":`);
       console.log(`   📏 pathLength: ${pathLength}`);
       console.log(`   📊 progress: ${progress.toFixed(4)}`);
       console.log(`   📍 point: (${point.x}, ${point.y})`);
-      
+
       // 手機版垂直佈局優化
       const isVertical = this.state.currentBreakpoint === 'mobile';
       if (isVertical) {
         // 垂直模式下，所有節點水平居中，只在垂直軸上分佈
         point.x = this.calculateSVGDimensions().width / 2; // 水平居中
-        
+
         // 確保垂直分佈均勻
-        const sortedByDate = allProjects.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+        const sortedByDate = allProjects
+          .slice()
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
         const currentIndex = sortedByDate.findIndex(p => p.id === project.id);
         const totalHeight = this.calculateSVGDimensions().height;
-        
+
         // 在總高度的 80% 範圍內均勻分佈，上下各留 10% 邊距
-        point.y = (totalHeight * 0.1) + (currentIndex / Math.max(allProjects.length - 1, 1)) * (totalHeight * 0.8);
+        point.y =
+          totalHeight * 0.1 +
+          (currentIndex / Math.max(allProjects.length - 1, 1)) *
+            (totalHeight * 0.8);
       }
-      
-      console.log(`[InteractiveTimeline] 節點 ${project.title} 位置: (${point.x}, ${point.y})`);
-      
+
+      console.log(
+        `[InteractiveTimeline] 節點 ${project.title} 位置: (${point.x}, ${point.y})`
+      );
+
       return {
         x: point.x,
-        y: point.y
+        y: point.y,
       };
     } catch (error) {
       console.error('[InteractiveTimeline] 計算節點位置失敗:', error);
       // 回傳預設位置
       const container = this.element.querySelector('.timeline-viewport');
-      const rect = container?.getBoundingClientRect() || { width: 800, height: 400 };
+      const rect = container?.getBoundingClientRect() || {
+        width: 800,
+        height: 400,
+      };
       const projectIndex = allProjects.findIndex(p => p.id === project.id);
       return {
         x: rect.width * (projectIndex / Math.max(allProjects.length - 1, 1)),
-        y: rect.height * 0.5
+        y: rect.height * 0.5,
       };
     }
   }
@@ -2559,11 +2714,11 @@ export class InteractiveTimeline extends BaseComponent {
    */
   setupTimelineMarkers() {
     console.log('[InteractiveTimeline] 設定時間軸年份標記系統');
-    
+
     const markersContainer = this.element.querySelector('.timeline-markers');
     const svg = this.element.querySelector('.timeline-svg');
     const path = this.element.querySelector('.timeline-path');
-    
+
     if (!markersContainer || !svg || !path) {
       console.error('[InteractiveTimeline] 標記容器或路徑元素未找到');
       return;
@@ -2571,7 +2726,7 @@ export class InteractiveTimeline extends BaseComponent {
 
     // 清空現有標記
     markersContainer.innerHTML = '';
-    
+
     // 只在手機版顯示年份和時期標記，桌面版移除以避免遮擋
     const isVertical = this.state.currentBreakpoint === 'mobile';
     if (isVertical) {
@@ -2582,7 +2737,7 @@ export class InteractiveTimeline extends BaseComponent {
     } else {
       console.log('[InteractiveTimeline] 桌面版跳過標記生成，避免遮擋');
     }
-    
+
     console.log('[InteractiveTimeline] 時間軸標記系統設定完成');
   }
 
@@ -2591,24 +2746,28 @@ export class InteractiveTimeline extends BaseComponent {
    */
   generateYearMarkers(container, svg, path) {
     // 收集所有專案年份
-    const years = [...new Set(this.timelineData.map(project => {
-      return new Date(project.date).getFullYear();
-    }))].sort();
-    
+    const years = [
+      ...new Set(
+        this.timelineData.map(project => {
+          return new Date(project.date).getFullYear();
+        })
+      ),
+    ].sort();
+
     console.log('[InteractiveTimeline] 檢測到年份:', years);
-    
+
     const isVertical = this.state.currentBreakpoint === 'mobile';
-    
+
     years.forEach((year, index) => {
       // 計算年份標記在路徑上的位置
       const yearProgress = this.calculateYearProgress(year, years);
       const markerPosition = this.calculateMarkerPosition(path, yearProgress);
-      
+
       // 創建年份標記元素
       const yearMarker = document.createElement('div');
       yearMarker.className = 'year-marker';
       yearMarker.style.animationDelay = `${index * 0.2}s`;
-      
+
       if (isVertical) {
         yearMarker.style.left = '10px';
         yearMarker.style.top = `${markerPosition.y}px`;
@@ -2616,12 +2775,12 @@ export class InteractiveTimeline extends BaseComponent {
         yearMarker.style.left = `${markerPosition.x}px`;
         yearMarker.style.top = '10px';
       }
-      
+
       yearMarker.innerHTML = `
         <div class="marker-line"></div>
         <div class="marker-label">${year}</div>
       `;
-      
+
       container.appendChild(yearMarker);
     });
   }
@@ -2632,26 +2791,30 @@ export class InteractiveTimeline extends BaseComponent {
   generatePeriodMarkers(container) {
     const currentYear = new Date().getFullYear();
     const isVertical = this.state.currentBreakpoint === 'mobile';
-    
+
     const periods = [
       { name: 'Current', years: [currentYear], color: '#4CAF50' },
       { name: 'Recent', years: [currentYear - 1], color: '#2196F3' },
-      { name: 'Archive', years: [currentYear - 2, currentYear - 3, currentYear - 4], color: '#795548' }
+      {
+        name: 'Archive',
+        years: [currentYear - 2, currentYear - 3, currentYear - 4],
+        color: '#795548',
+      },
     ];
-    
+
     periods.forEach((period, index) => {
-      const hasProjects = period.years.some(year => 
-        this.timelineData.some(project => 
-          new Date(project.date).getFullYear() === year
+      const hasProjects = period.years.some(year =>
+        this.timelineData.some(
+          project => new Date(project.date).getFullYear() === year
         )
       );
-      
+
       if (!hasProjects) return;
-      
+
       const periodMarker = document.createElement('div');
       periodMarker.className = 'period-marker';
       periodMarker.style.animationDelay = `${0.5 + index * 0.3}s`;
-      
+
       // 根據時期設定位置和顏色
       if (isVertical) {
         periodMarker.style.left = '50px';
@@ -2664,12 +2827,12 @@ export class InteractiveTimeline extends BaseComponent {
         periodMarker.style.top = '60px';
         periodMarker.style.width = '120px';
       }
-      
+
       periodMarker.style.setProperty('--period-color', period.color);
       periodMarker.innerHTML = `
         <div class="period-label">${period.name}</div>
       `;
-      
+
       container.appendChild(periodMarker);
     });
   }
@@ -2680,9 +2843,9 @@ export class InteractiveTimeline extends BaseComponent {
   calculateYearProgress(year, allYears) {
     const minYear = Math.min(...allYears);
     const maxYear = Math.max(...allYears);
-    
+
     if (minYear === maxYear) return 0.5;
-    
+
     return (year - minYear) / (maxYear - minYear);
   }
 
@@ -2693,7 +2856,7 @@ export class InteractiveTimeline extends BaseComponent {
     try {
       const pathLength = path.getTotalLength();
       const point = path.getPointAtLength(pathLength * progress);
-      
+
       // 轉換到實際坐標
       const svg = this.element.querySelector('.timeline-svg');
       return this.convertSVGToPixelCoordinates(svg, point);
@@ -2708,18 +2871,18 @@ export class InteractiveTimeline extends BaseComponent {
    */
   setupInteractions() {
     console.log('[InteractiveTimeline] 設定節點互動功能');
-    
+
     // 設定節點點擊事件
     this.nodes.forEach(node => {
       this.setupNodeInteraction(node);
     });
-    
+
     // 設定導航按鈕
     this.setupNavigationControls();
-    
+
     // 設定縮放控制
     this.setupZoomControls();
-    
+
     console.log('[InteractiveTimeline] 互動功能設定完成');
   }
 
@@ -2728,28 +2891,28 @@ export class InteractiveTimeline extends BaseComponent {
    */
   setupNodeInteraction(node) {
     const element = node.element;
-    
+
     // 滑鼠進入效果
     element.addEventListener('mouseenter', () => {
       if (window.gsap) {
         window.gsap.to(element, {
           scale: this.config.animations.nodeHover.scale,
           duration: this.config.animations.nodeHover.duration,
-          ease: "power2.out"
+          ease: 'power2.out',
         });
-        
+
         // 顯示標籤
         const label = element.querySelector('.node-label');
         if (label) {
           window.gsap.to(label, {
             opacity: 1,
             y: -5,
-            duration: 0.3
+            duration: 0.3,
           });
         }
       }
     });
-    
+
     // 滑鼠離開效果
     element.addEventListener('mouseleave', () => {
       if (window.gsap) {
@@ -2757,21 +2920,21 @@ export class InteractiveTimeline extends BaseComponent {
         window.gsap.to(element, {
           scale: importanceScale,
           duration: this.config.animations.nodeHover.duration,
-          ease: "power2.out"
+          ease: 'power2.out',
         });
-        
+
         // 隱藏標籤
         const label = element.querySelector('.node-label');
         if (label) {
           window.gsap.to(label, {
             opacity: 0,
             y: 0,
-            duration: 0.3
+            duration: 0.3,
           });
         }
       }
     });
-    
+
     // 點擊事件 (為 Step 2.2.3 準備)
     element.addEventListener('click', () => {
       this.handleNodeClickLegacy(node);
@@ -2783,14 +2946,14 @@ export class InteractiveTimeline extends BaseComponent {
    */
   handleNodeClickLegacy(node) {
     console.log(`[InteractiveTimeline] 節點被點擊 (舊版): ${node.data.title}`);
-    
+
     // 設定選中狀態
     this.state.selectedNode = node;
-    
+
     // 移除其他節點的選中狀態
     this.nodes.forEach(n => n.element.classList.remove('selected'));
     node.element.classList.add('selected');
-    
+
     // 節點點擊反饋動畫
     if (window.gsap) {
       window.gsap.to(node.element, {
@@ -2798,10 +2961,10 @@ export class InteractiveTimeline extends BaseComponent {
         duration: 0.2,
         yoyo: true,
         repeat: 1,
-        ease: "power2.inOut"
+        ease: 'power2.inOut',
       });
     }
-    
+
     // Step 2.2.3 將在這裡實作卡片飛出動畫
     console.log('[InteractiveTimeline] 卡片飛出動畫將在 Step 2.2.3 實作');
   }
@@ -2812,11 +2975,11 @@ export class InteractiveTimeline extends BaseComponent {
   setupNavigationControls() {
     const prevBtn = this.element.querySelector('.prev-btn');
     const nextBtn = this.element.querySelector('.next-btn');
-    
+
     if (prevBtn) {
       prevBtn.addEventListener('click', () => this.navigateTimeline(-1));
     }
-    
+
     if (nextBtn) {
       nextBtn.addEventListener('click', () => this.navigateTimeline(1));
     }
@@ -2826,14 +2989,19 @@ export class InteractiveTimeline extends BaseComponent {
    * 時間軸導航
    */
   navigateTimeline(direction) {
-    console.log(`[InteractiveTimeline] 導航方向: ${direction > 0 ? '前進' : '後退'}`);
-    
+    console.log(
+      `[InteractiveTimeline] 導航方向: ${direction > 0 ? '前進' : '後退'}`
+    );
+
     this.currentPosition += direction;
-    this.currentPosition = Math.max(0, Math.min(this.timelineData.length - 1, this.currentPosition));
-    
+    this.currentPosition = Math.max(
+      0,
+      Math.min(this.timelineData.length - 1, this.currentPosition)
+    );
+
     // 更新當前年份顯示
     this.updateCurrentYear();
-    
+
     // Step 2.2.4 將實作完整的時間軸滾動
     console.log('[InteractiveTimeline] 時間軸滾動將在 Step 2.2.4 完善');
   }
@@ -2844,11 +3012,11 @@ export class InteractiveTimeline extends BaseComponent {
   setupZoomControls() {
     const zoomInBtn = this.element.querySelector('[data-zoom="in"]');
     const zoomOutBtn = this.element.querySelector('[data-zoom="out"]');
-    
+
     if (zoomInBtn) {
       zoomInBtn.addEventListener('click', () => this.zoomTimeline(1.2));
     }
-    
+
     if (zoomOutBtn) {
       zoomOutBtn.addEventListener('click', () => this.zoomTimeline(0.8));
     }
@@ -2859,13 +3027,13 @@ export class InteractiveTimeline extends BaseComponent {
    */
   zoomTimeline(scale) {
     console.log(`[InteractiveTimeline] 縮放比例: ${scale}`);
-    
+
     const viewport = this.element.querySelector('.timeline-viewport');
     if (viewport && window.gsap) {
       window.gsap.to(viewport, {
         scale: scale,
         duration: 0.5,
-        ease: "power2.out"
+        ease: 'power2.out',
       });
     }
   }
@@ -2887,27 +3055,30 @@ export class InteractiveTimeline extends BaseComponent {
    */
   setupResponsiveHandling() {
     console.log('[InteractiveTimeline] 設定響應式處理');
-    
+
     // 初始設定當前年份
     this.updateCurrentYear();
-    
+
     // 監聽視窗大小變化
     const handleResize = this.debounce(() => {
       const newBreakpoint = this.detectBreakpoint();
       if (newBreakpoint !== this.state.currentBreakpoint) {
         this.state.currentBreakpoint = newBreakpoint;
         this.rebuildTimeline();
-        
+
         // 更新觸控狀態 (Step 2.2.4b)
         if (this.state.touch) {
           this.state.touch.isEnabled = newBreakpoint === 'mobile';
-          console.log('[TouchGesture] 更新觸控狀態:', this.state.touch.isEnabled);
+          console.log(
+            '[TouchGesture] 更新觸控狀態:',
+            this.state.touch.isEnabled
+          );
         }
       }
     }, 300);
-    
+
     window.addEventListener('resize', handleResize);
-    
+
     console.log('[InteractiveTimeline] 響應式處理設定完成');
   }
 
@@ -2916,7 +3087,7 @@ export class InteractiveTimeline extends BaseComponent {
    */
   rebuildTimeline() {
     console.log('[InteractiveTimeline] 重建時間軸以適應新的斷點');
-    
+
     // 重新生成路徑和節點
     this.setupTimeline();
     this.setupNodes();
@@ -2939,7 +3110,7 @@ export class InteractiveTimeline extends BaseComponent {
           </button>
         </div>
       `;
-      
+
       this.element.retry = () => this.init();
     }
   }
@@ -2962,7 +3133,7 @@ export class InteractiveTimeline extends BaseComponent {
 
     try {
       console.log('[InteractiveTimeline] 開始執行 DOM 掛載後設定');
-      
+
       // 使用雙重 requestAnimationFrame 確保 SVG 完全渲染
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -2975,14 +3146,13 @@ export class InteractiveTimeline extends BaseComponent {
           this.setupYearFilter(); // Step 2.2.4a 新增年份篩選
           this.setupTouchGestures(); // Step 2.2.4b 新增觸控手勢
           this.setupDesktopEnhancements(); // Step 2.2.4c 新增桌面端增強
-          
+
           // 初始化完成後進行居中對齊
           this.centerTimelineInitially();
-          
+
           console.log('[InteractiveTimeline] DOM 掛載後設定完成');
         });
       });
-      
     } catch (error) {
       console.error('[InteractiveTimeline] DOM 掛載後設定失敗:', error);
     }
@@ -2998,49 +3168,57 @@ export class InteractiveTimeline extends BaseComponent {
         console.warn('[InteractiveTimeline] 已達到最大重試次數，放棄居中對齊');
         return;
       }
-      
+
       if (retryCount === 0) {
         console.log('[InteractiveTimeline] 執行初始居中對齊');
       }
-      
+
       const timelineContent = this.element.querySelector('.timeline-content');
       const viewport = this.element.querySelector('.timeline-viewport');
-      
+
       if (!timelineContent || !viewport) {
         console.warn('[InteractiveTimeline] 無法找到時間軸內容或視窗元素');
         return;
       }
-      
+
       // 等待一個 requestAnimationFrame 確保 DOM 尺寸正確計算
       requestAnimationFrame(() => {
         const contentDimensions = this.calculateSVGDimensions();
         const viewportWidth = viewport.clientWidth;
         const viewportHeight = viewport.clientHeight;
-        
+
         // 如果視窗寬度仍然是 0，則等待更長時間再嘗試
         if (viewportWidth === 0) {
           if (retryCount < 3) {
             // 只在前幾次重試時顯示警告
-            console.warn(`[InteractiveTimeline] 視窗寬度為 0，第 ${retryCount + 1} 次重試...`);
+            console.warn(
+              `[InteractiveTimeline] 視窗寬度為 0，第 ${retryCount + 1} 次重試...`
+            );
           }
           setTimeout(() => {
             this.centerTimelineInitially(retryCount + 1);
           }, 200);
           return;
         }
-        
+
         // 計算水平和垂直居中偏移
         // 對於水平居中，如果內容寬度小於視窗寬度才需要居中偏移
-        const offsetX = contentDimensions.width < viewportWidth ? 
-          (viewportWidth - contentDimensions.width) / 2 : 0;
-        const offsetY = Math.max(0, (viewportHeight - contentDimensions.height) / 2);
-        
+        const offsetX =
+          contentDimensions.width < viewportWidth
+            ? (viewportWidth - contentDimensions.width) / 2
+            : 0;
+        const offsetY = Math.max(
+          0,
+          (viewportHeight - contentDimensions.height) / 2
+        );
+
         // 應用初始變換，確保內容可見且居中
         timelineContent.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-        
-        console.log(`[InteractiveTimeline] 初始居中完成，視窗: ${viewportWidth}x${viewportHeight}, 偏移: ${offsetX}px, ${offsetY}px`);
+
+        console.log(
+          `[InteractiveTimeline] 初始居中完成，視窗: ${viewportWidth}x${viewportHeight}, 偏移: ${offsetX}px, ${offsetY}px`
+        );
       });
-      
     } catch (error) {
       console.error('[InteractiveTimeline] 初始居中失敗:', error);
     }
@@ -3077,9 +3255,13 @@ export class InteractiveTimeline extends BaseComponent {
    * 收集所有可用年份
    */
   collectAvailableYears() {
-    const years = [...new Set(this.timelineData.map(project => {
-      return new Date(project.date).getFullYear();
-    }))].sort((a, b) => b - a); // 降序排列，最新年份在前
+    const years = [
+      ...new Set(
+        this.timelineData.map(project => {
+          return new Date(project.date).getFullYear();
+        })
+      ),
+    ].sort((a, b) => b - a); // 降序排列，最新年份在前
 
     this.state.yearFilter.availableYears = years;
     console.log('[InteractiveTimeline] 收集到年份:', years);
@@ -3096,10 +3278,10 @@ export class InteractiveTimeline extends BaseComponent {
     }
 
     const isMobile = this.state.currentBreakpoint === 'mobile';
-    
+
     // 清空現有選項
     yearSelector.innerHTML = '';
-    
+
     // 桌面版添加"顯示所有"選項
     if (!isMobile) {
       const defaultOption = document.createElement('option');
@@ -3124,7 +3306,10 @@ export class InteractiveTimeline extends BaseComponent {
       this.applyYearFilter(latestYear.toString());
     }
 
-    console.log('[InteractiveTimeline] 年份選項已填充' + (isMobile ? '（手機版）' : '（桌面版）'));
+    console.log(
+      '[InteractiveTimeline] 年份選項已填充' +
+        (isMobile ? '（手機版）' : '（桌面版）')
+    );
   }
 
   /**
@@ -3138,22 +3323,25 @@ export class InteractiveTimeline extends BaseComponent {
     }
 
     console.log('[DEBUG] 找到年份選擇器:', yearSelector);
-    console.log('[DEBUG] 年份選擇器樣式:', window.getComputedStyle(yearSelector));
-    
+    console.log(
+      '[DEBUG] 年份選擇器樣式:',
+      window.getComputedStyle(yearSelector)
+    );
+
     // 添加多種事件監聽器來調試
-    yearSelector.addEventListener('click', (event) => {
+    yearSelector.addEventListener('click', event => {
       console.log('[DEBUG] 年份選擇器被點擊:', event);
     });
-    
-    yearSelector.addEventListener('mousedown', (event) => {
+
+    yearSelector.addEventListener('mousedown', event => {
       console.log('[DEBUG] 年份選擇器 mousedown:', event);
     });
-    
-    yearSelector.addEventListener('focus', (event) => {
+
+    yearSelector.addEventListener('focus', event => {
       console.log('[DEBUG] 年份選擇器獲得焦點:', event);
     });
 
-    yearSelector.addEventListener('change', (event) => {
+    yearSelector.addEventListener('change', event => {
       console.log('[DEBUG] 年份選擇器值變化:', event.target.value);
       const selectedYear = event.target.value;
       this.applyYearFilter(selectedYear);
@@ -3173,10 +3361,12 @@ export class InteractiveTimeline extends BaseComponent {
 
     // 篩選專案數據
     if (year) {
-      this.state.yearFilter.filteredProjects = this.timelineData.filter(project => {
-        const projectYear = new Date(project.date).getFullYear();
-        return projectYear.toString() === year;
-      });
+      this.state.yearFilter.filteredProjects = this.timelineData.filter(
+        project => {
+          const projectYear = new Date(project.date).getFullYear();
+          return projectYear.toString() === year;
+        }
+      );
     } else {
       this.state.yearFilter.filteredProjects = [...this.timelineData];
     }
@@ -3194,13 +3384,15 @@ export class InteractiveTimeline extends BaseComponent {
     this.updateCurrentYearDisplay();
 
     // 觸發自定義事件
-    this.element.dispatchEvent(new CustomEvent('yearFilterChanged', {
-      detail: {
-        selectedYear: year,
-        filteredProjects: this.state.yearFilter.filteredProjects,
-        totalProjects: this.timelineData.length
-      }
-    }));
+    this.element.dispatchEvent(
+      new CustomEvent('yearFilterChanged', {
+        detail: {
+          selectedYear: year,
+          filteredProjects: this.state.yearFilter.filteredProjects,
+          totalProjects: this.timelineData.length,
+        },
+      })
+    );
   }
 
   /**
@@ -3208,60 +3400,66 @@ export class InteractiveTimeline extends BaseComponent {
    */
   rebuildMobileTimeline() {
     console.log('[InteractiveTimeline] 重建手機版時間軸');
-    
+
     // 取得要顯示的專案數量
-    const projectsToShow = this.state.yearFilter.isFiltering ? 
-      this.state.yearFilter.filteredProjects : 
-      this.timelineData;
-    
+    const projectsToShow = this.state.yearFilter.isFiltering
+      ? this.state.yearFilter.filteredProjects
+      : this.timelineData;
+
     console.log(`[InteractiveTimeline] 篩選後專案數: ${projectsToShow.length}`);
-    
+
     // 重新設定 SVG 和路徑尺寸
     const svg = this.element.querySelector('.timeline-svg');
     const dimensions = this.calculateSVGDimensions();
-    
+
     if (svg) {
       svg.setAttribute('width', dimensions.width);
       svg.setAttribute('height', dimensions.height);
-      svg.setAttribute('viewBox', `0 0 ${dimensions.width} ${dimensions.height}`);
+      svg.setAttribute(
+        'viewBox',
+        `0 0 ${dimensions.width} ${dimensions.height}`
+      );
     }
-    
+
     // 重新計算和設定路徑
     this.setupTimeline();
-    
+
     // 重新建立節點（使用篩選後的數據）
     this.setupNodes(true);
-    
+
     // 更新容器高度
     const viewport = this.element.querySelector('.timeline-viewport');
-    const container = this.element.querySelector('.timeline-container');
+    const _container = this.element.querySelector('.timeline-container');
     const timelineContent = this.element.querySelector('.timeline-content');
-    
+
     if (viewport) {
       viewport.style.minHeight = `${dimensions.height}px`;
     }
-    
+
     if (timelineContent) {
       timelineContent.style.height = `${dimensions.height}px`;
     }
-    
-    console.log(`[InteractiveTimeline] 手機版時間軸重建完成，顯示 ${projectsToShow.length} 個專案`);
+
+    console.log(
+      `[InteractiveTimeline] 手機版時間軸重建完成，顯示 ${projectsToShow.length} 個專案`
+    );
   }
 
   /**
    * 更新節點可見性 - Step 2.2.4d 立即響應版本
    */
   updateNodesVisibility() {
-    const { selectedYear, filteredProjects } = this.state.yearFilter;
-    
+    const { selectedYear, filteredProjects: _filteredProjects } =
+      this.state.yearFilter;
+
     // Step 2.2.4d: 立即切換，無動畫延遲
 
-    this.nodes.forEach((node, index) => {
+    this.nodes.forEach((node, _index) => {
       const project = node.data;
       const projectYear = new Date(project.date).getFullYear();
-      const shouldShow = !selectedYear || projectYear.toString() === selectedYear;
+      const shouldShow =
+        !selectedYear || projectYear.toString() === selectedYear;
 
-      
       if (shouldShow) {
         // 立即顯示節點 - 保持居中對齊
         const importanceScale = 0.8 + (project.importance / 5) * 0.4;
@@ -3277,9 +3475,11 @@ export class InteractiveTimeline extends BaseComponent {
         node.element.style.pointerEvents = 'none';
       }
     });
-    
-    console.log(`[InteractiveTimeline] 節點可見性立即更新: ${selectedYear || '顯示所有'}`);
-    
+
+    console.log(
+      `[InteractiveTimeline] 節點可見性立即更新: ${selectedYear || '顯示所有'}`
+    );
+
     // Step 2.2.4d: 年份切換後自動居中
     if (selectedYear && this.config.yearFilter.autoCenter) {
       this.centerViewportOnYear(selectedYear);
@@ -3294,36 +3494,42 @@ export class InteractiveTimeline extends BaseComponent {
       const projectYear = new Date(node.data.date).getFullYear();
       return projectYear.toString() === selectedYear;
     });
-    
+
     if (yearNodes.length === 0) {
       console.warn(`[InteractiveTimeline] 未找到 ${selectedYear} 年的節點`);
       return;
     }
-    
+
     // 計算年份節點的邊界框
     const bounds = this.calculateNodesBounds(yearNodes);
-    
+
     // 計算視窗居中偏移
     const centerOffset = this.calculateCenterOffset(bounds);
-    
+
     // 應用視窗變換
     this.applyViewportTransform(centerOffset);
-    
-    console.log(`[InteractiveTimeline] 視窗自動居中到 ${selectedYear} 年，偏移: (${centerOffset.x}, ${centerOffset.y})`);
+
+    console.log(
+      `[InteractiveTimeline] 視窗自動居中到 ${selectedYear} 年，偏移: (${centerOffset.x}, ${centerOffset.y})`
+    );
   }
 
   /**
    * 計算節點邊界框 - Step 2.2.4d 修復座標計算
    */
   calculateNodesBounds(nodes) {
-    if (nodes.length === 0) return { minX: 0, maxX: 0, minY: 0, maxY: 0, centerX: 0, centerY: 0 };
-    
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    
+    if (nodes.length === 0)
+      return { minX: 0, maxX: 0, minY: 0, maxY: 0, centerX: 0, centerY: 0 };
+
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity;
+
     nodes.forEach(node => {
       // 修復：使用節點創建時儲存的正確位置
       let x, y;
-      
+
       if (node.position) {
         // 使用已儲存的像素座標
         x = node.position.x;
@@ -3334,15 +3540,15 @@ export class InteractiveTimeline extends BaseComponent {
         x = parseFloat(nodeStyle.left) || 0;
         y = parseFloat(nodeStyle.top) || 0;
       }
-      
+
       minX = Math.min(minX, x);
       maxX = Math.max(maxX, x);
       minY = Math.min(minY, y);
       maxY = Math.max(maxY, y);
-      
+
       console.log(`[DEBUG] 節點 ${node.data.title} 位置: (${x}, ${y})`);
     });
-    
+
     const bounds = {
       minX,
       maxX,
@@ -3351,9 +3557,9 @@ export class InteractiveTimeline extends BaseComponent {
       centerX: (minX + maxX) / 2,
       centerY: (minY + maxY) / 2,
       width: maxX - minX,
-      height: maxY - minY
+      height: maxY - minY,
     };
-    
+
     console.log(`[DEBUG] 節點邊界框:`, bounds);
     return bounds;
   }
@@ -3363,29 +3569,29 @@ export class InteractiveTimeline extends BaseComponent {
    */
   calculateCenterOffset(bounds) {
     const viewport = this.element.querySelector('.timeline-viewport');
-    
+
     const viewportCenterX = viewport.clientWidth / 2;
     const viewportCenterY = viewport.clientHeight / 2;
-    
+
     // 獲取當前變換狀態
     const timelineContent = this.element.querySelector('.timeline-content');
     const currentTransform = timelineContent.style.transform || '';
     const scaleMatch = currentTransform.match(/scale\(([^)]+)\)/);
     const currentScale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
-    
+
     // 計算需要移動的距離讓節點中心對齊視窗中心
     // 節點位置已經是像素坐標，不需要再次縮放調整
     const targetX = viewportCenterX - bounds.centerX;
     const targetY = viewportCenterY - bounds.centerY;
-    
+
     console.log(`[DEBUG] 視窗中心: (${viewportCenterX}, ${viewportCenterY})`);
     console.log(`[DEBUG] 節點中心: (${bounds.centerX}, ${bounds.centerY})`);
     console.log(`[DEBUG] 當前縮放: ${currentScale}`);
     console.log(`[DEBUG] 目標偏移: (${targetX}, ${targetY})`);
-    
+
     return {
       x: targetX,
-      y: targetY
+      y: targetY,
     };
   }
 
@@ -3395,58 +3601,81 @@ export class InteractiveTimeline extends BaseComponent {
   applyViewportTransform(offset) {
     const timelineContent = this.element.querySelector('.timeline-content');
     if (!timelineContent) {
-      console.log('[InteractiveTimeline] applyViewportTransform: timelineContent 未找到');
+      console.log(
+        '[InteractiveTimeline] applyViewportTransform: timelineContent 未找到'
+      );
       return;
     }
-    
+
     // 獲取當前變換
     const currentTransform = timelineContent.style.transform || '';
     const scaleMatch = currentTransform.match(/scale\(([^)]+)\)/);
     const currentScale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
-    
-    console.log(`[InteractiveTimeline] 當前變換: ${currentTransform}, 縮放: ${currentScale}`);
+
+    console.log(
+      `[InteractiveTimeline] 當前變換: ${currentTransform}, 縮放: ${currentScale}`
+    );
     console.log(`[InteractiveTimeline] 目標偏移: (${offset.x}, ${offset.y})`);
-    
+
     // 計算邊界限制
     const viewport = this.element.querySelector('.timeline-viewport');
     const contentDimensions = this.calculateSVGDimensions();
-    
+
     if (viewport) {
       const viewportWidth = viewport.clientWidth;
       const viewportHeight = viewport.clientHeight;
       const scaledContentWidth = contentDimensions.width * currentScale;
       const scaledContentHeight = contentDimensions.height * currentScale;
-      
-      console.log(`[InteractiveTimeline] 視窗尺寸: ${viewportWidth}x${viewportHeight}`);
-      console.log(`[InteractiveTimeline] 內容尺寸: ${contentDimensions.width}x${contentDimensions.height} (縮放後: ${scaledContentWidth}x${scaledContentHeight})`);
-      
+
+      console.log(
+        `[InteractiveTimeline] 視窗尺寸: ${viewportWidth}x${viewportHeight}`
+      );
+      console.log(
+        `[InteractiveTimeline] 內容尺寸: ${contentDimensions.width}x${contentDimensions.height} (縮放後: ${scaledContentWidth}x${scaledContentHeight})`
+      );
+
       // 設定合理的邊界限制 - 允許足夠的移動空間用於年份切換
       const padding = Math.max(viewportWidth, viewportHeight); // 預留足夠的移動空間
       const maxTranslateX = scaledContentWidth + padding;
       const minTranslateX = -scaledContentWidth - padding;
       const maxTranslateY = scaledContentHeight + padding;
       const minTranslateY = -scaledContentHeight - padding;
-      
-      console.log(`[InteractiveTimeline] X 邊界: ${minTranslateX} ~ ${maxTranslateX}`);
-      console.log(`[InteractiveTimeline] Y 邊界: ${minTranslateY} ~ ${maxTranslateY}`);
-      
+
+      console.log(
+        `[InteractiveTimeline] X 邊界: ${minTranslateX} ~ ${maxTranslateX}`
+      );
+      console.log(
+        `[InteractiveTimeline] Y 邊界: ${minTranslateY} ~ ${maxTranslateY}`
+      );
+
       // 應用邊界限制但保持足夠寬鬆以支持年份切換
-      const boundedX = Math.max(minTranslateX, Math.min(maxTranslateX, offset.x));
-      const boundedY = Math.max(minTranslateY, Math.min(maxTranslateY, offset.y));
-      
-      console.log(`[InteractiveTimeline] 邊界處理後偏移: (${boundedX}, ${boundedY})`);
-      
+      const boundedX = Math.max(
+        minTranslateX,
+        Math.min(maxTranslateX, offset.x)
+      );
+      const boundedY = Math.max(
+        minTranslateY,
+        Math.min(maxTranslateY, offset.y)
+      );
+
+      console.log(
+        `[InteractiveTimeline] 邊界處理後偏移: (${boundedX}, ${boundedY})`
+      );
+
       // 檢查是否啟用動畫
-      const useAnimation = window.gsap && 
-                          this.config.yearFilter && 
-                          this.config.yearFilter.centerAnimation && 
-                          this.config.yearFilter.centerAnimation.enabled;
-                          
+      const useAnimation =
+        window.gsap &&
+        this.config.yearFilter &&
+        this.config.yearFilter.centerAnimation &&
+        this.config.yearFilter.centerAnimation.enabled;
+
       console.log(`[InteractiveTimeline] 使用動畫: ${useAnimation}`);
-      
+
       // 平滑過渡到新位置（如果啟用動畫）
       if (useAnimation) {
-        console.log(`[InteractiveTimeline] 執行 GSAP 動畫到: translateX(${boundedX}px) translateY(${boundedY}px) scale(${currentScale})`);
+        console.log(
+          `[InteractiveTimeline] 執行 GSAP 動畫到: translateX(${boundedX}px) translateY(${boundedY}px) scale(${currentScale})`
+        );
         window.gsap.to(timelineContent, {
           duration: this.config.yearFilter.centerAnimation.duration || 0.8,
           ease: this.config.yearFilter.centerAnimation.easing || 'power2.out',
@@ -3458,23 +3687,25 @@ export class InteractiveTimeline extends BaseComponent {
               this.state.desktop.translateX = boundedX;
               this.state.desktop.translateY = boundedY;
             }
-          }
+          },
         });
       } else {
         // 立即設定（無動畫或GSAP未載入）
         const newTransform = `translateX(${boundedX}px) translateY(${boundedY}px) scale(${currentScale})`;
         console.log(`[InteractiveTimeline] 立即設定變換: ${newTransform}`);
         timelineContent.style.transform = newTransform;
-        
+
         if (this.state.desktop) {
           this.state.desktop.translateX = boundedX;
           this.state.desktop.translateY = boundedY;
         }
-        
+
         // 確認設定是否成功
         setTimeout(() => {
           const actualTransform = timelineContent.style.transform;
-          console.log(`[InteractiveTimeline] 設定後實際變換: ${actualTransform}`);
+          console.log(
+            `[InteractiveTimeline] 設定後實際變換: ${actualTransform}`
+          );
         }, 100);
       }
     }
@@ -3512,10 +3743,12 @@ export class InteractiveTimeline extends BaseComponent {
     } else {
       // 顯示所有年份時，顯示年份範圍
       if (this.state.yearFilter.availableYears.length > 0) {
-        const years = [...this.state.yearFilter.availableYears].sort((a, b) => a - b);
+        const years = [...this.state.yearFilter.availableYears].sort(
+          (a, b) => a - b
+        );
         const minYear = years[0];
         const maxYear = years[years.length - 1];
-        
+
         if (minYear === maxYear) {
           currentYearElement.textContent = minYear.toString();
         } else {
@@ -3523,13 +3756,18 @@ export class InteractiveTimeline extends BaseComponent {
         }
       } else if (this.timelineData.length > 0) {
         // 降級方案：從專案數據計算
-        const years = [...new Set(this.timelineData.map(project => {
-          return new Date(project.date).getFullYear();
-        }))].sort((a, b) => a - b);
-        
+        const years = [
+          ...new Set(
+            this.timelineData.map(project => {
+              return new Date(project.date).getFullYear();
+            })
+          ),
+        ].sort((a, b) => a - b);
+
         const minYear = years[0];
         const maxYear = years[years.length - 1];
-        currentYearElement.textContent = minYear === maxYear ? minYear.toString() : `${minYear}~${maxYear}`;
+        currentYearElement.textContent =
+          minYear === maxYear ? minYear.toString() : `${minYear}~${maxYear}`;
       }
     }
   }
@@ -3539,92 +3777,93 @@ export class InteractiveTimeline extends BaseComponent {
    */
   setupParticleSystem() {
     console.log('[InteractiveTimeline] 初始化背景粒子流動系統');
-    
+
     if (!this.config.particles.enabled) {
       console.log('[InteractiveTimeline] 粒子系統已停用');
       return;
     }
-    
+
     const canvas = this.element.querySelector('.particles-canvas');
     if (!canvas) {
       console.error('[InteractiveTimeline] 粒子 Canvas 元素未找到');
       return;
     }
-    
+
     const context = canvas.getContext('2d');
     if (!context) {
       console.error('[InteractiveTimeline] Canvas Context 取得失敗');
       return;
     }
-    
+
     // 設定響應式 Canvas 尺寸
     this.setupCanvasSize(canvas);
-    
+
     // 初始化粒子狀態
     this.state.particles.canvas = canvas;
     this.state.particles.context = context;
     this.state.particles.isActive = true;
-    
+
     // 創建粒子池
     this.createParticlePool();
-    
+
     // 啟動動畫循環
     this.startParticleAnimation();
-    
+
     // 標記粒子容器為活躍
     const particleContainer = this.element.querySelector('.timeline-particles');
     if (particleContainer) {
       particleContainer.classList.add('active');
     }
-    
+
     console.log('[InteractiveTimeline] 粒子系統初始化完成');
   }
-  
+
   /**
    * 設定響應式 Canvas 尺寸
    */
   setupCanvasSize(canvas) {
     const container = canvas.closest('.timeline-viewport');
     if (!container) return;
-    
+
     const updateCanvasSize = () => {
       const rect = container.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
-      
+
       // 設定顯示尺寸
       canvas.style.width = rect.width + 'px';
       canvas.style.height = rect.height + 'px';
-      
+
       // 設定實際解析度
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
-      
+
       // 縮放 context 以適應 DPI
       const ctx = canvas.getContext('2d');
       ctx.scale(dpr, dpr);
     };
-    
+
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
   }
-  
+
   /**
    * 創建粒子對象池
    */
   createParticlePool() {
     const breakpoint = this.state.currentBreakpoint;
-    const particleConfig = this.config.particles.performance[breakpoint] || this.config.particles;
+    const particleConfig =
+      this.config.particles.performance[breakpoint] || this.config.particles;
     const count = particleConfig.count || this.config.particles.count;
-    
+
     this.state.particles.particlePool = [];
-    
+
     for (let i = 0; i < count; i++) {
       this.state.particles.particlePool.push(this.createParticle());
     }
-    
+
     console.log(`[InteractiveTimeline] 創建 ${count} 個粒子 (${breakpoint})`);
   }
-  
+
   /**
    * 創建單個粒子
    */
@@ -3635,43 +3874,45 @@ export class InteractiveTimeline extends BaseComponent {
     const sizeConfig = this.config.particles.size;
     const speedConfig = this.config.particles.speed;
     const opacityConfig = this.config.particles.opacity;
-    
+
     // 使用顯示尺寸而非像素尺寸
     const displayWidth = canvas.offsetWidth;
     const displayHeight = canvas.offsetHeight;
-    
+
     return {
       // 位置 - 初始隨機分佈
       x: Math.random() * displayWidth,
       y: Math.random() * displayHeight,
-      
+
       // 起始位置 (用於重生)
       startX: isVertical ? Math.random() * displayWidth : -10,
       startY: isVertical ? -10 : Math.random() * displayHeight,
-      
+
       // 速度
-      vx: isVertical ? 
-          (Math.random() - 0.5) * 0.5 : 
-          speedConfig.min + Math.random() * (speedConfig.max - speedConfig.min),
-      vy: isVertical ? 
-          speedConfig.min + Math.random() * (speedConfig.max - speedConfig.min) :
-          (Math.random() - 0.5) * 0.5,
-      
+      vx: isVertical
+        ? (Math.random() - 0.5) * 0.5
+        : speedConfig.min + Math.random() * (speedConfig.max - speedConfig.min),
+      vy: isVertical
+        ? speedConfig.min + Math.random() * (speedConfig.max - speedConfig.min)
+        : (Math.random() - 0.5) * 0.5,
+
       // 視覺屬性
       size: sizeConfig.min + Math.random() * (sizeConfig.max - sizeConfig.min),
-      opacity: opacityConfig.min + Math.random() * (opacityConfig.max - opacityConfig.min),
+      opacity:
+        opacityConfig.min +
+        Math.random() * (opacityConfig.max - opacityConfig.min),
       color: colors[Math.floor(Math.random() * colors.length)],
-      
+
       // 生命週期
       life: 1.0,
       maxLife: 1.0,
-      
+
       // 動畫屬性
       pulse: Math.random() * Math.PI * 2, // 脈衝相位
-      pulseSpeed: 0.02 + Math.random() * 0.02
+      pulseSpeed: 0.02 + Math.random() * 0.02,
     };
   }
-  
+
   /**
    * 啟動粒子動畫循環
    */
@@ -3679,31 +3920,32 @@ export class InteractiveTimeline extends BaseComponent {
     if (this.state.particles.animationFrame) {
       cancelAnimationFrame(this.state.particles.animationFrame);
     }
-    
+
     // Step 2.2.4b: 獲取性能配置
     const breakpoint = this.state.currentBreakpoint;
-    const particleConfig = this.config.particles.performance[breakpoint] || this.config.particles;
+    const particleConfig =
+      this.config.particles.performance[breakpoint] || this.config.particles;
     const targetFrameRate = particleConfig.frameRate || 60;
     const frameInterval = 1000 / targetFrameRate; // ms per frame
-    
+
     let lastFrameTime = 0;
-    
-    const animate = (currentTime) => {
+
+    const animate = currentTime => {
       if (!this.state.particles.isActive) return;
-      
+
       // 幀率控制
       if (currentTime - lastFrameTime >= frameInterval) {
         this.updateParticles();
         this.renderParticles();
         lastFrameTime = currentTime;
       }
-      
+
       this.state.particles.animationFrame = requestAnimationFrame(animate);
     };
-    
+
     animate(0);
   }
-  
+
   /**
    * 更新粒子位置和狀態
    */
@@ -3711,22 +3953,22 @@ export class InteractiveTimeline extends BaseComponent {
     const canvas = this.state.particles.canvas;
     const particles = this.state.particles.particlePool;
     const isVertical = this.state.currentBreakpoint === 'mobile';
-    
+
     // 使用顯示尺寸進行邊界檢測
     const displayWidth = canvas.offsetWidth;
     const displayHeight = canvas.offsetHeight;
-    
+
     particles.forEach(particle => {
       // 更新位置
       particle.x += particle.vx;
       particle.y += particle.vy;
-      
+
       // 更新脈衝動畫
       particle.pulse += particle.pulseSpeed;
-      
+
       // 檢查邊界並重生粒子
       let needsRespawn = false;
-      
+
       if (isVertical) {
         // 垂直流動：從上到下
         if (particle.y > displayHeight + 20) {
@@ -3738,7 +3980,7 @@ export class InteractiveTimeline extends BaseComponent {
           needsRespawn = true;
         }
       }
-      
+
       // 重生粒子 - 從邊界外重新開始
       if (needsRespawn && this.config.particles.respawn) {
         if (isVertical) {
@@ -3746,21 +3988,33 @@ export class InteractiveTimeline extends BaseComponent {
           particle.x = Math.random() * displayWidth;
           particle.y = -10;
           particle.vx = (Math.random() - 0.5) * 0.5;
-          particle.vy = this.config.particles.speed.min + Math.random() * (this.config.particles.speed.max - this.config.particles.speed.min);
+          particle.vy =
+            this.config.particles.speed.min +
+            Math.random() *
+              (this.config.particles.speed.max -
+                this.config.particles.speed.min);
         } else {
           // 水平流動重生在左側
           particle.x = -10;
           particle.y = Math.random() * displayHeight;
-          particle.vx = this.config.particles.speed.min + Math.random() * (this.config.particles.speed.max - this.config.particles.speed.min);
+          particle.vx =
+            this.config.particles.speed.min +
+            Math.random() *
+              (this.config.particles.speed.max -
+                this.config.particles.speed.min);
           particle.vy = (Math.random() - 0.5) * 0.5;
         }
         // 重置其他屬性
         particle.pulse = Math.random() * Math.PI * 2;
-        particle.opacity = this.config.particles.opacity.min + Math.random() * (this.config.particles.opacity.max - this.config.particles.opacity.min);
+        particle.opacity =
+          this.config.particles.opacity.min +
+          Math.random() *
+            (this.config.particles.opacity.max -
+              this.config.particles.opacity.min);
       }
     });
   }
-  
+
   /**
    * 渲染粒子到 Canvas
    */
@@ -3768,53 +4022,55 @@ export class InteractiveTimeline extends BaseComponent {
     const canvas = this.state.particles.canvas;
     const ctx = this.state.particles.context;
     const particles = this.state.particles.particlePool;
-    
+
     // 使用顯示尺寸清空畫布（因為 ctx 已經被縮放）
     const displayWidth = canvas.offsetWidth;
     const displayHeight = canvas.offsetHeight;
     ctx.clearRect(0, 0, displayWidth, displayHeight);
-    
+
     // 渲染每個粒子
     particles.forEach(particle => {
       const pulseFactor = 0.8 + 0.2 * Math.sin(particle.pulse);
       const renderSize = particle.size * pulseFactor;
       const renderOpacity = particle.opacity * pulseFactor;
-      
+
       ctx.save();
-      
+
       // 設定粒子樣式
       ctx.globalAlpha = renderOpacity;
       ctx.fillStyle = particle.color;
-      
+
       // 繪製發光效果
       ctx.shadowColor = particle.color;
       ctx.shadowBlur = renderSize * 3;
-      
+
       // 繪製粒子
       ctx.beginPath();
       ctx.arc(particle.x, particle.y, renderSize, 0, Math.PI * 2);
       ctx.fill();
-      
+
       ctx.restore();
     });
   }
-  
+
   /**
    * 停止粒子系統
    */
   stopParticleSystem() {
     this.state.particles.isActive = false;
-    
+
     if (this.state.particles.animationFrame) {
       cancelAnimationFrame(this.state.particles.animationFrame);
       this.state.particles.animationFrame = null;
     }
-    
-    const particleContainer = this.element?.querySelector('.timeline-particles');
+
+    const particleContainer = this.element?.querySelector(
+      '.timeline-particles'
+    );
     if (particleContainer) {
       particleContainer.classList.remove('active');
     }
-    
+
     console.log('[InteractiveTimeline] 粒子系統已停止');
   }
 
@@ -3837,7 +4093,7 @@ export class InteractiveTimeline extends BaseComponent {
       velocity: 0,
       lastMoveTime: 0,
       scrollOffset: 0,
-      maxScroll: 0
+      maxScroll: 0,
     };
 
     // 只在移動端啟用觸控手勢
@@ -3849,19 +4105,31 @@ export class InteractiveTimeline extends BaseComponent {
     console.log('[InteractiveTimeline] 設定移動端觸控拖曳手勢');
 
     // 觸控開始
-    timelineContainer.addEventListener('touchstart', (event) => {
-      this.handleTouchStart(event);
-    }, { passive: false });
+    timelineContainer.addEventListener(
+      'touchstart',
+      event => {
+        this.handleTouchStart(event);
+      },
+      { passive: false }
+    );
 
     // 觸控移動
-    timelineContainer.addEventListener('touchmove', (event) => {
-      this.handleTouchMove(event);
-    }, { passive: false });
+    timelineContainer.addEventListener(
+      'touchmove',
+      event => {
+        this.handleTouchMove(event);
+      },
+      { passive: false }
+    );
 
     // 觸控結束
-    timelineContainer.addEventListener('touchend', (event) => {
-      this.handleTouchEnd(event);
-    }, { passive: true });
+    timelineContainer.addEventListener(
+      'touchend',
+      event => {
+        this.handleTouchEnd(event);
+      },
+      { passive: true }
+    );
 
     // 計算可滾動範圍
     this.updateScrollBounds();
@@ -3908,7 +4176,10 @@ export class InteractiveTimeline extends BaseComponent {
 
     // 更新滾動偏移
     this.state.touch.scrollOffset -= deltaY * 0.5; // 減速係數
-    this.state.touch.scrollOffset = Math.max(0, Math.min(this.state.touch.scrollOffset, this.state.touch.maxScroll));
+    this.state.touch.scrollOffset = Math.max(
+      0,
+      Math.min(this.state.touch.scrollOffset, this.state.touch.maxScroll)
+    );
 
     // 應用滾動變換
     this.applyScrollTransform();
@@ -3920,7 +4191,7 @@ export class InteractiveTimeline extends BaseComponent {
   /**
    * 處理觸控結束事件
    */
-  handleTouchEnd(event) {
+  handleTouchEnd(_event) {
     if (!this.state.touch.isDragging) return;
 
     this.state.touch.isDragging = false;
@@ -3943,7 +4214,10 @@ export class InteractiveTimeline extends BaseComponent {
 
       // 更新位置
       this.state.touch.scrollOffset -= this.state.touch.velocity * 16;
-      this.state.touch.scrollOffset = Math.max(0, Math.min(this.state.touch.scrollOffset, this.state.touch.maxScroll));
+      this.state.touch.scrollOffset = Math.max(
+        0,
+        Math.min(this.state.touch.scrollOffset, this.state.touch.maxScroll)
+      );
 
       this.applyScrollTransform();
 
@@ -3974,16 +4248,19 @@ export class InteractiveTimeline extends BaseComponent {
   updateScrollBounds() {
     const container = this.element.querySelector('.timeline-container');
     const viewport = this.element.querySelector('.timeline-viewport');
-    
+
     if (container && viewport) {
       const containerHeight = container.clientHeight;
       const viewportHeight = viewport.scrollHeight;
-      this.state.touch.maxScroll = Math.max(0, viewportHeight - containerHeight + 100); // 額外100px緩衝
-      
+      this.state.touch.maxScroll = Math.max(
+        0,
+        viewportHeight - containerHeight + 100
+      ); // 額外100px緩衝
+
       console.log('[TouchGesture] 滾動邊界:', {
         container: containerHeight,
         viewport: viewportHeight,
-        maxScroll: this.state.touch.maxScroll
+        maxScroll: this.state.touch.maxScroll,
       });
     }
   }
@@ -3997,8 +4274,10 @@ export class InteractiveTimeline extends BaseComponent {
       console.log('[InteractiveTimeline] 移動端，跳過桌面端增強功能');
       return;
     }
-    
-    console.log(`[InteractiveTimeline] 當前斷點: ${this.state.currentBreakpoint}, 視窗寬度: ${window.innerWidth}px`);
+
+    console.log(
+      `[InteractiveTimeline] 當前斷點: ${this.state.currentBreakpoint}, 視窗寬度: ${window.innerWidth}px`
+    );
 
     console.log('[InteractiveTimeline] 設定桌面端增強功能');
 
@@ -4015,7 +4294,7 @@ export class InteractiveTimeline extends BaseComponent {
       translateX: 0,
       translateY: 0,
       maxTranslateX: 0,
-      maxTranslateY: 0
+      maxTranslateY: 0,
     };
 
     const timelineContainer = this.element.querySelector('.timeline-container');
@@ -4023,16 +4302,16 @@ export class InteractiveTimeline extends BaseComponent {
 
     // 設定滑鼠滾輪縮放
     this.setupMouseWheelZoom(timelineContainer);
-    
+
     // 設定初始居中位置
     this.setInitialCenterPosition();
-    
+
     // 設定水平拖曳
     this.setupHorizontalDrag(timelineContainer);
-    
+
     // 設定鍵盤快捷鍵
     this.setupKeyboardShortcuts();
-    
+
     // 增強視覺特效
     this.enhanceVisualEffects();
   }
@@ -4043,29 +4322,33 @@ export class InteractiveTimeline extends BaseComponent {
   setInitialCenterPosition() {
     const timelineContent = this.element.querySelector('.timeline-content');
     const viewport = this.element.querySelector('.timeline-viewport');
-    
+
     if (!timelineContent || !viewport) return;
-    
+
     const contentDimensions = this.calculateSVGDimensions();
     const viewportWidth = viewport.clientWidth;
     const viewportHeight = viewport.clientHeight;
-    
+
     // 計算居中所需的偏移
     const centerX = (viewportWidth - contentDimensions.width) / 2;
     const centerY = (viewportHeight - contentDimensions.height) / 2;
-    
+
     // 設定初始居中位置 - 直接使用計算出的中心位置
     const initialTranslateX = centerX;
     const initialTranslateY = centerY;
-    
+
     timelineContent.style.transform = `translateX(${initialTranslateX}px) translateY(${initialTranslateY}px) scale(1)`;
-    
+
     // 更新狀態
     this.state.desktop.translateX = initialTranslateX;
     this.state.desktop.translateY = initialTranslateY;
-    
-    console.log(`[DEBUG] 設定初始居中位置: X=${initialTranslateX}, Y=${initialTranslateY}`);
-    console.log(`[DEBUG] 視窗尺寸: ${viewportWidth}x${viewportHeight}, 內容尺寸: ${contentDimensions.width}x${contentDimensions.height}`);
+
+    console.log(
+      `[DEBUG] 設定初始居中位置: X=${initialTranslateX}, Y=${initialTranslateY}`
+    );
+    console.log(
+      `[DEBUG] 視窗尺寸: ${viewportWidth}x${viewportHeight}, 內容尺寸: ${contentDimensions.width}x${contentDimensions.height}`
+    );
     console.log(`[DEBUG] 中心計算: centerX=${centerX}, centerY=${centerY}`);
   }
 
@@ -4073,38 +4356,42 @@ export class InteractiveTimeline extends BaseComponent {
    * 設定滑鼠滾輪縮放功能
    */
   setupMouseWheelZoom(container) {
-    container.addEventListener('wheel', (event) => {
-      // 改為直接支援滾輪縮放，不需要按修飾鍵
-      event.preventDefault();
-      
-      console.log('[DEBUG] 滾輪縮放:', event.deltaY);
-      
-      const viewport = this.element.querySelector('.timeline-viewport');
-      if (!viewport) return;
+    container.addEventListener(
+      'wheel',
+      event => {
+        // 改為直接支援滾輪縮放，不需要按修飾鍵
+        event.preventDefault();
 
-      // 計算縮放
-      const delta = event.deltaY * -0.001;
-      const newZoom = Math.max(
-        this.state.desktop.minZoom,
-        Math.min(this.state.desktop.maxZoom, this.state.desktop.zoom + delta)
-      );
+        console.log('[DEBUG] 滾輪縮放:', event.deltaY);
 
-      // 計算縮放中心點
-      const rect = container.getBoundingClientRect();
-      const centerX = (event.clientX - rect.left) / rect.width;
+        const viewport = this.element.querySelector('.timeline-viewport');
+        if (!viewport) return;
 
-      // 應用縮放
-      this.state.desktop.zoom = newZoom;
-      const timelineContent = this.element.querySelector('.timeline-content');
-      if (timelineContent) {
-        const translateX = this.state.desktop.translateX || 0;
-        const translateY = this.state.desktop.translateY || 0;
-        timelineContent.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(${newZoom})`;
-        timelineContent.style.transformOrigin = `${centerX * 100}% center`;
-      }
+        // 計算縮放
+        const delta = event.deltaY * -0.001;
+        const newZoom = Math.max(
+          this.state.desktop.minZoom,
+          Math.min(this.state.desktop.maxZoom, this.state.desktop.zoom + delta)
+        );
 
-      console.log('[DesktopEnhancement] 縮放:', newZoom.toFixed(2));
-    }, { passive: false });
+        // 計算縮放中心點
+        const rect = container.getBoundingClientRect();
+        const centerX = (event.clientX - rect.left) / rect.width;
+
+        // 應用縮放
+        this.state.desktop.zoom = newZoom;
+        const timelineContent = this.element.querySelector('.timeline-content');
+        if (timelineContent) {
+          const translateX = this.state.desktop.translateX || 0;
+          const translateY = this.state.desktop.translateY || 0;
+          timelineContent.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(${newZoom})`;
+          timelineContent.style.transformOrigin = `${centerX * 100}% center`;
+        }
+
+        console.log('[DesktopEnhancement] 縮放:', newZoom.toFixed(2));
+      },
+      { passive: false }
+    );
   }
 
   /**
@@ -4118,65 +4405,78 @@ export class InteractiveTimeline extends BaseComponent {
     let initialTranslateY = 0;
 
     // 滑鼠按下
-    container.addEventListener('mousedown', (event) => {
-      console.log('[DEBUG] 滑鼠按下事件觸發:', event.target, event.target.className);
-      
+    container.addEventListener('mousedown', event => {
+      console.log(
+        '[DEBUG] 滑鼠按下事件觸發:',
+        event.target,
+        event.target.className
+      );
+
       // 忽略節點點擊和年份選擇器點擊
-      if (event.target.closest('.project-node') || 
-          event.target.closest('.timeline-year-filter') ||
-          event.target.closest('.year-selector')) {
-        console.log('[DEBUG] 跳過拖曳: 點擊在', event.target.closest('.project-node') ? '節點' : '年份選擇器');
+      if (
+        event.target.closest('.project-node') ||
+        event.target.closest('.timeline-year-filter') ||
+        event.target.closest('.year-selector')
+      ) {
+        console.log(
+          '[DEBUG] 跳過拖曳: 點擊在',
+          event.target.closest('.project-node') ? '節點' : '年份選擇器'
+        );
         return;
       }
-      
+
       console.log('[DEBUG] 開始拖曳:', event.target);
       isDragging = true;
       startX = event.clientX;
       startY = event.clientY;
-      
+
       const timelineContent = this.element.querySelector('.timeline-content');
       if (timelineContent) {
         const transform = timelineContent.style.transform || '';
         const translateXMatch = transform.match(/translateX\(([^)]+)px\)/);
         const translateYMatch = transform.match(/translateY\(([^)]+)px\)/);
-        initialTranslateX = translateXMatch ? parseFloat(translateXMatch[1]) : 0;
-        initialTranslateY = translateYMatch ? parseFloat(translateYMatch[1]) : 0;
+        initialTranslateX = translateXMatch
+          ? parseFloat(translateXMatch[1])
+          : 0;
+        initialTranslateY = translateYMatch
+          ? parseFloat(translateYMatch[1])
+          : 0;
       }
       container.style.cursor = 'grabbing';
-      
+
       event.preventDefault();
     });
 
     // 滑鼠移動
-    window.addEventListener('mousemove', (event) => {
+    window.addEventListener('mousemove', event => {
       if (!isDragging) return;
 
       const deltaX = event.clientX - startX;
       const deltaY = event.clientY - startY;
       const timelineContent = this.element.querySelector('.timeline-content');
-      
+
       console.log('[DEBUG] 拖曳移動:', { deltaX, deltaY, isDragging });
-      
+
       if (timelineContent) {
         let newTranslateX = initialTranslateX + deltaX;
         let newTranslateY = initialTranslateY + deltaY;
-        
+
         // 計算邊界限制
         const viewport = this.element.querySelector('.timeline-viewport');
         const contentDimensions = this.calculateSVGDimensions();
-        
+
         if (viewport) {
           const viewportWidth = viewport.clientWidth;
           const viewportHeight = viewport.clientHeight;
-          
+
           // 重新設計邊界邏輯：允許內容在較大視窗中自由移動
           const contentLargerThanViewport = {
             width: contentDimensions.width > viewportWidth,
-            height: contentDimensions.height > viewportHeight
+            height: contentDimensions.height > viewportHeight,
           };
-          
+
           let maxTranslateX, minTranslateX, maxTranslateY, minTranslateY;
-          
+
           if (contentLargerThanViewport.width) {
             // 內容比視窗大：限制拖曳範圍
             maxTranslateX = 0;
@@ -4188,7 +4488,7 @@ export class InteractiveTimeline extends BaseComponent {
             maxTranslateX = centerX + dragRangeX;
             minTranslateX = centerX - dragRangeX;
           }
-          
+
           if (contentLargerThanViewport.height) {
             maxTranslateY = 0;
             minTranslateY = viewportHeight - contentDimensions.height;
@@ -4199,25 +4499,40 @@ export class InteractiveTimeline extends BaseComponent {
             maxTranslateY = centerY + dragRangeY;
             minTranslateY = centerY - dragRangeY;
           }
-          
-          console.log('[DEBUG] 邊界計算:', { 
-            minTranslateX, maxTranslateX, minTranslateY, maxTranslateY,
-            viewportWidth, viewportHeight,
-            contentWidth: contentDimensions.width, contentHeight: contentDimensions.height,
+
+          console.log('[DEBUG] 邊界計算:', {
+            minTranslateX,
+            maxTranslateX,
+            minTranslateY,
+            maxTranslateY,
+            viewportWidth,
+            viewportHeight,
+            contentWidth: contentDimensions.width,
+            contentHeight: contentDimensions.height,
             beforeClamp: { newTranslateX, newTranslateY },
-            centerX: contentLargerThanViewport.width ? 'N/A' : (viewportWidth - contentDimensions.width) / 2,
-            centerY: contentLargerThanViewport.height ? 'N/A' : (viewportHeight - contentDimensions.height) / 2
+            centerX: contentLargerThanViewport.width
+              ? 'N/A'
+              : (viewportWidth - contentDimensions.width) / 2,
+            centerY: contentLargerThanViewport.height
+              ? 'N/A'
+              : (viewportHeight - contentDimensions.height) / 2,
           });
-          
-          newTranslateX = Math.max(minTranslateX, Math.min(maxTranslateX, newTranslateX));
-          newTranslateY = Math.max(minTranslateY, Math.min(maxTranslateY, newTranslateY));
-          
+
+          newTranslateX = Math.max(
+            minTranslateX,
+            Math.min(maxTranslateX, newTranslateX)
+          );
+          newTranslateY = Math.max(
+            minTranslateY,
+            Math.min(maxTranslateY, newTranslateY)
+          );
+
           const zoom = this.state.desktop.zoom || 1;
           const transformString = `translateX(${newTranslateX}px) translateY(${newTranslateY}px) scale(${zoom})`;
-          
+
           console.log('[DEBUG] 套用變換:', transformString);
           timelineContent.style.transform = transformString;
-          
+
           this.state.desktop.translateX = newTranslateX;
           this.state.desktop.translateY = newTranslateY;
         }
@@ -4240,21 +4555,27 @@ export class InteractiveTimeline extends BaseComponent {
    * 設定鍵盤快捷鍵
    */
   setupKeyboardShortcuts() {
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', event => {
       // 只在時間軸有焦點時響應
-      if (!this.element?.contains(document.activeElement) && 
-          document.activeElement !== document.body) return;
+      if (
+        !this.element?.contains(document.activeElement) &&
+        document.activeElement !== document.body
+      )
+        return;
 
       const timelineContent = this.element?.querySelector('.timeline-content');
       if (!timelineContent) return;
 
-      switch(event.key) {
+      switch (event.key) {
         case '+':
         case '=':
           // 放大
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
-            this.state.desktop.zoom = Math.min(this.state.desktop.maxZoom, this.state.desktop.zoom + 0.1);
+            this.state.desktop.zoom = Math.min(
+              this.state.desktop.maxZoom,
+              this.state.desktop.zoom + 0.1
+            );
             const translateX = this.state.desktop.translateX || 0;
             const translateY = this.state.desktop.translateY || 0;
             timelineContent.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(${this.state.desktop.zoom})`;
@@ -4264,7 +4585,10 @@ export class InteractiveTimeline extends BaseComponent {
           // 縮小
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
-            this.state.desktop.zoom = Math.max(this.state.desktop.minZoom, this.state.desktop.zoom - 0.1);
+            this.state.desktop.zoom = Math.max(
+              this.state.desktop.minZoom,
+              this.state.desktop.zoom - 0.1
+            );
             const translateX = this.state.desktop.translateX || 0;
             const translateY = this.state.desktop.translateY || 0;
             timelineContent.style.transform = `translateX(${translateX}px) translateY(${translateY}px) scale(${this.state.desktop.zoom})`;
@@ -4276,7 +4600,8 @@ export class InteractiveTimeline extends BaseComponent {
             event.preventDefault();
             this.state.desktop.zoom = 1;
             this.state.desktop.translateX = 0;
-            timelineContent.style.transform = 'translateX(0px) translateY(0px) scale(1)';
+            timelineContent.style.transform =
+              'translateX(0px) translateY(0px) scale(1)';
           }
           break;
         case 'ArrowLeft': {
@@ -4318,34 +4643,37 @@ export class InteractiveTimeline extends BaseComponent {
     // 增強節點懸停效果
     const nodes = this.element.querySelectorAll('.project-node');
     nodes.forEach(node => {
-      node.addEventListener('mouseenter', (event) => {
+      node.addEventListener('mouseenter', _event => {
         if (window.gsap) {
           // 更強的懸停動畫
           window.gsap.to(node, {
             scale: 1.6,
             duration: 0.3,
-            ease: "back.out(1.7)",
-            boxShadow: "0 0 30px rgba(74, 144, 226, 0.8), 0 6px 20px rgba(0, 0, 0, 0.4)"
+            ease: 'back.out(1.7)',
+            boxShadow:
+              '0 0 30px rgba(74, 144, 226, 0.8), 0 6px 20px rgba(0, 0, 0, 0.4)',
           });
 
           // 添加脈動效果
           window.gsap.to(node, {
-            boxShadow: "0 0 40px rgba(74, 144, 226, 1), 0 8px 25px rgba(0, 0, 0, 0.5)",
+            boxShadow:
+              '0 0 40px rgba(74, 144, 226, 1), 0 8px 25px rgba(0, 0, 0, 0.5)',
             duration: 0.8,
             repeat: -1,
             yoyo: true,
-            ease: "sine.inOut"
+            ease: 'sine.inOut',
           });
         }
       });
 
-      node.addEventListener('mouseleave', (event) => {
+      node.addEventListener('mouseleave', _event => {
         if (window.gsap) {
           window.gsap.killTweensOf(node);
           window.gsap.to(node, {
             scale: 1,
             duration: 0.3,
-            boxShadow: "0 0 10px rgba(74, 144, 226, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)"
+            boxShadow:
+              '0 0 10px rgba(74, 144, 226, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)',
           });
         }
       });
@@ -4357,21 +4685,21 @@ export class InteractiveTimeline extends BaseComponent {
       // 設置基礎透明度和虛線樣式
       const pathLength = path.getTotalLength();
       path.style.strokeDasharray = `${pathLength * 0.3}, ${pathLength * 0.1}`; // 30% 實線, 10% 間隔
-      
+
       // 流動光效 - 保留基礎痕跡
       const timeline = window.gsap.timeline({ repeat: -1 });
       timeline
         .to(path, {
           strokeDashoffset: -pathLength * 0.4,
           duration: 2, // 加速到 2 秒
-          ease: "none"
+          ease: 'none',
         })
         .to(path, {
           strokeDashoffset: -pathLength * 0.8,
           duration: 2, // 加速到 2 秒
-          ease: "none"
+          ease: 'none',
         });
-      
+
       // 添加基礎路徑（始終可見的淡化版本）
       const basePath = path.cloneNode(true);
       basePath.style.strokeDasharray = 'none';
@@ -4406,7 +4734,7 @@ export class InteractiveTimeline extends BaseComponent {
   getTechCategoryColor(category) {
     const colors = {
       backend: '#4ecdc4',
-      frontend: '#ff6b35', 
+      frontend: '#ff6b35',
       database: '#95e1d3',
       cache: '#f38181',
       messaging: '#ffeaa7',
@@ -4416,7 +4744,7 @@ export class InteractiveTimeline extends BaseComponent {
       monitoring: '#fdcb6e',
       visualization: '#6c5ce7',
       async: '#00b894',
-      general: '#ddd'
+      general: '#ddd',
     };
     return colors[category] || colors.general;
   }
@@ -4431,7 +4759,7 @@ export class InteractiveTimeline extends BaseComponent {
         totalProjects: 0,
         techTypes: 0,
         yearSpan: 0,
-        featuredProjects: 0
+        featuredProjects: 0,
       };
     }
 
@@ -4457,7 +4785,10 @@ export class InteractiveTimeline extends BaseComponent {
       if (project.startYear) {
         years.add(project.startYear);
       }
-      if (project.completedYear && project.completedYear !== project.startYear) {
+      if (
+        project.completedYear &&
+        project.completedYear !== project.startYear
+      ) {
         years.add(project.completedYear);
       }
       // 如果沒有年份數據，從日期字符串中提取
@@ -4470,24 +4801,28 @@ export class InteractiveTimeline extends BaseComponent {
         if (!isNaN(year)) years.add(year);
       }
     });
-    
-    const yearSpan = years.size > 1 ? `${Math.min(...years)}-${Math.max(...years)}` : 
-                    years.size === 1 ? `${[...years][0]}` : '無數據';
-    
+
+    const yearSpan =
+      years.size > 1
+        ? `${Math.min(...years)}-${Math.max(...years)}`
+        : years.size === 1
+          ? `${[...years][0]}`
+          : '無數據';
 
     // 計算特色專案數量 (高重要性或已完成的專案)
-    const featuredProjects = this.adaptedProjects.filter(project => 
-      project.importance === 'high' || 
-      project.status === 'completed' ||
-      project.rarity === 'legendary' ||
-      project.rarity === 'epic'
+    const featuredProjects = this.adaptedProjects.filter(
+      project =>
+        project.importance === 'high' ||
+        project.status === 'completed' ||
+        project.rarity === 'legendary' ||
+        project.rarity === 'epic'
     ).length;
 
     return {
       totalProjects,
       techTypes: techTypes.size,
       yearSpan,
-      featuredProjects
+      featuredProjects,
     };
   }
 
@@ -4500,34 +4835,34 @@ export class InteractiveTimeline extends BaseComponent {
       this.dataAdapter.destroy();
       this.dataAdapter = null;
     }
-    
+
     if (this.layoutEngine) {
       this.layoutEngine.destroy();
       this.layoutEngine = null;
     }
-    
+
     if (this.importanceScoring) {
       this.importanceScoring.destroy();
       this.importanceScoring = null;
     }
-    
+
     // 清理數據引用
     this.adaptedProjects = [];
     this.layoutNodes = [];
-    
+
     // 停止粒子系統
     this.stopParticleSystem();
-    
+
     // 停止觸控動畫
     if (this.state.touch?.animationFrame) {
       cancelAnimationFrame(this.state.touch.animationFrame);
     }
-    
+
     // 清理事件監聽器
     if (this.state.desktop) {
       // 清理桌面端事件
     }
-    
+
     if (this.element && this.element.parentNode) {
       this.element.parentNode.removeChild(this.element);
     }

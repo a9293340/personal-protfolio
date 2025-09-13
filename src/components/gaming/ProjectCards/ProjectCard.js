@@ -1,6 +1,6 @@
 /**
  * ProjectCard 專案卡片組件
- * 
+ *
  * 核心功能：
  * - 基於成熟動畫套件的 3D 翻轉卡片
  * - 稀有度系統視覺效果
@@ -13,12 +13,12 @@ import { BaseComponent } from '../../../core/components/BaseComponent.js';
 export class ProjectCard extends BaseComponent {
   constructor(config = {}) {
     super();
-    
+
     this.config = this.mergeConfig(this.getDefaultConfig(), config);
     this.state = this.getInitialState();
     this.element = null;
     this.isFlipped = false;
-    
+
     this.init();
   }
 
@@ -28,32 +28,32 @@ export class ProjectCard extends BaseComponent {
       width: '320px',
       height: '240px',
       borderRadius: '16px',
-      
+
       // 動畫配置
       flipDuration: '1s',
       flipEasing: 'cubic-bezier(0.23, 1, 0.32, 1)',
       hoverScale: {
         desktop: 1.05,
-        mobile: 1.03
+        mobile: 1.03,
       },
-      
+
       // 稀有度配置
       rarity: 'normal', // normal, rare, superRare, legendary
-      
+
       // 響應式配置
       responsive: {
         mobile: {
           width: '280px',
           height: '200px',
-          simplifiedEffects: true
+          simplifiedEffects: true,
         },
         desktop: {
-          width: '320px', 
+          width: '320px',
           height: '240px',
-          fullEffects: true
-        }
+          fullEffects: true,
+        },
       },
-      
+
       // 專案數據
       projectData: {
         id: '',
@@ -62,14 +62,14 @@ export class ProjectCard extends BaseComponent {
         technologies: [],
         images: {
           front: '',
-          back: ''
+          back: '',
         },
         links: {
           demo: '',
           github: '',
-          detail: ''
-        }
-      }
+          detail: '',
+        },
+      },
     };
   }
 
@@ -79,7 +79,7 @@ export class ProjectCard extends BaseComponent {
       isFlipped: false,
       isLoading: false,
       currentRarity: this.config.rarity,
-      isMobile: this.detectMobile()
+      isMobile: this.detectMobile(),
     };
   }
 
@@ -106,36 +106,46 @@ export class ProjectCard extends BaseComponent {
    */
   async loadProjectData() {
     try {
-      if (this.config.projectData && this.config.projectData.id && !this.config.projectData.title) {
-        const projectsModule = await import('../../../config/data/work-projects/projects.data.js');
-        const projectsConfig = projectsModule.projectsDataConfig || projectsModule.default;
-        
+      if (
+        this.config.projectData &&
+        this.config.projectData.id &&
+        !this.config.projectData.title
+      ) {
+        const projectsModule = await import(
+          '../../../config/data/work-projects/projects.data.js'
+        );
+        const projectsConfig =
+          projectsModule.projectsDataConfig || projectsModule.default;
+
         const projectData = projectsConfig.all[this.config.projectData.id];
-        
+
         if (projectData) {
           this.config.projectData = {
             id: projectData.id,
             title: projectData.name,
             description: projectData.shortDescription,
-            technologies: projectData.technologies?.map(tech => 
-              typeof tech === 'object' ? tech.name : tech
-            ) || [],
+            technologies:
+              projectData.technologies?.map(tech =>
+                typeof tech === 'object' ? tech.name : tech
+              ) || [],
             images: {
               front: projectData.thumbnail || '',
-              back: projectData.images?.[0] || ''
+              back: projectData.images?.[0] || '',
             },
-            links: projectData.links || {}
+            links: projectData.links || {},
           };
-          
+
           // 更新稀有度
           if (projectData.rarity) {
             this.config.rarity = projectData.rarity;
             this.state.currentRarity = projectData.rarity;
           }
-          
+
           console.log(`[ProjectCard] 載入專案數據: ${projectData.name}`);
         } else {
-          console.warn(`[ProjectCard] 未找到專案數據: ${this.config.projectData.id}`);
+          console.warn(
+            `[ProjectCard] 未找到專案數據: ${this.config.projectData.id}`
+          );
         }
       }
     } catch (error) {
@@ -151,40 +161,40 @@ export class ProjectCard extends BaseComponent {
       {
         name: 'animate.css',
         url: 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css',
-        type: 'css'
+        type: 'css',
       },
       {
         name: 'hover.css',
         url: 'https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.3.1/css/hover-min.css',
-        type: 'css'
+        type: 'css',
       },
       {
         name: 'aos',
         url: 'https://unpkg.com/aos@2.3.1/dist/aos.css',
-        type: 'css'
+        type: 'css',
       },
       {
         name: 'aos.js',
         url: 'https://unpkg.com/aos@2.3.1/dist/aos.js',
-        type: 'js'
-      }
+        type: 'js',
+      },
     ];
 
     const loadPromises = libraries.map(lib => this.loadLibrary(lib));
-    
+
     try {
       await Promise.all(loadPromises);
-      
+
       // 初始化 AOS
       if (window.AOS) {
         window.AOS.init({
           duration: 1000,
           easing: 'ease-in-out-cubic',
           once: false,
-          mirror: true
+          mirror: true,
         });
       }
-      
+
       console.log('[ProjectCard] 動畫套件載入完成');
     } catch (error) {
       console.error('[ProjectCard] 動畫套件載入失敗:', error);
@@ -195,17 +205,18 @@ export class ProjectCard extends BaseComponent {
   loadLibrary(library) {
     return new Promise((resolve, reject) => {
       // 檢查是否已載入
-      const selector = library.type === 'css' 
-        ? `link[href="${library.url}"]`
-        : `script[src="${library.url}"]`;
-      
+      const selector =
+        library.type === 'css'
+          ? `link[href="${library.url}"]`
+          : `script[src="${library.url}"]`;
+
       if (document.querySelector(selector)) {
         resolve();
         return;
       }
 
       let element;
-      
+
       if (library.type === 'css') {
         element = document.createElement('link');
         element.rel = 'stylesheet';
@@ -229,12 +240,12 @@ export class ProjectCard extends BaseComponent {
   createElement() {
     this.element = document.createElement('div');
     this.element.className = this.generateClasses();
-    
+
     this.element.innerHTML = this.generateHTML();
-    
+
     // 設定基礎樣式
     this.applyBaseStyles();
-    
+
     // 套用稀有度效果
     this.applyRarityEffects();
   }
@@ -244,19 +255,19 @@ export class ProjectCard extends BaseComponent {
       'project-card',
       `rarity-${this.state.currentRarity}`,
       'animate__animated',
-      'hvr-float'
+      'hvr-float',
     ];
-    
+
     if (this.state.isMobile) {
       classes.push('mobile-optimized');
     }
-    
+
     return classes.join(' ');
   }
 
   generateHTML() {
     const { projectData } = this.config;
-    
+
     return `
       <div class="card-container" data-aos="fade-up">
         <div class="flip-card">
@@ -266,9 +277,9 @@ export class ProjectCard extends BaseComponent {
               <h3 class="project-title">${projectData.title || '專案標題'}</h3>
               <p class="project-description">${projectData.description || '專案描述'}</p>
               <div class="tech-tags">
-                ${(projectData.technologies || []).map(tech => 
-                  `<span class="tech-tag">${tech}</span>`
-                ).join('')}
+                ${(projectData.technologies || [])
+                  .map(tech => `<span class="tech-tag">${tech}</span>`)
+                  .join('')}
               </div>
             </div>
           </div>
@@ -278,20 +289,26 @@ export class ProjectCard extends BaseComponent {
               <div class="project-details">
                 <h3>專案詳情</h3>
                 <div class="project-links">
-                  ${projectData.links.demo ? 
-                    `<a href="${projectData.links.demo}" class="project-link demo-link" target="_blank">
+                  ${
+                    projectData.links.demo
+                      ? `<a href="${projectData.links.demo}" class="project-link demo-link" target="_blank">
                       <span>🌐</span> 查看展示
-                    </a>` : ''
+                    </a>`
+                      : ''
                   }
-                  ${projectData.links.github ? 
-                    `<a href="${projectData.links.github}" class="project-link github-link" target="_blank">
+                  ${
+                    projectData.links.github
+                      ? `<a href="${projectData.links.github}" class="project-link github-link" target="_blank">
                       <span>📦</span> 源碼庫
-                    </a>` : ''
+                    </a>`
+                      : ''
                   }
-                  ${projectData.links.detail ? 
-                    `<a href="${projectData.links.detail}" class="project-link detail-link">
+                  ${
+                    projectData.links.detail
+                      ? `<a href="${projectData.links.detail}" class="project-link detail-link">
                       <span>📋</span> 詳細資訊
-                    </a>` : ''
+                    </a>`
+                      : ''
                   }
                 </div>
               </div>
@@ -305,9 +322,9 @@ export class ProjectCard extends BaseComponent {
   getRarityIcon() {
     const icons = {
       normal: '📄',
-      rare: '💎', 
+      rare: '💎',
       superRare: '🌟',
-      legendary: '👑'
+      legendary: '👑',
     };
     return icons[this.state.currentRarity] || icons.normal;
   }
@@ -515,7 +532,7 @@ export class ProjectCard extends BaseComponent {
         }
       </style>
     `;
-    
+
     if (!document.querySelector('#project-card-base-styles')) {
       const styleElement = document.createElement('div');
       styleElement.id = 'project-card-base-styles';
@@ -531,7 +548,7 @@ export class ProjectCard extends BaseComponent {
     // 稀有度效果將在下個步驟詳細實現
     const rarityClass = `rarity-${this.state.currentRarity}`;
     this.element.classList.add(rarityClass);
-    
+
     console.log(`[ProjectCard] 套用稀有度效果: ${this.state.currentRarity}`);
   }
 
@@ -539,22 +556,22 @@ export class ProjectCard extends BaseComponent {
    * 綁定事件
    */
   bindEvents() {
-    const flipCard = this.element.querySelector('.flip-card');
-    
+    const _flipCard = this.element.querySelector('.flip-card');
+
     // 點擊翻轉
     this.element.addEventListener('click', () => {
       this.toggleFlip();
     });
-    
+
     // Hover 效果
     this.element.addEventListener('mouseenter', () => {
       this.handleHover(true);
     });
-    
+
     this.element.addEventListener('mouseleave', () => {
       this.handleHover(false);
     });
-    
+
     // 響應式處理
     window.addEventListener('resize', () => {
       this.handleResize();
@@ -564,23 +581,23 @@ export class ProjectCard extends BaseComponent {
   toggleFlip() {
     this.isFlipped = !this.isFlipped;
     const flipCard = this.element.querySelector('.flip-card');
-    
+
     if (this.isFlipped) {
       flipCard.classList.add('flipped');
     } else {
       flipCard.classList.remove('flipped');
     }
-    
+
     console.log(`[ProjectCard] 卡片翻轉: ${this.isFlipped ? '背面' : '正面'}`);
   }
 
   handleHover(isHovered) {
     this.state.isHovered = isHovered;
-    
-    const scale = this.state.isMobile 
-      ? this.config.hoverScale.mobile 
+
+    const scale = this.state.isMobile
+      ? this.config.hoverScale.mobile
       : this.config.hoverScale.desktop;
-    
+
     if (isHovered) {
       this.element.style.transform = `scale(${scale})`;
       this.element.classList.add('animate__pulse');
@@ -593,10 +610,12 @@ export class ProjectCard extends BaseComponent {
   handleResize() {
     const wasMobile = this.state.isMobile;
     this.state.isMobile = this.detectMobile();
-    
+
     if (wasMobile !== this.state.isMobile) {
       this.applyResponsiveHandling();
-      console.log(`[ProjectCard] 響應式切換: ${this.state.isMobile ? 'Mobile' : 'Desktop'}`);
+      console.log(
+        `[ProjectCard] 響應式切換: ${this.state.isMobile ? 'Mobile' : 'Desktop'}`
+      );
     }
   }
 
@@ -646,11 +665,11 @@ export class ProjectCard extends BaseComponent {
         </button>
       </div>
     `;
-    
+
     this.element.retry = () => {
       this.init();
     };
-    
+
     this.applyErrorStyles();
   }
 
@@ -708,7 +727,7 @@ export class ProjectCard extends BaseComponent {
         }
       </style>
     `;
-    
+
     if (!document.querySelector('#project-card-error-styles')) {
       const styleElement = document.createElement('div');
       styleElement.id = 'project-card-error-styles';

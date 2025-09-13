@@ -9,10 +9,12 @@
 /* 主要容器 */
 .skills-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     rgba(10, 10, 10, 0.95) 0%,
     rgba(26, 26, 46, 0.98) 50%,
-    rgba(10, 10, 10, 0.95) 100%);
+    rgba(10, 10, 10, 0.95) 100%
+  );
   color: white;
   overflow: hidden;
   position: relative;
@@ -140,11 +142,13 @@
   height: 100%;
   border-radius: 1rem;
   border: 2px solid rgba(52, 152, 219, 0.3);
-  background: radial-gradient(ellipse at center, 
-    rgba(52, 152, 219, 0.1) 0%, 
-    transparent 70%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(52, 152, 219, 0.1) 0%,
+    transparent 70%
+  );
   box-shadow: inset 0 0 50px rgba(52, 152, 219, 0.1);
-  
+
   /* 提高渲染清晰度 */
   image-rendering: crisp-edges;
   image-rendering: -webkit-crisp-edges;
@@ -177,11 +181,11 @@
 
 .poe-center-node:hover {
   transform: scale(1.1) translateZ(0) !important;
-  box-shadow: 
-    0 0 50px var(--primary-gold)90,
-    inset 0 0 25px var(--primary-gold)40,
+  box-shadow:
+    0 0 50px var(--primary-gold) 90,
+    inset 0 0 25px var(--primary-gold) 40,
     0 0 80px rgba(212, 175, 55, 0.6),
-    0 0 100px var(--primary-gold)20 !important;
+    0 0 100px var(--primary-gold) 20 !important;
 }
 
 /* 主技能節點樣式 */
@@ -214,9 +218,11 @@
 }
 
 /* 舊樣式保留（兼容性） */
-.skill-node, .sub-skill-node, .poe-skill-connection {
+.skill-node,
+.sub-skill-node,
+.poe-skill-connection {
   image-rendering: crisp-edges;
-  image-rendering: -webkit-crisp-edges; 
+  image-rendering: -webkit-crisp-edges;
   image-rendering: -moz-crisp-edges;
   transform: translateZ(0);
   -webkit-font-smoothing: antialiased;
@@ -518,8 +524,12 @@
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-20px); }
-  100% { transform: translateX(20px); }
+  0% {
+    transform: translateX(-20px);
+  }
+  100% {
+    transform: translateX(20px);
+  }
 }
 
 /* Requirements section */
@@ -821,7 +831,7 @@
 
 .skill-requirements li:before,
 .skill-projects li:before {
-  content: "•";
+  content: '•';
   color: var(--primary-gold);
   position: absolute;
   left: 0;
@@ -937,7 +947,7 @@
 }
 
 .help-section li:before {
-  content: "→";
+  content: '→';
   color: var(--primary-gold);
   position: absolute;
   left: 0;
@@ -1011,7 +1021,9 @@
     text-shadow: 0 0 10px currentColor;
   }
   to {
-    text-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+    text-shadow:
+      0 0 20px currentColor,
+      0 0 30px currentColor;
   }
 }
 
@@ -1040,14 +1052,14 @@
   .mobile-only {
     display: block;
   }
-  
+
   /* 手機端技能樹容器樣式 */
   .mobile-skill-tree-wrapper {
     padding-top: 120px; /* 為頭部留空間 */
     min-height: 100vh;
     background: var(--primary-dark);
   }
-  
+
   .mobile-skill-tree-container {
     width: 100%;
     height: auto;
@@ -1117,7 +1129,7 @@
     padding-top: 1rem;
     min-height: calc(100vh - 200px);
   }
-  
+
   .skill-tree-wrapper,
   .skill-tree-container {
     height: calc(100vh - 250px);
@@ -1218,12 +1230,12 @@ body.modal-open {
     background: #000;
     color: #fff;
   }
-  
+
   .control-btn {
     background: rgba(52, 152, 219, 0.3);
     border-color: #3498db;
   }
-  
+
   .skill-tree-container {
     border-color: #3498db;
   }
@@ -1571,18 +1583,18 @@ body.modal-open {
   .skill-stats {
     grid-template-columns: 1fr;
   }
-  
+
   .related-skill-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .related-skill-meta {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .resource-item {
     flex-direction: column;
     align-items: flex-start;

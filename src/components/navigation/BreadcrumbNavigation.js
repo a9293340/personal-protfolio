@@ -14,9 +14,17 @@ export class BreadcrumbNavigation extends BaseComponent {
       '/': { name: '主城區', icon: '🏰', description: '冒險的起點' },
       '/about': { name: '角色檔案', icon: '👤', description: '查看角色狀態' },
       '/skills': { name: '技能樹', icon: '🌲', description: '技能發展路徑' },
-      '/work-projects': { name: '職業任務', icon: '💼', description: '工作經歷時間軸' },
-      '/personal-projects': { name: '個人收藏', icon: '🎴', description: '個人專案卡牌' },
-      '/contact': { name: '聯絡據點', icon: '📮', description: '聯繫方式' }
+      '/work-projects': {
+        name: '職業任務',
+        icon: '💼',
+        description: '工作經歷時間軸',
+      },
+      '/personal-projects': {
+        name: '個人收藏',
+        icon: '🎴',
+        description: '個人專案卡牌',
+      },
+      '/contact': { name: '聯絡據點', icon: '📮', description: '聯繫方式' },
     };
 
     // 綁定方法
@@ -30,7 +38,7 @@ export class BreadcrumbNavigation extends BaseComponent {
     return {
       breadcrumbs: [],
       currentPath: window.location.hash.slice(1) || '/',
-      isVisible: true
+      isVisible: true,
     };
   }
 
@@ -43,7 +51,7 @@ export class BreadcrumbNavigation extends BaseComponent {
       showDescriptions: true,
       maxItems: 4,
       animationEnabled: true,
-      style: 'gaming' // gaming, minimal, classic
+      style: 'gaming', // gaming, minimal, classic
     };
   }
 
@@ -71,38 +79,46 @@ export class BreadcrumbNavigation extends BaseComponent {
 
           <!-- 導航路徑 -->
           <ol class="breadcrumb-list">
-            ${breadcrumbs.map((crumb, index) => `
+            ${breadcrumbs
+              .map(
+                (crumb, index) => `
               <li class="breadcrumb-item ${index === breadcrumbs.length - 1 ? 'breadcrumb-item--current' : ''}"
                   data-index="${index}">
 
-                ${index === breadcrumbs.length - 1 ? (
-                  // 當前頁面 - 不可點擊
-                  `<span class="breadcrumb-current" aria-current="page">
+                ${
+                  index === breadcrumbs.length - 1
+                    ? // 當前頁面 - 不可點擊
+                      `<span class="breadcrumb-current" aria-current="page">
                     ${showIcons ? `<span class="breadcrumb-icon">${crumb.icon}</span>` : ''}
                     <span class="breadcrumb-text">${crumb.name}</span>
                     ${showDescriptions ? `<span class="breadcrumb-desc">${crumb.description}</span>` : ''}
                   </span>`
-                ) : (
-                  // 可點擊的路徑項目
-                  `<a href="#${crumb.path}"
+                    : // 可點擊的路徑項目
+                      `<a href="#${crumb.path}"
                       class="breadcrumb-link"
                       data-path="${crumb.path}"
                       title="返回 ${crumb.name}">
                     ${showIcons ? `<span class="breadcrumb-icon">${crumb.icon}</span>` : ''}
                     <span class="breadcrumb-text">${crumb.name}</span>
                   </a>`
-                )}
+                }
 
                 <!-- 分隔符 -->
-                ${index < breadcrumbs.length - 1 ? `
+                ${
+                  index < breadcrumbs.length - 1
+                    ? `
                   <span class="breadcrumb-separator" aria-hidden="true">
                     <svg class="separator-icon" viewBox="0 0 16 16" fill="currentColor">
                       <path d="M6.5 2L11.5 8L6.5 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                   </span>
-                ` : ''}
+                `
+                    : ''
+                }
               </li>
-            `).join('')}
+            `
+              )
+              .join('')}
           </ol>
 
           <!-- 快速動作按鈕 -->
@@ -150,7 +166,7 @@ export class BreadcrumbNavigation extends BaseComponent {
    */
   bindEvents() {
     // 綁定麵包屑連結點擊
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       const link = e.target.closest('.breadcrumb-link');
       if (link) {
         e.preventDefault();
@@ -193,7 +209,7 @@ export class BreadcrumbNavigation extends BaseComponent {
 
     this.setState({
       breadcrumbs,
-      isVisible: shouldShow
+      isVisible: shouldShow,
     });
   }
 
@@ -209,7 +225,7 @@ export class BreadcrumbNavigation extends BaseComponent {
         path: '/',
         name: this.routeTitles['/'].name,
         icon: this.routeTitles['/'].icon,
-        description: this.routeTitles['/'].description
+        description: this.routeTitles['/'].description,
       });
     }
 
@@ -219,7 +235,7 @@ export class BreadcrumbNavigation extends BaseComponent {
         path: currentPath,
         name: this.routeTitles[currentPath].name,
         icon: this.routeTitles[currentPath].icon,
-        description: this.routeTitles[currentPath].description
+        description: this.routeTitles[currentPath].description,
       });
     }
 
@@ -248,9 +264,12 @@ export class BreadcrumbNavigation extends BaseComponent {
     }
 
     // 延遲導航以播放動畫
-    setTimeout(() => {
-      window.location.hash = path;
-    }, (this.config && this.config.animationEnabled) ? 200 : 0);
+    setTimeout(
+      () => {
+        window.location.hash = path;
+      },
+      this.config && this.config.animationEnabled ? 200 : 0
+    );
   }
 
   /**
@@ -276,7 +295,7 @@ export class BreadcrumbNavigation extends BaseComponent {
         duration: 0.1,
         yoyo: true,
         repeat: 1,
-        ease: "power2.inOut"
+        ease: 'power2.inOut',
       });
     }
   }

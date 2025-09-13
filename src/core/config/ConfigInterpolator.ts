@@ -1,6 +1,6 @@
 /**
  * 配置插值系統
- * 
+ *
  * 實現 {{變數}} 模板語法解析，支援嵌套物件和數組插值處理
  */
 
@@ -9,11 +9,14 @@ export interface InterpolationContext {
 }
 
 export interface InterpolationOptions {
-  strict?: boolean;           // 嚴格模式：未找到變數時拋出錯誤
-  defaultValue?: any;         // 默認值
-  maxDepth?: number;          // 最大解析深度，防止循環引用
-  allowFunctions?: boolean;   // 是否允許函數調用
-  customResolvers?: Record<string, (path: string, context: InterpolationContext) => any>;
+  strict?: boolean; // 嚴格模式：未找到變數時拋出錯誤
+  defaultValue?: any; // 默認值
+  maxDepth?: number; // 最大解析深度，防止循環引用
+  allowFunctions?: boolean; // 是否允許函數調用
+  customResolvers?: Record<
+    string,
+    (path: string, context: InterpolationContext) => any
+  >;
 }
 
 /**
@@ -23,7 +26,7 @@ export class ConfigInterpolator {
   private static instance: ConfigInterpolator | null = null;
   private readonly variablePattern = /\{\{([^}]+)\}\}/g;
   private readonly functionPattern = /^(\w+)\(([^)]*)\)$/;
-  
+
   private constructor() {}
 
   /**
@@ -40,24 +43,29 @@ export class ConfigInterpolator {
    * 主要插值方法
    */
   interpolate(
-    template: any, 
-    context: InterpolationContext, 
+    template: any,
+    context: InterpolationContext,
     options: InterpolationOptions = {}
   ): any {
     const opts = {
       strict: false,
       maxDepth: 10,
       allowFunctions: false,
-      ...options
+      ...options,
     };
 
     try {
       return this.processValue(template, context, opts, 0, new Set());
     } catch (error) {
       if (opts.strict) {
-        throw new Error(`Configuration interpolation failed: ${(error as Error).message}`);
+        throw new Error(
+          `Configuration interpolation failed: ${(error as Error).message}`
+        );
       }
-      console.warn('Configuration interpolation warning:', (error as Error).message);
+      console.warn(
+        'Configuration interpolation warning:',
+        (error as Error).message
+      );
       return template;
     }
   }
@@ -74,7 +82,9 @@ export class ConfigInterpolator {
   ): any {
     // 防止無限遞歸
     if (depth > (options.maxDepth || 10)) {
-      throw new Error(`Maximum interpolation depth (${options.maxDepth}) exceeded`);
+      throw new Error(
+        `Maximum interpolation depth (${options.maxDepth}) exceeded`
+      );
     }
 
     // 防止循環引用
@@ -88,7 +98,7 @@ export class ConfigInterpolator {
 
     if (Array.isArray(value)) {
       visited.add(value);
-      const result = value.map(item => 
+      const result = value.map(item =>
         this.processValue(item, context, options, depth + 1, visited)
       );
       visited.delete(value);
@@ -99,7 +109,13 @@ export class ConfigInterpolator {
       visited.add(value);
       const result: any = {};
       for (const [key, val] of Object.entries(value)) {
-        result[key] = this.processValue(val, context, options, depth + 1, visited);
+        result[key] = this.processValue(
+          val,
+          context,
+          options,
+          depth + 1,
+          visited
+        );
       }
       visited.delete(value);
       return result;
@@ -122,31 +138,35 @@ export class ConfigInterpolator {
     }
 
     let hasInterpolation = false;
-    
-    const result = template.replace(this.variablePattern, (match, expression) => {
-      hasInterpolation = true;
-      const trimmedExpr = expression.trim();
-      
-      try {
-        const value = this.resolveExpression(trimmedExpr, context, options);
-        
-        // 如果整個字符串就是一個插值表達式，返回原始類型
-        if (template === match) {
-          return value;
+
+    const result = template.replace(
+      this.variablePattern,
+      (match, expression) => {
+        hasInterpolation = true;
+        const trimmedExpr = expression.trim();
+
+        try {
+          const value = this.resolveExpression(trimmedExpr, context, options);
+
+          // 如果整個字符串就是一個插值表達式，返回原始類型
+          if (template === match) {
+            return value;
+          }
+
+          // 否則轉換為字符串
+          return this.valueToString(value);
+        } catch (error) {
+          if (options.strict) {
+            throw error;
+          }
+
+          console.warn(`Failed to resolve variable: ${trimmedExpr}`, error);
+          return options.defaultValue !== undefined
+            ? this.valueToString(options.defaultValue)
+            : match;
         }
-        
-        // 否則轉換為字符串
-        return this.valueToString(value);
-      } catch (error) {
-        if (options.strict) {
-          throw error;
-        }
-        
-        console.warn(`Failed to resolve variable: ${trimmedExpr}`, error);
-        return options.defaultValue !== undefined ? 
-          this.valueToString(options.defaultValue) : match;
       }
-    });
+    );
 
     // 如果整個字符串就是一個插值且成功解析，返回解析後的值
     if (hasInterpolation && template.match(/^\{\{[^}]+\}\}$/)) {
@@ -157,7 +177,9 @@ export class ConfigInterpolator {
         if (options.strict) {
           throw error;
         }
-        return options.defaultValue !== undefined ? options.defaultValue : template;
+        return options.defaultValue !== undefined
+          ? options.defaultValue
+          : template;
       }
     }
 
@@ -176,13 +198,20 @@ export class ConfigInterpolator {
     if (options.allowFunctions) {
       const funcMatch = expression.match(this.functionPattern);
       if (funcMatch) {
-        return this.resolveFunction(funcMatch[1], funcMatch[2], context, options);
+        return this.resolveFunction(
+          funcMatch[1],
+          funcMatch[2],
+          context,
+          options
+        );
       }
     }
 
     // 檢查自定義解析器
     if (options.customResolvers) {
-      for (const [prefix, resolver] of Object.entries(options.customResolvers)) {
+      for (const [prefix, resolver] of Object.entries(
+        options.customResolvers
+      )) {
         if (expression.startsWith(prefix + '.')) {
           return resolver(expression, context);
         }
@@ -206,14 +235,16 @@ export class ConfigInterpolator {
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
-      
+
       // 處理數組索引
       const arrayMatch = part.match(/^(\w+)\[(\d+)\]$/);
       if (arrayMatch) {
         const [, arrayName, index] = arrayMatch;
         current = current?.[arrayName];
         if (!Array.isArray(current)) {
-          throw new Error(`Expected array at path: ${parts.slice(0, i + 1).join('.')}`);
+          throw new Error(
+            `Expected array at path: ${parts.slice(0, i + 1).join('.')}`
+          );
         }
         current = current[parseInt(index)];
       } else {
@@ -240,7 +271,9 @@ export class ConfigInterpolator {
     context: InterpolationContext,
     options: InterpolationOptions
   ): any {
-    const args = argsString ? this.parseArguments(argsString, context, options) : [];
+    const args = argsString
+      ? this.parseArguments(argsString, context, options)
+      : [];
 
     // 內建函數
     const builtInFunctions = this.getBuiltInFunctions();
@@ -270,7 +303,7 @@ export class ConfigInterpolator {
 
     for (const part of parts) {
       const trimmed = part.trim();
-      
+
       // 字符串字面量
       if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
         args.push(trimmed.slice(1, -1));
@@ -300,36 +333,43 @@ export class ConfigInterpolator {
       // 字符串函數
       upper: (str: string) => String(str).toUpperCase(),
       lower: (str: string) => String(str).toLowerCase(),
-      capitalize: (str: string) => String(str).charAt(0).toUpperCase() + String(str).slice(1),
-      
+      capitalize: (str: string) =>
+        String(str).charAt(0).toUpperCase() + String(str).slice(1),
+
       // 數組函數
-      length: (arr: any) => Array.isArray(arr) ? arr.length : String(arr).length,
-      join: (arr: any[], separator = ',') => Array.isArray(arr) ? arr.join(separator) : String(arr),
-      slice: (arr: any[], start: number, end?: number) => 
-        Array.isArray(arr) ? arr.slice(start, end) : String(arr).slice(start, end),
-      
+      length: (arr: any) =>
+        Array.isArray(arr) ? arr.length : String(arr).length,
+      join: (arr: any[], separator = ',') =>
+        Array.isArray(arr) ? arr.join(separator) : String(arr),
+      slice: (arr: any[], start: number, end?: number) =>
+        Array.isArray(arr)
+          ? arr.slice(start, end)
+          : String(arr).slice(start, end),
+
       // 數學函數
       max: (...nums: number[]) => Math.max(...nums),
       min: (...nums: number[]) => Math.min(...nums),
       round: (num: number) => Math.round(num),
       ceil: (num: number) => Math.ceil(num),
       floor: (num: number) => Math.floor(num),
-      
+
       // 條件函數
-      default: (value: any, defaultValue: any) => value !== undefined && value !== null ? value : defaultValue,
-      if: (condition: any, trueValue: any, falseValue: any) => condition ? trueValue : falseValue,
-      
+      default: (value: any, defaultValue: any) =>
+        value !== undefined && value !== null ? value : defaultValue,
+      if: (condition: any, trueValue: any, falseValue: any) =>
+        condition ? trueValue : falseValue,
+
       // 格式化函數
       formatDate: (date: string | Date, format = 'YYYY-MM-DD') => {
         const d = new Date(date);
         return this.formatDate(d, format);
       },
       formatNumber: (num: number, decimals = 0) => num.toFixed(decimals),
-      
+
       // 實用函數
       keys: (obj: object) => Object.keys(obj),
       values: (obj: object) => Object.values(obj),
-      entries: (obj: object) => Object.entries(obj)
+      entries: (obj: object) => Object.entries(obj),
     };
   }
 
@@ -340,7 +380,7 @@ export class ConfigInterpolator {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
-    
+
     return format
       .replace('YYYY', year.toString())
       .replace('MM', month)
@@ -365,14 +405,14 @@ export class ConfigInterpolator {
    */
   validateTemplate(template: any): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
+
     try {
       this.findVariables(template).forEach(variable => {
         // 檢查變數語法是否正確
         if (!variable.trim()) {
           errors.push('Empty variable expression found');
         }
-        
+
         // 檢查是否有未閉合的大括號
         if (variable.includes('{{') || variable.includes('}}')) {
           errors.push(`Invalid variable syntax: {{${variable}}}`);
@@ -384,7 +424,7 @@ export class ConfigInterpolator {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -393,7 +433,7 @@ export class ConfigInterpolator {
    */
   findVariables(template: any): string[] {
     const variables = new Set<string>();
-    
+
     const collect = (value: any) => {
       if (typeof value === 'string') {
         const matches = value.matchAll(this.variablePattern);
@@ -406,7 +446,7 @@ export class ConfigInterpolator {
         Object.values(value).forEach(collect);
       }
     };
-    
+
     collect(template);
     return Array.from(variables);
   }

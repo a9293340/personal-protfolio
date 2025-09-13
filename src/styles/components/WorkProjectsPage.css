@@ -6,10 +6,12 @@
 /* 主要容器 */
 .work-projects-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     rgba(10, 10, 10, 0.95) 0%,
     rgba(26, 26, 46, 0.98) 50%,
-    rgba(10, 10, 10, 0.95) 100%);
+    rgba(10, 10, 10, 0.95) 100%
+  );
   color: white;
   overflow: hidden;
   position: relative;
@@ -146,7 +148,7 @@
   overflow: hidden;
   position: relative;
   backdrop-filter: blur(5px);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   min-height: 600px; /* 確保容器有最小高度 */
@@ -154,7 +156,7 @@
 
 .timeline-container:hover {
   border-color: rgba(52, 152, 219, 0.3);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     0 0 40px rgba(52, 152, 219, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -471,13 +473,22 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 /* 響應式設計 */
@@ -488,17 +499,17 @@
     margin: 1rem auto 0;
     max-width: 600px;
   }
-  
+
   .work-projects-main {
     padding-bottom: 1rem;
   }
-  
+
   .stats-grid {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
   }
-  
+
   .stat-item {
     flex: 1;
     min-width: 120px;
@@ -509,43 +520,43 @@
   .work-projects-header {
     padding: 1rem;
   }
-  
+
   .work-projects-header-content {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .work-projects-title {
     font-size: 1.6rem;
   }
-  
+
   .work-projects-controls {
     width: 100%;
     justify-content: center;
   }
-  
+
   .control-btn .btn-text {
     display: none;
   }
-  
+
   .work-projects-main {
     padding: 140px 1rem 1rem;
   }
-  
+
   .timeline-container {
     border-radius: 0.75rem;
   }
-  
+
   .projects-stats-panel {
     margin: 1rem 0 0;
     padding: 1rem;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   .modal-content {
     width: 95%;
     margin: 1rem;
@@ -560,16 +571,16 @@
     text-align: center;
     gap: 0.5rem;
   }
-  
+
   .work-projects-controls {
     gap: 0.5rem;
   }
-  
+
   .control-btn {
     padding: 0.5rem;
     font-size: 1rem;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
@@ -581,16 +592,16 @@
     background: #000;
     color: #fff;
   }
-  
+
   .control-btn {
     background: rgba(52, 152, 219, 0.3);
     border-color: #3498db;
   }
-  
+
   .timeline-container {
     border-color: #3498db;
   }
-  
+
   .projects-stats-panel {
     background: rgba(0, 0, 0, 0.9);
     border-color: #3498db;

@@ -25,8 +25,8 @@ export class WorkProjectsPage extends BaseComponent {
         enableFullscreen: true,
         showYearFilter: true,
         enableParticles: true,
-        autoPlay: false
-      }
+        autoPlay: false,
+      },
     };
   }
 
@@ -35,7 +35,7 @@ export class WorkProjectsPage extends BaseComponent {
    */
   async render() {
     const config = this.mergeConfig();
-    
+
     return `
       <div class="work-projects-page">
         <!-- 頁面頭部 -->
@@ -159,22 +159,21 @@ export class WorkProjectsPage extends BaseComponent {
    */
   async init() {
     await super.init();
-    
+
     try {
       // 設置全局實例
       window.workProjectsPageInstance = this;
-      
+
       // 初始化互動時間軸
       await this.initializeTimeline();
-      
+
       // 綁定UI事件
       this.bindEvents();
-      
+
       // 更新統計數據
       this.updateStats();
-      
+
       console.log('🚀 WorkProjectsPage initialized');
-      
     } catch (error) {
       console.error('❌ WorkProjectsPage initialization failed:', error);
       this.showError('工作專案時間軸載入失敗');
@@ -187,7 +186,7 @@ export class WorkProjectsPage extends BaseComponent {
   async initializeTimeline() {
     const container = document.getElementById('timeline-container');
     const loading = document.getElementById('timeline-loading');
-    
+
     if (!container) {
       throw new Error('時間軸容器不存在');
     }
@@ -195,7 +194,7 @@ export class WorkProjectsPage extends BaseComponent {
     try {
       // 顯示載入狀態
       loading.style.display = 'flex';
-      
+
       // 創建互動時間軸組件
       this.interactiveTimeline = new InteractiveTimeline({
         container: container,
@@ -208,17 +207,20 @@ export class WorkProjectsPage extends BaseComponent {
         responsive: {
           mobile: {
             height: '500px',
-            orientation: 'vertical'
+            orientation: 'vertical',
           },
           desktop: {
             height: '600px',
-            orientation: 'horizontal'
-          }
-        }
+            orientation: 'horizontal',
+          },
+        },
       });
 
-      console.log('🔧 InteractiveTimeline 實例已創建:', this.interactiveTimeline);
-      
+      console.log(
+        '🔧 InteractiveTimeline 實例已創建:',
+        this.interactiveTimeline
+      );
+
       // 容器狀態檢查
       if (!container.offsetWidth || !container.offsetHeight) {
         console.warn('⚠️ 時間軸容器可能不可見');
@@ -231,7 +233,10 @@ export class WorkProjectsPage extends BaseComponent {
           requestAnimationFrame(async () => {
             // 檢查容器寬度是否已正確計算
             if (container && container.clientWidth > 0) {
-              console.log('[WorkProjectsPage] 容器寬度已準備完成:', container.clientWidth);
+              console.log(
+                '[WorkProjectsPage] 容器寬度已準備完成:',
+                container.clientWidth
+              );
               await this.interactiveTimeline.init();
               resolve();
             } else {
@@ -248,12 +253,12 @@ export class WorkProjectsPage extends BaseComponent {
 
       // 監聽時間軸事件
       this.setupTimelineEvents();
-      
+
       // 隱藏載入狀態
       loading.style.display = 'none';
-      
+
       console.log('✅ InteractiveTimeline initialized in WorkProjectsPage');
-      
+
       // 驗證時間軸內容是否正確載入
       setTimeout(() => {
         const nodeCount = container.querySelectorAll('.timeline-node').length;
@@ -263,7 +268,6 @@ export class WorkProjectsPage extends BaseComponent {
           console.log(`✅ 時間軸載入成功 - ${nodeCount} 個專案節點`);
         }
       }, 1000);
-      
     } catch (error) {
       console.error('❌ Timeline initialization failed:', error);
       loading.innerHTML = `
@@ -284,25 +288,25 @@ export class WorkProjectsPage extends BaseComponent {
     if (!this.interactiveTimeline) return;
 
     // 專案節點點擊事件
-    this.interactiveTimeline.on('project-selected', (data) => {
+    this.interactiveTimeline.on('project-selected', data => {
       console.log('🚀 專案選擇事件:', data);
       this.handleProjectSelection(data);
     });
 
     // 年份篩選變更事件
-    this.interactiveTimeline.on('year-filter-changed', (data) => {
+    this.interactiveTimeline.on('year-filter-changed', data => {
       console.log('📅 年份篩選變更:', data);
       this.updateStats();
     });
 
     // 時間軸初始化完成
-    this.interactiveTimeline.on('timeline-initialized', (data) => {
+    this.interactiveTimeline.on('timeline-initialized', data => {
       console.log(`🌟 時間軸載入完成: ${data.projectCount} 個專案`);
       this.updateStats();
     });
 
     // 錯誤處理
-    this.interactiveTimeline.on('timeline-error', (data) => {
+    this.interactiveTimeline.on('timeline-error', data => {
       console.error('🚨 時間軸錯誤:', data.error);
       this.showError('時間軸運行錯誤: ' + data.error.message);
     });
@@ -314,7 +318,7 @@ export class WorkProjectsPage extends BaseComponent {
   handleProjectSelection(data) {
     // 這裡可以添加專案詳情顯示邏輯
     console.log('🎯 處理專案選擇:', data.projectId);
-    
+
     // 更新統計面板高亮當前專案
     this.highlightCurrentProject(data.projectId);
   }
@@ -359,7 +363,7 @@ export class WorkProjectsPage extends BaseComponent {
     const infoCloseBtn = document.getElementById('info-close-btn');
     const infoBackdrop = document.getElementById('info-backdrop');
     const exitFullscreenBtn = document.getElementById('exit-fullscreen-btn');
-    
+
     if (infoCloseBtn) {
       infoCloseBtn.addEventListener('click', () => {
         this.hideInfo();
@@ -379,7 +383,7 @@ export class WorkProjectsPage extends BaseComponent {
     }
 
     // ESC 鍵處理
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', event => {
       if (event.key === 'Escape') {
         if (this.isFullscreen) {
           this.exitFullscreen();
@@ -407,19 +411,19 @@ export class WorkProjectsPage extends BaseComponent {
   enterFullscreen() {
     const page = document.querySelector('.work-projects-page');
     const overlay = document.getElementById('fullscreen-overlay');
-    
+
     if (page && overlay) {
       page.classList.add('fullscreen');
       overlay.classList.add('show');
       this.isFullscreen = true;
-      
+
       // 調整時間軸大小
       if (this.interactiveTimeline && this.interactiveTimeline.resize) {
         setTimeout(() => {
           this.interactiveTimeline.resize();
         }, 300);
       }
-      
+
       console.log('⛶ 進入全螢幕模式');
     }
   }
@@ -430,19 +434,19 @@ export class WorkProjectsPage extends BaseComponent {
   exitFullscreen() {
     const page = document.querySelector('.work-projects-page');
     const overlay = document.getElementById('fullscreen-overlay');
-    
+
     if (page && overlay) {
       page.classList.remove('fullscreen');
       overlay.classList.remove('show');
       this.isFullscreen = false;
-      
+
       // 調整時間軸大小
       if (this.interactiveTimeline && this.interactiveTimeline.resize) {
         setTimeout(() => {
           this.interactiveTimeline.resize();
         }, 300);
       }
-      
+
       console.log('✕ 退出全螢幕模式');
     }
   }
@@ -489,23 +493,27 @@ export class WorkProjectsPage extends BaseComponent {
     try {
       const stats = this.interactiveTimeline.getStats();
       const statsGrid = document.getElementById('stats-grid');
-      
+
       if (statsGrid && stats) {
         const statItems = statsGrid.querySelectorAll('.stat-item');
-        
+
         if (statItems[0]) {
-          statItems[0].querySelector('.stat-number').textContent = stats.totalProjects || '-';
+          statItems[0].querySelector('.stat-number').textContent =
+            stats.totalProjects || '-';
         }
         if (statItems[1]) {
-          statItems[1].querySelector('.stat-number').textContent = stats.techTypes || '-';
+          statItems[1].querySelector('.stat-number').textContent =
+            stats.techTypes || '-';
         }
         if (statItems[2]) {
-          statItems[2].querySelector('.stat-number').textContent = stats.yearSpan || '-';
+          statItems[2].querySelector('.stat-number').textContent =
+            stats.yearSpan || '-';
         }
         if (statItems[3]) {
-          statItems[3].querySelector('.stat-number').textContent = stats.featuredProjects || '-';
+          statItems[3].querySelector('.stat-number').textContent =
+            stats.featuredProjects || '-';
         }
-        
+
         console.log('📊 統計數據已更新:', stats);
       }
     } catch (error) {
@@ -518,7 +526,7 @@ export class WorkProjectsPage extends BaseComponent {
    */
   showError(message) {
     console.error('🚨 WorkProjectsPage Error:', message);
-    
+
     const loading = document.getElementById('timeline-loading');
     if (loading) {
       loading.innerHTML = `
@@ -549,7 +557,14 @@ export class WorkProjectsPage extends BaseComponent {
       }
 
       // 移除事件監聽器
-      const buttons = ['fullscreen-btn', 'center-timeline-btn', 'info-btn', 'info-close-btn', 'info-backdrop', 'exit-fullscreen-btn'];
+      const buttons = [
+        'fullscreen-btn',
+        'center-timeline-btn',
+        'info-btn',
+        'info-close-btn',
+        'info-backdrop',
+        'exit-fullscreen-btn',
+      ];
       buttons.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
@@ -562,7 +577,6 @@ export class WorkProjectsPage extends BaseComponent {
 
       super.destroy();
       console.log('🚀 WorkProjectsPage destroyed');
-      
     } catch (error) {
       console.error('❌ WorkProjectsPage destroy error:', error);
     }

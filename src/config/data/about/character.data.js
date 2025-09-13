@@ -17,23 +17,23 @@ export const characterInfoConfig = {
         level: 5,
         period: '2019-2020',
         status: 'completed',
-        description: '用戶界面開發、互動設計專家'
+        description: '用戶界面開發、互動設計專家',
       },
       {
-        job: '全端工程師', 
+        job: '全端工程師',
         icon: '🔧',
         level: 6,
         period: '2020-2022',
         status: 'completed',
-        description: '前後端一體化開發專家'
+        description: '前後端一體化開發專家',
       },
       {
         job: '後端工程師',
-        icon: '👨‍💻', 
+        icon: '👨‍💻',
         level: 8,
         period: '2022-2024',
         status: 'current',
-        description: '精通後端開發的專業工程師'
+        description: '精通後端開發的專業工程師',
       },
       {
         job: '系統架構師',
@@ -41,25 +41,25 @@ export const characterInfoConfig = {
         level: 1,
         period: '2024-未來',
         status: 'target',
-        description: '設計大型系統架構的專家'
-      }
+        description: '設計大型系統架構的專家',
+      },
     ],
-    transitionDate: '2024-01-15'
+    transitionDate: '2024-01-15',
   },
-  
+
   // 整體角色經驗系統 (用於職業轉換)
   overallExperience: {
-    current: 23500,  // 總經驗值
+    current: 23500, // 總經驗值
     required: 30000, // 下次轉職所需
-    gainRate: 200,   // 每月獲得經驗
+    gainRate: 200, // 每月獲得經驗
     sources: [
       { type: 'project_completion', exp: 800, description: '完成專案' },
       { type: 'skill_mastery', exp: 500, description: '掌握新技能' },
       { type: 'mentoring', exp: 300, description: '指導團隊' },
-      { type: 'innovation', exp: 600, description: '技術創新' }
-    ]
+      { type: 'innovation', exp: 600, description: '技術創新' },
+    ],
   },
-  
+
   // 六大技能領域系統 (基於 skills.data.js)
   skillDomains: {
     title: '六大技能領域',
@@ -72,27 +72,27 @@ export const characterInfoConfig = {
         maxLevel: 10,
         experience: 7500,
         maxExperience: 10000,
-        description: '服務器端開發、API設計、系統邏輯實現'
+        description: '服務器端開發、API設計、系統邏輯實現',
       },
       architecture: {
         name: '系統架構設計領域',
         icon: '🏗️',
-        color: '#1abc9c', 
+        color: '#1abc9c',
         currentLevel: 3,
         maxLevel: 10,
         experience: 2800,
         maxExperience: 5000,
-        description: '系統設計、架構模式、擴展性規劃'
+        description: '系統設計、架構模式、擴展性規劃',
       },
       database: {
         name: '資料庫工程領域',
         icon: '🗄️',
         color: '#2ecc71',
         currentLevel: 5,
-        maxLevel: 10, 
+        maxLevel: 10,
         experience: 4200,
         maxExperience: 7500,
-        description: '數據存儲、查詢優化、架構設計'
+        description: '數據存儲、查詢優化、架構設計',
       },
       devops: {
         name: '雲端服務與 DevOps',
@@ -102,7 +102,7 @@ export const characterInfoConfig = {
         maxLevel: 10,
         experience: 3600,
         maxExperience: 6000,
-        description: '持續整合、容器化、基礎設施管理'
+        description: '持續整合、容器化、基礎設施管理',
       },
       ai: {
         name: 'AI 工程應用領域',
@@ -112,7 +112,7 @@ export const characterInfoConfig = {
         maxLevel: 10,
         experience: 3200,
         maxExperience: 6000,
-        description: 'AI工具整合、Prompt Engineering、智能化應用'
+        description: 'AI工具整合、Prompt Engineering、智能化應用',
       },
       frontend: {
         name: '前端開發領域',
@@ -122,10 +122,10 @@ export const characterInfoConfig = {
         maxLevel: 10,
         experience: 3000,
         maxExperience: 6000,
-        description: '用戶界面開發、互動設計、前端框架'
-      }
-    }
-  }
+        description: '用戶界面開發、互動設計、前端框架',
+      },
+    },
+  },
 };
 
 /**
@@ -144,8 +144,8 @@ export const characterAttributesConfig = {
       bonuses: [
         { source: 'Node.js 精通', bonus: 8 },
         { source: 'API 設計經驗', bonus: 5 },
-        { source: '優化實戰', bonus: 2 }
-      ]
+        { source: '優化實戰', bonus: 2 },
+      ],
     },
     defense: {
       value: 90,
@@ -158,8 +158,8 @@ export const characterAttributesConfig = {
       bonuses: [
         { source: '錯誤處理', bonus: 8 },
         { source: '測試覆蓋', bonus: 4 },
-        { source: '監控告警', bonus: 3 }
-      ]
+        { source: '監控告警', bonus: 3 },
+      ],
     },
     agility: {
       value: 88,
@@ -171,8 +171,8 @@ export const characterAttributesConfig = {
       baseValue: 80,
       bonuses: [
         { source: '快速學習', bonus: 5 },
-        { source: '技術敏感度', bonus: 3 }
-      ]
+        { source: '技術敏感度', bonus: 3 },
+      ],
     },
     intelligence: {
       value: 92,
@@ -184,8 +184,8 @@ export const characterAttributesConfig = {
       baseValue: 85,
       bonuses: [
         { source: '系統思維', bonus: 4 },
-        { source: '抽象能力', bonus: 3 }
-      ]
+        { source: '抽象能力', bonus: 3 },
+      ],
     },
     charisma: {
       value: 85,
@@ -197,8 +197,8 @@ export const characterAttributesConfig = {
       baseValue: 75,
       bonuses: [
         { source: '溝通能力', bonus: 6 },
-        { source: '領導經驗', bonus: 4 }
-      ]
+        { source: '領導經驗', bonus: 4 },
+      ],
     },
     luck: {
       value: 90,
@@ -210,11 +210,11 @@ export const characterAttributesConfig = {
       baseValue: 82,
       bonuses: [
         { source: 'Debug 直覺', bonus: 5 },
-        { source: '解決方案靈感', bonus: 3 }
-      ]
-    }
+        { source: '解決方案靈感', bonus: 3 },
+      ],
+    },
   },
-  
+
   // 屬性成長配置
   growth: {
     perLevel: {
@@ -223,7 +223,7 @@ export const characterAttributesConfig = {
       agility: 1,
       intelligence: 3,
       charisma: 2,
-      luck: 1
+      luck: 1,
     },
     caps: {
       attack: 100,
@@ -231,9 +231,9 @@ export const characterAttributesConfig = {
       agility: 100,
       intelligence: 100,
       charisma: 100,
-      luck: 100
-    }
-  }
+      luck: 100,
+    },
+  },
 };
 
 /**
@@ -247,22 +247,22 @@ export const jobSkillsConfig = {
       'API 設計與實現',
       '資料庫設計與優化',
       '服務端架構',
-      'RESTful 服務開發'
+      'RESTful 服務開發',
     ],
     specialization: [
       'Node.js 生態系統',
       'Python 全端開發',
       'Docker 容器化',
-      'Redis 快取策略'
+      'Redis 快取策略',
     ],
     achievements: [
       '完成 15+ 後端專案',
       'API 響應時間優化 60%',
       '資料庫查詢效能提升 3倍',
-      '團隊代碼規範制定'
-    ]
+      '團隊代碼規範制定',
+    ],
   },
-  
+
   // 系統架構師技能樹
   systemArchitect: {
     jobName: '系統架構師',
@@ -270,21 +270,21 @@ export const jobSkillsConfig = {
       '分散式系統設計',
       '微服務架構',
       '系統容量規劃',
-      '技術選型決策'
+      '技術選型決策',
     ],
     developing: [
       'K8s 容器編排',
       '服務網格架構',
       '事件驅動架構',
-      '雲原生設計模式'
+      '雲原生設計模式',
     ],
     plannedSkills: [
       '大數據架構',
       '機器學習基礎設施',
       'DevOps 流程設計',
-      '性能監控體系'
-    ]
-  }
+      '性能監控體系',
+    ],
+  },
 };
 
 /**
@@ -301,32 +301,32 @@ export const levelSystemConfig = {
     { level: 7, required: 50000, total: 167000 },
     { level: 8, required: 65000, total: 232000 },
     { level: 9, required: 80000, total: 312000 },
-    { level: 10, required: 100000, total: 412000 }
+    { level: 10, required: 100000, total: 412000 },
   ],
-  
+
   // 升級獎勵
   levelRewards: {
     2: { skillPoints: 2, attributeBonus: { intelligence: 1 } },
     3: { skillPoints: 2, attributeBonus: { defense: 1 } },
     4: { skillPoints: 3, attributeBonus: { attack: 1, charisma: 1 } },
-    5: { skillPoints: 3, specialAbility: 'architecture_insight' }
+    5: { skillPoints: 3, specialAbility: 'architecture_insight' },
   },
-  
+
   // 轉職要求
   jobTransition: {
     requirements: {
       level: 8,
       keySkills: ['系統思維', 'API 設計', '團隊協作'],
       experience: 232000,
-      projects: 15
+      projects: 15,
     },
     benefits: {
       newSkillTree: 'systemArchitect',
       attributeReset: false,
       bonusSkillPoints: 5,
-      specialAbilities: ['系統設計', '架構評估']
-    }
-  }
+      specialAbilities: ['系統設計', '架構評估'],
+    },
+  },
 };
 
 /**
@@ -335,11 +335,11 @@ export const levelSystemConfig = {
 export const visualEffectsConfig = {
   // 色彩主題
   colorTheme: {
-    primary: '#d4af37',      // 主要金色
-    secondary: '#f4d03f',    // 亮金色
+    primary: '#d4af37', // 主要金色
+    secondary: '#f4d03f', // 亮金色
     background: 'rgba(26, 26, 46, 0.95)',
     cardBackground: 'rgba(212, 175, 55, 0.1)',
-    
+
     // 屬性色彩
     attributeColors: {
       attack: '#e74c3c',
@@ -347,65 +347,65 @@ export const visualEffectsConfig = {
       agility: '#f39c12',
       intelligence: '#9b59b6',
       charisma: '#2ecc71',
-      luck: '#1abc9c'
+      luck: '#1abc9c',
     },
-    
+
     // 經驗條顏色
     experienceBar: {
       background: 'rgba(255, 255, 255, 0.1)',
       fill: 'linear-gradient(90deg, #00ff88 0%, #00cc66 100%)',
-      glow: '0 0 10px #00ff88'
+      glow: '0 0 10px #00ff88',
     },
-    
+
     // 技能點顏色
     skillPoints: {
       used: '#d4af37',
       available: '#ffffff',
-      next: '#00ff88'
-    }
+      next: '#00ff88',
+    },
   },
-  
+
   // 動畫配置
   animations: {
     attributeBars: {
       duration: '1.5s',
       easing: 'ease-out',
       delay: 200,
-      glowDelay: 1000
+      glowDelay: 1000,
     },
     experienceBar: {
       duration: '2s',
       easing: 'ease-out',
-      delay: 500
+      delay: 500,
     },
     radarChart: {
       drawSpeed: 50,
-      pulseSpeed: 2000
+      pulseSpeed: 2000,
     },
     levelUp: {
       duration: '3s',
       particles: 20,
-      sparkleColors: ['#d4af37', '#f4d03f', '#ffffff']
-    }
+      sparkleColors: ['#d4af37', '#f4d03f', '#ffffff'],
+    },
   },
-  
+
   // 特效設定
   effects: {
     glow: {
       enabled: true,
       intensity: 0.8,
-      color: '#d4af37'
+      color: '#d4af37',
     },
     particles: {
       enabled: true,
       count: 15,
-      speed: 0.5
+      speed: 0.5,
     },
     screenShake: {
       enabled: false, // 升級時啟用
-      intensity: 5
-    }
-  }
+      intensity: 5,
+    },
+  },
 };
 
 /**
@@ -416,5 +416,5 @@ export default {
   attributes: characterAttributesConfig,
   jobSkills: jobSkillsConfig,
   levelSystem: levelSystemConfig,
-  visual: visualEffectsConfig
+  visual: visualEffectsConfig,
 };

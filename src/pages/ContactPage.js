@@ -1,6 +1,6 @@
 /**
  * ContactPage.js - 聯絡頁面主組件
- * 
+ *
  * 功能特色：
  * - Config-Driven 聯絡表單與社交連結展示
  * - 遊戲化風格的聯絡介面
@@ -16,19 +16,19 @@ import { contactConfig } from '../config/data/contact/contact.config.js';
 export class ContactPage extends BaseComponent {
   constructor(config = {}) {
     super();
-    
+
     this.config = this.mergeConfig(contactConfig, config);
-    
+
     // 子組件
     this.contactForm = null;
     this.socialGrid = null;
-    
+
     // 狀態
     this.isLoaded = false;
-    
+
     console.log('📞 [ContactPage] 聯絡頁面組件初始化');
   }
-  
+
   /**
    * 獲取預設配置
    */
@@ -37,14 +37,14 @@ export class ContactPage extends BaseComponent {
       animations: {
         enabled: true,
         duration: 300,
-        easing: 'ease-out'
+        easing: 'ease-out',
       },
       responsive: {
-        breakpoint: 768
-      }
+        breakpoint: 768,
+      },
     };
   }
-  
+
   /**
    * 獲取初始狀態
    */
@@ -52,10 +52,10 @@ export class ContactPage extends BaseComponent {
     return {
       isMobile: window.innerWidth <= 768,
       formSubmitted: false,
-      currentSection: null
+      currentSection: null,
     };
   }
-  
+
   /**
    * 渲染頁面
    */
@@ -64,10 +64,10 @@ export class ContactPage extends BaseComponent {
     await this.initializeComponents();
     this.bindEvents();
     this.setupResponsiveLayout();
-    
+
     return this.element.outerHTML;
   }
-  
+
   /**
    * 創建主要 DOM 結構
    */
@@ -76,15 +76,15 @@ export class ContactPage extends BaseComponent {
     if (!this.state) {
       this.state = this.getInitialState();
     }
-    
+
     this.element = document.createElement('div');
     this.element.className = 'contact-page';
-    
+
     // 應用響應式配置
-    const layout = this.state.isMobile 
-      ? this.config.responsive?.mobile?.layout 
+    const layout = this.state.isMobile
+      ? this.config.responsive?.mobile?.layout
       : this.config.layout;
-    
+
     this.element.innerHTML = `
       <div class="contact-page-container" style="
         max-width: ${layout?.maxWidth || '1000px'};
@@ -141,9 +141,10 @@ export class ContactPage extends BaseComponent {
         <!-- 主要內容區域 -->
         <main class="contact-main" style="
           display: ${this.state.isMobile ? 'flex' : 'grid'};
-          ${this.state.isMobile 
-            ? 'flex-direction: column; gap: 2rem;'
-            : `grid-template-columns: ${layout?.columns?.left?.width || '60%'} ${layout?.columns?.right?.width || '40%'}; gap: ${layout?.gap || '2rem'};`
+          ${
+            this.state.isMobile
+              ? 'flex-direction: column; gap: 2rem;'
+              : `grid-template-columns: ${layout?.columns?.left?.width || '60%'} ${layout?.columns?.right?.width || '40%'}; gap: ${layout?.gap || '2rem'};`
           }
           position: relative;
           z-index: 2;
@@ -183,11 +184,11 @@ export class ContactPage extends BaseComponent {
         </section>
       </div>
     `;
-    
+
     // 添加樣式
     this.addPageStyles();
   }
-  
+
   /**
    * 初始化子組件
    */
@@ -195,62 +196,61 @@ export class ContactPage extends BaseComponent {
     try {
       // 初始化聯絡表單
       await this.initializeContactForm();
-      
+
       // 初始化聯絡資訊
       await this.initializeContactInfo();
-      
+
       // 初始化社交連結
       await this.initializeSocialLinks();
-      
+
       // 初始化合作興趣標籤
       await this.initializeCollaborationTags();
-      
+
       // 初始化回覆時間說明
       await this.initializeResponseInfo();
-      
+
       this.isLoaded = true;
       console.log('✅ [ContactPage] 所有子組件初始化完成');
-      
     } catch (error) {
       console.error('❌ [ContactPage] 組件初始化失敗:', error);
       this.showErrorMessage('頁面載入失敗，請重新整理頁面');
     }
   }
-  
+
   /**
    * 初始化聯絡表單
    */
   async initializeContactForm() {
     const container = this.element.querySelector('#contact-form-container');
-    
+
     if (container) {
       // 使用新的 contact.config.js 結構
       const formConfig = {
         fields: this.config.form?.fields || [],
         submitButton: this.config.form?.submission || {},
-        handling: this.config.form?.submission?.messages || {}
+        handling: this.config.form?.submission?.messages || {},
       };
-      
+
       // 創建表單組件
       this.contactForm = new ContactForm(formConfig);
-      
+
       // 監聽表單事件
-      this.contactForm.on('formSubmit', (data) => this.handleFormSubmit(data));
+      this.contactForm.on('formSubmit', data => this.handleFormSubmit(data));
       this.contactForm.on('formSuccess', () => this.handleFormSuccess());
-      this.contactForm.on('formError', (error) => this.handleFormError(error));
-      
+      this.contactForm.on('formError', error => this.handleFormError(error));
+
       // 渲染表單
       const formElement = await this.contactForm.render();
       container.appendChild(formElement);
     }
   }
-  
+
   /**
    * 初始化聯絡資訊
    */
   async initializeContactInfo() {
     const container = this.element.querySelector('#contact-info-container');
-    
+
     if (container && this.config.contactMethods) {
       container.innerHTML = `
         <div class="contact-info-card" style="
@@ -269,7 +269,9 @@ export class ContactPage extends BaseComponent {
           ">直接聯絡方式</h3>
           
           <div class="contact-items">
-            ${this.config.contactMethods.map(method => `
+            ${this.config.contactMethods
+              .map(
+                method => `
               <div class="contact-item" style="
                 display: flex;
                 align-items: center;
@@ -283,51 +285,56 @@ export class ContactPage extends BaseComponent {
                 <span style="font-size: 1.5rem;">${method.icon}</span>
                 <div>
                   <div style="color: white; font-weight: 500;">${method.label}</div>
-                  ${method.action ? 
-                    `<a href="${method.action}" style="
+                  ${
+                    method.action
+                      ? `<a href="${method.action}" style="
                       color: var(--primary-gold);
                       text-decoration: none;
                       font-size: 0.9rem;
-                    ">${method.value}</a>` :
-                    `<div style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">${method.value}</div>`
+                    ">${method.value}</a>`
+                      : `<div style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">${method.value}</div>`
                   }
                 </div>
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
         </div>
       `;
     }
   }
-  
+
   /**
    * 初始化社交連結
    */
   async initializeSocialLinks() {
     const container = this.element.querySelector('#social-links-container');
-    
+
     if (container) {
       // 創建社交連結組件
       this.socialGrid = new SocialLinksGrid({
         title: '社交平台',
         style: 'gaming-grid',
-        showStats: true
+        showStats: true,
       });
-      
+
       const socialElement = await this.socialGrid.render();
       container.appendChild(socialElement);
     }
   }
-  
+
   /**
    * 初始化合作興趣標籤
    */
   async initializeCollaborationTags() {
-    const container = this.element.querySelector('#collaboration-tags-container');
-    
+    const container = this.element.querySelector(
+      '#collaboration-tags-container'
+    );
+
     if (container && this.config.collaborationInterests) {
       const tags = this.config.collaborationInterests || [];
-      
+
       container.innerHTML = `
         <div class="collaboration-section">
           <h3 style="
@@ -351,7 +358,9 @@ export class ContactPage extends BaseComponent {
             gap: 1rem;
             justify-content: center;
           ">
-            ${tags.map((tag, index) => `
+            ${tags
+              .map(
+                (tag, index) => `
               <div class="interest-tag" style="
                 background: linear-gradient(135deg, ${tag.color || 'var(--primary-gold)'}33, ${tag.color || 'var(--primary-gold)'}11);
                 border: 1px solid ${tag.color || 'var(--primary-gold)'}66;
@@ -367,19 +376,21 @@ export class ContactPage extends BaseComponent {
                  onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='none';">
                 ${tag.name}
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
         </div>
       `;
     }
   }
-  
+
   /**
    * 初始化回覆時間說明
    */
   async initializeResponseInfo() {
     const container = this.element.querySelector('#response-info-container');
-    
+
     if (container && this.config.responseInfo) {
       container.innerHTML = `
         <div class="response-info-card" style="
@@ -408,17 +419,17 @@ export class ContactPage extends BaseComponent {
       `;
     }
   }
-  
+
   /**
    * 綁定事件監聽器
    */
   bindEvents() {
     // 響應式監聽
     window.addEventListener('resize', () => this.handleResize());
-    
+
     // 滾動事件
     window.addEventListener('scroll', () => this.handleScroll());
-    
+
     // 表單項目懸停效果
     const contactItems = this.element.querySelectorAll('.contact-item');
     contactItems.forEach(item => {
@@ -427,7 +438,7 @@ export class ContactPage extends BaseComponent {
         item.style.transform = 'translateY(-2px)';
         item.style.boxShadow = '0 4px 15px rgba(255, 255, 255, 0.1)';
       });
-      
+
       item.addEventListener('mouseleave', () => {
         item.style.background = 'rgba(255, 255, 255, 0.05)';
         item.style.transform = 'translateY(0)';
@@ -435,7 +446,7 @@ export class ContactPage extends BaseComponent {
       });
     });
   }
-  
+
   /**
    * 處理視窗大小變化
    */
@@ -446,7 +457,7 @@ export class ContactPage extends BaseComponent {
       this.setupResponsiveLayout();
     }
   }
-  
+
   /**
    * 設置響應式佈局
    */
@@ -464,7 +475,7 @@ export class ContactPage extends BaseComponent {
       }
     }
   }
-  
+
   /**
    * 處理滾動事件
    */
@@ -473,16 +484,16 @@ export class ContactPage extends BaseComponent {
     const scrollY = window.scrollY;
     const particles = this.element.querySelector('.bg-particles');
     const glow = this.element.querySelector('.bg-glow');
-    
+
     if (particles) {
       particles.style.transform = `translateY(${scrollY * 0.3}px)`;
     }
-    
+
     if (glow) {
       glow.style.transform = `translateY(${scrollY * 0.1}px)`;
     }
   }
-  
+
   /**
    * 處理表單提交
    */
@@ -490,13 +501,13 @@ export class ContactPage extends BaseComponent {
     console.log('📨 [ContactPage] 表單提交:', formData);
     // 更新 state
     this.state = { ...this.state, formSubmitted: true };
-    
+
     // 這裡可以實現真實的表單提交邏輯
     // 例如發送到後端 API 或第三方服務
-    
+
     return true; // 模擬成功提交
   }
-  
+
   /**
    * 處理表單成功提交
    */
@@ -504,7 +515,7 @@ export class ContactPage extends BaseComponent {
     console.log('✅ [ContactPage] 表單提交成功');
     this.showSuccessMessage('訊息發送成功！我會盡快回覆您。');
   }
-  
+
   /**
    * 處理表單錯誤
    */
@@ -512,7 +523,7 @@ export class ContactPage extends BaseComponent {
     console.error('❌ [ContactPage] 表單提交失敗:', error);
     this.showErrorMessage('訊息發送失敗，請稍後再試或直接寄信給我。');
   }
-  
+
   /**
    * 顯示成功訊息
    */
@@ -520,7 +531,7 @@ export class ContactPage extends BaseComponent {
     // 實現成功訊息顯示邏輯
     console.log('✅ Success:', message);
   }
-  
+
   /**
    * 顯示錯誤訊息
    */
@@ -528,7 +539,7 @@ export class ContactPage extends BaseComponent {
     // 實現錯誤訊息顯示邏輯
     console.error('❌ Error:', message);
   }
-  
+
   /**
    * 獲取標題內容
    */
@@ -536,7 +547,7 @@ export class ContactPage extends BaseComponent {
     const heroConfig = this.config.sections?.find(s => s.id === 'contact-hero');
     return heroConfig?.config?.title || '建立連結';
   }
-  
+
   /**
    * 獲取副標題內容
    */
@@ -544,15 +555,18 @@ export class ContactPage extends BaseComponent {
     const heroConfig = this.config.sections?.find(s => s.id === 'contact-hero');
     return heroConfig?.config?.subtitle || '技術交流 · 合作機會 · 職涯討論';
   }
-  
+
   /**
    * 獲取描述內容
    */
   getHeroDescription() {
     const heroConfig = this.config.sections?.find(s => s.id === 'contact-hero');
-    return heroConfig?.config?.description || '歡迎透過以下方式與我聯繫，一起探討技術趨勢和合作可能性';
+    return (
+      heroConfig?.config?.description ||
+      '歡迎透過以下方式與我聯繫，一起探討技術趨勢和合作可能性'
+    );
   }
-  
+
   /**
    * 添加頁面樣式
    */
@@ -660,26 +674,26 @@ export class ContactPage extends BaseComponent {
       document.head.appendChild(style);
     }
   }
-  
+
   /**
    * 銷毀組件
    */
   destroy() {
     console.log('🗑️ [ContactPage] 銷毀聯絡頁面組件');
-    
+
     // 銷毀子組件
     if (this.contactForm) {
       this.contactForm.destroy();
     }
-    
+
     if (this.socialGrid) {
       this.socialGrid.destroy();
     }
-    
+
     // 移除事件監聽器
     window.removeEventListener('resize', this.handleResize);
     window.removeEventListener('scroll', this.handleScroll);
-    
+
     super.destroy();
   }
 }

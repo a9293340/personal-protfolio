@@ -38,7 +38,6 @@ export class NavigationManager {
 
       this.isInitialized = true;
       console.log('✅ NavigationManager - Initialized successfully');
-
     } catch (error) {
       console.error('❌ NavigationManager initialization failed:', error);
       throw error;
@@ -59,7 +58,7 @@ export class NavigationManager {
       showIcons: true,
       showDescriptions: true,
       animationEnabled: true,
-      style: 'gaming'
+      style: 'gaming',
     });
 
     // 渲染麵包屑導航
@@ -91,7 +90,7 @@ export class NavigationManager {
       animationEnabled: true,
       style: 'gaming',
       position: 'top-right',
-      storageType: 'sessionStorage' // 每次開啟瀏覽器都重新開始
+      storageType: 'sessionStorage', // 每次開啟瀏覽器都重新開始
     });
 
     // 渲染進度指示器
@@ -140,7 +139,7 @@ export class NavigationManager {
       enabled: true,
       showVisualFeedback: true,
       enableSounds: false,
-      helpPanelPosition: 'center'
+      helpPanelPosition: 'center',
     });
 
     // 渲染快捷鍵導航
@@ -250,7 +249,7 @@ export class NavigationManager {
       this.emitNavigationEvent('route-changed', {
         from: this.navigationHistory[this.navigationHistory.length - 2],
         to: newPath,
-        history: this.navigationHistory
+        history: this.navigationHistory,
       });
     }
   }
@@ -274,7 +273,7 @@ export class NavigationManager {
   emitNavigationEvent(eventName, data) {
     if (typeof window !== 'undefined' && window.CustomEvent) {
       const event = new window.CustomEvent(`navigation:${eventName}`, {
-        detail: data
+        detail: data,
       });
       window.dispatchEvent(event);
     }
@@ -319,7 +318,8 @@ export class NavigationManager {
       // 移除當前頁面
       this.navigationHistory.pop();
       // 獲取上一頁
-      const previousPage = this.navigationHistory[this.navigationHistory.length - 1];
+      const previousPage =
+        this.navigationHistory[this.navigationHistory.length - 1];
       this.navigateTo(previousPage || '/');
     } else {
       this.navigateTo('/');

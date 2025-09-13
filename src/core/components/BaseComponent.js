@@ -17,7 +17,7 @@ export class BaseComponent extends EventManager {
 
     console.log(`🧩 Component created: ${this.constructor.name}`);
   }
-  
+
   /**
    * 渲染組件 HTML
    * 子類別必須實現此方法
@@ -26,7 +26,7 @@ export class BaseComponent extends EventManager {
   async render() {
     throw new Error(`${this.constructor.name} must implement render() method`);
   }
-  
+
   /**
    * 初始化組件
    * 在 HTML 插入 DOM 後執行
@@ -36,11 +36,11 @@ export class BaseComponent extends EventManager {
       console.warn(`${this.constructor.name} already initialized`);
       return;
     }
-    
+
     this.initialized = true;
     console.log(`✅ Component initialized: ${this.constructor.name}`);
   }
-  
+
   /**
    * 銷毀組件
    * 清理事件監聽器、定時器等
@@ -49,16 +49,16 @@ export class BaseComponent extends EventManager {
     if (this.destroyed) {
       return;
     }
-    
+
     // Clean up event listeners first
     super.destroy();
-    
+
     this.destroyed = true;
     this.initialized = false;
-    
+
     console.log(`🔥 Component destroyed: ${this.constructor.name}`);
   }
-  
+
   /**
    * 創建 HTML 元素
    * @param {string} tag - 標籤名
@@ -70,10 +70,10 @@ export class BaseComponent extends EventManager {
     const attrStr = Object.entries(attrs)
       .map(([key, value]) => `${key}="${value}"`)
       .join(' ');
-    
+
     return `<${tag}${attrStr ? ' ' + attrStr : ''}>${content}</${tag}>`;
   }
-  
+
   /**
    * 獲取組件預設配置
    * 子類別可覆寫此方法
@@ -82,7 +82,7 @@ export class BaseComponent extends EventManager {
   getDefaultConfig() {
     return {};
   }
-  
+
   /**
    * 合併配置
    * @param {Object} config - 新配置
@@ -92,7 +92,7 @@ export class BaseComponent extends EventManager {
     return {
       ...this.getDefaultConfig(),
       ...this.options,
-      ...config
+      ...config,
     };
   }
 
@@ -119,7 +119,7 @@ export class BaseComponent extends EventManager {
     this.emit('stateChange', {
       prevState,
       currentState: this.state,
-      changes: newState
+      changes: newState,
     });
 
     // 執行回調

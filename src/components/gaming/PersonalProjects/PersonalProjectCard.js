@@ -1,6 +1,6 @@
 /**
  * PersonalProjectCard.js - 個人專案卡牌組件
- * 
+ *
  * 功能特色：
  * - 遊戲王風格卡牌設計
  * - 稀有度驅動的視覺效果
@@ -14,27 +14,30 @@ import { BaseComponent } from '../../../core/components/BaseComponent.js';
 export class PersonalProjectCard extends BaseComponent {
   constructor(config = {}) {
     super();
-    
+
     this.config = this.mergeConfig(this.getDefaultConfig(), config);
     this.project = config.project;
     this.index = config.index || 0;
     this.onClick = config.onClick || (() => {});
-    
+
     // DOM 元素
     this.element = null;
     this.cardFront = null;
     this.cardBack = null;
-    
+
     // 動畫狀態
     this.isHovered = false;
     this.hoverAnimation = null;
-    
+
     // 點擊防抖
     this.lastClickTime = 0;
-    
-    console.log('🃏 [PersonalProjectCard] 卡牌組件初始化:', this.project?.title);
+
+    console.log(
+      '🃏 [PersonalProjectCard] 卡牌組件初始化:',
+      this.project?.title
+    );
   }
-  
+
   /**
    * 獲取預設配置
    */
@@ -42,46 +45,46 @@ export class PersonalProjectCard extends BaseComponent {
     return {
       size: {
         width: 280,
-        height: 390,  // 接近遊戲王卡牌比例
-        borderRadius: 12
+        height: 390, // 接近遊戲王卡牌比例
+        borderRadius: 12,
       },
       animation: {
         hover: {
           duration: 0.3,
           scale: 1.05,
           tiltAngle: 8,
-          glowIntensity: 0.8
+          glowIntensity: 0.8,
         },
         click: {
           duration: 0.2,
-          scale: 0.95
-        }
+          scale: 0.95,
+        },
       },
       rarity: {
         normal: {
           borderColor: '#8e8e8e',
           glowColor: '#ffffff',
-          particleCount: 0
+          particleCount: 0,
         },
         rare: {
           borderColor: '#4169e1',
           glowColor: '#4169e1',
-          particleCount: 3
+          particleCount: 3,
         },
         superRare: {
           borderColor: '#9400d3',
           glowColor: '#9400d3',
-          particleCount: 5
+          particleCount: 5,
         },
         legendary: {
           borderColor: '#ffd700',
           glowColor: '#ffd700',
-          particleCount: 8
-        }
-      }
+          particleCount: 8,
+        },
+      },
     };
   }
-  
+
   /**
    * 渲染卡牌
    */
@@ -89,22 +92,23 @@ export class PersonalProjectCard extends BaseComponent {
     this.createElement();
     this.bindEvents();
     this.applyRarityEffects();
-    
+
     return this.element;
   }
-  
+
   /**
    * 創建 DOM 元素
    */
   createElement() {
     const project = this.project;
-    const rarityConfig = this.config.rarity[project.rarity] || this.config.rarity.normal;
-    
+    const rarityConfig =
+      this.config.rarity[project.rarity] || this.config.rarity.normal;
+
     this.element = document.createElement('div');
     this.element.className = `project-card rarity-${project.rarity} status-${project.status}`;
     this.element.dataset.projectId = project.id;
     this.element.dataset.rarity = project.rarity;
-    
+
     // 卡牌樣式
     this.element.style.cssText = `
       width: ${this.config.size.width}px;
@@ -118,7 +122,7 @@ export class PersonalProjectCard extends BaseComponent {
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
     `;
-    
+
     // 卡牌內容
     this.element.innerHTML = `
       <div class="card-glow" style="
@@ -182,7 +186,9 @@ export class PersonalProjectCard extends BaseComponent {
             opacity: 0.6;
           ">${this.getCategoryIcon(project.category)}</div>
           
-          ${project.images?.thumbnail ? `
+          ${
+            project.images?.thumbnail
+              ? `
             <img src="${project.images.thumbnail}" alt="${project.title}" style="
               width: 100%;
               height: 100%;
@@ -192,7 +198,9 @@ export class PersonalProjectCard extends BaseComponent {
               top: 0;
               left: 0;
             ">
-          ` : ''}
+          `
+              : ''
+          }
         </div>
         
         <div class="card-info" style="
@@ -265,30 +273,31 @@ export class PersonalProjectCard extends BaseComponent {
         border-radius: ${this.config.size.borderRadius}px;
       "></div>
     `;
-    
+
     // 獲取子元素引用
     this.cardGlow = this.element.querySelector('.card-glow');
     this.cardShine = this.element.querySelector('.card-shine');
     this.cardParticles = this.element.querySelector('.card-particles');
   }
-  
+
   /**
    * 應用稀有度特效
    */
   applyRarityEffects() {
-    const rarityConfig = this.config.rarity[this.project.rarity] || this.config.rarity.normal;
-    
+    const rarityConfig =
+      this.config.rarity[this.project.rarity] || this.config.rarity.normal;
+
     // 創建粒子效果（僅限稀有以上）
     if (rarityConfig.particleCount > 0) {
       this.createParticleEffect(rarityConfig);
     }
-    
+
     // 傳說級卡牌額外效果
     if (this.project.rarity === 'legendary') {
       this.createLegendaryEffect();
     }
   }
-  
+
   /**
    * 創建粒子效果
    */
@@ -308,10 +317,10 @@ export class PersonalProjectCard extends BaseComponent {
         animation: particleFloat ${2 + Math.random() * 3}s infinite ease-in-out;
         animation-delay: ${Math.random() * 2}s;
       `;
-      
+
       this.cardParticles.appendChild(particle);
     }
-    
+
     // 添加動畫 CSS（如果尚未添加）
     if (!document.querySelector('#card-particle-animations')) {
       const style = document.createElement('style');
@@ -330,14 +339,14 @@ export class PersonalProjectCard extends BaseComponent {
       document.head.appendChild(style);
     }
   }
-  
+
   /**
    * 創建傳說級特效
    */
   createLegendaryEffect() {
     this.element.style.animation = 'legendaryPulse 3s infinite ease-in-out';
   }
-  
+
   /**
    * 綁定事件
    */
@@ -345,151 +354,165 @@ export class PersonalProjectCard extends BaseComponent {
     // 滑鼠懸停事件
     this.element.addEventListener('mouseenter', () => this.handleMouseEnter());
     this.element.addEventListener('mouseleave', () => this.handleMouseLeave());
-    this.element.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-    
+    this.element.addEventListener('mousemove', e => this.handleMouseMove(e));
+
     // 點擊事件
     this.element.addEventListener('click', () => this.handleClick());
-    
+
     // 鍵盤支援
     this.element.setAttribute('tabindex', '0');
-    this.element.addEventListener('keydown', (e) => {
+    this.element.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         this.handleClick();
       }
     });
   }
-  
+
   /**
    * 處理滑鼠進入
    */
   handleMouseEnter() {
     this.isHovered = true;
-    
+
     // 停止之前的動畫
     if (this.hoverAnimation) {
       this.hoverAnimation.kill();
     }
-    
+
     // 創建懸停動畫
     this.hoverAnimation = gsap.timeline();
-    
+
     // 卡牌縮放和傾斜
     this.hoverAnimation.to(this.element, {
       scale: this.config.animation.hover.scale,
       rotationY: this.config.animation.hover.tiltAngle,
       z: 50,
       duration: this.config.animation.hover.duration,
-      ease: "power2.out"
+      ease: 'power2.out',
     });
-    
+
     // 發光效果
-    this.hoverAnimation.to(this.cardGlow, {
-      opacity: this.config.animation.hover.glowIntensity,
-      duration: this.config.animation.hover.duration
-    }, 0);
-    
+    this.hoverAnimation.to(
+      this.cardGlow,
+      {
+        opacity: this.config.animation.hover.glowIntensity,
+        duration: this.config.animation.hover.duration,
+      },
+      0
+    );
+
     // 光澤效果
-    this.hoverAnimation.to(this.cardShine, {
-      transform: 'rotate(45deg) translateX(200%)',
-      duration: 0.6,
-      ease: "power2.out"
-    }, 0.1);
-    
+    this.hoverAnimation.to(
+      this.cardShine,
+      {
+        transform: 'rotate(45deg) translateX(200%)',
+        duration: 0.6,
+        ease: 'power2.out',
+      },
+      0.1
+    );
+
     console.log(`✨ [PersonalProjectCard] 卡牌懸停: ${this.project.title}`);
   }
-  
+
   /**
    * 處理滑鼠離開
    */
   handleMouseLeave() {
     this.isHovered = false;
-    
+
     // 停止之前的動畫
     if (this.hoverAnimation) {
       this.hoverAnimation.kill();
     }
-    
+
     // 恢復原始狀態
     this.hoverAnimation = gsap.timeline();
-    
+
     this.hoverAnimation.to(this.element, {
       scale: 1,
       rotationY: 0,
       rotationX: 0,
       z: 0,
       duration: this.config.animation.hover.duration,
-      ease: "power2.out"
+      ease: 'power2.out',
     });
-    
-    this.hoverAnimation.to(this.cardGlow, {
-      opacity: 0,
-      duration: this.config.animation.hover.duration
-    }, 0);
-    
+
+    this.hoverAnimation.to(
+      this.cardGlow,
+      {
+        opacity: 0,
+        duration: this.config.animation.hover.duration,
+      },
+      0
+    );
+
     // 重置光澤位置
     gsap.set(this.cardShine, {
-      transform: 'rotate(45deg) translateX(-200%)'
+      transform: 'rotate(45deg) translateX(-200%)',
     });
   }
-  
+
   /**
    * 處理滑鼠移動（3D 跟隨效果）
    */
   handleMouseMove(e) {
     if (!this.isHovered) return;
-    
+
     const rect = this.element.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    
+
     const mouseX = e.clientX - centerX;
     const mouseY = e.clientY - centerY;
-    
+
     // 計算旋轉角度（限制在合理範圍內）
-    const rotateX = (mouseY / rect.height) * -20;  // 上下旋轉
-    const rotateY = (mouseX / rect.width) * 20;    // 左右旋轉
-    
+    const rotateX = (mouseY / rect.height) * -20; // 上下旋轉
+    const rotateY = (mouseX / rect.width) * 20; // 左右旋轉
+
     // 應用 3D 旋轉
     gsap.to(this.element, {
       rotationX: rotateX,
       rotationY: rotateY,
       duration: 0.3,
-      ease: "power2.out",
-      overwrite: true
+      ease: 'power2.out',
+      overwrite: true,
     });
   }
-  
+
   /**
    * 處理點擊
    */
   handleClick() {
     const now = Date.now();
     const clickDebounceTime = 300; // 300ms 防抖間隔
-    
+
     // 防抖檢查：忽略快速連續點擊
     if (now - this.lastClickTime < clickDebounceTime) {
-      console.log(`⏳ [PersonalProjectCard] 點擊過快，忽略重複點擊: ${this.project.title}`);
+      console.log(
+        `⏳ [PersonalProjectCard] 點擊過快，忽略重複點擊: ${this.project.title}`
+      );
       return;
     }
-    
+
     this.lastClickTime = now;
     console.log(`🎯 [PersonalProjectCard] 卡牌點擊: ${this.project.title}`);
-    
+
     // 立即觸發點擊回調，避免動畫延遲
     this.onClick(this.project, this.element);
-    
+
     // 點擊動畫作為視覺反饋
     gsap.to(this.element, {
       scale: this.config.animation.click.scale,
       duration: this.config.animation.click.duration,
-      ease: "power2.out",
+      ease: 'power2.out',
       yoyo: true,
       repeat: 1,
-      overwrite: true  // 覆寫其他動畫避免衝突
+      overwrite: true, // 覆寫其他動畫避免衝突
     });
   }
-  
+
   /**
    * 獲取稀有度圖標
    */
@@ -498,24 +521,24 @@ export class PersonalProjectCard extends BaseComponent {
       normal: '⚪',
       rare: '🔸',
       superRare: '💎',
-      legendary: '⭐'
+      legendary: '⭐',
     };
     return icons[rarity] || icons.normal;
   }
-  
+
   /**
    * 獲取稀有度 RGB 值
    */
   getRarityRgb(rarity) {
     const colors = {
-      normal: '142, 142, 142',      // 灰色
-      rare: '65, 105, 225',         // 藍色
-      superRare: '148, 0, 211',     // 紫色
-      legendary: '255, 215, 0'      // 金色
+      normal: '142, 142, 142', // 灰色
+      rare: '65, 105, 225', // 藍色
+      superRare: '148, 0, 211', // 紫色
+      legendary: '255, 215, 0', // 金色
     };
     return colors[rarity] || colors.normal;
   }
-  
+
   /**
    * 獲取類型圖標
    */
@@ -526,11 +549,11 @@ export class PersonalProjectCard extends BaseComponent {
       fullstack: '🔧',
       mobile: '📱',
       ai: '🧠',
-      blockchain: '⛓️'
+      blockchain: '⛓️',
     };
     return icons[category] || '💻';
   }
-  
+
   /**
    * 獲取類型標籤
    */
@@ -541,22 +564,22 @@ export class PersonalProjectCard extends BaseComponent {
       fullstack: '全端',
       mobile: '移動端',
       ai: 'AI/ML',
-      blockchain: '區塊鏈'
+      blockchain: '區塊鏈',
     };
     return labels[category] || '通用';
   }
-  
+
   /**
    * 銷毀組件
    */
   destroy() {
     console.log('🗑️ [PersonalProjectCard] 銷毀卡牌組件:', this.project?.title);
-    
+
     // 停止動畫
     if (this.hoverAnimation) {
       this.hoverAnimation.kill();
     }
-    
+
     // 移除事件監聽器
     if (this.element) {
       this.element.removeEventListener('mouseenter', this.handleMouseEnter);
@@ -564,7 +587,7 @@ export class PersonalProjectCard extends BaseComponent {
       this.element.removeEventListener('mousemove', this.handleMouseMove);
       this.element.removeEventListener('click', this.handleClick);
     }
-    
+
     super.destroy();
   }
 }

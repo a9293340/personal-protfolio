@@ -104,11 +104,11 @@
 }
 
 @keyframes glow {
-  0% { 
+  0% {
     opacity: 0.5;
     transform: scale(1);
   }
-  100% { 
+  100% {
     opacity: 1;
     transform: scale(1.1);
   }
@@ -151,10 +151,12 @@
   border-radius: 4px;
   transition: width 1.5s ease-out;
   position: relative;
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0.1), 
-    rgba(255, 255, 255, 0.3) 50%, 
-    rgba(255, 255, 255, 0.1));
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1)
+  );
 }
 
 .progress-bar-fill::after {
@@ -164,16 +166,22 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(255, 255, 255, 0.6), 
-    transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
   animation: shimmer 2s infinite;
 }
 
 @keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 .progress-text {
@@ -214,19 +222,35 @@
 
 /* 稀有度樣式 */
 .achievement-badge.legendary {
-  background: radial-gradient(circle at center, rgba(243, 156, 18, 0.2), rgba(0, 0, 0, 0.3));
+  background: radial-gradient(
+    circle at center,
+    rgba(243, 156, 18, 0.2),
+    rgba(0, 0, 0, 0.3)
+  );
 }
 
 .achievement-badge.epic {
-  background: radial-gradient(circle at center, rgba(155, 89, 182, 0.2), rgba(0, 0, 0, 0.3));
+  background: radial-gradient(
+    circle at center,
+    rgba(155, 89, 182, 0.2),
+    rgba(0, 0, 0, 0.3)
+  );
 }
 
 .achievement-badge.rare {
-  background: radial-gradient(circle at center, rgba(52, 152, 219, 0.2), rgba(0, 0, 0, 0.3));
+  background: radial-gradient(
+    circle at center,
+    rgba(52, 152, 219, 0.2),
+    rgba(0, 0, 0, 0.3)
+  );
 }
 
 .achievement-badge.common {
-  background: radial-gradient(circle at center, rgba(149, 165, 166, 0.2), rgba(0, 0, 0, 0.3));
+  background: radial-gradient(
+    circle at center,
+    rgba(149, 165, 166, 0.2),
+    rgba(0, 0, 0, 0.3)
+  );
 }
 
 /* 傳說級特殊效果 */
@@ -237,7 +261,7 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
-  background-image: 
+  background-image:
     radial-gradient(2px 2px at 20px 30px, rgba(255, 215, 0, 0.8), transparent),
     radial-gradient(2px 2px at 40px 70px, rgba(255, 215, 0, 0.6), transparent),
     radial-gradient(1px 1px at 90px 40px, rgba(255, 215, 0, 0.4), transparent),
@@ -249,8 +273,13 @@
 }
 
 @keyframes sparkle {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* 稀有度圖例 */
@@ -283,25 +312,27 @@
 
 /* 動畫定義 */
 @keyframes pulse {
-  0%, 100% { 
+  0%,
+  100% {
     transform: scale(1);
   }
-  50% { 
+  50% {
     transform: scale(1.1);
   }
 }
 
 @keyframes bounce {
-  0%, 100% { 
+  0%,
+  100% {
     transform: scale(1) translateY(0);
   }
-  25% { 
+  25% {
     transform: scale(0.95) translateY(-5px);
   }
-  50% { 
+  50% {
     transform: scale(1.05) translateY(-3px);
   }
-  75% { 
+  75% {
     transform: scale(0.98) translateY(-1px);
   }
 }
@@ -311,35 +342,35 @@
   .achievement-badges-container {
     padding: 1.5rem;
   }
-  
+
   .achievements-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .achievement-badge {
     padding: 1rem;
   }
-  
+
   .badge-icon-container {
     width: 50px;
     height: 50px;
   }
-  
+
   .badge-icon {
     font-size: 1.5rem;
   }
-  
+
   .badge-name {
     font-size: 1rem;
   }
-  
+
   .achievement-stats {
     flex-direction: column;
     gap: 0.5rem;
     align-items: center;
   }
-  
+
   .rarity-indicators {
     gap: 1rem;
   }
@@ -349,11 +380,11 @@
   .achievements-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .achievement-badge {
     padding: 1rem;
   }
-  
+
   .badge-metadata {
     flex-direction: column;
     gap: 0.5rem;

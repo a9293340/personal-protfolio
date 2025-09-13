@@ -9,12 +9,12 @@ import { EventManager } from '../../../core/events/EventManager.js';
 export class MobileSkillTree extends BaseComponent {
   constructor(container, options = {}) {
     super(options);
-    
+
     this.container = container;
     this.skillData = options.skillData || {};
     this.expandedBranches = new Set(['backend']); // 預設展開後端分支
     this.events = new EventManager();
-    
+
     if (!this.container) {
       console.error('❌ MobileSkillTree: 容器不存在', container);
     }
@@ -25,7 +25,7 @@ export class MobileSkillTree extends BaseComponent {
       showDetails: true,
       enableAnimation: true,
       animationDuration: 300,
-      initialExpandedBranch: '' // 預設全部收起
+      initialExpandedBranch: '', // 預設全部收起
     };
   }
 
@@ -33,19 +33,21 @@ export class MobileSkillTree extends BaseComponent {
     const config = this.config || this.getDefaultConfig();
     return {
       selectedSkill: null,
-      expandedBranches: config.initialExpandedBranch ? new Set([config.initialExpandedBranch]) : new Set()
+      expandedBranches: config.initialExpandedBranch
+        ? new Set([config.initialExpandedBranch])
+        : new Set(),
     };
   }
 
   async init() {
     await super.init();
-    
+
     // 合併配置
     this.config = { ...this.getDefaultConfig(), ...this.options };
-    
+
     // 初始化狀態
     this.state = this.getInitialState();
-    
+
     this.createStructure();
     this.bindEvents();
     this.render();
@@ -75,7 +77,7 @@ export class MobileSkillTree extends BaseComponent {
       stats: this.container.querySelector('.skill-tree-stats'),
       centerSkill: this.container.querySelector('.center-skill'),
       branches: this.container.querySelector('.skill-branches'),
-      content: this.container.querySelector('.skill-tree-content')
+      content: this.container.querySelector('.skill-tree-content'),
     };
   }
 
@@ -87,7 +89,7 @@ export class MobileSkillTree extends BaseComponent {
 
   renderStats() {
     const stats = this.skillData.statistics || {};
-    
+
     this.elements.stats.innerHTML = `
       <div class="stats-grid">
         <div class="stat-item">
@@ -126,9 +128,14 @@ export class MobileSkillTree extends BaseComponent {
           </div>
         </div>
         <div class="skill-achievements">
-          ${centerSkill.achievements?.map(achievement => 
-            `<span class="achievement-badge">${achievement}</span>`
-          ).join('') || ''}
+          ${
+            centerSkill.achievements
+              ?.map(
+                achievement =>
+                  `<span class="achievement-badge">${achievement}</span>`
+              )
+              .join('') || ''
+          }
         </div>
       </div>
     `;
@@ -136,14 +143,14 @@ export class MobileSkillTree extends BaseComponent {
 
   renderBranches() {
     const categories = this.skillData.categories || {};
-    const ring1Skills = this.skillData.tree?.ring1 || [];
-    
+    const _ring1Skills = this.skillData.tree?.ring1 || [];
+
     let branchesHTML = '';
-    
+
     Object.entries(categories).forEach(([categoryId, category]) => {
       const branchSkills = this.getBranchSkills(categoryId);
       const isExpanded = this.state.expandedBranches.has(categoryId);
-      
+
       branchesHTML += `
         <div class="skill-branch ${isExpanded ? 'expanded' : 'collapsed'}" data-category="${categoryId}">
           <div class="branch-header" data-toggle-branch="${categoryId}">
@@ -173,12 +180,14 @@ export class MobileSkillTree extends BaseComponent {
         </div>
       `;
     });
-    
+
     this.elements.branches.innerHTML = branchesHTML;
   }
 
   renderBranchSkills(skills) {
-    return skills.map(skill => `
+    return skills
+      .map(
+        skill => `
       <div class="skill-item" data-skill-id="${skill.id}">
         <div class="skill-indicator status-${skill.status}"></div>
         <div class="skill-content">
@@ -194,16 +203,18 @@ export class MobileSkillTree extends BaseComponent {
           </svg>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   getBranchSkills(categoryId) {
     const allSkills = [
       ...(this.skillData.tree?.ring1 || []),
       ...(this.skillData.tree?.ring2 || []),
-      ...(this.skillData.tree?.ring3 || [])
+      ...(this.skillData.tree?.ring3 || []),
     ];
-    
+
     return allSkills.filter(skill => skill.category === categoryId);
   }
 
@@ -212,26 +223,26 @@ export class MobileSkillTree extends BaseComponent {
       this.skillData.tree?.center,
       ...(this.skillData.tree?.ring1 || []),
       ...(this.skillData.tree?.ring2 || []),
-      ...(this.skillData.tree?.ring3 || [])
+      ...(this.skillData.tree?.ring3 || []),
     ].filter(Boolean);
-    
+
     const skill = allSkills.find(s => s.id === skillId);
     return skill ? skill.name : skillId;
   }
 
   getStatusText(status) {
     const statusMap = {
-      'mastered': '已掌握',
-      'available': '可學習',
-      'learning': '學習中',
-      'locked': '待解鎖'
+      mastered: '已掌握',
+      available: '可學習',
+      learning: '學習中',
+      locked: '待解鎖',
     };
     return statusMap[status] || status;
   }
 
   bindEvents() {
     // 分支展開/收合
-    this.elements.branches.addEventListener('click', (e) => {
+    this.elements.branches.addEventListener('click', e => {
       const toggleBtn = e.target.closest('[data-toggle-branch]');
       if (toggleBtn) {
         const categoryId = toggleBtn.dataset.toggleBranch;
@@ -248,13 +259,13 @@ export class MobileSkillTree extends BaseComponent {
         this.showSkillModal(skillId);
         return;
       }
-      
+
       // 除錯：顯示點擊的元素
       console.log('📱 點擊了其他元素:', e.target);
     });
 
     // 中心技能點擊
-    this.elements.centerSkill.addEventListener('click', (e) => {
+    this.elements.centerSkill.addEventListener('click', e => {
       const skillNode = e.target.closest('[data-skill-id]');
       if (skillNode) {
         this.showSkillModal(skillNode.dataset.skillId);
@@ -268,16 +279,21 @@ export class MobileSkillTree extends BaseComponent {
       return;
     }
 
-    const branchElement = this.container.querySelector(`[data-category="${categoryId}"]`);
+    const branchElement = this.container.querySelector(
+      `[data-category="${categoryId}"]`
+    );
     if (!branchElement) {
-      console.warn('⚠️ MobileSkillTree: toggleBranch - 找不到分支元素:', categoryId);
+      console.warn(
+        '⚠️ MobileSkillTree: toggleBranch - 找不到分支元素:',
+        categoryId
+      );
       return;
     }
 
     const isCurrentlyExpanded = this.state.expandedBranches.has(categoryId);
     const content = branchElement.querySelector('.branch-content');
     const indicator = branchElement.querySelector('.expand-indicator');
-    
+
     if (isCurrentlyExpanded) {
       // 收合
       this.state.expandedBranches.delete(categoryId);
@@ -308,10 +324,13 @@ export class MobileSkillTree extends BaseComponent {
       content.style.transition = `all ${this.config.animationDuration}ms ease-in-out`;
     }
 
-    console.log('📱 分支切換:', categoryId, isCurrentlyExpanded ? '收合' : '展開');
+    console.log(
+      '📱 分支切換:',
+      categoryId,
+      isCurrentlyExpanded ? '收合' : '展開'
+    );
     this.emit('branchToggle', { categoryId, expanded: !isCurrentlyExpanded });
   }
-
 
   showSkillModal(skillId) {
     if (skillId) {
@@ -353,8 +372,14 @@ export class MobileSkillTree extends BaseComponent {
   }
 
   destroy() {
-    this.elements.branches.removeEventListener('click', this.boundToggleHandler);
-    this.elements.centerSkill.removeEventListener('click', this.boundCenterHandler);
+    this.elements.branches.removeEventListener(
+      'click',
+      this.boundToggleHandler
+    );
+    this.elements.centerSkill.removeEventListener(
+      'click',
+      this.boundCenterHandler
+    );
     super.destroy();
   }
 }

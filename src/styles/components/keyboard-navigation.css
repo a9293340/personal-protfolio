@@ -19,7 +19,11 @@
 .keyboard-help-panel {
   position: fixed;
   z-index: 10000;
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(16, 16, 36, 0.95));
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 46, 0.98),
+    rgba(16, 16, 36, 0.95)
+  );
   backdrop-filter: blur(20px);
   border: 2px solid var(--primary-gold);
   border-radius: 16px;
@@ -119,7 +123,11 @@
 .keyboard-help-intro {
   margin-bottom: 24px;
   padding: 16px;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 208, 63, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(212, 175, 55, 0.1),
+    rgba(244, 208, 63, 0.05)
+  );
   border: 1px solid rgba(212, 175, 55, 0.3);
   border-radius: 12px;
 }
@@ -203,14 +211,22 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 208, 63, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(212, 175, 55, 0.1),
+    rgba(244, 208, 63, 0.05)
+  );
   border: 1px solid rgba(212, 175, 55, 0.3);
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .keyboard-shortcut-item:hover {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(244, 208, 63, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(212, 175, 55, 0.2),
+    rgba(244, 208, 63, 0.1)
+  );
   border-color: var(--primary-gold);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
@@ -328,7 +344,11 @@
 }
 
 .keyboard-feedback-item {
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(16, 16, 36, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 46, 0.95),
+    rgba(16, 16, 36, 0.9)
+  );
   backdrop-filter: blur(10px);
   border: 1px solid var(--primary-gold);
   border-radius: 8px;
@@ -402,7 +422,11 @@
   bottom: 20px;
   right: 20px;
   z-index: 900;
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.9), rgba(16, 16, 36, 0.8));
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 46, 0.9),
+    rgba(16, 16, 36, 0.8)
+  );
   backdrop-filter: blur(8px);
   border: 1px solid rgba(212, 175, 55, 0.3);
   border-radius: 8px;
@@ -478,8 +502,12 @@ body.keyboard-help-open::before {
 }
 
 @keyframes overlayFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ================================

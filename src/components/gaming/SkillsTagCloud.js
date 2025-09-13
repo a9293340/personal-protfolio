@@ -24,20 +24,20 @@ export class SkillsTagCloud extends BaseComponent {
       theme: {
         bgColor: 'rgba(52, 73, 94, 0.1)',
         borderColor: '#34495e',
-        titleColor: '#34495e'
+        titleColor: '#34495e',
       },
       animation: {
         hover: {
           scale: 1.2,
           duration: '0.3s',
-          easing: 'ease-out'
+          easing: 'ease-out',
         },
         float: {
           enabled: true,
           amplitude: '5px',
-          duration: '3s'
-        }
-      }
+          duration: '3s',
+        },
+      },
     };
   }
 
@@ -100,15 +100,16 @@ export class SkillsTagCloud extends BaseComponent {
   renderTagCloud(tags) {
     // 按熟練度排序並分組佈局
     const sortedTags = [...tags].sort((a, b) => b.level - a.level);
-    
+
     return `
       <div class="tag-cloud-grid">
-        ${sortedTags.map((tag, index) => {
-          const size = this.calculateTagSize(tag.level);
-          const opacity = this.calculateTagOpacity(tag.level);
-          const delay = index * 100;
-          
-          return `
+        ${sortedTags
+          .map((tag, index) => {
+            const size = this.calculateTagSize(tag.level);
+            const opacity = this.calculateTagOpacity(tag.level);
+            const delay = index * 100;
+
+            return `
             <div class="skill-tag ${this.getTagSizeClass(tag.level)}" 
                  data-tag="${tag.name}"
                  data-level="${tag.level}"
@@ -144,7 +145,8 @@ export class SkillsTagCloud extends BaseComponent {
               </div>
             </div>
           `;
-        }).join('')}
+          })
+          .join('')}
       </div>
     `;
   }
@@ -156,35 +158,37 @@ export class SkillsTagCloud extends BaseComponent {
     const categories = [...new Set(tags.map(tag => tag.category))];
     const categoryNames = {
       backend: '後端',
-      frontend: '前端', 
+      frontend: '前端',
       database: '資料庫',
       cloud: '雲端',
       devops: 'DevOps',
       tools: '工具',
       api: 'API',
       architecture: '架構',
-      realtime: '即時通訊'
+      realtime: '即時通訊',
     };
 
     // 判斷移動端預設激活狀態
     const isMobile = window.innerWidth <= 768;
     const defaultCategory = isMobile ? 'backend' : 'all';
 
-    return categories.map(category => {
-      const isActive = isMobile && category === defaultCategory;
-      return `
+    return categories
+      .map(category => {
+        const isActive = isMobile && category === defaultCategory;
+        return `
         <button class="filter-btn ${isActive ? 'active' : ''}" data-category="${category}">
           ${categoryNames[category] || category}
         </button>
       `;
-    }).join('');
+      })
+      .join('');
   }
 
   /**
    * 渲染等級圖例
    */
   renderLevelLegend() {
-    return Array.from({length: 10}, (_, i) => {
+    return Array.from({ length: 10 }, (_, i) => {
       const level = i + 1;
       return `
         <div class="level-indicator" data-level="${level}">
@@ -199,7 +203,7 @@ export class SkillsTagCloud extends BaseComponent {
    * 渲染技能等級點
    */
   renderLevelDots(level) {
-    return Array.from({length: 10}, (_, i) => {
+    return Array.from({ length: 10 }, (_, i) => {
       const isActive = i < level;
       return `<div class="level-dot ${isActive ? 'active' : ''}"></div>`;
     }).join('');
@@ -212,10 +216,10 @@ export class SkillsTagCloud extends BaseComponent {
     const baseSize = 0.8;
     const maxSize = 2.0;
     const scale = baseSize + ((level - 1) / 9) * (maxSize - baseSize);
-    
+
     return {
       fontSize: `${scale}rem`,
-      scale: scale
+      scale: scale,
     };
   }
 
@@ -251,14 +255,14 @@ export class SkillsTagCloud extends BaseComponent {
   getCategoryDisplayName(category) {
     const names = {
       backend: '後端開發',
-      frontend: '前端開發', 
+      frontend: '前端開發',
       database: '資料庫',
       cloud: '雲端服務',
       devops: '開發維運',
       tools: '開發工具',
       api: 'API設計',
       architecture: '系統架構',
-      realtime: '即時通訊'
+      realtime: '即時通訊',
     };
     return names[category] || category;
   }
@@ -275,22 +279,22 @@ export class SkillsTagCloud extends BaseComponent {
    */
   async init() {
     await super.init();
-    
+
     // 初始化標籤動畫
     this.initTagAnimations();
-    
+
     // 綁定互動事件
     this.bindTagInteractions();
-    
+
     // 綁定篩選事件
     this.bindFilterEvents();
-    
+
     // 設置移動端預設篩選
     this.setInitialFilter();
-    
+
     // 啟動浮動動畫
     this.startFloatAnimations();
-    
+
     console.log('☁️ SkillsTagCloud initialized');
   }
 
@@ -299,14 +303,15 @@ export class SkillsTagCloud extends BaseComponent {
    */
   initTagAnimations() {
     const tags = document.querySelectorAll('.skill-tag');
-    
+
     tags.forEach((tag, index) => {
       // 入場動畫
       tag.style.opacity = '0';
       tag.style.transform = 'scale(0.5) rotate(10deg)';
-      
+
       setTimeout(() => {
-        tag.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        tag.style.transition =
+          'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
         tag.style.opacity = tag.dataset.opacity || '1';
         tag.style.transform = 'scale(1) rotate(0deg)';
       }, index * 100);
@@ -318,20 +323,20 @@ export class SkillsTagCloud extends BaseComponent {
    */
   bindTagInteractions() {
     const tags = document.querySelectorAll('.skill-tag');
-    
+
     tags.forEach(tag => {
       const tooltip = tag.querySelector('.tag-tooltip');
-      
+
       tag.addEventListener('mouseenter', () => {
         this.showTagTooltip(tag, tooltip);
         this.pauseFloatAnimation(tag);
       });
-      
+
       tag.addEventListener('mouseleave', () => {
         this.hideTagTooltip(tag, tooltip);
         this.resumeFloatAnimation(tag);
       });
-      
+
       tag.addEventListener('click', () => {
         this.handleTagClick(tag);
       });
@@ -343,7 +348,7 @@ export class SkillsTagCloud extends BaseComponent {
    */
   bindFilterEvents() {
     const filterBtns = document.querySelectorAll('.filter-btn');
-    
+
     filterBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         this.handleFilterClick(btn);
@@ -358,10 +363,12 @@ export class SkillsTagCloud extends BaseComponent {
     // 移動端預設顯示後端分類，桌面端顯示全部
     const isMobile = window.innerWidth <= 768;
     const defaultCategory = isMobile ? 'backend' : 'all';
-    
+
     // 找到對應的篩選按鈕
-    const targetBtn = document.querySelector(`.filter-btn[data-category="${defaultCategory}"]`);
-    
+    const targetBtn = document.querySelector(
+      `.filter-btn[data-category="${defaultCategory}"]`
+    );
+
     if (targetBtn) {
       // 模擬點擊事件來設置初始狀態
       this.handleFilterClick(targetBtn);
@@ -373,19 +380,19 @@ export class SkillsTagCloud extends BaseComponent {
    */
   handleFilterClick(clickedBtn) {
     const category = clickedBtn.dataset.category;
-    
+
     // 更新按鈕狀態
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.classList.remove('active');
     });
     clickedBtn.classList.add('active');
-    
+
     // 篩選標籤
     const tags = document.querySelectorAll('.skill-tag');
     tags.forEach(tag => {
       const tagCategory = tag.dataset.category;
       const shouldShow = category === 'all' || tagCategory === category;
-      
+
       if (shouldShow) {
         tag.style.display = 'block';
         setTimeout(() => {
@@ -408,7 +415,7 @@ export class SkillsTagCloud extends BaseComponent {
   showTagTooltip(tag, tooltip) {
     tag.style.transform += ' scale(1.1)';
     tag.style.zIndex = '10';
-    
+
     if (tooltip) {
       tooltip.style.visibility = 'visible';
       tooltip.style.opacity = '1';
@@ -421,7 +428,7 @@ export class SkillsTagCloud extends BaseComponent {
   hideTagTooltip(tag, tooltip) {
     tag.style.transform = tag.style.transform.replace(' scale(1.1)', '');
     tag.style.zIndex = '';
-    
+
     if (tooltip) {
       tooltip.style.visibility = 'hidden';
       tooltip.style.opacity = '0';
@@ -434,21 +441,21 @@ export class SkillsTagCloud extends BaseComponent {
   handleTagClick(tag) {
     const tagName = tag.dataset.tag;
     const level = tag.dataset.level;
-    
+
     // 點擊動畫
     tag.style.animation = 'tagBounce 0.6s ease-out';
-    
+
     setTimeout(() => {
       tag.style.animation = '';
     }, 600);
-    
+
     // 發送自定義事件（供頁面監聽）
     const event = new window.CustomEvent('tag-clicked', {
       detail: { tagName, level, tag },
-      bubbles: true
+      bubbles: true,
     });
     tag.dispatchEvent(event);
-    
+
     console.log(`☁️ Skill tag clicked: ${tagName} (Level ${level})`);
   }
 
@@ -458,14 +465,14 @@ export class SkillsTagCloud extends BaseComponent {
   startFloatAnimations() {
     const config = this.mergeConfig();
     if (!config.animation.float.enabled) return;
-    
+
     const tags = document.querySelectorAll('.skill-tag');
-    
+
     tags.forEach((tag, index) => {
       const delay = index * 300;
-      const duration = 3000 + (Math.random() * 2000); // 3-5秒
-      const amplitude = 5 + (Math.random() * 5); // 5-10px
-      
+      const duration = 3000 + Math.random() * 2000; // 3-5秒
+      const amplitude = 5 + Math.random() * 5; // 5-10px
+
       setTimeout(() => {
         this.createFloatAnimation(tag, amplitude, duration);
       }, delay);
@@ -477,22 +484,22 @@ export class SkillsTagCloud extends BaseComponent {
    */
   createFloatAnimation(tag, amplitude, duration) {
     let startTime = null;
-    
-    const animate = (timestamp) => {
+
+    const animate = timestamp => {
       if (!startTime) startTime = timestamp;
       const elapsed = timestamp - startTime;
-      
+
       const progress = (elapsed % duration) / duration;
       const y = Math.sin(progress * Math.PI * 2) * amplitude;
-      
+
       if (!tag.dataset.paused) {
         tag.style.transform = `translateY(${y}px)`;
       }
-      
+
       const animationId = requestAnimationFrame(animate);
       this.floatAnimations.set(tag, animationId);
     };
-    
+
     const animationId = requestAnimationFrame(animate);
     this.floatAnimations.set(tag, animationId);
   }
@@ -520,21 +527,21 @@ export class SkillsTagCloud extends BaseComponent {
       cancelAnimationFrame(animationId);
     });
     this.floatAnimations.clear();
-    
+
     // 清理事件監聽器
     const tags = document.querySelectorAll('.skill-tag');
     const filters = document.querySelectorAll('.filter-btn');
-    
+
     tags.forEach(tag => {
       tag.removeEventListener('mouseenter', this.showTagTooltip);
       tag.removeEventListener('mouseleave', this.hideTagTooltip);
       tag.removeEventListener('click', this.handleTagClick);
     });
-    
+
     filters.forEach(btn => {
       btn.removeEventListener('click', this.handleFilterClick);
     });
-    
+
     super.destroy();
     console.log('☁️ SkillsTagCloud destroyed');
   }

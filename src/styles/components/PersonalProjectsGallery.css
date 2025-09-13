@@ -8,10 +8,12 @@
   width: 100%;
   min-height: 100vh;
   padding: 2rem;
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     rgba(15, 15, 25, 0.95) 0%,
     rgba(20, 10, 25, 0.98) 50%,
-    rgba(15, 15, 25, 0.95) 100%);
+    rgba(15, 15, 25, 0.95) 100%
+  );
 }
 
 /* 畫廊標題 */
@@ -81,7 +83,8 @@
   white-space: nowrap;
 }
 
-.filter-select, .sort-select {
+.filter-select,
+.sort-select {
   padding: 0.5rem 1rem;
   background: rgba(15, 15, 25, 0.8);
   border: 1px solid rgba(212, 175, 55, 0.3);
@@ -92,12 +95,14 @@
   transition: all 0.3s ease;
 }
 
-.filter-select:hover, .sort-select:hover {
+.filter-select:hover,
+.sort-select:hover {
   border-color: var(--primary-gold);
   box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
 }
 
-.filter-select:focus, .sort-select:focus {
+.filter-select:focus,
+.sort-select:focus {
   outline: none;
   border-color: var(--bright-gold);
   box-shadow: 0 0 12px rgba(244, 208, 63, 0.4);
@@ -150,7 +155,7 @@
   display: grid;
   gap: 2rem;
   margin: 2rem auto 0;
-  
+
   /* 桌面版：4列垂直卡片 */
   grid-template-columns: repeat(4, 1fr);
   max-width: 1400px;
@@ -164,13 +169,13 @@
     max-width: 800px;
     gap: 1rem;
   }
-  
+
   .gallery-controls {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
   }
-  
+
   .filter-controls {
     justify-content: center;
   }
@@ -181,37 +186,38 @@
   .personal-projects-gallery {
     padding: 1rem;
   }
-  
+
   .gallery-title {
     font-size: 2rem;
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .title-icon {
     font-size: 2.5rem;
   }
-  
+
   .gallery-controls {
     padding: 1rem;
   }
-  
+
   .filter-controls {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
   }
-  
+
   .filter-group {
     flex-direction: column;
     align-items: stretch;
     gap: 0.3rem;
   }
-  
-  .filter-select, .sort-select {
+
+  .filter-select,
+  .sort-select {
     width: 100%;
   }
-  
+
   .gallery-stats {
     flex-direction: column;
     gap: 1rem;

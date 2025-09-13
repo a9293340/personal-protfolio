@@ -13,42 +13,157 @@ export class KeyboardNavigation extends BaseComponent {
     this.shortcuts = {
       // 頁面導航 (數字鍵)
       navigation: {
-        'Digit1': { path: '/', name: '首頁', icon: '🏰', description: '返回主城區' },
-        'Digit2': { path: '/about', name: '關於', icon: '👤', description: '查看角色檔案' },
-        'Digit3': { path: '/skills', name: '技能', icon: '🌲', description: '打開技能樹' },
-        'Digit4': { path: '/work-projects', name: '工作', icon: '💼', description: '職業任務列表' },
-        'Digit5': { path: '/personal-projects', name: '作品', icon: '🎴', description: '個人收藏展示' },
-        'Digit6': { path: '/contact', name: '聯絡', icon: '📮', description: '聯絡據點' }
+        Digit1: {
+          path: '/',
+          name: '首頁',
+          icon: '🏰',
+          description: '返回主城區',
+        },
+        Digit2: {
+          path: '/about',
+          name: '關於',
+          icon: '👤',
+          description: '查看角色檔案',
+        },
+        Digit3: {
+          path: '/skills',
+          name: '技能',
+          icon: '🌲',
+          description: '打開技能樹',
+        },
+        Digit4: {
+          path: '/work-projects',
+          name: '工作',
+          icon: '💼',
+          description: '職業任務列表',
+        },
+        Digit5: {
+          path: '/personal-projects',
+          name: '作品',
+          icon: '🎴',
+          description: '個人收藏展示',
+        },
+        Digit6: {
+          path: '/contact',
+          name: '聯絡',
+          icon: '📮',
+          description: '聯絡據點',
+        },
       },
 
       // 功能快捷鍵
       actions: {
-        'KeyH': { action: 'showHelp', name: '幫助', icon: '❓', description: '顯示快捷鍵說明' },
-        'Escape': { action: 'escape', name: '退出', icon: '❌', description: '退出當前操作' },
-        'KeyF': { action: 'fullscreen', name: '全螢幕', icon: '⛶', description: '切換全螢幕模式' },
-        'KeyS': { action: 'search', name: '搜尋', icon: '🔍', description: '開啟搜尋功能' },
-        'KeyT': { action: 'toggleTheme', name: '主題', icon: '🎨', description: '切換主題' }
+        KeyH: {
+          action: 'showHelp',
+          name: '幫助',
+          icon: '❓',
+          description: '顯示快捷鍵說明',
+        },
+        Escape: {
+          action: 'escape',
+          name: '退出',
+          icon: '❌',
+          description: '退出當前操作',
+        },
+        KeyF: {
+          action: 'fullscreen',
+          name: '全螢幕',
+          icon: '⛶',
+          description: '切換全螢幕模式',
+        },
+        KeyS: {
+          action: 'search',
+          name: '搜尋',
+          icon: '🔍',
+          description: '開啟搜尋功能',
+        },
+        KeyT: {
+          action: 'toggleTheme',
+          name: '主題',
+          icon: '🎨',
+          description: '切換主題',
+        },
       },
 
       // 導航控制 (方向鍵 + 修飾鍵)
       movement: {
-        'ArrowLeft': { action: 'goBack', name: '上一頁', icon: '←', description: '返回上一頁' },
-        'ArrowRight': { action: 'goForward', name: '下一頁', icon: '→', description: '前往下一頁' },
-        'Home': { action: 'goHome', name: '首頁', icon: '🏠', description: '返回首頁' },
-        'End': { action: 'goEnd', name: '最後', icon: '🔚', description: '前往最後一頁' },
-        'ArrowUp': { action: 'scrollUp', name: '向上', icon: '↑', description: '向上滾動' },
-        'ArrowDown': { action: 'scrollDown', name: '向下', icon: '↓', description: '向下滾動' }
+        ArrowLeft: {
+          action: 'goBack',
+          name: '上一頁',
+          icon: '←',
+          description: '返回上一頁',
+        },
+        ArrowRight: {
+          action: 'goForward',
+          name: '下一頁',
+          icon: '→',
+          description: '前往下一頁',
+        },
+        Home: {
+          action: 'goHome',
+          name: '首頁',
+          icon: '🏠',
+          description: '返回首頁',
+        },
+        End: {
+          action: 'goEnd',
+          name: '最後',
+          icon: '🔚',
+          description: '前往最後一頁',
+        },
+        ArrowUp: {
+          action: 'scrollUp',
+          name: '向上',
+          icon: '↑',
+          description: '向上滾動',
+        },
+        ArrowDown: {
+          action: 'scrollDown',
+          name: '向下',
+          icon: '↓',
+          description: '向下滾動',
+        },
       },
 
       // 進階功能 (Ctrl + 鍵)
       advanced: {
-        'ctrl+KeyR': { action: 'refresh', name: '刷新', icon: '🔄', description: '刷新當前頁面' },
-        'ctrl+KeyD': { action: 'debug', name: '除錯', icon: '🐛', description: '開啟開發者工具' },
-        'ctrl+KeyP': { action: 'print', name: '列印', icon: '🖨️', description: '列印當前頁面' },
-        'ctrl+Equal': { action: 'zoomIn', name: '放大', icon: '🔍+', description: '放大頁面' },
-        'ctrl+Minus': { action: 'zoomOut', name: '縮小', icon: '🔍-', description: '縮小頁面' },
-        'ctrl+Digit0': { action: 'zoomReset', name: '重置縮放', icon: '🔍=', description: '重置頁面縮放' }
-      }
+        'ctrl+KeyR': {
+          action: 'refresh',
+          name: '刷新',
+          icon: '🔄',
+          description: '刷新當前頁面',
+        },
+        'ctrl+KeyD': {
+          action: 'debug',
+          name: '除錯',
+          icon: '🐛',
+          description: '開啟開發者工具',
+        },
+        'ctrl+KeyP': {
+          action: 'print',
+          name: '列印',
+          icon: '🖨️',
+          description: '列印當前頁面',
+        },
+        'ctrl+Equal': {
+          action: 'zoomIn',
+          name: '放大',
+          icon: '🔍+',
+          description: '放大頁面',
+        },
+        'ctrl+Minus': {
+          action: 'zoomOut',
+          name: '縮小',
+          icon: '🔍-',
+          description: '縮小頁面',
+        },
+        'ctrl+Digit0': {
+          action: 'zoomReset',
+          name: '重置縮放',
+          icon: '🔍=',
+          description: '重置頁面縮放',
+        },
+      },
     };
 
     // 綁定方法
@@ -66,7 +181,7 @@ export class KeyboardNavigation extends BaseComponent {
       showHelpPanel: false,
       currentMode: 'global', // global, page-specific
       activeModifiers: new Set(),
-      lastKeySequence: []
+      lastKeySequence: [],
     };
   }
 
@@ -80,7 +195,7 @@ export class KeyboardNavigation extends BaseComponent {
       enableSounds: false,
       helpPanelPosition: 'center', // center, top-right, bottom-right
       keySequenceTimeout: 1000,
-      excludeElements: ['input', 'textarea', 'select', '[contenteditable]']
+      excludeElements: ['input', 'textarea', 'select', '[contenteditable]'],
     };
   }
 
@@ -146,7 +261,9 @@ export class KeyboardNavigation extends BaseComponent {
                   頁面導航
                 </h4>
                 <div class="keyboard-shortcuts-grid">
-                  ${Object.entries(this.shortcuts.navigation).map(([key, config]) => `
+                  ${Object.entries(this.shortcuts.navigation)
+                    .map(
+                      ([key, config]) => `
                     <div class="keyboard-shortcut-item">
                       <kbd class="keyboard-key">${this.getKeyDisplayName(key)}</kbd>
                       <span class="shortcut-icon">${config.icon}</span>
@@ -155,7 +272,9 @@ export class KeyboardNavigation extends BaseComponent {
                         <div class="shortcut-desc">${config.description}</div>
                       </div>
                     </div>
-                  `).join('')}
+                  `
+                    )
+                    .join('')}
                 </div>
               </div>
 
@@ -166,7 +285,9 @@ export class KeyboardNavigation extends BaseComponent {
                   功能控制
                 </h4>
                 <div class="keyboard-shortcuts-grid">
-                  ${Object.entries(this.shortcuts.actions).map(([key, config]) => `
+                  ${Object.entries(this.shortcuts.actions)
+                    .map(
+                      ([key, config]) => `
                     <div class="keyboard-shortcut-item">
                       <kbd class="keyboard-key">${this.getKeyDisplayName(key)}</kbd>
                       <span class="shortcut-icon">${config.icon}</span>
@@ -175,7 +296,9 @@ export class KeyboardNavigation extends BaseComponent {
                         <div class="shortcut-desc">${config.description}</div>
                       </div>
                     </div>
-                  `).join('')}
+                  `
+                    )
+                    .join('')}
                 </div>
               </div>
 
@@ -186,7 +309,9 @@ export class KeyboardNavigation extends BaseComponent {
                   導航控制
                 </h4>
                 <div class="keyboard-shortcuts-grid">
-                  ${Object.entries(this.shortcuts.movement).map(([key, config]) => `
+                  ${Object.entries(this.shortcuts.movement)
+                    .map(
+                      ([key, config]) => `
                     <div class="keyboard-shortcut-item">
                       <kbd class="keyboard-key">${this.getKeyDisplayName(key)}</kbd>
                       <span class="shortcut-icon">${config.icon}</span>
@@ -195,7 +320,9 @@ export class KeyboardNavigation extends BaseComponent {
                         <div class="shortcut-desc">${config.description}</div>
                       </div>
                     </div>
-                  `).join('')}
+                  `
+                    )
+                    .join('')}
                 </div>
               </div>
 
@@ -206,7 +333,9 @@ export class KeyboardNavigation extends BaseComponent {
                   進階功能
                 </h4>
                 <div class="keyboard-shortcuts-grid">
-                  ${Object.entries(this.shortcuts.advanced).map(([key, config]) => `
+                  ${Object.entries(this.shortcuts.advanced)
+                    .map(
+                      ([key, config]) => `
                     <div class="keyboard-shortcut-item">
                       <kbd class="keyboard-key">${this.getKeyDisplayName(key)}</kbd>
                       <span class="shortcut-icon">${config.icon}</span>
@@ -215,7 +344,9 @@ export class KeyboardNavigation extends BaseComponent {
                         <div class="shortcut-desc">${config.description}</div>
                       </div>
                     </div>
-                  `).join('')}
+                  `
+                    )
+                    .join('')}
                 </div>
               </div>
 
@@ -274,7 +405,7 @@ export class KeyboardNavigation extends BaseComponent {
     document.addEventListener('keyup', this.handleKeyUp, true);
 
     // 綁定幫助面板關閉
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       const closeBtn = e.target.closest('#keyboard-help-close');
       if (closeBtn) {
         this.hideHelpPanel();
@@ -288,7 +419,7 @@ export class KeyboardNavigation extends BaseComponent {
     });
 
     // 狀態指示器點擊切換
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       const statusIndicator = e.target.closest('#keyboard-status');
       if (statusIndicator) {
         this.toggleEnabled();
@@ -587,16 +718,37 @@ export class KeyboardNavigation extends BaseComponent {
    */
   getKeyDisplayName(key) {
     const displayNames = {
-      'Digit1': '1', 'Digit2': '2', 'Digit3': '3', 'Digit4': '4', 'Digit5': '5', 'Digit6': '6',
-      'KeyH': 'H', 'KeyF': 'F', 'KeyS': 'S', 'KeyT': 'T', 'KeyR': 'R', 'KeyD': 'D', 'KeyP': 'P',
-      'ArrowLeft': '←', 'ArrowRight': '→', 'ArrowUp': '↑', 'ArrowDown': '↓',
-      'Home': 'Home', 'End': 'End', 'Escape': 'Esc',
-      'Equal': '+', 'Minus': '-', 'Digit0': '0'
+      Digit1: '1',
+      Digit2: '2',
+      Digit3: '3',
+      Digit4: '4',
+      Digit5: '5',
+      Digit6: '6',
+      KeyH: 'H',
+      KeyF: 'F',
+      KeyS: 'S',
+      KeyT: 'T',
+      KeyR: 'R',
+      KeyD: 'D',
+      KeyP: 'P',
+      ArrowLeft: '←',
+      ArrowRight: '→',
+      ArrowUp: '↑',
+      ArrowDown: '↓',
+      Home: 'Home',
+      End: 'End',
+      Escape: 'Esc',
+      Equal: '+',
+      Minus: '-',
+      Digit0: '0',
     };
 
     // 處理組合鍵
     if (key.includes('+')) {
-      return key.split('+').map(part => displayNames[part] || part).join(' + ');
+      return key
+        .split('+')
+        .map(part => displayNames[part] || part)
+        .join(' + ');
     }
 
     return displayNames[key] || key;
@@ -628,7 +780,9 @@ export class KeyboardNavigation extends BaseComponent {
   toggleEnabled() {
     const newEnabledState = !this.state.isEnabled;
     this.setState({ isEnabled: newEnabledState }, () => {
-      console.log(`⌨️ Keyboard navigation ${newEnabledState ? 'enabled' : 'disabled'}`);
+      console.log(
+        `⌨️ Keyboard navigation ${newEnabledState ? 'enabled' : 'disabled'}`
+      );
       this.updateStatusDisplay();
     });
   }
@@ -646,7 +800,9 @@ export class KeyboardNavigation extends BaseComponent {
    * 更新狀態顯示
    */
   updateStatusDisplay() {
-    const statusIndicator = document.querySelector('.keyboard-status-indicator');
+    const statusIndicator = document.querySelector(
+      '.keyboard-status-indicator'
+    );
     const statusText = document.querySelector('.status-text');
 
     if (statusIndicator && statusText) {
@@ -677,7 +833,7 @@ export class KeyboardNavigation extends BaseComponent {
   /**
    * 播放快捷鍵音效
    */
-  playShortcutSound(shortcut) {
+  playShortcutSound(_shortcut) {
     // 簡單的音效實現
     if (window.AudioContext) {
       const audioContext = new window.AudioContext();
@@ -689,7 +845,10 @@ export class KeyboardNavigation extends BaseComponent {
 
       oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
       gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        audioContext.currentTime + 0.2
+      );
 
       oscillator.start();
       oscillator.stop(audioContext.currentTime + 0.2);
@@ -700,14 +859,16 @@ export class KeyboardNavigation extends BaseComponent {
    * 獲取快捷鍵統計
    */
   getShortcutStats() {
-    const totalShortcuts = Object.values(this.shortcuts)
-      .reduce((total, category) => total + Object.keys(category).length, 0);
+    const totalShortcuts = Object.values(this.shortcuts).reduce(
+      (total, category) => total + Object.keys(category).length,
+      0
+    );
 
     return {
       totalShortcuts,
       categories: Object.keys(this.shortcuts).length,
       enabled: this.state.isEnabled,
-      lastSequence: this.state.lastKeySequence
+      lastSequence: this.state.lastKeySequence,
     };
   }
 
@@ -717,7 +878,10 @@ export class KeyboardNavigation extends BaseComponent {
   destroy() {
     document.removeEventListener('keydown', this.handleKeyDown, true);
     document.removeEventListener('keyup', this.handleKeyUp, true);
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    document.removeEventListener(
+      'visibilitychange',
+      this.handleVisibilityChange
+    );
     document.body.classList.remove('keyboard-help-open');
     super.destroy();
     console.log('⌨️ KeyboardNavigation destroyed');

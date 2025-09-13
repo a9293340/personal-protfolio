@@ -8,9 +8,9 @@ export const previewSectionConfig = {
   header: {
     title: {
       icon: '✨',
-      text: '核心特色'
+      text: '核心特色',
     },
-    subtitle: '探索我的專業能力與項目成就'
+    subtitle: '探索我的專業能力與項目成就',
   },
 
   // 卡片配置
@@ -23,7 +23,7 @@ export const previewSectionConfig = {
       action: '/skills',
       bgColor: 'rgba(41, 128, 185, 0.1)',
       borderColor: '#3498db',
-      type: 'skills'
+      type: 'skills',
     },
     {
       id: 'timeline-preview',
@@ -33,7 +33,7 @@ export const previewSectionConfig = {
       action: '/projects',
       bgColor: 'rgba(46, 204, 113, 0.1)',
       borderColor: '#2ecc71',
-      type: 'timeline'
+      type: 'timeline',
     },
     {
       id: 'projects-preview',
@@ -43,9 +43,9 @@ export const previewSectionConfig = {
       action: '/projects',
       bgColor: 'rgba(212, 175, 55, 0.1)',
       borderColor: '#d4af37',
-      type: 'projects'
-    }
-  ]
+      type: 'projects',
+    },
+  ],
 };
 
 /**
@@ -57,48 +57,48 @@ export const skillsPreviewConfig = {
     {
       name: 'Node.js',
       level: 'advanced',
-      color: 'linear-gradient(135deg, #667eea, #764ba2)'
+      color: 'linear-gradient(135deg, #667eea, #764ba2)',
     },
     {
       name: 'TypeScript',
       level: 'advanced',
-      color: 'linear-gradient(135deg, #f093fb, #f5576c)'
+      color: 'linear-gradient(135deg, #f093fb, #f5576c)',
     },
     {
       name: 'Docker',
       level: 'intermediate',
-      color: 'linear-gradient(135deg, #4facfe, #00f2fe)'
+      color: 'linear-gradient(135deg, #4facfe, #00f2fe)',
     },
     {
       name: 'K8s',
       level: 'intermediate',
-      color: 'linear-gradient(135deg, #43e97b, #38f9d7)'
+      color: 'linear-gradient(135deg, #43e97b, #38f9d7)',
     },
     {
       name: 'AWS',
       level: 'intermediate',
-      color: 'linear-gradient(135deg, #fa709a, #fee140)'
+      color: 'linear-gradient(135deg, #fa709a, #fee140)',
     },
     {
       name: 'PostgreSQL',
       level: 'advanced',
-      color: 'linear-gradient(135deg, #a8edea, #fed6e3)'
+      color: 'linear-gradient(135deg, #a8edea, #fed6e3)',
     },
     {
       name: 'Redis',
       level: 'intermediate',
-      color: 'linear-gradient(135deg, #ff9a9e, #fecfef)'
+      color: 'linear-gradient(135deg, #ff9a9e, #fecfef)',
     },
     {
       name: 'GraphQL',
       level: 'intermediate',
-      color: 'linear-gradient(135deg, #a18cd1, #fbc2eb)'
-    }
+      color: 'linear-gradient(135deg, #a18cd1, #fbc2eb)',
+    },
   ],
   stats: {
     totalTech: '15+',
-    experience: '8+'
-  }
+    experience: '8+',
+  },
 };
 
 /**
@@ -111,27 +111,27 @@ export const timelinePreviewConfig = {
       year: '2024',
       title: '系統架構師',
       description: '負責系統架構設計與技術選型',
-      importance: 'high'
+      importance: 'high',
     },
     {
       year: '2022',
       title: '資深後端工程師',
       description: '領導後端團隊開發核心服務',
-      importance: 'high'
+      importance: 'high',
     },
     {
       year: '2020',
       title: '後端工程師',
       description: '專注於 API 開發與資料庫優化',
-      importance: 'medium'
+      importance: 'medium',
     },
     {
       year: '2018',
       title: '初級開發工程師',
       description: '開始職涯，學習基礎開發技能',
-      importance: 'low'
-    }
-  ]
+      importance: 'low',
+    },
+  ],
 };
 
 /**
@@ -146,7 +146,7 @@ export const projectsPreviewConfig = {
       icon: '🎮',
       description: '基於微服務架構的遊戲化學習平台',
       tech: ['Node.js', 'Docker', 'K8s'],
-      status: 'production'
+      status: 'production',
     },
     {
       id: 'data-analysis',
@@ -154,7 +154,7 @@ export const projectsPreviewConfig = {
       icon: '📊',
       description: '實時數據處理與視覺化分析系統',
       tech: ['Python', 'Apache Kafka', 'PostgreSQL'],
-      status: 'production'
+      status: 'production',
     },
     {
       id: 'ai-assistant',
@@ -162,14 +162,14 @@ export const projectsPreviewConfig = {
       icon: '🤖',
       description: '基於 LLM 的智能客服助理系統',
       tech: ['FastAPI', 'OpenAI', 'Vector DB'],
-      status: 'development'
-    }
+      status: 'development',
+    },
   ],
   stats: {
     totalProjects: '20+',
     completedProjects: '18',
-    inProgress: '2'
-  }
+    inProgress: '2',
+  },
 };
 
 /**
@@ -179,20 +179,20 @@ export const previewLimits = {
   skills: {
     maxTags: 8,
     maxStatsItems: 2,
-    minTags: 3
+    minTags: 3,
   },
   timeline: {
     maxItems: 4,
     maxTitleLength: 20,
-    minItems: 2
+    minItems: 2,
   },
   projects: {
     maxCards: 3,
     maxNameLength: 15,
     maxDescriptionLength: 50,
     maxTechTags: 3,
-    minCards: 2
-  }
+    minCards: 2,
+  },
 };
 
 /**
@@ -207,13 +207,13 @@ export const previewConfigSchema = {
       properties: {
         title: {
           type: 'object',
-          required: ['icon', 'text']
+          required: ['icon', 'text'],
         },
         subtitle: {
           type: 'string',
-          maxLength: 100
-        }
-      }
+          maxLength: 100,
+        },
+      },
     },
     sections: {
       type: 'array',
@@ -225,11 +225,11 @@ export const previewConfigSchema = {
         properties: {
           title: { type: 'string', maxLength: 20 },
           subtitle: { type: 'string', maxLength: 50 },
-          icon: { type: 'string', maxLength: 5 }
-        }
-      }
-    }
-  }
+          icon: { type: 'string', maxLength: 5 },
+        },
+      },
+    },
+  },
 };
 
 // 導出所有配置
@@ -239,5 +239,5 @@ export default {
   timeline: timelinePreviewConfig,
   projects: projectsPreviewConfig,
   limits: previewLimits,
-  schema: previewConfigSchema
+  schema: previewConfigSchema,
 };

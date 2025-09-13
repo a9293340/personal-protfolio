@@ -1,6 +1,6 @@
 /**
  * SocialLinksGrid.js - 社交連結網格組件
- * 
+ *
  * 功能特色：
  * - 遊戲化的社交平台展示
  * - 動態載入社交數據配置
@@ -14,13 +14,13 @@ import { socialDataConfig } from '../../config/data/social.data.js';
 export class SocialLinksGrid extends BaseComponent {
   constructor(config = {}) {
     super();
-    
+
     this.config = this.mergeConfig(this.getDefaultConfig(), config);
     this.socialData = socialDataConfig;
-    
+
     console.log('🔗 [SocialLinksGrid] 社交連結組件初始化');
   }
-  
+
   /**
    * 獲取預設配置
    */
@@ -31,24 +31,24 @@ export class SocialLinksGrid extends BaseComponent {
       showStats: false,
       showDescriptions: true,
       maxPlatforms: 6,
-      
+
       layout: {
         columns: {
           mobile: 1,
           tablet: 2,
-          desktop: 2
+          desktop: 2,
         },
-        gap: '1rem'
+        gap: '1rem',
       },
-      
+
       animations: {
         hover: 'icon-bounce',
         click: 'ripple-effect',
-        entrance: 'stagger-fade-in'
-      }
+        entrance: 'stagger-fade-in',
+      },
     };
   }
-  
+
   /**
    * 渲染組件
    */
@@ -56,18 +56,17 @@ export class SocialLinksGrid extends BaseComponent {
     this.createElement();
     this.bindEvents();
     this.applyAnimations();
-    
+
     return this.element;
   }
-  
+
   /**
    * 創建主要結構
    */
   createElement() {
-    
     this.element = document.createElement('div');
     this.element.className = 'social-links-grid';
-    
+
     this.element.innerHTML = `
       <div class="social-section" style="
         background: rgba(46, 26, 46, 0.4);
@@ -97,12 +96,11 @@ export class SocialLinksGrid extends BaseComponent {
         </div>
       </div>
     `;
-    
+
     // 添加樣式
     this.addStyles();
   }
-  
-  
+
   /**
    * 渲染專業檔案連結
    */
@@ -112,17 +110,19 @@ export class SocialLinksGrid extends BaseComponent {
         name: 'GitHub',
         icon: '💻',
         url: 'https://github.com',
-        color: '#333333'
+        color: '#333333',
       },
       {
         name: 'LinkedIn',
-        icon: '💼', 
+        icon: '💼',
         url: 'https://linkedin.com',
-        color: '#0077B5'
-      }
+        color: '#0077B5',
+      },
     ];
-    
-    return professionalPlatforms.map(platform => `
+
+    return professionalPlatforms
+      .map(
+        platform => `
       <a href="${platform.url}" 
          target="_blank" 
          rel="noopener noreferrer"
@@ -146,10 +146,11 @@ export class SocialLinksGrid extends BaseComponent {
         <span style="font-size: 0.9rem;">${platform.icon}</span>
         ${platform.name}
       </a>
-    `).join('');
+    `
+      )
+      .join('');
   }
-  
-  
+
   /**
    * 綁定事件監聽器
    */
@@ -157,29 +158,29 @@ export class SocialLinksGrid extends BaseComponent {
     // 簡化的事件處理 - 社交連結已經透過內聯事件處理
     console.log('🔗 Social links events bound');
   }
-  
+
   /**
    * 應用動畫效果
    */
   applyAnimations() {
     // 入場動畫已在 CSS 中定義
-    
+
     // 響應式檢查
     this.setupResponsiveLayout();
-    
+
     // 監聽視窗大小變化
     window.addEventListener('resize', () => {
       this.setupResponsiveLayout();
     });
   }
-  
+
   /**
    * 設置響應式佈局
    */
   setupResponsiveLayout() {
     const grid = this.element.querySelector('.social-grid');
     const professionalGrid = this.element.querySelector('.professional-grid');
-    
+
     if (window.innerWidth <= 768) {
       // 手機版：單列佈局
       if (grid) {
@@ -200,17 +201,17 @@ export class SocialLinksGrid extends BaseComponent {
       }
     }
   }
-  
+
   /**
    * 16進位顏色轉 RGB
    */
   hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     if (!result) return '255, 255, 255';
-    
+
     return `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`;
   }
-  
+
   /**
    * 添加樣式
    */
@@ -250,16 +251,16 @@ export class SocialLinksGrid extends BaseComponent {
       document.head.appendChild(style);
     }
   }
-  
+
   /**
    * 銷毀組件
    */
   destroy() {
     console.log('🗑️ [SocialLinksGrid] 銷毀社交連結組件');
-    
+
     // 移除事件監聽器
     window.removeEventListener('resize', this.setupResponsiveLayout);
-    
+
     super.destroy();
   }
 }

@@ -1,13 +1,13 @@
 /**
  * Router - 路由系統
- * 
+ *
  * 功能：
  * 1. 路由註冊和匹配 - 管理所有頁面路由
  * 2. 歷史記錄管理 - 瀏覽器歷史處理
  * 3. 頁面切換動畫 - 流暢的過渡效果
  * 4. 路由守衛功能 - 權限和導航控制
  * 5. 懶載入支援 - 按需載入頁面組件
- * 
+ *
  * @author Claude
  * @version 1.0.0
  */
@@ -57,7 +57,10 @@ export interface RouterConfig {
   mode: 'hash' | 'history';
   base?: string;
   container?: string;
-  scrollBehavior?: (to: RouteLocation, from: RouteLocation) => { x: number; y: number } | null;
+  scrollBehavior?: (
+    to: RouteLocation,
+    from: RouteLocation
+  ) => { x: number; y: number } | null;
   beforeEach?: RouteGuard;
   afterEach?: (to: RouteLocation, from: RouteLocation) => void;
 }
@@ -92,13 +95,13 @@ export class Router extends EventEmitter {
    */
   addRoute(route: RouteConfig): void {
     this.validateRoute(route);
-    
+
     // 規範化路徑
     const normalizedPath = this.normalizePath(route.path);
-    
+
     // 儲存路由配置
     this.routes.set(normalizedPath, { ...route, path: normalizedPath });
-    
+
     // 處理子路由
     if (route.children && route.children.length > 0) {
       route.children.forEach(childRoute => {
@@ -106,8 +109,10 @@ export class Router extends EventEmitter {
         this.addRoute({ ...childRoute, path: childPath });
       });
     }
-    
-    console.log(`✅ Route registered: ${normalizedPath} -> ${route.name || 'Anonymous'}`);
+
+    console.log(
+      `✅ Route registered: ${normalizedPath} -> ${route.name || 'Anonymous'}`
+    );
   }
 
   /**
@@ -123,12 +128,12 @@ export class Router extends EventEmitter {
   removeRoute(path: string): boolean {
     const normalizedPath = this.normalizePath(path);
     const existed = this.routes.has(normalizedPath);
-    
+
     if (existed) {
       this.routes.delete(normalizedPath);
       console.log(`🗑️ Route removed: ${normalizedPath}`);
     }
-    
+
     return existed;
   }
 
@@ -137,46 +142,49 @@ export class Router extends EventEmitter {
    */
   matchRoute(path: string): { route: RouteConfig; params: RouteParams } | null {
     const normalizedPath = this.normalizePath(path);
-    
+
     // 精確匹配
     if (this.routes.has(normalizedPath)) {
       return {
         route: this.routes.get(normalizedPath)!,
-        params: {}
+        params: {},
       };
     }
-    
+
     // 參數匹配
     for (const [routePath, routeConfig] of this.routes) {
       const params = this.matchParams(routePath, normalizedPath);
       if (params) {
         return {
           route: routeConfig,
-          params
+          params,
         };
       }
     }
-    
+
     return null;
   }
 
   /**
    * 參數匹配
    */
-  private matchParams(routePath: string, actualPath: string): RouteParams | null {
+  private matchParams(
+    routePath: string,
+    actualPath: string
+  ): RouteParams | null {
     const routeSegments = routePath.split('/');
     const pathSegments = actualPath.split('/');
-    
+
     if (routeSegments.length !== pathSegments.length) {
       return null;
     }
-    
+
     const params: RouteParams = {};
-    
+
     for (let i = 0; i < routeSegments.length; i++) {
       const routeSegment = routeSegments[i];
       const pathSegment = pathSegments[i];
-      
+
       if (routeSegment.startsWith(':')) {
         // 參數段
         const paramName = routeSegment.substring(1);
@@ -186,7 +194,7 @@ export class Router extends EventEmitter {
         return null;
       }
     }
-    
+
     return params;
   }
 
@@ -202,11 +210,11 @@ export class Router extends EventEmitter {
   private initialize(): void {
     // 監聽瀏覽器歷史變化
     window.addEventListener('popstate', this.handlePopState.bind(this));
-    
+
     if (this.config.mode === 'hash') {
       window.addEventListener('hashchange', this.handleHashChange.bind(this));
     }
-    
+
     // 初始路由
     this.handleInitialRoute();
   }
@@ -270,46 +278,47 @@ export class Router extends EventEmitter {
     }
 
     this.isNavigating = true;
-    
+
     try {
       // 創建目標路由位置
       const to = this.createRouteLocation(path);
       const from = this.currentRoute || this.createRouteLocation('/');
-      
+
       // 路由守衛檢查
       const guardResult = await this.runRouteGuards(to, from);
       if (!guardResult.allowed) {
         if (guardResult.redirect) {
           return this.navigate(guardResult.redirect, options);
         }
-        throw new Error(guardResult.error || 'Navigation blocked by route guard');
+        throw new Error(
+          guardResult.error || 'Navigation blocked by route guard'
+        );
       }
-      
+
       // 觸發離開事件
       if (this.currentRoute) {
         this.emit('router:beforeLeave', { from: this.currentRoute, to });
       }
-      
+
       // 載入組件
       const component = await this.loadRouteComponent(to);
-      
+
       // 頁面切換動畫
       await this.performPageTransition(from, to, component, options);
-      
+
       // 更新瀏覽器歷史
       this.updateBrowserHistory(to, options);
-      
+
       // 更新當前路由
       this.currentRoute = to;
-      
+
       // 觸發導航完成事件
       this.emit('router:navigated', { from, to });
-      
+
       // 執行後置守衛
       if (this.config.afterEach) {
         this.config.afterEach(to, from);
       }
-      
     } catch (error) {
       this.emit('router:error', { error, path });
       throw error;
@@ -324,13 +333,13 @@ export class Router extends EventEmitter {
   private createRouteLocation(path: string): RouteLocation {
     const [pathname, search, hash] = this.parsePath(path);
     const matchResult = this.matchRoute(pathname);
-    
+
     return {
       path: pathname,
       params: matchResult?.params || {},
       query: this.parseQuery(search),
       hash: hash || '',
-      fullPath: path
+      fullPath: path,
     };
   }
 
@@ -340,21 +349,21 @@ export class Router extends EventEmitter {
   private parsePath(path: string): [string, string, string] {
     const hashIndex = path.indexOf('#');
     const queryIndex = path.indexOf('?');
-    
+
     let pathname = path;
     let search = '';
     let hash = '';
-    
+
     if (hashIndex >= 0) {
       hash = path.substring(hashIndex);
       pathname = path.substring(0, hashIndex);
     }
-    
+
     if (queryIndex >= 0 && (hashIndex < 0 || queryIndex < hashIndex)) {
       search = pathname.substring(queryIndex);
       pathname = pathname.substring(0, queryIndex);
     }
-    
+
     return [pathname, search, hash];
   }
 
@@ -363,7 +372,7 @@ export class Router extends EventEmitter {
    */
   private parseQuery(search: string): RouteQuery {
     const query: RouteQuery = {};
-    
+
     if (search && search.startsWith('?')) {
       const params = new URLSearchParams(search);
       for (const [key, value] of params) {
@@ -379,7 +388,7 @@ export class Router extends EventEmitter {
         }
       }
     }
-    
+
     return query;
   }
 
@@ -392,37 +401,53 @@ export class Router extends EventEmitter {
   /**
    * 執行路由守衛
    */
-  private async runRouteGuards(to: RouteLocation, from: RouteLocation): Promise<NavigationGuardResult> {
+  private async runRouteGuards(
+    to: RouteLocation,
+    from: RouteLocation
+  ): Promise<NavigationGuardResult> {
     try {
       // 全域前置守衛
       if (this.config.beforeEach) {
-        const result = await this.executeGuard(this.config.beforeEach, to, from);
+        const result = await this.executeGuard(
+          this.config.beforeEach,
+          to,
+          from
+        );
         if (typeof result === 'string') {
           return { allowed: false, redirect: result };
         }
         if (!result) {
-          return { allowed: false, error: 'Blocked by global beforeEach guard' };
+          return {
+            allowed: false,
+            error: 'Blocked by global beforeEach guard',
+          };
         }
       }
-      
+
       // 路由級別守衛
       const matchResult = this.matchRoute(to.path);
       if (matchResult?.route.beforeEnter) {
-        const result = await this.executeGuard(matchResult.route.beforeEnter, to, from);
+        const result = await this.executeGuard(
+          matchResult.route.beforeEnter,
+          to,
+          from
+        );
         if (typeof result === 'string') {
           return { allowed: false, redirect: result };
         }
         if (!result) {
-          return { allowed: false, error: 'Blocked by route beforeEnter guard' };
+          return {
+            allowed: false,
+            error: 'Blocked by route beforeEnter guard',
+          };
         }
       }
-      
+
       return { allowed: true };
-      
     } catch (error) {
-      return { 
-        allowed: false, 
-        error: `Route guard error: ${(error as Error).message}` 
+      return {
+        allowed: false,
+        error: `Route guard error: ${(error as Error).message}`,
       };
     }
   }
@@ -431,8 +456,8 @@ export class Router extends EventEmitter {
    * 執行單個守衛
    */
   private async executeGuard(
-    guard: RouteGuard, 
-    to: RouteLocation, 
+    guard: RouteGuard,
+    to: RouteLocation,
     from: RouteLocation
   ): Promise<boolean | string> {
     try {
@@ -453,34 +478,36 @@ export class Router extends EventEmitter {
   /**
    * 載入路由組件
    */
-  private async loadRouteComponent(route: RouteLocation): Promise<BaseComponent | null> {
+  private async loadRouteComponent(
+    route: RouteLocation
+  ): Promise<BaseComponent | null> {
     const matchResult = this.matchRoute(route.path);
     if (!matchResult) {
       throw new Error(`No route found for path: ${route.path}`);
     }
 
     const routeConfig = matchResult.route;
-    
+
     // 檢查重定向
     if (routeConfig.redirect) {
       throw new Error(`Route redirected to: ${routeConfig.redirect}`);
     }
-    
+
     // 檢查組件
     if (!routeConfig.component) {
       return null; // 無組件路由
     }
-    
+
     // 檢查快取
     const cacheKey = `${route.path}-${JSON.stringify(route.params)}`;
     if (this.componentCache.has(cacheKey)) {
       return this.componentCache.get(cacheKey)!;
     }
-    
+
     try {
       // 載入組件
       let ComponentClass: typeof BaseComponent;
-      
+
       if (typeof routeConfig.component === 'function') {
         // 懶載入
         this.emit('router:componentLoading', { route });
@@ -488,7 +515,7 @@ export class Router extends EventEmitter {
       } else {
         ComponentClass = routeConfig.component;
       }
-      
+
       // 創建組件實例 - 這裡需要具體的組件實現類，不能直接實例化抽象類
       // 實際使用中，ComponentClass 應該是 BaseComponent 的具體實現
       const componentInstance = new (ComponentClass as any)(
@@ -496,17 +523,21 @@ export class Router extends EventEmitter {
         { ...route.params, ...route.query },
         {}
       );
-      
+
       // 快取組件
       this.componentCache.set(cacheKey, componentInstance);
-      
-      this.emit('router:componentLoaded', { route, component: componentInstance });
-      
+
+      this.emit('router:componentLoaded', {
+        route,
+        component: componentInstance,
+      });
+
       return componentInstance;
-      
     } catch (error) {
       this.emit('router:componentError', { route, error });
-      throw new Error(`Failed to load component for route ${route.path}: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to load component for route ${route.path}: ${(error as Error).message}`
+      );
     }
   }
 
@@ -537,7 +568,7 @@ export class Router extends EventEmitter {
     try {
       // 觸發切換開始事件
       this.emit('router:transitionStart', { from, to, animation });
-      
+
       // 執行動畫
       switch (animation) {
         case 'slide':
@@ -553,10 +584,9 @@ export class Router extends EventEmitter {
           // 無動畫
           await this.noTransition(container, component);
       }
-      
+
       // 觸發切換完成事件
       this.emit('router:transitionEnd', { from, to, animation });
-      
     } catch (error) {
       this.emit('router:transitionError', { from, to, error });
       // 降級為無動畫切換
@@ -567,25 +597,29 @@ export class Router extends EventEmitter {
   /**
    * 滑動切換動畫
    */
-  private async slideTransition(container: HTMLElement, component: BaseComponent | null, duration: number): Promise<void> {
-    return new Promise((resolve) => {
+  private async slideTransition(
+    container: HTMLElement,
+    component: BaseComponent | null,
+    duration: number
+  ): Promise<void> {
+    return new Promise(resolve => {
       // 淡出當前內容
       container.style.transform = 'translateX(-100%)';
       container.style.transition = `transform ${duration}ms ease-out`;
-      
+
       setTimeout(() => {
         // 更新內容
         if (component) {
           container.innerHTML = '';
           component.init();
         }
-        
+
         // 滑入新內容
         container.style.transform = 'translateX(100%)';
-        
+
         requestAnimationFrame(() => {
           container.style.transform = 'translateX(0)';
-          
+
           setTimeout(() => {
             container.style.transition = '';
             resolve();
@@ -598,21 +632,25 @@ export class Router extends EventEmitter {
   /**
    * 縮放切換動畫
    */
-  private async zoomTransition(container: HTMLElement, component: BaseComponent | null, duration: number): Promise<void> {
-    return new Promise((resolve) => {
+  private async zoomTransition(
+    container: HTMLElement,
+    component: BaseComponent | null,
+    duration: number
+  ): Promise<void> {
+    return new Promise(resolve => {
       container.style.transform = 'scale(0.8)';
       container.style.opacity = '0';
       container.style.transition = `all ${duration}ms ease-out`;
-      
+
       setTimeout(() => {
         if (component) {
           container.innerHTML = '';
           component.init();
         }
-        
+
         container.style.transform = 'scale(1)';
         container.style.opacity = '1';
-        
+
         setTimeout(() => {
           container.style.transition = '';
           resolve();
@@ -624,19 +662,23 @@ export class Router extends EventEmitter {
   /**
    * 淡入淡出動畫
    */
-  private async fadeTransition(container: HTMLElement, component: BaseComponent | null, duration: number): Promise<void> {
-    return new Promise((resolve) => {
+  private async fadeTransition(
+    container: HTMLElement,
+    component: BaseComponent | null,
+    duration: number
+  ): Promise<void> {
+    return new Promise(resolve => {
       container.style.opacity = '0';
       container.style.transition = `opacity ${duration}ms ease-out`;
-      
+
       setTimeout(() => {
         if (component) {
           container.innerHTML = '';
           component.init();
         }
-        
+
         container.style.opacity = '1';
-        
+
         setTimeout(() => {
           container.style.transition = '';
           resolve();
@@ -648,7 +690,10 @@ export class Router extends EventEmitter {
   /**
    * 無動畫切換
    */
-  private async noTransition(container: HTMLElement, component: BaseComponent | null): Promise<void> {
+  private async noTransition(
+    container: HTMLElement,
+    component: BaseComponent | null
+  ): Promise<void> {
     if (component) {
       container.innerHTML = '';
       await component.init();
@@ -664,10 +709,13 @@ export class Router extends EventEmitter {
   /**
    * 更新瀏覽器歷史
    */
-  private updateBrowserHistory(route: RouteLocation, options: NavigationOptions): void {
+  private updateBrowserHistory(
+    route: RouteLocation,
+    options: NavigationOptions
+  ): void {
     const url = this.buildUrl(route.fullPath);
     const state = { routerPath: route.fullPath };
-    
+
     if (options.replace) {
       window.history.replaceState(state, '', url);
     } else {
@@ -717,7 +765,7 @@ export class Router extends EventEmitter {
     if (!route.path) {
       throw new Error('Route must have a path');
     }
-    
+
     if (route.redirect && route.component) {
       throw new Error('Route cannot have both redirect and component');
     }
@@ -784,7 +832,7 @@ export class Router extends EventEmitter {
   destroy(): void {
     window.removeEventListener('popstate', this.handlePopState.bind(this));
     window.removeEventListener('hashchange', this.handleHashChange.bind(this));
-    
+
     this.componentCache.clear();
     this.routes.clear();
     this.removeAllListeners();

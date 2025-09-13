@@ -52,10 +52,12 @@
   left: 5%;
   right: 5%;
   height: 2px;
-  background: linear-gradient(90deg, 
+  background: linear-gradient(
+    90deg,
     rgba(46, 204, 113, 0.6) 0%,
     rgba(241, 196, 15, 0.8) 75%,
-    rgba(52, 152, 219, 0.5) 100%);
+    rgba(52, 152, 219, 0.5) 100%
+  );
   transform: translateY(-50%);
   border-radius: 1px;
   opacity: 0.7;
@@ -174,10 +176,11 @@
 }
 
 @keyframes currentStagePulse {
-  0%, 100% { 
+  0%,
+  100% {
     box-shadow: 0 0 15px rgba(241, 196, 15, 0.4);
   }
-  50% { 
+  50% {
     box-shadow: 0 0 25px rgba(241, 196, 15, 0.6);
   }
 }
@@ -422,16 +425,16 @@
   .timeline-stages {
     padding: 0 2%;
   }
-  
+
   .stage-info {
     max-width: 100px;
   }
-  
+
   .stage-title,
   .stage-concept {
     font-size: 0.8rem;
   }
-  
+
   .stage-tooltip {
     width: 240px;
   }
@@ -442,18 +445,18 @@
     padding: 1.5rem 1rem;
     margin-bottom: 1.5rem;
   }
-  
+
   .concept-timeline-container {
     padding: 1.5rem 0;
   }
-  
+
   .timeline-stages {
     flex-direction: column;
     gap: 2rem;
     padding: 0;
     justify-content: flex-start; /* 避免space-between造成的擠壓 */
   }
-  
+
   .timeline-line {
     left: 50%;
     right: auto;
@@ -462,12 +465,14 @@
     bottom: 0;
     height: auto;
     transform: translateX(-50%);
-    background: linear-gradient(180deg, 
+    background: linear-gradient(
+      180deg,
       rgba(46, 204, 113, 0.6) 0%,
       rgba(241, 196, 15, 0.8) 75%,
-      rgba(52, 152, 219, 0.5) 100%);
+      rgba(52, 152, 219, 0.5) 100%
+    );
   }
-  
+
   .timeline-stage {
     flex-direction: row;
     max-width: 280px;
@@ -475,25 +480,25 @@
     min-height: 80px; /* 確保每個stage有最小高度，避免被擠壓 */
     align-items: center; /* 垂直居中對齊 */
   }
-  
+
   /* 手機版隱藏進度條，避免佈局問題 */
   .stage-progress {
     display: none;
   }
-  
+
   .stage-info {
     margin-top: 0;
     margin-left: 1rem;
     text-align: left;
     max-width: none;
   }
-  
+
   .stage-tooltip {
     left: 120%;
     transform: none;
     width: 200px;
   }
-  
+
   .stage-tooltip::after {
     left: 0;
     top: 50%;
@@ -514,11 +519,11 @@
     width: 50px;
     height: 50px;
   }
-  
+
   .stage-icon {
     font-size: 1.2rem;
   }
-  
+
   .stage-tooltip {
     display: none; /* 手機版隱藏工具提示 */
   }

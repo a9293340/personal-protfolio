@@ -10,32 +10,36 @@ export class PageTransitionManager {
     this.isTransitioning = false;
     this.currentTransition = 'fadeSlideUp'; // 默認轉場效果
     this.transitionDuration = 400; // 與 animations.config.js 中的 pageTransition 一致
-    
+
     // 性能優化配置
     this.performanceConfig = {
       // 檢測設備性能
-      reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)')
+        .matches,
       isLowEndDevice: this.detectLowEndDevice(),
-      isMobile: window.innerWidth <= 768
+      isMobile: window.innerWidth <= 768,
     };
-    
+
     // 根據設備性能調整轉場時長
-    if (this.performanceConfig.isLowEndDevice || this.performanceConfig.isMobile) {
+    if (
+      this.performanceConfig.isLowEndDevice ||
+      this.performanceConfig.isMobile
+    ) {
       this.transitionDuration = 300; // 更短的動畫時長
     }
-    
+
     // 如果用戶偏好減少動畫，則禁用複雜效果
     if (this.performanceConfig.reducedMotion) {
       this.currentTransition = 'fadeSlideUp'; // 使用簡單的淡入效果
       this.transitionDuration = 200;
     }
-    
+
     // 綁定方法
     this.setupTransitionStyles();
-    
+
     console.log('✨ PageTransitionManager initialized', this.performanceConfig);
   }
-  
+
   /**
    * 檢測是否為低端設備
    * @returns {boolean}
@@ -44,11 +48,11 @@ export class PageTransitionManager {
     // 基於 navigator.hardwareConcurrency 檢測 CPU 核心數
     const cores = navigator.hardwareConcurrency || 4;
     const memory = navigator.deviceMemory || 4; // GB
-    
+
     // 如果 CPU 核心數少於 4 或記憶體少於 4GB，視為低端設備
     return cores < 4 || memory < 4;
   }
-  
+
   /**
    * 設置頁面轉場 CSS 樣式
    */
@@ -57,7 +61,7 @@ export class PageTransitionManager {
     if (document.querySelector('#page-transition-styles')) {
       return;
     }
-    
+
     const style = document.createElement('style');
     style.id = 'page-transition-styles';
     style.textContent = `
@@ -278,11 +282,11 @@ export class PageTransitionManager {
         }
       }
     `;
-    
+
     document.head.appendChild(style);
     console.log('🎨 Page transition styles injected');
   }
-  
+
   /**
    * 執行頁面轉場動畫
    * @param {HTMLElement} container - 頁面容器元素
@@ -295,60 +299,62 @@ export class PageTransitionManager {
       console.warn('⚠️ Transition already in progress');
       return;
     }
-    
+
     this.isTransitioning = true;
-    
+
     try {
       const {
         transitionType = this.currentTransition,
         showLoader = true,
-        showParticles = true
+        showParticles = true,
       } = options;
-      
+
       console.log(`✨ Starting page transition: ${transitionType}`);
-      
+
       // 1. 準備轉場容器
       this.prepareTransitionContainer(container);
-      
+
       // 2. 顯示載入效果（根據性能配置決定）
       if (showLoader && !this.performanceConfig.reducedMotion) {
         this.showGamingLoader();
       }
-      
+
       // 3. 顯示粒子效果（低端設備跳過）
-      if (showParticles && !this.performanceConfig.isLowEndDevice && !this.performanceConfig.reducedMotion) {
+      if (
+        showParticles &&
+        !this.performanceConfig.isLowEndDevice &&
+        !this.performanceConfig.reducedMotion
+      ) {
         this.showTransitionParticles();
       }
-      
+
       // 4. 執行退出動畫
       await this.animatePageExit(container, transitionType);
-      
+
       // 5. 渲染新頁面
       await renderNewPage();
-      
+
       // 6. 執行進入動畫
       await this.animatePageEnter(container, transitionType);
-      
+
       // 7. 清理效果
       this.hideGamingLoader();
       this.hideTransitionParticles();
       this.cleanupTransitionContainer(container);
-      
+
       console.log('✅ Page transition completed');
-      
     } catch (error) {
       console.error('❌ Page transition failed:', error);
-      
+
       // 錯誤恢復
       this.hideGamingLoader();
       this.hideTransitionParticles();
       this.cleanupTransitionContainer(container);
-      
     } finally {
       this.isTransitioning = false;
     }
   }
-  
+
   /**
    * 準備轉場容器
    */
@@ -357,7 +363,7 @@ export class PageTransitionManager {
       container.classList.add('page-transition-container');
     }
   }
-  
+
   /**
    * 執行頁面退出動畫
    */
@@ -367,16 +373,16 @@ export class PageTransitionManager {
       console.warn(`⚠️ Unknown transition type: ${transitionType}`);
       return;
     }
-    
+
     // 獲取退出動畫類名
     const exitClass = this.getExitAnimationClass(config.exit);
-    
-    return new Promise((resolve) => {
+
+    return new Promise(resolve => {
       if (container.children.length > 0) {
         const currentContent = container.children[0];
         currentContent.classList.add('page-exiting');
         currentContent.classList.add(exitClass);
-        
+
         // 動畫完成後清理
         setTimeout(() => {
           resolve();
@@ -386,7 +392,7 @@ export class PageTransitionManager {
       }
     });
   }
-  
+
   /**
    * 執行頁面進入動畫
    */
@@ -395,16 +401,16 @@ export class PageTransitionManager {
     if (!config) {
       return;
     }
-    
+
     // 獲取進入動畫類名
     const enterClass = this.getEnterAnimationClass(config.enter);
-    
-    return new Promise((resolve) => {
+
+    return new Promise(resolve => {
       if (container.children.length > 0) {
         const newContent = container.children[container.children.length - 1];
         newContent.classList.add('page-entering');
         newContent.classList.add(enterClass);
-        
+
         // 動畫完成後清理類名
         setTimeout(() => {
           newContent.classList.remove('page-entering', enterClass);
@@ -415,37 +421,37 @@ export class PageTransitionManager {
       }
     });
   }
-  
+
   /**
    * 獲取退出動畫類名
    */
   getExitAnimationClass(exitType) {
     const animationMap = {
-      'fadeOut': 'transition-fade-out',
-      'slideOutLeft': 'transition-slide-out-left'
+      fadeOut: 'transition-fade-out',
+      slideOutLeft: 'transition-slide-out-left',
     };
     return animationMap[exitType] || 'transition-fade-out';
   }
-  
+
   /**
    * 獲取進入動畫類名
    */
   getEnterAnimationClass(enterType) {
     const animationMap = {
-      'slideInUp': 'transition-slide-in-up',
-      'slideInDown': 'transition-slide-in-down',
-      'scaleIn': 'transition-scale-in'
+      slideInUp: 'transition-slide-in-up',
+      slideInDown: 'transition-slide-in-down',
+      scaleIn: 'transition-scale-in',
     };
     return animationMap[enterType] || 'transition-slide-in-up';
   }
-  
+
   /**
    * 顯示遊戲化載入器
    */
   showGamingLoader() {
     // 移除現有載入器
     this.hideGamingLoader();
-    
+
     const loader = document.createElement('div');
     loader.id = 'gaming-page-loader';
     loader.classList.add('gaming-loader');
@@ -453,10 +459,10 @@ export class PageTransitionManager {
       <div class="gaming-loader-icon">⚡</div>
       <div class="gaming-loader-text">Loading...</div>
     `;
-    
+
     document.body.appendChild(loader);
   }
-  
+
   /**
    * 隱藏遊戲化載入器
    */
@@ -466,18 +472,18 @@ export class PageTransitionManager {
       loader.remove();
     }
   }
-  
+
   /**
    * 顯示轉場粒子效果
    */
   showTransitionParticles() {
     // 移除現有粒子
     this.hideTransitionParticles();
-    
+
     const particlesContainer = document.createElement('div');
     particlesContainer.id = 'transition-particles';
     particlesContainer.classList.add('transition-particles', 'active');
-    
+
     // 創建粒子
     for (let i = 0; i < 20; i++) {
       const particle = document.createElement('div');
@@ -487,15 +493,15 @@ export class PageTransitionManager {
       particle.style.animationDelay = Math.random() * 0.5 + 's';
       particlesContainer.appendChild(particle);
     }
-    
+
     document.body.appendChild(particlesContainer);
-    
+
     // 自動清理粒子
     setTimeout(() => {
       this.hideTransitionParticles();
     }, 2000);
   }
-  
+
   /**
    * 隱藏轉場粒子效果
    */
@@ -506,7 +512,7 @@ export class PageTransitionManager {
       setTimeout(() => particles.remove(), 200);
     }
   }
-  
+
   /**
    * 清理轉場容器
    */
@@ -516,14 +522,14 @@ export class PageTransitionManager {
     exitingElements.forEach(element => {
       element.remove();
     });
-    
+
     // 清理類名
     const enteringElements = container.querySelectorAll('.page-entering');
     enteringElements.forEach(element => {
       element.classList.remove('page-entering');
     });
   }
-  
+
   /**
    * 設置轉場類型
    */
@@ -535,7 +541,7 @@ export class PageTransitionManager {
       console.warn(`⚠️ Unknown transition type: ${type}`);
     }
   }
-  
+
   /**
    * 根據路由路徑選擇合適的轉場效果
    */
@@ -543,35 +549,35 @@ export class PageTransitionManager {
     // 基於路由路徑選擇轉場效果的邏輯
     const routeTransitions = {
       '/': 'fadeSlideUp',
-      '/about': 'fadeSlideDown', 
+      '/about': 'fadeSlideDown',
       '/skills': 'scaleSlide',
       '/work-projects': 'fadeSlideUp',
       '/personal-projects': 'scaleSlide',
-      '/contact': 'fadeSlideDown'
+      '/contact': 'fadeSlideDown',
     };
-    
+
     return routeTransitions[toPath] || 'fadeSlideUp';
   }
-  
+
   /**
    * 檢查是否正在轉場中
    */
   isInTransition() {
     return this.isTransitioning;
   }
-  
+
   /**
    * 銷毀轉場管理器
    */
   destroy() {
     this.hideGamingLoader();
     this.hideTransitionParticles();
-    
+
     const styles = document.getElementById('page-transition-styles');
     if (styles) {
       styles.remove();
     }
-    
+
     console.log('🔥 PageTransitionManager destroyed');
   }
 }
