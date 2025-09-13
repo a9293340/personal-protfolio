@@ -6,6 +6,7 @@
 import { Router } from './core/router/Router.js';
 import { routesConfig, validateRoutesConfig, getRouteStats } from './config/routes.config.js';
 import { NavBar } from './components/layout/NavBar.js';
+import { initializeGlobalNavigation } from './systems/NavigationManager.js';
 
 /**
  * 主應用程式類
@@ -14,6 +15,7 @@ class GamingPortfolioApp {
   constructor() {
     this.router = null;
     this.navbar = null;
+    this.navigationManager = null;
     this.initialized = false;
   }
   
@@ -38,7 +40,10 @@ class GamingPortfolioApp {
       
       // 初始化導航系統
       await this.initializeNavBar();
-      
+
+      // 初始化導航管理器（包含麵包屑導航）
+      await this.initializeNavigationManager();
+
       // 初始化路由系統
       await this.initializeRouter();
       
@@ -113,13 +118,24 @@ class GamingPortfolioApp {
   }
   
   /**
+   * 初始化導航管理器
+   */
+  async initializeNavigationManager() {
+    console.log('🧭 Initializing navigation manager...');
+
+    this.navigationManager = await initializeGlobalNavigation();
+
+    console.log('✅ Navigation manager initialized');
+  }
+
+  /**
    * 初始化路由系統
    */
   async initializeRouter() {
     console.log('🛣️ Initializing router...');
-    
+
     this.router = new Router();
-    
+
     // 註冊所有路由
     routesConfig.forEach(route => {
       this.router.register(route.path, route.component, {
@@ -127,7 +143,7 @@ class GamingPortfolioApp {
         meta: route.meta
       });
     });
-    
+
     console.log('✅ Router initialized with', routesConfig.length, 'routes');
   }
   
@@ -179,12 +195,17 @@ class GamingPortfolioApp {
       this.navbar.destroy();
       this.navbar = null;
     }
-    
+
+    if (this.navigationManager) {
+      this.navigationManager.destroy();
+      this.navigationManager = null;
+    }
+
     if (this.router) {
       this.router.destroy();
       this.router = null;
     }
-    
+
     this.initialized = false;
     console.log('🔥 Gaming Portfolio - Destroyed');
   }

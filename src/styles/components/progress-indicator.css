@@ -1,0 +1,745 @@
+/**
+ * 頁面進度指示器樣式
+ * Step 3.5.3 階段2: 遊戲化進度追蹤系統
+ */
+
+/* ================================
+   基礎進度指示器樣式
+   ================================ */
+
+.progress-indicator {
+  position: fixed;
+  z-index: 850;
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(16, 16, 36, 0.9));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(212, 175, 55, 0.1);
+  padding: 16px;
+  transition: all 0.3s var(--transition-smooth);
+  opacity: 1;
+  transform: scale(1);
+  max-width: 280px;
+  min-width: 220px;
+}
+
+.progress-indicator--hidden {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+/* ================================
+   位置變體
+   ================================ */
+
+.progress-indicator--top-right {
+  top: 120px;
+  right: 20px;
+}
+
+.progress-indicator--top-left {
+  top: 120px;
+  left: 20px;
+}
+
+.progress-indicator--bottom-right {
+  bottom: 20px;
+  right: 20px;
+}
+
+.progress-indicator--bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+
+/* ================================
+   主進度顯示
+   ================================ */
+
+.progress-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* ================================
+   進度圓環
+   ================================ */
+
+.progress-circle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.progress-circle-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(0deg);
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.3));
+}
+
+.progress-bg-circle {
+  opacity: 0.3;
+}
+
+.progress-fill-circle {
+  transition: stroke-dashoffset 1s var(--transition-smooth);
+  filter: drop-shadow(0 0 4px var(--primary-gold));
+}
+
+/* 圓環內容 */
+.progress-milestone-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1.8rem;
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6));
+}
+
+.progress-percentage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--primary-gold);
+  text-align: center;
+}
+
+/* 脈衝動畫 */
+.progress-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transform: scale(1);
+  pointer-events: none;
+}
+
+.progress-pulse--active {
+  animation: progressPulse 2s infinite;
+}
+
+@keyframes progressPulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+/* ================================
+   進度資訊
+   ================================ */
+
+.progress-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.progress-percentage-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-gold);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.progress-stats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.progress-visited {
+  color: var(--primary-gold);
+  font-weight: 600;
+}
+
+.progress-separator {
+  color: var(--color-text-muted);
+}
+
+.progress-total {
+  color: var(--color-text-secondary);
+}
+
+.progress-label {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.progress-milestone-name {
+  font-size: 0.8rem;
+  color: var(--bright-gold);
+  font-weight: 500;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(244, 208, 63, 0.1));
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ================================
+   里程碑指示器
+   ================================ */
+
+.progress-milestones {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.progress-milestone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s var(--transition-smooth);
+  flex: 1;
+  min-width: 0;
+}
+
+.progress-milestone:hover {
+  background: rgba(212, 175, 55, 0.1);
+  transform: translateY(-2px);
+}
+
+.progress-milestone--achieved {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(244, 208, 63, 0.2));
+  border: 1px solid rgba(212, 175, 55, 0.5);
+}
+
+.progress-milestone--achieved .milestone-icon {
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.8));
+  animation: milestoneGlow 2s infinite alternate;
+}
+
+@keyframes milestoneGlow {
+  from { filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.8)); }
+  to { filter: drop-shadow(0 0 12px rgba(212, 175, 55, 1)); }
+}
+
+.milestone-icon {
+  font-size: 1.2rem;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.progress-milestone--achieved .milestone-icon {
+  opacity: 1;
+}
+
+.milestone-progress {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.progress-milestone--achieved .milestone-progress {
+  color: var(--primary-gold);
+}
+
+/* ================================
+   下一個目標
+   ================================ */
+
+.progress-next-goal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(244, 208, 63, 0.05));
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.next-goal-icon {
+  font-size: 1.2rem;
+  opacity: 0.8;
+  animation: nextGoalPulse 2s infinite;
+}
+
+@keyframes nextGoalPulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.next-goal-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.next-goal-name {
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.next-goal-remaining {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* ================================
+   切換按鈕
+   ================================ */
+
+.progress-toggle {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(244, 208, 63, 0.1));
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.progress-toggle:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(244, 208, 63, 0.2));
+  color: var(--primary-gold);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
+}
+
+.progress-toggle:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(212, 175, 55, 0.2);
+}
+
+.toggle-icon {
+  font-size: 1rem;
+}
+
+/* ================================
+   詳細面板
+   ================================ */
+
+.progress-details {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 320px !important;
+  max-width: 90vw !important;
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(16, 16, 36, 0.95)) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
+  border-radius: 12px !important;
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.5),
+    0 0 25px rgba(212, 175, 55, 0.15) !important;
+  opacity: 0 !important;
+  transform: translate(-50%, -50%) scale(0.95) !important;
+  pointer-events: none !important;
+  transition: all 0.4s var(--transition-smooth) !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
+}
+
+.progress-details--open {
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(1) !important;
+  pointer-events: all !important;
+}
+
+.progress-details-content {
+  padding: 20px;
+}
+
+.details-title {
+  color: var(--primary-gold);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-align: center;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  padding-bottom: 8px;
+}
+
+/* ================================
+   詳情頁面狀態
+   ================================ */
+
+.details-pages {
+  margin-bottom: 20px;
+}
+
+.details-page {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.details-page--visited {
+  opacity: 1;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.page-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.page-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.details-page--visited .page-name {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.page-status {
+  font-size: 1rem;
+}
+
+/* ================================
+   成就統計
+   ================================ */
+
+.details-achievements {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.achievement-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.achievement-item:last-child {
+  border-bottom: none;
+}
+
+.achievement-label {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.achievement-value {
+  font-size: 0.9rem;
+  color: var(--primary-gold);
+  font-weight: 600;
+}
+
+/* ================================
+   關閉按鈕
+   ================================ */
+
+.details-close {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(244, 208, 63, 0.2));
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 6px;
+  color: var(--color-text-primary);
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.details-close:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.4), rgba(244, 208, 63, 0.3));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+/* ================================
+   里程碑成就通知
+   ================================ */
+
+.milestone-achievement-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(16, 16, 36, 0.95));
+  backdrop-filter: blur(15px);
+  border: 2px solid var(--primary-gold);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.6),
+    0 0 30px rgba(212, 175, 55, 0.4);
+  max-width: 400px;
+  text-align: center;
+}
+
+.achievement-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.achievement-icon {
+  font-size: 3rem;
+  filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.8));
+  animation: achievementIconPulse 1s infinite alternate;
+}
+
+@keyframes achievementIconPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+
+.achievement-text {
+  flex: 1;
+  text-align: left;
+}
+
+.achievement-title {
+  font-size: 1.2rem;
+  color: var(--primary-gold);
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.achievement-name {
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.achievement-desc {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+/* ================================
+   響應式設計
+   ================================ */
+
+/* 平板版 */
+@media (max-width: 768px) {
+  .progress-indicator {
+    padding: 12px;
+    max-width: 240px;
+    min-width: 200px;
+  }
+
+  .progress-indicator--top-right,
+  .progress-indicator--top-left {
+    top: 100px;
+  }
+
+  .progress-circle {
+    width: 60px;
+    height: 60px;
+  }
+
+  .progress-milestone-icon {
+    font-size: 1.4rem;
+  }
+
+  .progress-percentage {
+    font-size: 0.8rem;
+  }
+
+  .progress-percentage-text {
+    font-size: 1.2rem;
+  }
+
+  .progress-details {
+    width: 280px;
+  }
+}
+
+/* 手機版 */
+@media (max-width: 480px) {
+  .progress-indicator {
+    padding: 8px;
+    max-width: 160px; /* 減小寬度 */
+    min-width: 140px;
+    transform: scale(0.9); /* 整體縮小 */
+  }
+
+  .progress-indicator--top-right {
+    top: 10px; /* 移到更頂部 */
+    right: 8px;
+  }
+
+  .progress-indicator--top-left {
+    top: 10px;
+    left: 8px;
+  }
+
+  .progress-main {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .progress-circle {
+    width: 50px;
+    height: 50px;
+  }
+
+  .progress-milestone-icon {
+    font-size: 1.2rem;
+  }
+
+  .progress-percentage {
+    font-size: 0.7rem;
+  }
+
+  .progress-percentage-text {
+    font-size: 1rem;
+  }
+
+  .progress-stats {
+    font-size: 0.8rem;
+  }
+
+  .progress-milestone-name {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+
+  .progress-milestones {
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .milestone-icon {
+    font-size: 1rem;
+  }
+
+  .milestone-progress {
+    font-size: 0.6rem;
+  }
+
+  /* 手機版詳情面板調整 */
+  .progress-details {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 300px;
+    margin: 0;
+  }
+
+  .progress-details--open {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .milestone-achievement-notification {
+    max-width: 90vw;
+    padding: 20px;
+  }
+
+  .achievement-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .achievement-text {
+    text-align: center;
+  }
+}
+
+/* ================================
+   高對比度模式
+   ================================ */
+
+@media (prefers-contrast: high) {
+  .progress-indicator {
+    background: rgba(0, 0, 0, 0.95);
+    border-color: #ffffff;
+  }
+
+  .progress-fill-circle {
+    stroke: #ffffff;
+  }
+
+  .progress-percentage,
+  .progress-percentage-text,
+  .progress-visited {
+    color: #ffffff;
+  }
+
+  .progress-milestone--achieved {
+    background: #ffffff;
+    color: #000000;
+  }
+}
+
+/* ================================
+   減少動畫模式
+   ================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-indicator,
+  .progress-details,
+  .progress-milestone,
+  .progress-toggle {
+    animation: none;
+    transition: none;
+  }
+
+  .progress-pulse,
+  .milestone-glow,
+  .nextGoalPulse,
+  .achievementIconPulse {
+    animation: none;
+  }
+}

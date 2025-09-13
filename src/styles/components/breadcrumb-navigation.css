@@ -1,0 +1,453 @@
+/**
+ * 麵包屑導航樣式
+ * Step 3.5.3 階段1: 遊戲化麵包屑導航系統
+ */
+
+/* ================================
+   基礎麵包屑樣式
+   ================================ */
+
+.breadcrumb-nav {
+  position: sticky;
+  top: 70px; /* 在主導航下方 */
+  z-index: 900;
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(16, 16, 36, 0.95));
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  transition: all 0.3s var(--transition-smooth);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.breadcrumb-nav--hidden {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+.breadcrumb-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ================================
+   麵包屑清單
+   ================================ */
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex: 1;
+  min-width: 0; /* 允許溢出處理 */
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ================================
+   麵包屑連結樣式
+   ================================ */
+
+.breadcrumb-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  border-radius: 6px;
+  transition: all 0.3s var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.breadcrumb-link:hover {
+  color: var(--primary-gold);
+  background: rgba(212, 175, 55, 0.1);
+  transform: translateY(-1px);
+}
+
+.breadcrumb-link:hover .breadcrumb-icon {
+  transform: scale(1.1);
+}
+
+.breadcrumb-link:active {
+  transform: translateY(0);
+}
+
+/* 點擊波紋效果 */
+.breadcrumb-link::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+  pointer-events: none;
+}
+
+.breadcrumb-link:active::before {
+  width: 100px;
+  height: 100px;
+}
+
+/* ================================
+   當前頁面樣式
+   ================================ */
+
+.breadcrumb-current {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  color: var(--primary-gold);
+  font-weight: 600;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(244, 208, 63, 0.1));
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+}
+
+/* ================================
+   圖標與文字
+   ================================ */
+
+.breadcrumb-icon {
+  font-size: 1.1rem;
+  transition: transform 0.3s var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.breadcrumb-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.breadcrumb-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-left: 4px;
+  opacity: 0.8;
+}
+
+/* ================================
+   分隔符
+   ================================ */
+
+.breadcrumb-separator {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  margin: 0 4px;
+}
+
+.separator-icon {
+  width: 12px;
+  height: 12px;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+/* ================================
+   快速動作按鈕
+   ================================ */
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.breadcrumb-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.3s var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.breadcrumb-action:hover {
+  background: rgba(212, 175, 55, 0.2);
+  color: var(--primary-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
+}
+
+.breadcrumb-action:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(212, 175, 55, 0.2);
+}
+
+.action-icon {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.breadcrumb-action:hover .action-icon {
+  transform: scale(1.1);
+}
+
+/* ================================
+   遊戲風格變體
+   ================================ */
+
+.breadcrumb-nav--gaming {
+  background: linear-gradient(135deg,
+    rgba(26, 26, 46, 0.98),
+    rgba(16, 16, 36, 0.95)
+  );
+  border-bottom: 2px solid var(--primary-gold);
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(212, 175, 55, 0.1);
+}
+
+.breadcrumb-nav--gaming .breadcrumb-current {
+  background: linear-gradient(135deg,
+    rgba(212, 175, 55, 0.2),
+    rgba(244, 208, 63, 0.15)
+  );
+  border: 1px solid var(--primary-gold);
+  box-shadow:
+    0 2px 10px rgba(212, 175, 55, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.breadcrumb-nav--gaming .breadcrumb-icon {
+  filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.5));
+}
+
+/* ================================
+   響應式設計
+   ================================ */
+
+/* 平板版 */
+@media (max-width: 768px) {
+  .breadcrumb-nav {
+    top: 60px; /* 調整手機版導航高度 */
+  }
+
+  .breadcrumb-container {
+    padding: 10px 16px;
+    gap: 12px;
+  }
+
+  .breadcrumb-desc {
+    display: none; /* 隱藏描述節省空間 */
+  }
+
+  .breadcrumb-text {
+    font-size: 0.85rem;
+  }
+
+  .breadcrumb-action {
+    width: 32px;
+    height: 32px;
+  }
+
+  .action-icon {
+    font-size: 1rem;
+  }
+}
+
+/* 手機版 */
+@media (max-width: 480px) {
+  .breadcrumb-nav {
+    position: relative; /* 改為相對定位，減少佔位 */
+    top: auto;
+    background: rgba(26, 26, 46, 0.9); /* 調整透明度 */
+    border-bottom-width: 1px; /* 減薄邊框 */
+  }
+
+  .breadcrumb-container {
+    padding: 6px 12px; /* 減少垂直內距 */
+    gap: 6px;
+    min-height: 40px; /* 設定最小高度 */
+  }
+
+  .breadcrumb-link,
+  .breadcrumb-current {
+    padding: 3px 6px; /* 減少內距 */
+    gap: 3px;
+  }
+
+  .breadcrumb-text {
+    font-size: 0.75rem; /* 減小字體 */
+  }
+
+  .breadcrumb-icon {
+    font-size: 0.9rem; /* 減小圖標 */
+  }
+
+  .breadcrumb-actions {
+    gap: 4px;
+  }
+
+  .breadcrumb-action {
+    width: 24px; /* 減小按鈕 */
+    height: 24px;
+  }
+
+  .action-icon {
+    font-size: 0.8rem;
+  }
+
+  /* 長路徑處理 */
+  .breadcrumb-list {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .breadcrumb-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 在首頁時完全隱藏麵包屑 */
+  .breadcrumb-nav--hidden {
+    display: none;
+  }
+}
+
+/* ================================
+   動畫效果
+   ================================ */
+
+/* 入場動畫 */
+@keyframes breadcrumbSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.breadcrumb-nav {
+  animation: breadcrumbSlideIn 0.4s var(--transition-smooth);
+}
+
+/* 麵包屑項目依序入場 */
+.breadcrumb-item {
+  animation: breadcrumbItemSlideIn 0.3s var(--transition-smooth) forwards;
+  animation-delay: calc(var(--item-index, 0) * 0.1s);
+  opacity: 0;
+}
+
+@keyframes breadcrumbItemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 預設所有項目透明度為1，以防JavaScript未載入 */
+.breadcrumb-item {
+  opacity: 1;
+}
+
+/* 懸停光效 */
+.breadcrumb-link::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+
+.breadcrumb-link:hover::after {
+  left: 100%;
+}
+
+/* ================================
+   高對比度模式支援
+   ================================ */
+
+@media (prefers-contrast: high) {
+  .breadcrumb-nav {
+    background: rgba(0, 0, 0, 0.95);
+    border-bottom-color: #ffffff;
+  }
+
+  .breadcrumb-link {
+    color: #ffffff;
+  }
+
+  .breadcrumb-current {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+  }
+
+  .breadcrumb-action {
+    background: transparent;
+    border-color: #ffffff;
+    color: #ffffff;
+  }
+}
+
+/* ================================
+   減少動畫模式
+   ================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .breadcrumb-nav,
+  .breadcrumb-item,
+  .breadcrumb-link,
+  .breadcrumb-action,
+  .breadcrumb-icon {
+    animation: none;
+    transition: none;
+  }
+
+  .breadcrumb-link::before,
+  .breadcrumb-link::after {
+    display: none;
+  }
+}

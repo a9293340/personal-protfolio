@@ -4,6 +4,9 @@
 
 /* ===== 導入組件樣式 ===== */
 @import './components/navbar.css';
+@import './components/breadcrumb-navigation.css';
+@import './components/progress-indicator.css';
+@import './components/keyboard-navigation.css';
 @import './components/hero.css';
 @import './components/PreviewSection.css';
 @import './components/AboutPage.css';
@@ -26,6 +29,11 @@
   --primary-blue: #2980b9;
   --primary-red: #8b0000;
 
+  /* 文字色彩 */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b0b0c0;
+  --color-text-muted: #888899;
+
   /* 字體系統 */
   --font-heading: 'Cinzel', 'Noto Serif TC', serif;
   --font-body: 'Inter', 'Noto Sans TC', sans-serif;
@@ -37,6 +45,9 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
+
+  /* 過渡動畫 */
+  --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===== 基礎重置 ===== */
