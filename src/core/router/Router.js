@@ -12,6 +12,7 @@ export class Router {
     this.currentRoute = null;
     this.currentComponent = null;
     this.previousRoute = null;
+    this.isNavigating = false;
     
     // 初始化頁面轉場管理器
     this.transitionManager = new PageTransitionManager();
@@ -61,11 +62,14 @@ export class Router {
         return;
       }
       
-      // 檢查是否正在轉場中
-      if (this.transitionManager.isInTransition()) {
-        console.warn('⚠️ Navigation blocked - transition in progress');
+      // 檢查是否正在轉場中或導航中
+      if (this.transitionManager.isInTransition() || this.isNavigating) {
+        console.warn('⚠️ Navigation blocked - transition or navigation in progress');
         return;
       }
+      
+      // 標記開始導航，防止併發導航
+      this.isNavigating = true;
       
       // 檢查路由是否存在
       let route = this.routes.get(path);
@@ -96,7 +100,7 @@ export class Router {
       // 記錄路由變化
       this.previousRoute = this.currentRoute;
       
-      // 暫時使用原始渲染方式來修復 3.5.1 問題
+      // 暫時禁用轉場動畫，使用原始渲染方式確保穩定性
       await this.renderComponent(route.component, path);
       
       // 更新當前路由
@@ -106,7 +110,20 @@ export class Router {
       
     } catch (error) {
       console.error('❌ Navigation failed:', error);
-      this.showError(`Navigation failed: ${error.message}`);
+      
+      // 如果轉場動畫失敗，降級使用原始渲染方式
+      console.warn('🔄 Falling back to simple rendering due to transition error');
+      try {
+        await this.renderComponent(route.component, path);
+        this.currentRoute = path;
+        console.log(`✅ Navigation complete (fallback): ${path}`);
+      } catch (fallbackError) {
+        console.error('❌ Fallback navigation also failed:', fallbackError);
+        this.showError(`Navigation failed: ${error.message}`);
+      }
+    } finally {
+      // 無論成功或失敗，都清除導航標誌
+      this.isNavigating = false;
     }
   }
   
