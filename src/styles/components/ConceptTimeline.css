@@ -37,7 +37,7 @@
 }
 
 /* 時間線容器 - 重新設計佈局 */
-.timeline-container {
+.concept-timeline-container {
   position: relative;
   padding: 2rem 0;
   display: flex;
@@ -443,7 +443,7 @@
     margin-bottom: 1.5rem;
   }
   
-  .timeline-container {
+  .concept-timeline-container {
     padding: 1.5rem 0;
   }
   

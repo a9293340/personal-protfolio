@@ -37,7 +37,7 @@ export class ConceptTimeline extends BaseComponent {
         </div>
 
         <!-- 水平時間線容器 -->
-        <div class="timeline-container">
+        <div class="concept-timeline-container">
           <div class="timeline-line"></div>
           
           <!-- 階段節點 -->
