@@ -39,7 +39,8 @@ export class InteractiveTimeline extends BaseComponent {
     this.adaptedProjects = [];
     this.layoutNodes = [];
     
-    this.init();
+    // 不在構造函數中直接初始化，而是等待容器準備完成
+    // this.init();
   }
 
   getDefaultConfig() {
@@ -628,6 +629,11 @@ export class InteractiveTimeline extends BaseComponent {
     }
     if (this.config.height) {
       this.element.style.height = this.config.height;
+      console.log(`🎨 InteractiveTimeline height set to: ${this.config.height}`);
+    } else {
+      // 設定默認高度
+      this.element.style.height = '600px';
+      console.log(`🎨 InteractiveTimeline using default height: 600px`);
     }
   }
 
@@ -652,8 +658,6 @@ export class InteractiveTimeline extends BaseComponent {
                 </linearGradient>
               </defs>
               <path class="timeline-path" stroke="url(#timelineGradient)" fill="none"/>
-              <!-- 調試：顯示時間軸中心線 -->
-              <line class="timeline-debug-center" x1="0" y1="${this.calculateSVGDimensions().height / 2}" x2="${this.calculateSVGDimensions().width}" y2="${this.calculateSVGDimensions().height / 2}" stroke="rgba(255, 0, 0, 0.5)" stroke-width="2" stroke-dasharray="5,5"/>
             </svg>
             
             <div class="timeline-nodes">
@@ -714,7 +718,7 @@ export class InteractiveTimeline extends BaseComponent {
         .timeline-container {
           width: 100%;
           height: 100%;
-          min-height: 400px;
+          min-height: 600px;
           position: relative;
           display: flex;
           flex-direction: column;
@@ -830,8 +834,9 @@ export class InteractiveTimeline extends BaseComponent {
         .timeline-viewport {
           flex: 1;
           position: relative;
-          overflow: hidden; /* 桌面版保持 hidden */
+          /* overflow: hidden; -- 移除此設定讓內容可以顯示 */
           min-height: 350px;
+          height: 100%;
           cursor: grab;
         }
         
@@ -843,6 +848,8 @@ export class InteractiveTimeline extends BaseComponent {
           position: absolute;
           top: 0;
           left: 0;
+          margin: 0;
+          padding: 0;
           transition: transform 0.3s ease-out;
           transform-origin: top left;
         }
@@ -1377,6 +1384,9 @@ export class InteractiveTimeline extends BaseComponent {
     svg.style.width = svgWidth + 'px';
     svg.style.height = svgHeight + 'px';
     svg.style.display = 'block';
+    svg.style.position = 'absolute';
+    svg.style.top = '0';
+    svg.style.left = '0';
     
     // 同步更新粒子畫布尺寸
     const canvas = this.element.querySelector('.particles-canvas');
@@ -1431,9 +1441,9 @@ export class InteractiveTimeline extends BaseComponent {
               Q ${centerX + controlOffset} ${midY + 30} ${centerX} ${endY}`;
     } else {
       // 水平時間軸 (桌面版)
-      const startX = padding;
-      const endX = width - padding;
-      const centerY = height * 0.85; // 調整到85%高度位置，讓節點更靠下
+      const startX = 0; // 從左邊開始，不要 padding
+      const endX = width; // 延伸到右邊，不要 padding
+      const centerY = height * 0.5; // 調整到50%高度位置，與紅色調試線對齊
       
       // 創建自然的波浪曲線
       const controlOffset = height * 0.2;
@@ -2965,12 +2975,74 @@ export class InteractiveTimeline extends BaseComponent {
           this.setupYearFilter(); // Step 2.2.4a 新增年份篩選
           this.setupTouchGestures(); // Step 2.2.4b 新增觸控手勢
           this.setupDesktopEnhancements(); // Step 2.2.4c 新增桌面端增強
+          
+          // 初始化完成後進行居中對齊
+          this.centerTimelineInitially();
+          
           console.log('[InteractiveTimeline] DOM 掛載後設定完成');
         });
       });
       
     } catch (error) {
       console.error('[InteractiveTimeline] DOM 掛載後設定失敗:', error);
+    }
+  }
+
+  /**
+   * 初始化後進行時間軸居中對齊
+   */
+  centerTimelineInitially(retryCount = 0) {
+    try {
+      // 避免無限重試，最多重試 5 次
+      if (retryCount >= 5) {
+        console.warn('[InteractiveTimeline] 已達到最大重試次數，放棄居中對齊');
+        return;
+      }
+      
+      if (retryCount === 0) {
+        console.log('[InteractiveTimeline] 執行初始居中對齊');
+      }
+      
+      const timelineContent = this.element.querySelector('.timeline-content');
+      const viewport = this.element.querySelector('.timeline-viewport');
+      
+      if (!timelineContent || !viewport) {
+        console.warn('[InteractiveTimeline] 無法找到時間軸內容或視窗元素');
+        return;
+      }
+      
+      // 等待一個 requestAnimationFrame 確保 DOM 尺寸正確計算
+      requestAnimationFrame(() => {
+        const contentDimensions = this.calculateSVGDimensions();
+        const viewportWidth = viewport.clientWidth;
+        const viewportHeight = viewport.clientHeight;
+        
+        // 如果視窗寬度仍然是 0，則等待更長時間再嘗試
+        if (viewportWidth === 0) {
+          if (retryCount < 3) {
+            // 只在前幾次重試時顯示警告
+            console.warn(`[InteractiveTimeline] 視窗寬度為 0，第 ${retryCount + 1} 次重試...`);
+          }
+          setTimeout(() => {
+            this.centerTimelineInitially(retryCount + 1);
+          }, 200);
+          return;
+        }
+        
+        // 計算水平和垂直居中偏移
+        // 對於水平居中，如果內容寬度小於視窗寬度才需要居中偏移
+        const offsetX = contentDimensions.width < viewportWidth ? 
+          (viewportWidth - contentDimensions.width) / 2 : 0;
+        const offsetY = Math.max(0, (viewportHeight - contentDimensions.height) / 2);
+        
+        // 應用初始變換，確保內容可見且居中
+        timelineContent.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        
+        console.log(`[InteractiveTimeline] 初始居中完成，視窗: ${viewportWidth}x${viewportHeight}, 偏移: ${offsetX}px, ${offsetY}px`);
+      });
+      
+    } catch (error) {
+      console.error('[InteractiveTimeline] 初始居中失敗:', error);
     }
   }
 

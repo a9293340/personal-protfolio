@@ -224,16 +224,30 @@ export class WorkProjectsPage extends BaseComponent {
         console.warn('⚠️ 時間軸容器可能不可見');
       }
 
+      // 等待 DOM 佈局完成後再初始化 InteractiveTimeline
+      await new Promise(resolve => {
+        // 使用多個 requestAnimationFrame 確保佈局完全完成
+        requestAnimationFrame(() => {
+          requestAnimationFrame(async () => {
+            // 檢查容器寬度是否已正確計算
+            if (container && container.clientWidth > 0) {
+              console.log('[WorkProjectsPage] 容器寬度已準備完成:', container.clientWidth);
+              await this.interactiveTimeline.init();
+              resolve();
+            } else {
+              // 如果寬度仍然是 0，等待更長時間
+              console.warn('[WorkProjectsPage] 容器寬度仍為 0，延遲初始化');
+              setTimeout(async () => {
+                await this.interactiveTimeline.init();
+                resolve();
+              }, 100);
+            }
+          });
+        });
+      });
+
       // 監聽時間軸事件
       this.setupTimelineEvents();
-      
-      // 等待初始化完成 (如果有 initialized promise)
-      if (this.interactiveTimeline.initialized) {
-        await this.interactiveTimeline.initialized;
-      } else {
-        // 如果沒有 promise，等待一小段時間讓初始化完成
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
       
       // 隱藏載入狀態
       loading.style.display = 'none';
