@@ -114,9 +114,12 @@ export class Router {
       // 如果轉場動畫失敗，降級使用原始渲染方式
       console.warn('🔄 Falling back to simple rendering due to transition error');
       try {
-        await this.renderComponent(route.component, path);
-        this.currentRoute = path;
-        console.log(`✅ Navigation complete (fallback): ${path}`);
+        const fallbackRoute = this.routes.get(path) || this.routes.get('/');
+        if (fallbackRoute) {
+          await this.renderComponent(fallbackRoute.component, path);
+          this.currentRoute = path;
+          console.log(`✅ Navigation complete (fallback): ${path}`);
+        }
       } catch (fallbackError) {
         console.error('❌ Fallback navigation also failed:', fallbackError);
         this.showError(`Navigation failed: ${error.message}`);

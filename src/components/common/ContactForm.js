@@ -490,7 +490,7 @@ export class ContactForm extends BaseComponent {
     const field = e.target;
     const fieldName = field.name;
     
-    if (fieldName && this.formData.hasOwnProperty(fieldName)) {
+    if (fieldName && Object.prototype.hasOwnProperty.call(this.formData, fieldName)) {
       this.formData[fieldName] = field.value;
       this.validateField(fieldName, field.value);
     }
@@ -563,12 +563,13 @@ export class ContactForm extends BaseComponent {
           }
           break;
           
-        case 'email':
+        case 'email': {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (value && !emailRegex.test(value)) {
             errors.push(rule.message);
           }
           break;
+        }
       }
     }
     
@@ -734,7 +735,7 @@ export class ContactForm extends BaseComponent {
       const errorMessage = firstError || '請檢查並修正表單中的錯誤';
       
       // 使用 alert 確保用戶看到錯誤
-      alert(`❌ 表單驗證失敗\n\n${errorMessage}`);
+      window.alert(`❌ 表單驗證失敗\n\n${errorMessage}`);
       
       // 也嘗試在頁面上顯示錯誤訊息
       this.showFormMessage(errorMessage, 'error');
@@ -856,7 +857,7 @@ export class ContactForm extends BaseComponent {
     if (!successEl || !errorEl) {
       console.error('❌ Message elements not found!');
       // 使用 alert 作為後備方案
-      alert(`${type === 'success' ? '✅' : '❌'} ${message}`);
+      window.alert(`${type === 'success' ? '✅' : '❌'} ${message}`);
       return;
     }
     
