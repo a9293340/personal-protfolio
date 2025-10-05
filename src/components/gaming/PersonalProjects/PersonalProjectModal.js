@@ -371,12 +371,11 @@ export class PersonalProjectModal extends BaseComponent {
   resolveImagePath(path) {
     if (!path) return '';
 
-    // 如果路徑以 /images/ 開頭，轉換為 src/assets/images/
+    // 圖片已統一存放於 public/images/ 目錄
+    // 路徑格式：/images/personal-projects/project-id/image.png
+    // Vite 會自動處理 public/ 目錄下的靜態資源
     if (path.startsWith('/images/')) {
-      // 移除開頭的 /images/ 並添加正確的相對路徑
-      // Vite 開發模式會自動處理 /src/ 開頭的路徑
-      const relativePath = path.replace('/images/', '');
-      return `/src/assets/images/${relativePath}`;
+      return path;
     }
 
     // 如果是完整 URL，直接返回

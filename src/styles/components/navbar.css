@@ -79,11 +79,11 @@
   align-items: center;
   gap: 3px;
   flex-wrap: nowrap;
-  overflow-x: auto;
 }
 
 .desktop-menu {
   display: flex;
+  gap: 3px;
 }
 
 .nav-item {

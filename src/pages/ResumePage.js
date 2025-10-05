@@ -20,8 +20,8 @@ import workProjectsConfig from '../config/data/work-projects/projects.data.js';
 import { personalProjectsData } from '../config/data/personal-projects/projects.data.js';
 import resumeConfig from '../config/data/resume/education-work.config.js';
 import resumeSummaryConfig from '../config/data/resume/resume-summary.config.js';
-import headerBgImage from '../assets/images/resume/head-bg.png';
-import profilePhoto from '../assets/images/resume/profile-photo.jpg';
+import { ProjectModal } from '../components/resume/ProjectModal.js';
+import '../styles/components/project-modal.css';
 
 export class ResumePage extends BaseComponent {
   constructor(options = {}) {
@@ -39,8 +39,9 @@ export class ResumePage extends BaseComponent {
     this.educationData = resumeConfig.education;
     this.workExperienceData = resumeConfig.workExperience;
     this.resumeSummary = resumeSummaryConfig;
-    this.headerBgImage = headerBgImage;
-    this.profilePhoto = profilePhoto;
+
+    // 初始化 ProjectModal
+    this.projectModal = new ProjectModal();
   }
 
   /**
@@ -95,7 +96,7 @@ export class ResumePage extends BaseComponent {
 
           <div class="cv-header-main">
             <div class="cv-profile-section">
-              <img src="${this.profilePhoto}" alt="${personal.fullName}" class="cv-profile-photo" />
+              <img src="/images/resume/profile-photo.jpg" alt="${personal.fullName}" class="cv-profile-photo" />
             </div>
 
             <div class="cv-name-section">
@@ -219,7 +220,7 @@ export class ResumePage extends BaseComponent {
             const period = project.timeline ? `${project.timeline.startDate} ~ ${project.timeline.endDate || 'now'}` : '';
 
             return `
-              <div class="cv-project-item">
+              <div class="cv-project-item" data-project-id="${project.id}" data-project-type="work" style="cursor: pointer;">
                 <div class="cv-project-header">
                   <div>
                     <h3 class="cv-project-title">${title}</h3>
@@ -254,7 +255,7 @@ export class ResumePage extends BaseComponent {
             const description = (project.description || '').substring(0, 150) + '...';
 
             return `
-              <div class="cv-project-item">
+              <div class="cv-project-item" data-project-id="${project.id}" data-project-type="personal" style="cursor: pointer;">
                 <div class="cv-project-header">
                   <h3 class="cv-project-title">${title}</h3>
                   <span class="cv-project-type">個人專案</span>
@@ -516,7 +517,7 @@ export class ResumePage extends BaseComponent {
           left: 0;
           right: 0;
           bottom: 0;
-          background-image: url('${this.headerBgImage}');
+          background-image: url('/images/resume/head-bg.png');
           background-size: cover;
           background-position: center;
           z-index: 0;
@@ -1099,7 +1100,7 @@ export class ResumePage extends BaseComponent {
           color: #a0aec0;
         }
 
-        /* ===== Responsive ===== */
+        /* ===== Responsive - 平板與手機 ===== */
         @media (max-width: 768px) {
           .resume-page.standalone {
             padding: 0;
@@ -1107,8 +1108,8 @@ export class ResumePage extends BaseComponent {
 
           .cv-header {
             margin: 0 5% 30px 5%;
-            padding: 40px 20px;
-            border-radius: 20px;
+            padding: 35px 18px;
+            border-radius: 15px;
           }
 
           .cv-profile-photo {
@@ -1117,15 +1118,16 @@ export class ResumePage extends BaseComponent {
           }
 
           .cv-theme-toggle {
-            top: 15px;
-            right: 15px;
-            width: 45px;
-            height: 45px;
+            top: 12px;
+            right: 12px;
+            width: 42px;
+            height: 42px;
+            font-size: 1.2rem;
           }
 
           .cv-header-main {
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
           }
 
           .cv-contact-section {
@@ -1133,52 +1135,296 @@ export class ResumePage extends BaseComponent {
             min-width: auto;
           }
 
+          .cv-contact-item {
+            font-size: 0.85rem;
+          }
+
           .cv-name {
-            font-size: 2.2rem;
+            font-size: 2rem;
+            line-height: 1.2;
           }
 
           .cv-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
           }
 
           .cv-tagline {
-            font-size: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
           }
 
           .cv-career-summary {
-            margin-top: 30px;
-            padding: 20px;
+            margin-top: 25px;
+            padding: 18px;
+          }
+
+          .cv-career-summary h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+          }
+
+          .cv-career-summary p {
+            font-size: 0.9rem;
+            line-height: 1.6;
           }
 
           .cv-section {
-            padding: 20px;
-            margin: 0 5% 30px 5%;
+            padding: 18px;
+            margin: 0 5% 25px 5%;
+            border-radius: 12px;
           }
 
           .cv-section-title {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+          }
+
+          .cv-item-title {
+            font-size: 1rem;
+          }
+
+          .cv-item-subtitle {
+            font-size: 0.85rem;
+          }
+
+          .cv-item-period {
+            font-size: 0.8rem;
+            align-self: flex-start;
           }
 
           .cv-item-header {
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
           }
 
-          .cv-item-period {
-            align-self: flex-start;
+          .cv-item-list {
+            padding-left: 18px;
+          }
+
+          .cv-item-list li {
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-bottom: 6px;
+          }
+
+          /* 標籤優化 */
+          .cv-tag {
+            padding: 3px 8px;
+            font-size: 0.75rem;
+            border-radius: 10px;
+          }
+
+          .cv-item-tags {
+            gap: 5px;
+            margin-top: 10px;
+          }
+
+          /* 專案卡片 */
+          .cv-project-item {
+            padding: 15px;
+            margin-bottom: 12px;
           }
 
           .cv-project-header {
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
+            margin-bottom: 10px;
+          }
+
+          .cv-project-title {
+            font-size: 1rem;
+          }
+
+          .cv-project-period {
+            font-size: 0.8rem;
           }
 
           .cv-project-type {
+            font-size: 0.75rem;
+            padding: 3px 10px;
             align-self: flex-start;
           }
 
+          .cv-project-desc {
+            font-size: 0.85rem;
+            line-height: 1.6;
+          }
+
+          /* 技能區域 */
           .cv-skills-container {
             grid-template-columns: 1fr;
+            gap: 15px;
+          }
+
+          .cv-skill-domain {
+            padding: 15px;
+          }
+
+          .cv-skill-domain h3 {
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+          }
+
+          .cv-skill-domain h4 {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+          }
+
+          .cv-skill-tags {
+            gap: 6px;
+          }
+
+          .cv-skill-tag {
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 12px;
+          }
+        }
+
+        /* ===== Responsive - 小螢幕手機 ===== */
+        @media (max-width: 480px) {
+          .cv-header {
+            margin: 0 3% 20px 3%;
+            padding: 25px 15px;
+            border-radius: 12px;
+          }
+
+          .cv-profile-photo {
+            width: 80px;
+            height: 100px;
+          }
+
+          .cv-theme-toggle {
+            top: 10px;
+            right: 10px;
+            width: 38px;
+            height: 38px;
+            font-size: 1.1rem;
+          }
+
+          .cv-name {
+            font-size: 1.6rem;
+          }
+
+          .cv-title {
+            font-size: 1rem;
+          }
+
+          .cv-tagline {
+            font-size: 0.85rem;
+          }
+
+          .cv-contact-item {
+            font-size: 0.8rem;
+            padding: 6px 0;
+          }
+
+          .cv-contact-icon {
+            font-size: 0.9rem;
+            min-width: 18px;
+          }
+
+          .cv-career-summary {
+            margin-top: 20px;
+            padding: 15px;
+          }
+
+          .cv-career-summary h3 {
+            font-size: 1rem;
+          }
+
+          .cv-career-summary p {
+            font-size: 0.85rem;
+            line-height: 1.5;
+          }
+
+          .cv-section {
+            padding: 15px;
+            margin: 0 3% 20px 3%;
+            border-radius: 10px;
+          }
+
+          .cv-section-title {
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+          }
+
+          .cv-item-title {
+            font-size: 0.95rem;
+          }
+
+          .cv-item-subtitle {
+            font-size: 0.8rem;
+          }
+
+          .cv-item-period {
+            font-size: 0.75rem;
+          }
+
+          .cv-item-list li {
+            font-size: 0.8rem;
+            line-height: 1.5;
+            margin-bottom: 5px;
+          }
+
+          .cv-tag {
+            padding: 2px 7px;
+            font-size: 0.7rem;
+            border-radius: 8px;
+          }
+
+          .cv-item-tags {
+            gap: 4px;
+            margin-top: 8px;
+          }
+
+          .cv-project-item {
+            padding: 12px;
+            margin-bottom: 10px;
+          }
+
+          .cv-project-title {
+            font-size: 0.95rem;
+          }
+
+          .cv-project-period {
+            font-size: 0.75rem;
+          }
+
+          .cv-project-type {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+          }
+
+          .cv-project-desc {
+            font-size: 0.8rem;
+            line-height: 1.5;
+          }
+
+          .cv-skill-domain {
+            padding: 12px;
+          }
+
+          .cv-skill-domain h3 {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+          }
+
+          .cv-skill-domain h4 {
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+          }
+
+          .cv-skill-tags {
+            gap: 5px;
+          }
+
+          .cv-skill-tag {
+            padding: 3px 8px;
+            font-size: 0.7rem;
+            border-radius: 10px;
           }
         }
 
@@ -1254,16 +1500,48 @@ export class ResumePage extends BaseComponent {
       localStorage.setItem('cv-theme', isDark ? 'dark' : 'light');
     };
 
-    // 設置全局彈窗函數（待實作）
-    window.showWorkDetails = (workId) => {
-      console.log('Show work details:', workId);
-      // TODO: 實作工作詳情彈窗
-    };
+    // 綁定專案卡片點擊事件
+    this.attachProjectClickEvents();
+  }
 
-    window.showProjectDetails = (projectId, type) => {
-      console.log('Show project details:', projectId, type);
-      // TODO: 實作專案詳情彈窗
-    };
+  /**
+   * 綁定專案卡片點擊事件
+   */
+  attachProjectClickEvents() {
+    const projectItems = document.querySelectorAll('.cv-project-item');
+
+    projectItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        const projectId = e.currentTarget.dataset.projectId;
+        const projectType = e.currentTarget.dataset.projectType;
+
+        if (projectType === 'work') {
+          this.showWorkProjectModal(projectId);
+        } else if (projectType === 'personal') {
+          this.showPersonalProjectModal(projectId);
+        }
+      });
+    });
+  }
+
+  /**
+   * 顯示工作專案彈窗
+   */
+  showWorkProjectModal(projectId) {
+    const project = this.workProjectsConfig.all[projectId];
+    if (project) {
+      this.projectModal.show(project, 'work');
+    }
+  }
+
+  /**
+   * 顯示個人專案彈窗
+   */
+  showPersonalProjectModal(projectId) {
+    const project = this.personalProjects.find(p => p.id === projectId);
+    if (project) {
+      this.projectModal.show(project, 'personal');
+    }
   }
 
   /**
@@ -1271,5 +1549,10 @@ export class ResumePage extends BaseComponent {
    */
   destroy() {
     console.log('📄 Resume Page destroyed');
+
+    // 銷毀 ProjectModal
+    if (this.projectModal) {
+      this.projectModal.destroy();
+    }
   }
 }

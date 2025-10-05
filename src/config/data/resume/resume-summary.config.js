@@ -4,8 +4,8 @@
  */
 
 export const resumeSummaryConfig = {
-  // 個人照片
-  profileImage: '/src/assets/images/resume/profile-photo.jpg',
+  // 個人照片 (存放於 public/images/resume/)
+  profileImage: '/images/resume/profile-photo.jpg',
 
   // 一句話簡介 (已存在於 personal.config.js，這裡可覆蓋)
   tagline: '擅長系統架構設計與高併發處理的後端工程師，致力於打造高品質且可擴展的系統架構',

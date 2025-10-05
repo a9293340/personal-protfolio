@@ -139,8 +139,89 @@ src/
 │   ├── AudioManager/           # 音效管理
 │   ├── AnimationManager/       # 動畫管理
 │   └── PreloadManager/         # 預載管理
-└── assets/                     # 靜態資源
+└── assets/                     # 靜態資源（非圖片）
+
+public/                         # 靜態資源（由 Vite 直接提供）
+└── images/                     # 所有圖片統一存放
+    ├── personal-projects/      # 個人專案圖片
+    ├── work-projects/          # 工作專案圖片
+    └── resume/                 # CV 專用圖片
 ```
+
+### 圖片資源管理規範 ⚠️ 重要規範
+
+**核心原則：所有圖片統一存放於 `public/images/` 目錄**
+
+#### 1. 為什麼使用 public/ 而非 src/assets/
+- **CV 版和動態版共用**：兩個版本可以使用相同的圖片路徑，避免重複維護
+- **配置驅動架構**：圖片路徑寫在配置文件中，直接使用絕對路徑更清晰
+- **簡化管理**：個人專案圖片數量多（20+ 張），使用 public/ 避免複雜的動態 import
+- **維護性優先**：單一來源，易於更新和管理
+
+#### 2. 目錄結構規範
+```
+public/images/
+├── personal-projects/          # 個人專案圖片
+│   ├── {project-id}/          # 每個專案一個目錄
+│   │   ├── screenshot1.png
+│   │   ├── screenshot2.png
+│   │   └── ...
+│   └── thumbnails/            # 縮圖（如需要）
+├── work-projects/              # 工作專案圖片
+│   └── {project-id}/
+├── resume/                     # CV 專用圖片
+│   ├── head-bg.png
+│   └── profile-photo.jpg
+└── common/                     # 通用圖片（如需要）
+```
+
+#### 3. 路徑使用規範
+**配置文件中的路徑格式：**
+```javascript
+// ✅ 正確：使用絕對路徑
+images: {
+  screenshots: [
+    '/images/personal-projects/ygo-card-time/frontend-first.PNG',
+    '/images/personal-projects/ygo-card-time/frontend-second.PNG',
+  ]
+}
+
+// ❌ 錯誤：不要使用相對路徑或 src/assets
+images: {
+  screenshots: [
+    '../assets/images/...',           // 錯誤
+    '/src/assets/images/...',         // 錯誤
+  ]
+}
+```
+
+**組件中使用圖片：**
+```javascript
+// ✅ 正確：直接使用配置中的路徑
+<img src="/images/resume/profile-photo.jpg" alt="Profile" />
+
+// ✅ 正確：從配置讀取
+<img src="${project.images.screenshots[0]}" alt="Screenshot" />
+
+// ❌ 錯誤：不要使用 import
+import profilePhoto from '../assets/images/resume/profile-photo.jpg';  // 錯誤
+```
+
+#### 4. 新增專案圖片流程
+1. 將圖片放到 `public/images/{category}/{project-id}/` 目錄
+2. 在配置文件中使用路徑格式：`/images/{category}/{project-id}/{filename}`
+3. 不需要任何代碼修改，Vite 會自動處理
+
+#### 5. 注意事項
+- **命名規範**：使用有意義的英文名稱，避免中文和特殊字符
+- **大小寫敏感**：注意 `.PNG` vs `.png` 的差異（建議統一使用小寫）
+- **檔案大小**：建議壓縮圖片以優化載入速度
+- **版本控制**：圖片檔案會被 git 追蹤，確保不要提交過大的檔案
+
+#### 6. 特殊情況處理
+- **動態載入的圖片**：如果需要根據配置動態載入大量圖片，仍使用 public/ 目錄
+- **需要 Vite 處理的資源**：如需要圖片壓縮、hash 等優化，考慮使用 src/assets/ 並用 import
+- **外部 URL**：直接在配置中使用完整 URL（如 CDN 上的圖片）
 
 ## 核心功能模組
 
