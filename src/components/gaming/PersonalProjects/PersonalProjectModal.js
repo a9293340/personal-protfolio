@@ -243,6 +243,9 @@ export class PersonalProjectModal extends BaseComponent {
     if (this.contentEl) {
       this.contentEl.innerHTML = this.generateProjectDetails(project);
 
+      // 初始化輪播功能
+      this.initializeCarousel(project);
+
       // 應用響應式布局
       this.applyResponsiveLayout();
     }
@@ -258,30 +261,7 @@ export class PersonalProjectModal extends BaseComponent {
     return `
       <div style="width: 100%; color: white;">
         <!-- 圖片輪播區域 -->
-        <div style="
-          width: 100%; 
-          height: 300px; 
-          background: rgba(255,255,255,0.05); 
-          border-radius: 12px; 
-          margin-bottom: 3rem;
-          border: 2px dashed rgba(212,175,55,0.3);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          gap: 1rem;
-        ">
-          <div style="
-            font-size: 3rem;
-            opacity: 0.6;
-            color: #d4af37;
-          ">📸</div>
-          <div style="
-            color: rgba(255,255,255,0.7);
-            text-align: center;
-            font-size: 1.1rem;
-          ">圖片輪播區域<br><small style="opacity: 0.6;">(預留空間，未來添加專案截圖)</small></div>
-        </div>
+        ${this.generateImageCarousel(project)}
         
         <div class="modal-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem;">
           <div style="background: rgba(255,255,255,0.08); padding: 2rem; border-radius: 12px; width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden;">
@@ -383,6 +363,341 @@ export class PersonalProjectModal extends BaseComponent {
         }
       </div>
     `;
+  }
+
+  /**
+   * 轉換圖片路徑（處理 Vite 靜態資源）
+   */
+  resolveImagePath(path) {
+    if (!path) return '';
+
+    // 如果路徑以 /images/ 開頭，轉換為 src/assets/images/
+    if (path.startsWith('/images/')) {
+      // 移除開頭的 /images/ 並添加正確的相對路徑
+      // Vite 開發模式會自動處理 /src/ 開頭的路徑
+      const relativePath = path.replace('/images/', '');
+      return `/src/assets/images/${relativePath}`;
+    }
+
+    // 如果是完整 URL，直接返回
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    return path;
+  }
+
+  /**
+   * 生成圖片輪播 HTML
+   */
+  generateImageCarousel(project) {
+    // 檢查是否有截圖
+    const hasScreenshots =
+      project.images?.screenshots && project.images.screenshots.length > 0;
+
+    if (!hasScreenshots) {
+      // 沒有圖片時顯示占位符
+      return `
+        <div style="
+          width: 100%;
+          height: 300px;
+          background: rgba(255,255,255,0.05);
+          border-radius: 12px;
+          margin-bottom: 3rem;
+          border: 2px dashed rgba(212,175,55,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 1rem;
+        ">
+          <div style="
+            font-size: 3rem;
+            opacity: 0.6;
+            color: #d4af37;
+          ">📸</div>
+          <div style="
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            font-size: 1.1rem;
+          ">暫無專案截圖<br><small style="opacity: 0.6;">(開發中的專案將在完成後補充)</small></div>
+        </div>
+      `;
+    }
+
+    // 有圖片時顯示輪播
+    const screenshots = project.images.screenshots;
+    const carouselId = `carousel-${project.id}`;
+
+    return `
+      <div class="image-carousel" id="${carouselId}" style="
+        width: 100%;
+        height: 400px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 12px;
+        margin-bottom: 3rem;
+        border: 2px solid rgba(212,175,55,0.4);
+        position: relative;
+        overflow: hidden;
+      ">
+        <!-- 輪播圖片容器 -->
+        <div class="carousel-track" style="
+          width: 100%;
+          height: 100%;
+          position: relative;
+          display: flex;
+          transition: transform 0.5s ease-in-out;
+        ">
+          ${screenshots
+            .map(
+              (screenshot, index) => `
+            <div class="carousel-slide" data-index="${index}" style="
+              min-width: 100%;
+              height: 100%;
+              flex-shrink: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: rgba(0,0,0,0.5);
+            ">
+              <img
+                src="${this.resolveImagePath(screenshot)}"
+                alt="${project.title} 截圖 ${index + 1}"
+                style="
+                  max-width: 100%;
+                  max-height: 100%;
+                  object-fit: contain;
+                  border-radius: 8px;
+                "
+                onerror="this.parentElement.innerHTML='<div style=\\'color: rgba(255,255,255,0.5); text-align: center;\\'><div style=\\'font-size: 3rem; margin-bottom: 1rem;\\'>🖼️</div><div>圖片載入失敗</div><small style=\\'opacity: 0.6; display: block; margin-top: 0.5rem;\\'>路徑: ${screenshot}</small></div>';"
+              />
+            </div>
+          `
+            )
+            .join('')}
+        </div>
+
+        <!-- 上一張/下一張按鈕 -->
+        ${
+          screenshots.length > 1
+            ? `
+          <button class="carousel-btn carousel-prev" data-action="prev" style="
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(212,175,55,0.8);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+          ">
+            ‹
+          </button>
+          <button class="carousel-btn carousel-next" data-action="next" style="
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(212,175,55,0.8);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+          ">
+            ›
+          </button>
+
+          <!-- 指示器 -->
+          <div class="carousel-indicators" style="
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+          ">
+            ${screenshots
+              .map(
+                (_, index) => `
+              <div class="carousel-indicator" data-index="${index}" style="
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: ${index === 0 ? 'rgba(212,175,55,1)' : 'rgba(255,255,255,0.4)'};
+                cursor: pointer;
+                transition: all 0.3s ease;
+              "></div>
+            `
+              )
+              .join('')}
+          </div>
+        `
+            : ''
+        }
+
+        <!-- 圖片計數器 -->
+        <div class="carousel-counter" style="
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: rgba(0,0,0,0.7);
+          padding: 8px 16px;
+          border-radius: 20px;
+          color: white;
+          font-size: 14px;
+          z-index: 10;
+        ">
+          <span class="carousel-current">1</span> / ${screenshots.length}
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * 初始化輪播功能
+   */
+  initializeCarousel(project) {
+    const hasScreenshots =
+      project.images?.screenshots && project.images.screenshots.length > 0;
+
+    if (!hasScreenshots || project.images.screenshots.length <= 1) {
+      return; // 沒有圖片或只有一張圖片，不需要輪播功能
+    }
+
+    const carouselId = `carousel-${project.id}`;
+    const carousel = this.element.querySelector(`#${carouselId}`);
+
+    if (!carousel) {
+      console.warn(`[PersonalProjectModal] 找不到輪播元素: ${carouselId}`);
+      return;
+    }
+
+    let currentIndex = 0;
+    const track = carousel.querySelector('.carousel-track');
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    const indicators = carousel.querySelectorAll('.carousel-indicator');
+    const counter = carousel.querySelector('.carousel-current');
+    const prevBtn = carousel.querySelector('.carousel-prev');
+    const nextBtn = carousel.querySelector('.carousel-next');
+
+    // 更新輪播位置
+    const updateCarousel = index => {
+      currentIndex = Math.max(0, Math.min(index, slides.length - 1));
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+      // 更新指示器
+      indicators.forEach((indicator, i) => {
+        indicator.style.background =
+          i === currentIndex ? 'rgba(212,175,55,1)' : 'rgba(255,255,255,0.4)';
+      });
+
+      // 更新計數器
+      if (counter) {
+        counter.textContent = currentIndex + 1;
+      }
+    };
+
+    // 上一張
+    const goPrev = () => {
+      updateCarousel(currentIndex - 1);
+    };
+
+    // 下一張
+    const goNext = () => {
+      updateCarousel(currentIndex + 1);
+    };
+
+    // 跳轉到指定張
+    const goTo = index => {
+      updateCarousel(index);
+    };
+
+    // 綁定按鈕事件
+    if (prevBtn) {
+      prevBtn.addEventListener('click', e => {
+        e.stopPropagation(); // 阻止事件冒泡
+        goPrev();
+      });
+
+      // Hover 效果
+      prevBtn.addEventListener('mouseenter', () => {
+        prevBtn.style.background = 'rgba(212,175,55,1)';
+        prevBtn.style.transform = 'translateY(-50%) scale(1.1)';
+      });
+      prevBtn.addEventListener('mouseleave', () => {
+        prevBtn.style.background = 'rgba(212,175,55,0.8)';
+        prevBtn.style.transform = 'translateY(-50%) scale(1)';
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', e => {
+        e.stopPropagation(); // 阻止事件冒泡
+        goNext();
+      });
+
+      // Hover 效果
+      nextBtn.addEventListener('mouseenter', () => {
+        nextBtn.style.background = 'rgba(212,175,55,1)';
+        nextBtn.style.transform = 'translateY(-50%) scale(1.1)';
+      });
+      nextBtn.addEventListener('mouseleave', () => {
+        nextBtn.style.background = 'rgba(212,175,55,0.8)';
+        nextBtn.style.transform = 'translateY(-50%) scale(1)';
+      });
+    }
+
+    // 綁定指示器事件
+    indicators.forEach((indicator, index) => {
+      indicator.addEventListener('click', e => {
+        e.stopPropagation(); // 阻止事件冒泡
+        goTo(index);
+      });
+
+      // Hover 效果
+      indicator.addEventListener('mouseenter', () => {
+        if (index !== currentIndex) {
+          indicator.style.background = 'rgba(255,255,255,0.7)';
+        }
+      });
+      indicator.addEventListener('mouseleave', () => {
+        if (index !== currentIndex) {
+          indicator.style.background = 'rgba(255,255,255,0.4)';
+        }
+      });
+    });
+
+    // 鍵盤導航（只在模態框可見時生效）
+    this.carouselKeyHandler = e => {
+      if (!this.isVisible || !carousel.offsetParent) return;
+
+      if (e.key === 'ArrowLeft') {
+        goPrev();
+      } else if (e.key === 'ArrowRight') {
+        goNext();
+      }
+    };
+    document.addEventListener('keydown', this.carouselKeyHandler);
+
+    console.log(`✅ [PersonalProjectModal] 輪播初始化完成: ${carouselId}`);
   }
 
   /**
@@ -546,9 +861,15 @@ export class PersonalProjectModal extends BaseComponent {
       this.closeBtn.addEventListener('click', () => this.hide());
     }
 
-    // 背景點擊關閉
+    // 背景點擊關閉（只有點擊背景本身才關閉，避免事件冒泡導致誤關閉）
     if (this.config.closeOnBackdrop && this.backdrop) {
-      this.backdrop.addEventListener('click', () => this.hide());
+      this.backdropClickHandler = e => {
+        // 只有當點擊的是背景元素本身（不是模態框內容）時才關閉
+        if (e.target === this.backdrop) {
+          this.hide();
+        }
+      };
+      this.backdrop.addEventListener('click', this.backdropClickHandler);
     }
 
     // ESC 鍵關閉
@@ -580,6 +901,16 @@ export class PersonalProjectModal extends BaseComponent {
     if (this.resizeHandler) {
       window.removeEventListener('resize', this.resizeHandler);
       this.resizeHandler = null;
+    }
+
+    if (this.backdropClickHandler && this.backdrop) {
+      this.backdrop.removeEventListener('click', this.backdropClickHandler);
+      this.backdropClickHandler = null;
+    }
+
+    if (this.carouselKeyHandler) {
+      document.removeEventListener('keydown', this.carouselKeyHandler);
+      this.carouselKeyHandler = null;
     }
   }
 
