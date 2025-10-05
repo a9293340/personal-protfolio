@@ -6,35 +6,35 @@
 export const heroData = {
   // 個人基本信息
   greeting: "👋 Hello, I'm",
-  name: 'Backend Engineer',
-  title: '後端工程師',
-  subtitle: '系統架構師的專業軌跡',
+  name: 'Eric Hung',
+  title: 'Senior Backend Engineer',
+  subtitle: '從代碼到架構，從問題到解決方案',
 
   // 動態打字文字組合 (支援多句和重點字高亮)
   typingTexts: [
     {
       sentences: [
-        '專精於 <highlight>Config-Driven</highlight> 架構設計',
-        '追求 <highlight>高品質代碼</highlight> 與用戶體驗',
-        '從 <highlight>後端工程師</highlight> 向 <highlight>系統架構師</highlight> 發展',
+        '打造 <highlight>日均 20 萬筆</highlight> 連結生成系統，<highlight>99.95%</highlight> 可用性',
+        '導入 <highlight>AI Code Review</highlight>，團隊效率提升 <highlight>30%</highlight>',
+        '從 <highlight>全端工程師</highlight> 深化為 <highlight>後端專家</highlight>，邁向系統架構師',
       ],
-      speeds: [80, 120, 100], // 每句的打字速度
+      speeds: [80, 90, 100],
     },
     {
       sentences: [
-        '熱衷於 <highlight>技術創新</highlight> 與團隊協作',
-        '建構 <highlight>可擴展</highlight>、<highlight>可維護</highlight> 的系統',
-        '持續學習新技術，<highlight>與時俱進</highlight>',
+        '專精 <highlight>Node.js</highlight> 與 <highlight>Golang</highlight>，打造高效能後端服務',
+        '擅長 <highlight>微服務架構</highlight> 與 <highlight>雲端部署</highlight> (GCP/AWS)',
+        '建立 <highlight>代碼規範</highlight>，推動團隊 <highlight>技術文化</highlight> 提升',
       ],
-      speeds: [90, 110, 85],
+      speeds: [85, 95, 90],
     },
     {
       sentences: [
-        '擅長 <highlight>微服務架構</highlight> 與 <highlight>雲端部署</highlight>',
-        '注重 <highlight>性能優化</highlight> 與 <highlight>安全防護</highlight>',
-        '相信技術能創造 <highlight>更美好的未來</highlight>',
+        '5 年經驗，<highlight>18 個專案</highlight>，從桌面應用到 <highlight>SaaS 平台</highlight>',
+        '不只寫代碼，更注重 <highlight>系統設計</highlight> 與 <highlight>架構思維</highlight>',
+        '持續學習，與 <highlight>AI</highlight> 協作，探索技術的 <highlight>無限可能</highlight>',
       ],
-      speeds: [95, 105, 75],
+      speeds: [75, 100, 85],
     },
   ],
 

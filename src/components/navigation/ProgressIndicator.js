@@ -207,6 +207,7 @@ export class ProgressIndicator extends BaseComponent {
     return `
       <div class="progress-indicator progress-indicator--${style} progress-indicator--${position}"
            role="region"
+           style="display: none;"
            aria-label="網站瀏覽進度">
 
         <!-- 主進度顯示 -->

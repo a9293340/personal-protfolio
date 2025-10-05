@@ -8,7 +8,7 @@ export const contactConfig = {
   // 主要聯絡資訊
   primary: {
     email: 'f102041332@gmail.com',
-    name: 'Gaming Portfolio',
+    name: '洪雋倫(Eric Hung)',
     timezone: 'Asia/Taipei',
     responseTime: '24-48 hours',
     preferredMethod: 'email',
