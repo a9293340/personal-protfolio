@@ -76,7 +76,7 @@ export class CardSummoning extends BaseComponent {
         height: 410,
         borderRadius: 12,
         glowColor: '#d4af37',
-        backImageUrl: '/src/assets/images/卡背.webp', // 遊戲王卡背圖片
+        backImageUrl: '/images/common/card-back.webp', // 遊戲王卡背圖片
       },
       animation: {
         totalDuration: 10000, // 總動畫時長 10秒 (延長2秒)
@@ -130,6 +130,22 @@ export class CardSummoning extends BaseComponent {
       animationProgress: 0,
       cardReady: false,
     };
+  }
+
+  /**
+   * 獲取正確的資源路徑（處理 GitHub Pages base path）
+   */
+  getAssetPath(path) {
+    if (!path) return '';
+
+    // 如果是完整 URL，直接返回
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    const base = import.meta.env.BASE_URL || '/';
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return base + cleanPath;
   }
 
   /**
@@ -257,7 +273,7 @@ export class CardSummoning extends BaseComponent {
     // 卡背圖片
     const cardBackImage = document.createElement('img');
     cardBackImage.className = 'card-back-image';
-    cardBackImage.src = this.config.card.backImageUrl;
+    cardBackImage.src = this.getAssetPath(this.config.card.backImageUrl);
     cardBackImage.alt = 'Yu-Gi-Oh Card Back';
     cardBackImage.style.cssText = `
       width: 100%;

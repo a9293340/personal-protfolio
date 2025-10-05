@@ -12,6 +12,76 @@
 
 export const personalProjectsData = [
   {
+    id: 'personal-gaming-portfolio',
+    title: '🎮 Gaming Portfolio - 遊戲化個人作品集網站',
+    description:
+      '融合流亡黯道技能樹與遊戲王卡牌風格的創新作品集網站，採用 Config-Driven 架構設計，實現動態互動版與靜態 CV 版雙模式。透過 100% 原生 JS 技術棧打造複雜動畫系統，展現從後端工程師向系統架構師發展的專業軌跡，並整合 GitHub Actions 實現自動化部署。',
+    category: 'frontend',
+    rarity: 'legendary',
+    status: 'completed',
+    importance: 10,
+    completedDate: '2024-10',
+
+    // 專案統計數據 (用於卡牌數值計算)
+    stats: {
+      complexity: 9, // 技術複雜度：Config-Driven 架構 + 複雜動畫系統 + 雙模式設計
+      innovation: 10, // 創新程度：遊戲化設計 + Meta 概念（作品集展示作品集）
+      utility: 9, // 實用價值：實戰級作品集 + 面試利器
+    },
+
+    // 遊戲王卡牌數據
+    cardData: {
+      attack: 3400, // 基於 complexity(9) + innovation(10) 計算
+      defense: 2800, // 基於 utility(9) 計算
+      level: 10,
+      attribute: 'LIGHT',
+      type: 'Frontend/Effect/Ritual',
+    },
+
+    // 技術棧
+    technologies: [
+      'Vite',
+      'Vanilla JavaScript',
+      'ES6+ Modules',
+      'GSAP',
+      'CSS3 Transform',
+      'HTML5',
+      'GitHub Actions',
+      'GitHub Pages',
+    ],
+
+    // 專案圖片
+    images: {
+      thumbnail: null, // 使用預設圖標
+      screenshots: [
+        '/images/personal-projects/gaming-portfolio/main1.png',
+        '/images/personal-projects/gaming-portfolio/main2.png',
+        '/images/personal-projects/gaming-portfolio/main3.png',
+        '/images/personal-projects/gaming-portfolio/main4.png',
+      ],
+    },
+
+    // 相關連結
+    links: {
+      demo: 'https://a9293340.github.io/personal-protfolio/',
+      github: 'https://github.com/a9293340/personal-protfolio',
+    },
+
+    // 專案亮點
+    highlights: [
+      'Config-Driven 架構 - 所有內容與結構通過配置文件統一管理，實現高度可維護性',
+      '遊戲化設計創新 - 融合流亡黯道技能樹與遊戲王卡牌系統，打造獨特視覺體驗',
+      '雙模式並存 - 動態互動版展現技術深度，靜態 CV 版適合面試與列印，一站滿足所有需求',
+      '100% 原生 JS - 零框架依賴，完全掌控代碼品質，bundle size 最小化',
+      'GSAP 動畫系統 - 流暢的技能樹互動、卡牌召喚特效、頁面轉場動畫',
+      '完整 RWD 優化 - 雙斷點響應式設計（768px + 480px），手機端完美適配',
+      '圖片資源統一管理 - public/ 目錄集中管理，CV 版與動態版共用資源，降低維護成本',
+      'GitHub Actions CI/CD - 自動化部署流程，type-check + lint 品質檢查，確保代碼品質',
+      'ProjectModal 彈窗系統 - 工作專案與個人專案分離渲染，支援圖片輪播功能',
+      '深色模式支援 - CV 版獨立深色模式，localStorage 持久化偏好設定',
+    ],
+  },
+  {
     id: 'personal-3d-portfolio-v1',
     title: '🎨 3D 互動個人作品集（舊版）',
     description:
@@ -74,7 +144,6 @@ export const personalProjectsData = [
       'Vercel 無縫部署 - CI/CD 自動化部署流程',
     ],
   },
-
   {
     id: 'personal-house-view-log',
     title: '🏠 看房筆記本 - 房產評論社群平台',
@@ -141,7 +210,6 @@ export const personalProjectsData = [
       '解決實際痛點 - 看房資訊分散、記錄不便，提供一站式解決方案',
     ],
   },
-
   {
     id: 'personal-ygo-card-time',
     title: '🎴 卡壇 Card Time - 遊戲王卡牌資訊平台',
@@ -254,7 +322,6 @@ export const personalProjectsData = [
       },
     },
   },
-
   {
     id: 'personal-money-flow',
     title: '💰 Money Flow - 跨平台個人財務管理應用',
@@ -399,7 +466,6 @@ export const personalProjectsData = [
       status: '核心功能完成，優化與上架準備中',
     },
   },
-
   {
     id: 'personal-smart-survey-pro',
     title: '📋 SmartSurvey Pro - 企業級智能問卷平台',
@@ -575,7 +641,6 @@ export const personalProjectsData = [
       community: '開源分享，幫助其他開發者學習',
     },
   },
-
   {
     id: 'personal-earthquake-map',
     title: '🌍 台灣地震 3D 視覺化系統',

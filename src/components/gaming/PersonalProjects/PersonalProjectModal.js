@@ -371,19 +371,28 @@ export class PersonalProjectModal extends BaseComponent {
   resolveImagePath(path) {
     if (!path) return '';
 
-    // 圖片已統一存放於 public/images/ 目錄
-    // 路徑格式：/images/personal-projects/project-id/image.png
-    // Vite 會自動處理 public/ 目錄下的靜態資源
-    if (path.startsWith('/images/')) {
-      return path;
-    }
-
     // 如果是完整 URL，直接返回
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
 
+    // 圖片已統一存放於 public/images/ 目錄
+    // 路徑格式：/images/personal-projects/project-id/image.png
+    // 需要處理 GitHub Pages 的 base path
+    if (path.startsWith('/images/') || path.startsWith('/src/')) {
+      return this.getAssetPath(path);
+    }
+
     return path;
+  }
+
+  /**
+   * 獲取正確的資源路徑（處理 GitHub Pages base path）
+   */
+  getAssetPath(path) {
+    const base = import.meta.env.BASE_URL || '/';
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return base + cleanPath;
   }
 
   /**

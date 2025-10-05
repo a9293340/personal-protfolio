@@ -392,7 +392,7 @@ export class ResumePage extends BaseComponent {
   renderFooter() {
     return `
       <footer class="cv-footer">
-        <a href="/#/" class="cv-back-link">
+        <a href="${this.getAssetPath('/#/')}" class="cv-back-link">
           🎮 查看互動式遊戲化個人網站
         </a>
         <p class="cv-footer-note">
