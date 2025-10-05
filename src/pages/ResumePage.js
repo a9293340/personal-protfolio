@@ -105,6 +105,15 @@ export class ResumePage extends BaseComponent {
             <span class="theme-icon">🌙</span>
           </div>
 
+          <!-- QR Code for Print (只在列印時顯示) -->
+          <div class="cv-qrcode-print">
+            <img
+              src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://a9293340.github.io/personal-protfolio/%23/resume"
+              alt="Resume QR Code"
+            />
+            <p class="qr-hint">掃描查看線上版</p>
+          </div>
+
           <div class="cv-header-main">
             <div class="cv-profile-section">
               <img src="${this.getAssetPath('/images/resume/profile-photo.jpg')}" alt="${personal.fullName}" class="cv-profile-photo" />
@@ -580,6 +589,11 @@ export class ResumePage extends BaseComponent {
         .theme-icon {
           font-size: 1.5rem;
           filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        /* QR Code for Print - 螢幕上隱藏，列印時顯示 */
+        .cv-qrcode-print {
+          display: none;
         }
 
         .cv-header-main {
@@ -1441,19 +1455,61 @@ export class ResumePage extends BaseComponent {
 
         /* ===== Print Styles ===== */
         @media print {
-          .resume-page.standalone {
-            position: static;
-            padding: 20px;
+          /* 重置所有顏色為黑白 */
+          * {
+            color: #000 !important;
+            background: #fff !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+          }
+
+          body,
+          html {
+            margin: 0;
+            padding: 0;
             background: #fff !important;
           }
 
+          /* 隱藏所有固定定位的元素（包括左下角的指示器） */
+          *[style*="position: fixed"],
+          *[style*="position:fixed"],
+          .fixed,
+          [class*="indicator"],
+          [class*="debug"],
+          [class*="dev-tool"],
+          #navigation,
+          #breadcrumb-container,
+          #progress-indicator-container,
+          #keyboard-nav-container {
+            display: none !important;
+            visibility: hidden !important;
+          }
+
+          .resume-page.standalone {
+            position: static;
+            padding: 0 2% !important;
+            margin: 0 !important;
+            background: #fff !important;
+            max-width: 100% !important;
+          }
+
+          /* 移除深色模式樣式 */
+          .resume-page.standalone.dark-mode,
+          .dark-mode * {
+            background: #fff !important;
+            color: #000 !important;
+          }
+
           .cv-header {
-            margin: 0;
-            border-radius: 0;
+            margin: 0 !important;
+            padding: 20px 0 !important;
+            border-radius: 0 !important;
+            position: relative;
+            background: #fff !important;
           }
 
           .cv-header-bg {
-            display: none;
+            display: none !important;
           }
 
           .cv-theme-toggle,
@@ -1462,22 +1518,154 @@ export class ResumePage extends BaseComponent {
             display: none !important;
           }
 
+          /* 列印時顯示 QR Code */
+          .cv-qrcode-print {
+            display: block !important;
+            position: absolute;
+            top: 10px;
+            right: 0;
+            text-align: center;
+            background: #fff !important;
+          }
+
+          .cv-qrcode-print img {
+            width: 90px;
+            height: 90px;
+            border: 2px solid #000 !important;
+            border-radius: 8px;
+            display: block;
+            background: #fff !important;
+          }
+
+          .cv-qrcode-print .qr-hint {
+            margin-top: 5px;
+            font-size: 0.7rem;
+            color: #000 !important;
+            font-weight: 500;
+            background: transparent !important;
+          }
+
+          .cv-footer,
           .cv-footer-note {
-            display: none;
+            display: none !important;
           }
 
           .cv-section {
             page-break-inside: avoid;
             background: #fff !important;
             box-shadow: none !important;
+            margin: 0 0 15px 0 !important;
+            padding: 15px 0 !important;
+            border-radius: 0 !important;
           }
 
           .cv-name,
           .cv-title,
           .cv-summary,
-          .cv-contact-item {
+          .cv-tagline,
+          .cv-contact-item,
+          .cv-section-title,
+          .timeline-company,
+          .timeline-position,
+          .project-title,
+          .project-description,
+          .cv-skill-tag {
             color: #000 !important;
             text-shadow: none !important;
+            background: transparent !important;
+          }
+
+          /* 專案卡片列印優化 */
+          .project-card {
+            background: #fff !important;
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+            margin-bottom: 10px !important;
+            padding: 12px !important;
+          }
+
+          .project-tech-stack,
+          .project-highlights {
+            background: transparent !important;
+          }
+
+          .tech-tag {
+            background: #f5f5f5 !important;
+            color: #000 !important;
+            border: 1px solid #ddd !important;
+          }
+
+          /* Work Experience & Timeline 優化 - 避免截斷 */
+          .cv-item,
+          .timeline-item {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            background: #fff !important;
+            margin-bottom: 15px !important;
+          }
+
+          .timeline-item {
+            border-left: 3px solid #000 !important;
+          }
+
+          .timeline-dot {
+            background: #000 !important;
+            border-color: #000 !important;
+          }
+
+          /* 確保每個工作經歷項目不被截斷 */
+          .cv-item-header,
+          .cv-item-list,
+          .cv-item-tags {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+
+          /* Skills 優化 - 避免截斷 */
+          .cv-skill-category {
+            background: #fff !important;
+            border: 1px solid #ddd !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            margin-bottom: 15px !important;
+          }
+
+          .cv-skill-tag {
+            background: #f5f5f5 !important;
+            color: #000 !important;
+            border: 1px solid #ddd !important;
+          }
+
+          /* 確保所有主要內容區塊都不被截斷 */
+          /* 注意：不對 .cv-section 加 avoid，因為 section 太大會導致排版問題 */
+          .cv-item,
+          .project-card,
+          .cv-skill-category,
+          .timeline-item,
+          .cv-education-item {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+
+          /* 允許 section 之間分頁，但避免在標題後立即分頁 */
+          .cv-section-title {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+          }
+
+          /* 確保文字可讀性 */
+          h1, h2, h3, h4, h5, h6,
+          p, span, div, li, a {
+            color: #000 !important;
+            background: transparent !important;
+          }
+
+          /* 隱藏不必要的互動元素 */
+          button,
+          .modal,
+          .tooltip {
+            display: none !important;
           }
         }
       </style>
