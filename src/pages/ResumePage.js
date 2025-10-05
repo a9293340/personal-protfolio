@@ -45,6 +45,17 @@ export class ResumePage extends BaseComponent {
   }
 
   /**
+   * 獲取正確的資源路徑（處理 GitHub Pages base path）
+   */
+  getAssetPath(path) {
+    // 在生產環境中，Vite 會設定 import.meta.env.BASE_URL
+    const base = import.meta.env.BASE_URL || '/';
+    // 移除開頭的 / 避免重複
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return base + cleanPath;
+  }
+
+  /**
    * 獲取默認配置
    */
   getDefaultConfig() {
@@ -96,7 +107,7 @@ export class ResumePage extends BaseComponent {
 
           <div class="cv-header-main">
             <div class="cv-profile-section">
-              <img src="/images/resume/profile-photo.jpg" alt="${personal.fullName}" class="cv-profile-photo" />
+              <img src="${this.getAssetPath('/images/resume/profile-photo.jpg')}" alt="${personal.fullName}" class="cv-profile-photo" />
             </div>
 
             <div class="cv-name-section">
@@ -517,7 +528,7 @@ export class ResumePage extends BaseComponent {
           left: 0;
           right: 0;
           bottom: 0;
-          background-image: url('/images/resume/head-bg.png');
+          background-image: url('${this.getAssetPath('/images/resume/head-bg.png')}');
           background-size: cover;
           background-position: center;
           z-index: 0;

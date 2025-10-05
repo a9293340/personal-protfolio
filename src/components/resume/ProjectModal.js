@@ -16,6 +16,15 @@ export class ProjectModal {
   }
 
   /**
+   * 獲取正確的資源路徑（處理 GitHub Pages base path）
+   */
+  getAssetPath(path) {
+    const base = import.meta.env.BASE_URL || '/';
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return base + cleanPath;
+  }
+
+  /**
    * 顯示彈窗
    */
   show(project, type) {
@@ -182,7 +191,7 @@ export class ProjectModal {
                   <div class="carousel-images">
                     ${screenshots.map((img, idx) => `
                       <img
-                        src="${img}"
+                        src="${this.getAssetPath(img)}"
                         alt="${p.title} - Screenshot ${idx + 1}"
                         class="carousel-image ${idx === 0 ? 'active' : ''}"
                         loading="lazy"
