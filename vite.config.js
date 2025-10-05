@@ -4,7 +4,9 @@ import { resolve } from 'path';
 export default defineConfig({
   // 基礎配置
   root: '.',
-  base: './',
+  base: process.env.NODE_ENV === 'production'
+    ? '/personal-protfolio/'  // GitHub Pages 路徑
+    : './',                    // 開發環境使用相對路徑
   
   // 路徑別名配置
   resolve: {
