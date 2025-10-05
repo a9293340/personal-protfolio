@@ -9,6 +9,7 @@ import { SkillsPage } from '../pages/SkillsPage.js';
 import { WorkProjectsPage } from '../pages/WorkProjectsPage.js';
 import { PersonalProjectsPage } from '../pages/PersonalProjectsPage.js';
 import { ContactPage } from '../pages/ContactPage.js';
+import { ResumePage } from '../pages/ResumePage.js';
 
 /**
  * 路由配置
@@ -77,6 +78,16 @@ export const routesConfig = [
       description: '與我取得聯繫，討論技術合作或職位機會',
       keywords: 'contact, collaboration, career opportunities, communication',
       icon: '📬',
+    },
+  },
+  {
+    path: '/resume',
+    component: ResumePage,
+    title: '個人簡歷 | Gaming Portfolio',
+    meta: {
+      description: '靜態版個人簡歷，適合面試官快速瀏覽與列印',
+      keywords: 'resume, cv, curriculum vitae, professional profile',
+      icon: '📄',
     },
   },
 ];
